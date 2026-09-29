@@ -1,5 +1,6 @@
 import { world, system, BiomeTypes } from "@minecraft/server";
 import "./blocks.js";
+import { handleTreeScriptEvent } from "./trees.js";
 
 const BIOME_ID = "lothlorien:lothlorien";
 
@@ -161,6 +162,7 @@ function reportDepth(player) {
 function onScriptEvent(event) {
   const player = event.sourceEntity;
   if (!player || player.typeId !== "minecraft:player") return;
+  if (handleTreeScriptEvent(event, player)) return;
   if (event.id === "lothlorien:survey") {
     survey(player);
     return;

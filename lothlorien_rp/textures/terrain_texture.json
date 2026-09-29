@@ -30,6 +30,9 @@
     },
     "lothlorien:mallorn_leaves": {
       "textures": "textures/blocks/mallorn_leaves"
+    },
+    "lothlorien:mallorn_sapling": {
+      "textures": "textures/blocks/mallorn_sapling"
     }
   }
 }

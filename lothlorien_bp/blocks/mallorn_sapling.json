@@ -1,0 +1,79 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:block": {
+    "description": {
+      "identifier": "lothlorien:mallorn_sapling",
+      "menu_category": {
+        "category": "none"
+      },
+      "states": {
+        "lothlorien:stage": [
+          0,
+          1
+        ]
+      }
+    },
+    "components": {
+      "minecraft:tags": [
+        "minecraft:is_axe_item_destructible"
+      ],
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 0
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 0
+      },
+      "minecraft:flammable": {
+        "catch_chance_modifier": 60,
+        "destroy_chance_modifier": 100
+      },
+      "minecraft:sound": {
+        "sound": "grass"
+      },
+      "minecraft:map_color": "#e0b43a",
+      "minecraft:geometry": "geometry.lothlorien.mallorn_sapling",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "lothlorien:mallorn_sapling",
+          "render_method": "alpha_test",
+          "face_dimming": false,
+          "ambient_occlusion": false
+        }
+      },
+      "minecraft:collision_box": false,
+      "minecraft:selection_box": {
+        "origin": [
+          -6,
+          0,
+          -6
+        ],
+        "size": [
+          12,
+          12,
+          12
+        ]
+      },
+      "minecraft:placement_filter": {
+        "conditions": [
+          {
+            "allowed_faces": [
+              "up"
+            ],
+            "block_filter": [
+              "minecraft:grass_block",
+              "minecraft:dirt",
+              "minecraft:coarse_dirt",
+              "minecraft:podzol",
+              "minecraft:rooted_dirt",
+              "minecraft:moss_block",
+              "minecraft:mud",
+              "minecraft:farmland"
+            ]
+          }
+        ]
+      },
+      "minecraft:loot": "loot_tables/blocks/mallorn_sapling.json",
+      "lothlorien:sapling": {}
+    }
+  }
+}

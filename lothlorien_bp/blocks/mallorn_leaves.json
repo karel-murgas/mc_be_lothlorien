@@ -6,6 +6,12 @@
       "menu_category": {
         "category": "nature",
         "group": "minecraft:itemGroup.name.leaves"
+      },
+      "states": {
+        "lothlorien:persistent": [
+          false,
+          true
+        ]
       }
     },
     "components": {
@@ -39,7 +45,8 @@
           "texture": "lothlorien:mallorn_leaves",
           "render_method": "alpha_test"
         }
-      }
+      },
+      "lothlorien:leaves": {}
     }
   }
 }

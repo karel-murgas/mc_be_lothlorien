@@ -38,6 +38,21 @@
           "chance": 0.05
         }
       ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "lothlorien:mallorn_acorn"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "random_chance",
+          "chance": 0.04
+        }
+      ]
     }
   ]
 }

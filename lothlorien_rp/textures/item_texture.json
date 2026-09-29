@@ -4,6 +4,9 @@
   "texture_data": {
     "lothlorien:mallorn_door": {
       "textures": "textures/items/mallorn_door"
+    },
+    "lothlorien:mallorn_acorn": {
+      "textures": "textures/items/mallorn_acorn"
     }
   }
 }

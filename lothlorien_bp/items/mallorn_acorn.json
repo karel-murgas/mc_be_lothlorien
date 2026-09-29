@@ -1,0 +1,18 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:item": {
+    "description": {
+      "identifier": "lothlorien:mallorn_acorn",
+      "menu_category": {
+        "category": "nature",
+        "group": "minecraft:itemGroup.name.sapling"
+      }
+    },
+    "components": {
+      "minecraft:block_placer": {
+        "block": "lothlorien:mallorn_sapling"
+      },
+      "minecraft:icon": "lothlorien:mallorn_acorn"
+    }
+  }
+}

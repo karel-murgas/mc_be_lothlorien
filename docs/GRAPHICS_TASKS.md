@@ -64,3 +64,12 @@ their own textures later â€” the door and trapdoor already have separate files, 
 Added as phases arrive (Elanor/Niphredil flowers, golden leaf carpet, acorn, Elven lamp, ...).
 Mallorn boats (see `NOT_IMPLEMENTED.md`) will need an entity model + texture and item icons.
 Claude will append one section per phase with the file list and constraints.
+
+---
+
+## Step 1b — Acorn and sapling (Phase 4)
+
+Placeholders: `textures/blocks/mallorn_sapling.png` is vanilla `poplar_sapling`; `textures/items/mallorn_acorn.png`
+is a hand-drawn 16×16 acorn. Replace both in place. The sapling is drawn as two crossed planes with
+`alpha_test` (cutout, no soft alpha) and should read as a young golden-leaved tree.
+

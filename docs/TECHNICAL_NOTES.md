@@ -146,3 +146,29 @@ unlock on that item; the rest on planks; wood/stripped wood on log/stripped log)
   every 4 ticks (`minecraft:tick`). Support loss is handled in `blocks.js` (breaking the block they sit on).
 - Left out (signs, shelf, boats, ...): see `NOT_IMPLEMENTED.md` for reasons and retry notes.
 - **Untested in game** (no game access while writing): everything above. Check first: door swing/hinge, gate open pose, slab merge, log rotation, redstone opening.
+
+## Phase 4 — small Mallorn and the acorn loop
+
+Files: `scripts/mallorn_tree.js` (pure generator, no Minecraft imports), `scripts/trees.js` (growth,
+bone meal, leaf decay, instruments), `blocks/mallorn_sapling.json`, `items/mallorn_acorn.json`.
+
+- **Loop:** leaves drop acorns (4% per leaf, `loot_tables/blocks/mallorn_leaves.json`), the acorn item
+  places `mallorn_sapling` (hidden from the menu; its loot is one acorn), the sapling grows a tree.
+  Saplings need grass/dirt-like soil (`placement_filter`, engine breaks it when the soil goes) and light >= 9.
+- **Growth:** `lothlorien:sapling` random tick; stage 0 -> 1 -> tree, each step 1/7 per tick (vanilla-like).
+  The trunk needs room (air/leaves/soft plants); branches and leaves are placed only where free.
+  Bone meal: 45% to advance one step, handled in a `playerInteractWithBlock` world event.
+- **Tree:** 5-7 log trunk, noisy ellipsoid crown, two side branches with leaf tufts; seed-based, so every
+  tree differs (~70 distinct shapes in 200). Average ~11 logs (~43 planks) and ~85 leaves.
+- **Leaf decay:** leaves have state `lothlorien:persistent`. Player placement sets it true (never decays);
+  grown/worldgen leaves are false and, on a random tick, break with drops if no Mallorn log/wood is
+  within 6 steps through leaves (unloaded neighbour = assume connected).
+- **Balance (estimate):** 85 leaves x 4% = ~3.4 acorns if every leaf is cleared; a player who clears about
+  half gets ~1.7, so a tree replaces itself with margin without acorns raining. `node tests/tree_stats.mjs [n] [chance]`
+  prints the numbers offline. In game: `/scriptevent lothlorien:grow 20` plants 20 trees on a grid around
+  you, `/scriptevent lothlorien:treestats` reports the generator averages. **The 20-tree cut-down test is still to do.**
+- **Untested in game** (written without game access): random ticking without a `minecraft:random_ticking`
+  component (if leaves never decay or saplings never grow, add it first), `block.getLightLevel()` values,
+  `crop_growth_emitter` particle name, bone meal event cancel, sapling `placement_filter` with the
+  block-item route. Plain-Node generator stats are verified.
+
