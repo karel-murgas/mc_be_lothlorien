@@ -1,6 +1,6 @@
 # Lothlórien — technical notes
 
-Facts checked against the installed game data (`E:\AI\ref\bedrock\current`) and the docs,
+Facts checked against the installed game data (`C:\mcmods\reference\vanilla\current`) and the docs,
 kept here so later phases do not re-derive them. Design lives in `design/`.
 
 ## Biome (Phase 1)
@@ -22,7 +22,9 @@ Files:
   whole biome is dropped. Custom biomes cannot be targets, so
   a nested "heart" biome is not possible (see design KB §3).
 - `amount` (0–1] ≈ fraction of target area replaced; `noise_frequency_scale` (0–100]:
-  higher = smaller, more frequent patches. Current values `0.35` / `10` are spike guesses.
+  higher = smaller, more frequent patches. Tuning log: `0.35`/`10` gave a mid-sized, long narrow
+  region; now `0.5`/`4` plus old-growth birch (`birch_forest_mutated`). The biome can never be
+  wider than the forest it replaces: its outline follows the vanilla forest shape.
 - Append new replacement entries at the **end** of the array; inserting earlier shifts the
   noise of existing ones.
 - Stable server components: `climate`, `creature_spawn_probability`, `humidity`,
