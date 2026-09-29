@@ -27,7 +27,7 @@
             "dimension": "minecraft:overworld",
             "targets": [ "minecraft:forest", "minecraft:birch_forest", "minecraft:birch_forest_mutated", "minecraft:flower_forest", "minecraft:dappled_forest" ],
             "amount": 0.3,
-            "noise_frequency_scale": 0.25
+            "noise_frequency_scale": 0.5
           }
         ]
       },

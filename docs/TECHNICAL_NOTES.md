@@ -34,7 +34,9 @@ Files:
   In game (2026-09-29): `0.45`/`0.25` gave a region too big to find its end while flying. Likely
   cause: near 0.5 the replaced side of the noise is one connected web (percolation), so blobs chain
   across forests. Now `0.3`/`0.25`: amount is the dial for both coverage and connectivity;
-  frequency only sets the scale. Compare on the same seed. **Untested in game**: whether
+  frequency only sets the scale. Compare on the same seed.
+  `0.3`/`0.25`: still near-endless. Reading: with five temperate forest types as targets their
+  union is itself huge, so the noise blob, not the forest, now bounds a region. Now `0.3`/`0.5`. **Untested in game**: whether
   0.25 is accepted (if not, the biome is dropped and `/locate` fails) and the resulting region sizes.
   Goal (user): a forest is converted **whole or not at all**, and neighbouring forest types
   join into one region. JSON cannot select per forest; the approximation is noise so slow
