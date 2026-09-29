@@ -131,7 +131,8 @@ unlock on that item; the rest on planks; wood/stripped wood on log/stripped log)
   while `collision_box` uses world x. The first corner attempts (both the engine state and a
   script-computed one) wrote the models like collision boxes, so every corner showed mirrored and
   no rotation could fix it. The geometry cubes are the collision boxes with x negated.
-  Confirmed in game 2026-09-29. Regenerate block + geos with `python -B tools/gen_stairs.py`.
+  Confirmed in game 2026-09-29. Regenerate block + geos with the shared
+  `.claude/skills/bedrock-blocks/scripts/gen_stairs.py` (see the bedrock-blocks skill).
 - Slabs: `vertical_half`; merging in a `playerInteractWithBlock` world event (clicking the slab, or a
   neighbouring block whose face points into a cell holding a slab). Stripping logs is the same
   kind of event: a block component's `onPlayerInteract` blocks placement against the block.
