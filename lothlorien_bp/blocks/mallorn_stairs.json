@@ -3,19 +3,10 @@
   "minecraft:block": {
     "description": {
       "identifier": "lothlorien:mallorn_stairs",
-      "states": {
-        "lothlorien:shape": [
-          "straight",
-          "outer_left",
-          "outer_right",
-          "inner_left",
-          "inner_right"
-        ]
-      },
       "traits": {
         "minecraft:placement_direction": {
           "enabled_states": [
-            "minecraft:cardinal_direction"
+            "minecraft:corner_and_cardinal_direction"
           ]
         },
         "minecraft:placement_position": {
@@ -110,7 +101,7 @@
     },
     "permutations": [
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('lothlorien:shape') == 'straight'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('minecraft:corner') == 'none'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_straight_bottom",
           "minecraft:collision_box": [
@@ -142,46 +133,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('lothlorien:shape') == 'straight'",
-        "components": {
-          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_straight_bottom",
-          "minecraft:collision_box": [
-            {
-              "origin": [
-                -8,
-                0,
-                -8
-              ],
-              "size": [
-                16,
-                8,
-                16
-              ]
-            },
-            {
-              "origin": [
-                -8,
-                8,
-                -8
-              ],
-              "size": [
-                16,
-                8,
-                8
-              ]
-            }
-          ],
-          "minecraft:transformation": {
-            "rotation": [
-              0,
-              180,
-              0
-            ]
-          }
-        }
-      },
-      {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('lothlorien:shape') == 'straight'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('minecraft:corner') == 'none'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_straight_bottom",
           "minecraft:collision_box": [
@@ -220,7 +172,46 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('lothlorien:shape') == 'straight'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('minecraft:corner') == 'none'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_straight_bottom",
+          "minecraft:collision_box": [
+            {
+              "origin": [
+                -8,
+                0,
+                -8
+              ],
+              "size": [
+                16,
+                8,
+                16
+              ]
+            },
+            {
+              "origin": [
+                -8,
+                8,
+                -8
+              ],
+              "size": [
+                16,
+                8,
+                8
+              ]
+            }
+          ],
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('minecraft:corner') == 'none'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_straight_bottom",
           "minecraft:collision_box": [
@@ -259,7 +250,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('lothlorien:shape') == 'straight'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('minecraft:corner') == 'none'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_straight_top",
           "minecraft:collision_box": [
@@ -291,46 +282,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('lothlorien:shape') == 'straight'",
-        "components": {
-          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_straight_top",
-          "minecraft:collision_box": [
-            {
-              "origin": [
-                -8,
-                8,
-                -8
-              ],
-              "size": [
-                16,
-                8,
-                16
-              ]
-            },
-            {
-              "origin": [
-                -8,
-                0,
-                -8
-              ],
-              "size": [
-                16,
-                8,
-                8
-              ]
-            }
-          ],
-          "minecraft:transformation": {
-            "rotation": [
-              0,
-              180,
-              0
-            ]
-          }
-        }
-      },
-      {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('lothlorien:shape') == 'straight'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('minecraft:corner') == 'none'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_straight_top",
           "minecraft:collision_box": [
@@ -369,7 +321,46 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('lothlorien:shape') == 'straight'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('minecraft:corner') == 'none'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_straight_top",
+          "minecraft:collision_box": [
+            {
+              "origin": [
+                -8,
+                8,
+                -8
+              ],
+              "size": [
+                16,
+                8,
+                16
+              ]
+            },
+            {
+              "origin": [
+                -8,
+                0,
+                -8
+              ],
+              "size": [
+                16,
+                8,
+                8
+              ]
+            }
+          ],
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('minecraft:corner') == 'none'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_straight_top",
           "minecraft:collision_box": [
@@ -408,7 +399,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('lothlorien:shape') == 'outer_left'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('minecraft:corner') == 'outer_left'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_left_bottom",
           "minecraft:collision_box": [
@@ -440,46 +431,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('lothlorien:shape') == 'outer_left'",
-        "components": {
-          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_left_bottom",
-          "minecraft:collision_box": [
-            {
-              "origin": [
-                -8,
-                0,
-                -8
-              ],
-              "size": [
-                16,
-                8,
-                16
-              ]
-            },
-            {
-              "origin": [
-                -8,
-                8,
-                -8
-              ],
-              "size": [
-                8,
-                8,
-                8
-              ]
-            }
-          ],
-          "minecraft:transformation": {
-            "rotation": [
-              0,
-              180,
-              0
-            ]
-          }
-        }
-      },
-      {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('lothlorien:shape') == 'outer_left'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('minecraft:corner') == 'outer_left'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_left_bottom",
           "minecraft:collision_box": [
@@ -518,7 +470,46 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('lothlorien:shape') == 'outer_left'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('minecraft:corner') == 'outer_left'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_left_bottom",
+          "minecraft:collision_box": [
+            {
+              "origin": [
+                -8,
+                0,
+                -8
+              ],
+              "size": [
+                16,
+                8,
+                16
+              ]
+            },
+            {
+              "origin": [
+                -8,
+                8,
+                -8
+              ],
+              "size": [
+                8,
+                8,
+                8
+              ]
+            }
+          ],
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('minecraft:corner') == 'outer_left'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_left_bottom",
           "minecraft:collision_box": [
@@ -557,7 +548,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('lothlorien:shape') == 'outer_left'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('minecraft:corner') == 'outer_left'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_left_top",
           "minecraft:collision_box": [
@@ -589,46 +580,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('lothlorien:shape') == 'outer_left'",
-        "components": {
-          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_left_top",
-          "minecraft:collision_box": [
-            {
-              "origin": [
-                -8,
-                8,
-                -8
-              ],
-              "size": [
-                16,
-                8,
-                16
-              ]
-            },
-            {
-              "origin": [
-                -8,
-                0,
-                -8
-              ],
-              "size": [
-                8,
-                8,
-                8
-              ]
-            }
-          ],
-          "minecraft:transformation": {
-            "rotation": [
-              0,
-              180,
-              0
-            ]
-          }
-        }
-      },
-      {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('lothlorien:shape') == 'outer_left'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('minecraft:corner') == 'outer_left'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_left_top",
           "minecraft:collision_box": [
@@ -667,7 +619,46 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('lothlorien:shape') == 'outer_left'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('minecraft:corner') == 'outer_left'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_left_top",
+          "minecraft:collision_box": [
+            {
+              "origin": [
+                -8,
+                8,
+                -8
+              ],
+              "size": [
+                16,
+                8,
+                16
+              ]
+            },
+            {
+              "origin": [
+                -8,
+                0,
+                -8
+              ],
+              "size": [
+                8,
+                8,
+                8
+              ]
+            }
+          ],
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('minecraft:corner') == 'outer_left'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_left_top",
           "minecraft:collision_box": [
@@ -706,7 +697,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('lothlorien:shape') == 'outer_right'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('minecraft:corner') == 'outer_right'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_right_bottom",
           "minecraft:collision_box": [
@@ -738,46 +729,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('lothlorien:shape') == 'outer_right'",
-        "components": {
-          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_right_bottom",
-          "minecraft:collision_box": [
-            {
-              "origin": [
-                -8,
-                0,
-                -8
-              ],
-              "size": [
-                16,
-                8,
-                16
-              ]
-            },
-            {
-              "origin": [
-                0,
-                8,
-                -8
-              ],
-              "size": [
-                8,
-                8,
-                8
-              ]
-            }
-          ],
-          "minecraft:transformation": {
-            "rotation": [
-              0,
-              180,
-              0
-            ]
-          }
-        }
-      },
-      {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('lothlorien:shape') == 'outer_right'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('minecraft:corner') == 'outer_right'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_right_bottom",
           "minecraft:collision_box": [
@@ -816,7 +768,46 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('lothlorien:shape') == 'outer_right'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('minecraft:corner') == 'outer_right'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_right_bottom",
+          "minecraft:collision_box": [
+            {
+              "origin": [
+                -8,
+                0,
+                -8
+              ],
+              "size": [
+                16,
+                8,
+                16
+              ]
+            },
+            {
+              "origin": [
+                0,
+                8,
+                -8
+              ],
+              "size": [
+                8,
+                8,
+                8
+              ]
+            }
+          ],
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('minecraft:corner') == 'outer_right'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_right_bottom",
           "minecraft:collision_box": [
@@ -855,7 +846,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('lothlorien:shape') == 'outer_right'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('minecraft:corner') == 'outer_right'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_right_top",
           "minecraft:collision_box": [
@@ -887,46 +878,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('lothlorien:shape') == 'outer_right'",
-        "components": {
-          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_right_top",
-          "minecraft:collision_box": [
-            {
-              "origin": [
-                -8,
-                8,
-                -8
-              ],
-              "size": [
-                16,
-                8,
-                16
-              ]
-            },
-            {
-              "origin": [
-                0,
-                0,
-                -8
-              ],
-              "size": [
-                8,
-                8,
-                8
-              ]
-            }
-          ],
-          "minecraft:transformation": {
-            "rotation": [
-              0,
-              180,
-              0
-            ]
-          }
-        }
-      },
-      {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('lothlorien:shape') == 'outer_right'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('minecraft:corner') == 'outer_right'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_right_top",
           "minecraft:collision_box": [
@@ -965,7 +917,46 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('lothlorien:shape') == 'outer_right'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('minecraft:corner') == 'outer_right'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_right_top",
+          "minecraft:collision_box": [
+            {
+              "origin": [
+                -8,
+                8,
+                -8
+              ],
+              "size": [
+                16,
+                8,
+                16
+              ]
+            },
+            {
+              "origin": [
+                0,
+                0,
+                -8
+              ],
+              "size": [
+                8,
+                8,
+                8
+              ]
+            }
+          ],
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('minecraft:corner') == 'outer_right'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_outer_right_top",
           "minecraft:collision_box": [
@@ -1004,7 +995,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('lothlorien:shape') == 'inner_left'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('minecraft:corner') == 'inner_left'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_left_bottom",
           "minecraft:collision_box": [
@@ -1048,58 +1039,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('lothlorien:shape') == 'inner_left'",
-        "components": {
-          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_left_bottom",
-          "minecraft:collision_box": [
-            {
-              "origin": [
-                -8,
-                0,
-                -8
-              ],
-              "size": [
-                16,
-                8,
-                16
-              ]
-            },
-            {
-              "origin": [
-                -8,
-                8,
-                -8
-              ],
-              "size": [
-                16,
-                8,
-                8
-              ]
-            },
-            {
-              "origin": [
-                -8,
-                8,
-                0
-              ],
-              "size": [
-                8,
-                8,
-                8
-              ]
-            }
-          ],
-          "minecraft:transformation": {
-            "rotation": [
-              0,
-              180,
-              0
-            ]
-          }
-        }
-      },
-      {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('lothlorien:shape') == 'inner_left'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('minecraft:corner') == 'inner_left'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_left_bottom",
           "minecraft:collision_box": [
@@ -1150,7 +1090,58 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('lothlorien:shape') == 'inner_left'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('minecraft:corner') == 'inner_left'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_left_bottom",
+          "minecraft:collision_box": [
+            {
+              "origin": [
+                -8,
+                0,
+                -8
+              ],
+              "size": [
+                16,
+                8,
+                16
+              ]
+            },
+            {
+              "origin": [
+                -8,
+                8,
+                -8
+              ],
+              "size": [
+                16,
+                8,
+                8
+              ]
+            },
+            {
+              "origin": [
+                -8,
+                8,
+                0
+              ],
+              "size": [
+                8,
+                8,
+                8
+              ]
+            }
+          ],
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('minecraft:corner') == 'inner_left'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_left_bottom",
           "minecraft:collision_box": [
@@ -1201,7 +1192,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('lothlorien:shape') == 'inner_left'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('minecraft:corner') == 'inner_left'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_left_top",
           "minecraft:collision_box": [
@@ -1245,58 +1236,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('lothlorien:shape') == 'inner_left'",
-        "components": {
-          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_left_top",
-          "minecraft:collision_box": [
-            {
-              "origin": [
-                -8,
-                8,
-                -8
-              ],
-              "size": [
-                16,
-                8,
-                16
-              ]
-            },
-            {
-              "origin": [
-                -8,
-                0,
-                -8
-              ],
-              "size": [
-                16,
-                8,
-                8
-              ]
-            },
-            {
-              "origin": [
-                -8,
-                0,
-                0
-              ],
-              "size": [
-                8,
-                8,
-                8
-              ]
-            }
-          ],
-          "minecraft:transformation": {
-            "rotation": [
-              0,
-              180,
-              0
-            ]
-          }
-        }
-      },
-      {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('lothlorien:shape') == 'inner_left'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('minecraft:corner') == 'inner_left'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_left_top",
           "minecraft:collision_box": [
@@ -1347,7 +1287,58 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('lothlorien:shape') == 'inner_left'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('minecraft:corner') == 'inner_left'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_left_top",
+          "minecraft:collision_box": [
+            {
+              "origin": [
+                -8,
+                8,
+                -8
+              ],
+              "size": [
+                16,
+                8,
+                16
+              ]
+            },
+            {
+              "origin": [
+                -8,
+                0,
+                -8
+              ],
+              "size": [
+                16,
+                8,
+                8
+              ]
+            },
+            {
+              "origin": [
+                -8,
+                0,
+                0
+              ],
+              "size": [
+                8,
+                8,
+                8
+              ]
+            }
+          ],
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('minecraft:corner') == 'inner_left'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_left_top",
           "minecraft:collision_box": [
@@ -1398,7 +1389,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('lothlorien:shape') == 'inner_right'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('minecraft:corner') == 'inner_right'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_right_bottom",
           "minecraft:collision_box": [
@@ -1442,58 +1433,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('lothlorien:shape') == 'inner_right'",
-        "components": {
-          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_right_bottom",
-          "minecraft:collision_box": [
-            {
-              "origin": [
-                -8,
-                0,
-                -8
-              ],
-              "size": [
-                16,
-                8,
-                16
-              ]
-            },
-            {
-              "origin": [
-                -8,
-                8,
-                -8
-              ],
-              "size": [
-                16,
-                8,
-                8
-              ]
-            },
-            {
-              "origin": [
-                0,
-                8,
-                0
-              ],
-              "size": [
-                8,
-                8,
-                8
-              ]
-            }
-          ],
-          "minecraft:transformation": {
-            "rotation": [
-              0,
-              180,
-              0
-            ]
-          }
-        }
-      },
-      {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('lothlorien:shape') == 'inner_right'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('minecraft:corner') == 'inner_right'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_right_bottom",
           "minecraft:collision_box": [
@@ -1544,7 +1484,58 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('lothlorien:shape') == 'inner_right'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('minecraft:corner') == 'inner_right'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_right_bottom",
+          "minecraft:collision_box": [
+            {
+              "origin": [
+                -8,
+                0,
+                -8
+              ],
+              "size": [
+                16,
+                8,
+                16
+              ]
+            },
+            {
+              "origin": [
+                -8,
+                8,
+                -8
+              ],
+              "size": [
+                16,
+                8,
+                8
+              ]
+            },
+            {
+              "origin": [
+                0,
+                8,
+                0
+              ],
+              "size": [
+                8,
+                8,
+                8
+              ]
+            }
+          ],
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:vertical_half') == 'bottom' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('minecraft:corner') == 'inner_right'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_right_bottom",
           "minecraft:collision_box": [
@@ -1595,7 +1586,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('lothlorien:shape') == 'inner_right'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('minecraft:corner') == 'inner_right'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_right_top",
           "minecraft:collision_box": [
@@ -1639,58 +1630,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('lothlorien:shape') == 'inner_right'",
-        "components": {
-          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_right_top",
-          "minecraft:collision_box": [
-            {
-              "origin": [
-                -8,
-                8,
-                -8
-              ],
-              "size": [
-                16,
-                8,
-                16
-              ]
-            },
-            {
-              "origin": [
-                -8,
-                0,
-                -8
-              ],
-              "size": [
-                16,
-                8,
-                8
-              ]
-            },
-            {
-              "origin": [
-                0,
-                0,
-                0
-              ],
-              "size": [
-                8,
-                8,
-                8
-              ]
-            }
-          ],
-          "minecraft:transformation": {
-            "rotation": [
-              0,
-              180,
-              0
-            ]
-          }
-        }
-      },
-      {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('lothlorien:shape') == 'inner_right'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('minecraft:corner') == 'inner_right'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_right_top",
           "minecraft:collision_box": [
@@ -1741,7 +1681,58 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('lothlorien:shape') == 'inner_right'",
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('minecraft:corner') == 'inner_right'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_right_top",
+          "minecraft:collision_box": [
+            {
+              "origin": [
+                -8,
+                8,
+                -8
+              ],
+              "size": [
+                16,
+                8,
+                16
+              ]
+            },
+            {
+              "origin": [
+                -8,
+                0,
+                -8
+              ],
+              "size": [
+                16,
+                8,
+                8
+              ]
+            },
+            {
+              "origin": [
+                0,
+                0,
+                0
+              ],
+              "size": [
+                8,
+                8,
+                8
+              ]
+            }
+          ],
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:vertical_half') == 'top' && q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('minecraft:corner') == 'inner_right'",
         "components": {
           "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_inner_right_top",
           "minecraft:collision_box": [

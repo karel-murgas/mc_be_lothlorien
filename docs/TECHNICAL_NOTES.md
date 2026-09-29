@@ -122,11 +122,16 @@ unlock on that item; the rest on planks; wood/stripped wood on log/stripped log)
 
 - Tools: every wood block carries `minecraft:is_axe_item_destructible`; leaves use the hoe tag.
 - Logs: `block_face` trait + rotation permutations; axe strips (`lothlorien:strippable`).
-- Stairs: `cardinal_direction` + `vertical_half` traits; the corner shape is a custom state
-  `lothlorien:shape` computed in `blocks.js` with the Java-edition rules (on placement and when a
-  neighbouring stair is placed or broken). The engine's own `minecraft:corner` state was tried
-  first: its left/right is undocumented and it rendered wrong at both orientations we tried, so do
-  not go back to it. 5 shapes x 2 halves x 4 directions = 40 permutations, multi-box collision.
+- Stairs: native corners. `placement_direction` with `minecraft:corner_and_cardinal_direction`
+  gives `minecraft:cardinal_direction` + `minecraft:corner` (none/inner_left/inner_right/
+  outer_left/outer_right), and the engine keeps `corner` updated when neighbours change; no script.
+  Left/right follow Java: for a north-facing stair, left = west, right = east. 5 shapes x 2 halves
+  x 4 directions = 40 permutations, multi-box collision.
+  **Axis trap:** block geometry draws x mirrored (a cube at +x lands on the block's WEST side),
+  while `collision_box` uses world x. The first corner attempts (both the engine state and a
+  script-computed one) wrote the models like collision boxes, so every corner showed mirrored and
+  no rotation could fix it. The geometry cubes are the collision boxes with x negated.
+  Confirmed in game 2026-09-29. Regenerate block + geos with `python -B tools/gen_stairs.py`.
 - Slabs: `vertical_half`; merging in a `playerInteractWithBlock` world event (clicking the slab, or a
   neighbouring block whose face points into a cell holding a slab). Stripping logs is the same
   kind of event: a block component's `onPlayerInteract` blocks placement against the block.
@@ -139,5 +144,4 @@ unlock on that item; the rest on planks; wood/stripped wood on log/stripped log)
 - Button/plate: `minecraft:redstone_producer`; button releases after 30 ticks, plate polls
   every 4 ticks (`minecraft:tick`). Support loss is handled in `blocks.js` (breaking the block they sit on).
 - Left out (signs, shelf, boats, ...): see `NOT_IMPLEMENTED.md` for reasons and retry notes.
-- **Untested in game** (no game access while writing): everything above. Check first: stair
-  orientation and corners, door swing/hinge, gate open pose, slab merge, log rotation, redstone opening.
+- **Untested in game** (no game access while writing): everything above. Check first: door swing/hinge, gate open pose, slab merge, log rotation, redstone opening.
