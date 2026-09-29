@@ -164,6 +164,13 @@ bone meal, leaf decay, instruments), `blocks/mallorn_sapling.json`, `items/mallo
   random heights; 1-5 rising branches through the crown. Every branch may carry a leaf blob; the crown is a
   main blob (maybe off-centre) + blobs, so crown bottoms are uneven. Seed-based, ~all trees distinct.
   Average ~32 logs (~127 planks) and ~200 leaves (5-95%: ~100-320).
+- **Big Mallorn:** four saplings in a 2x2 square grow one tree with a 2x2 trunk (like vanilla dark oak): 15-24
+  high, flared root logs, crown of a big blob plus 3-5 satellites, 5-8 level platform branches (3-7 long) under the
+  crown, 2-5 low and 3-6 rising branches. ~140 logs (~560 planks), ~1500 leaves (~30 acorns if all cleared, for the
+  4 planted). Placement is spread over ticks with `system.runJob`. Debug: `/scriptevent lothlorien:growbig [n]`.
+- **Where trees come from:** the generators run in script, so they work for saplings and debug commands only.
+  Feature rules cannot call script, so **world generation cannot use them directly**; natural Mallorns need
+  pre-generated `.mcstructure` files placed by a feature (Phase 5).
 - **Leaf decay:** leaves have state `lothlorien:persistent`. Player placement sets it true (never decays);
   grown/worldgen leaves are false and, on a random tick, break with drops if no Mallorn log/wood is
   within 6 steps through leaves (unloaded neighbour = assume connected).
