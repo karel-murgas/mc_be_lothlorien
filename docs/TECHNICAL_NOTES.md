@@ -17,7 +17,9 @@ Files:
   since 1.21.110; `format_version` must be ≥ `1.21.110`. It re-labels part of the areas the
   vanilla generator already chose as a target biome. It **cannot change terrain shape**:
   Lothlórien has forest terrain because it only replaces forests.
-- `targets` are vanilla names **without** `minecraft:`. Custom biomes cannot be targets, so
+- `targets` are **namespaced** ids (`minecraft:forest`). Bare `forest` (what the wiki
+  and older docs show) fails in 1.26 with "No biome found with name: 'forest'" and the
+  whole biome is dropped. Custom biomes cannot be targets, so
   a nested "heart" biome is not possible (see design KB §3).
 - `amount` (0–1] ≈ fraction of target area replaced; `noise_frequency_scale` (0–100]:
   higher = smaller, more frequent patches. Current values `0.35` / `10` are spike guesses.
@@ -51,7 +53,16 @@ Spawn rules and feature rules find biomes only by tag.
 ## Debug instrument
 
 `/scriptevent lothlorien:debug` toggles an actionbar showing the biome id underfoot and the
-hostile mobs within 64 blocks (in-biome / total). Spike-only; remove or gate it later.
+hostile mobs within 64 blocks (in-biome / total). `/scriptevent lothlorien:survey` samples
+the loaded surface within 160 blocks and reports the Lothlórien share, how much of it is
+water, and the direction/coordinates of its centre. At world load the script says in chat
+whether the biome registered. Spike-only; remove or gate it later.
+
+`/locate biome` returns the **nearest** point of the biome, often its edge, and that edge
+can be shallow coastal water: vanilla forest extends into water where the terrain dips
+below sea level, and replacement keeps the terrain. Survey, then walk to the centre.
+
+General biome knowledge (for any mod) is in `.claude/skills/bedrock-modding/references/06-biomes.md`.
 
 ## Phase 1 test checklist (new world each time the biome JSON changes)
 
