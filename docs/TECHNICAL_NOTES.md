@@ -25,8 +25,12 @@ Files:
   higher = smaller, more frequent patches. Tuning log: `0.35`/`10` gave a mid-sized, long narrow
   region; then `0.5`/`4` plus old-growth birch (`birch_forest_mutated`); then `0.45`/`1`, which in game
   (2026-09-29) still cut a `minecraft:forest` at a taiga edge into a few-tree strip beside a large
-  unconverted forest. Now `0.45`/`0.25` plus `roofed_forest` (dark forest) in the **same** entry, so
-  one noise field covers forest + dark forest and adjacent ones merge. **Untested in game**: whether
+  unconverted forest. Now `0.45`/`0.25` plus `dappled_forest` (new temperate forest, 1.26.50) in the **same**
+  entry, so one noise field covers all forest types and adjacent ones merge. `roofed_forest` was
+  tried and dropped: replaced dark forest would likely lose woodland mansions. Considered, not
+  added: `meadow`/`cherry_grove` (mountain biomes), `mega_taiga` (cold); no old-growth oak biome
+  exists (old birch = `birch_forest_mutated`, already in). `plains` would widen regions most (our
+  trees fill it) but is very common and shares this entry's `amount`; undecided. **Untested in game**: whether
   0.25 is accepted (if not, the biome is dropped and `/locate` fails) and the resulting region sizes.
   Goal (user): a forest is converted **whole or not at all**, and neighbouring forest types
   join into one region. JSON cannot select per forest; the approximation is noise so slow
