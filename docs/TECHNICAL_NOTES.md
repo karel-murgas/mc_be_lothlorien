@@ -264,16 +264,21 @@ Density check: `/scriptevent lothlorien:treecount [radius]` reports trees per ch
     adaptation. `max_depth` is 0 (one piece, no jigsaw blocks). `start_height` is -5 from `world_surface`, so
     the roots go into the ground.
   - `worldgen/template_pools/giant_mallorn.json`: generated from CHOSEN.
-  - `worldgen/structure_sets/giant_mallorn.json`: random_spread, spacing 6 chunks, separation 2, so there is
-    at most one giant per 6x6 chunks and giants are at least 3 chunks (48 blocks) apart, which is more than
-    the 40-wide footprint. Separation 3 was rejected by the engine (it must be less than spacing / 2), so
-    nothing generated (2026-09-30).
+  - `worldgen/structure_sets/giant_mallorn.json`: random_spread, now spacing 13 / separation 6 (see below).
+    An early separation 3 with spacing 6 was rejected by the engine (separation must be less than spacing / 2),
+    so nothing generated (2026-09-30).
   - With that fixed, `/locate` found giants but nothing was built (2026-09-30).
     - `/place structure` said "Jigsaw structure generation failed. Structure placed out of bounds".
     - Six one-change test structures were placed in one new world. **The cause was `max_depth: 0`**: only
       the tests with depth 1 or 3 built. Size, height, reach, the `.mcstructure` format and `"rigid"` made
       no difference. `max_depth` is now 1.
     - `max_distance_from_center` is 116 as in vanilla's camp. The earlier 32 was not the cause.
+  - **Working in game (2026-09-30):** `/place structure` and natural generation build whole giants across
+    chunk borders.
+  - Spacing 6 / separation 2 was far too dense: about 5 giants in a medium Lothlorien patch, one pair of
+    trunks only about 28 blocks apart. The piece is rotated around its corner, so a trunk can move by
+    about the piece width. The set is now spacing 13 / separation 6: roughly 1 per patch, with spots at
+    least 112 blocks apart and trunks about 70+ apart. Not yet seen in game.
   - `/locate structure lothlorien:giant_mallorn` and `/place structure lothlorien:giant_mallorn` work.
 - **History:**
   - 2026-09-29: a 40-wide `structure_template_feature` was cut badly at chunk borders.
