@@ -1,0 +1,15 @@
+- New biome
+- Instead of forests
+- New tree type in many variants
+  - built in tree builder for small trees
+  - several categories built by procedural code created by LLM - run the code, if tree is good, save it
+  - from middle sized to epic sized
+- athelas (heals), elanor, niphredil -> create a miruvor from some of them
+- elven structures (watch platforms, shrines)
+- new wood type (mallorn wood)
+  - fences, door, trapdoor should look like carved
+  - maybe straight planks instead of zig-zag
+- maybe throw in unicorns (based on horse, it runs away if you killed anything in the last 10 minutes)
+- no enemy spawn
+- custom lights (maybe add fireflies too - and maybe use them, maybe just elven lamps (like lanterns but pretty))
+- deer mob

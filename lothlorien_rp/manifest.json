@@ -1,0 +1,29 @@
+{
+    "format_version": 2,
+    "header": {
+        "name": "Lothlorien RP",
+        "description": "Lothlorien resource pack",
+        "uuid": "d535a52f-4844-41f8-a99f-343476d5c9dd",
+        "version": [
+            1,
+            0,
+            0
+        ],
+        "min_engine_version": [
+            1,
+            21,
+            120
+        ]
+    },
+    "modules": [
+        {
+            "type": "resources",
+            "uuid": "057f5dd9-fe4f-4184-9165-9bbf094df65f",
+            "version": [
+                1,
+                0,
+                0
+            ]
+        }
+    ]
+}
