@@ -16,6 +16,12 @@
       },
       "minecraft:fuel": {
         "duration": 15
+      },
+      "minecraft:tags": {
+        "tags": [
+          "minecraft:logs",
+          "minecraft:logs_that_burn"
+        ]
       }
     }
   }

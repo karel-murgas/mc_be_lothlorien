@@ -16,6 +16,11 @@
       },
       "minecraft:fuel": {
         "duration": 7.5
+      },
+      "minecraft:tags": {
+        "tags": [
+          "minecraft:wooden_slabs"
+        ]
       }
     }
   }

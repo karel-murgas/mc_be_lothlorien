@@ -16,6 +16,11 @@
       },
       "minecraft:fuel": {
         "duration": 15
+      },
+      "minecraft:tags": {
+        "tags": [
+          "minecraft:planks"
+        ]
       }
     }
   }
