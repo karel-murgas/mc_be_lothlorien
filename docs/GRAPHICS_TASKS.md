@@ -73,3 +73,58 @@ Placeholders: `textures/blocks/mallorn_sapling.png` is vanilla `poplar_sapling`;
 is a hand-drawn 16×16 acorn. Replace both in place. The sapling is drawn as two crossed planes with
 `alpha_test` (cutout, no soft alpha) and should read as a young golden-leaved tree.
 
+---
+
+## Step 6 - Ground identity and flora (Phase 6)
+
+All files below are **placeholders** (vanilla flowers, a gold-tinted vanilla fern, a hand-drawn leaf).
+Replace each in place (same name); no JSON changes needed. Plants are two crossed planes with
+`alpha_test` (cutout, no soft alpha) and are also used as the 2D inventory icon, so each plant needs
+**both** a block texture and an item texture (same picture, may differ in framing).
+
+| Block file (`textures/blocks/`) | Item file (`textures/items/`) | Used by | Placeholder |
+|---|---|---|---|
+| `mallorn_leaf_carpet.png` | `mallorn_leaf_carpet.png` | golden leaf carpet, 1-4 segments per block | `mallorn_leaves` on dark gold |
+| `elanor.png` | `elanor.png` | Elanor, small golden star-shaped flower | vanilla dandelion |
+| `niphredil.png` | `niphredil.png` | Niphredil, delicate pale/white flower | vanilla lily of the valley |
+| `athelas.png` | `athelas.png` | Athelas, medicinal herb (later ingredient of salve / Miruvor) | vanilla fern, tinted light green |
+| `golden_fern.png` | `golden_fern.png` | golden fern, ambient ground cover | vanilla fern, tinted gold |
+| `mallorn_blossom.png` | `mallorn_blossom.png` | fallen Mallorn blossoms, 1-4 segments per block (cutout, scattered petals) | drawn petal specks |
+
+Particle: `textures/particle/mallorn_leaf.png` (**8x8**, one falling golden leaf, cutout alpha). The
+particle (`particles/falling_leaf.json`) draws it 0.12 blocks wide, spinning, so it must read at a few pixels.
+
+### Requirements (Claude adds to this list)
+
+- **Carpet and blossoms are segmented like vanilla leaf litter**: a block shows 1 to 4 quarter tiles (each 8x8 px
+  quadrant of the 16x16 texture, 1 px tall), rotated per block. Each quadrant must therefore look complete on its
+  own, with no motif crossing the quadrant lines. The item file is the inventory icon (a heap of the item, 2D).
+- **Blossoms are cutout** (alpha 0 between petals); the ground shows through.
+- **Leaf carpet is opaque and seen from above**: it covers the grass texture under trees, so it must
+  tile on all four sides and look good in large patches. Its top face uses the whole 16x16 tile; the
+  1 px sides use the bottom row (`v = 15`), so keep that row a plausible leaf-edge colour. Patches
+  are scattered (gaps between blocks show grass), so neighbouring blocks should not need to line up.
+- **Golden fern and Athelas must be clearly different silhouettes** (fern: arching fronds; Athelas:
+  low herb with small pale flowers) and Athelas must not read as "grass" from a distance.
+- **Elanor vs Niphredil**: golden vs white must be distinguishable at a glance, in shade and at night.
+- Colours are baked in: none of these blocks receives a biome tint.
+- Plants sit on grass in a vivid-green, gold-foliage biome; avoid dark outlines that fight the gold.
+- **PBR maps:** each step 6 block texture has a placeholder `<name>.texture_set.json` and `<name>_mers.tga` (flat values). When you
+  replace a texture keep the set file; optionally paint a real MERS map (R metalness, G emissive, B roughness, A subsurface).
+
+### Open problem: cutout flicker (for the graphics agent; also needs a code-side look)
+
+Seen in game (user, 2026-09-29): the custom cutout blocks shimmer at high frequency while the camera moves or looks at them
+(golden fern, Niphredil, Mallorn leaves; vanilla grass next to them is static). It is subtle, the plants do not disappear.
+It happens with **both Fancy and Vibrant Visuals**, so it is not (only) a PBR/Vibrant problem. Ruled out: semi-transparent pixels
+(all placeholder alpha is 0 or 255). Adding flat MERS maps did not settle it (that fix was tried before the user reported "both modes").
+Things to check, cheapest first:
+
+1. **Texture content.** Do the final textures have hard, clean silhouettes with no isolated single opaque pixels or 1 px gaps
+   (cutout edges plus mipmaps shimmer when they are thin)? Compare with the vanilla fern / poplar leaf tiles: thicker shapes, coloured
+   pixels under the transparent ones (edge padding, not black or white bleed). Transparent pixels should carry the neighbouring
+   colour, not (0,0,0).
+2. **Mip levels / padding** in `textures/terrain_texture.json` (`padding 8`, `num_mip_levels 4`): try 0-1 mip levels, or compare with
+   the vanilla atlas settings.
+3. **Code side (Claude):** `render_method` `alpha_test` vs `alpha_test_single_sided` on the plants, and whether the leaves show it too
+   with a vanilla leaf texture swapped in (isolates art from block definition).

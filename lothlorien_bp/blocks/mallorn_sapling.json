@@ -63,7 +63,7 @@
               "minecraft:dirt",
               "minecraft:coarse_dirt",
               "minecraft:podzol",
-              "minecraft:rooted_dirt",
+              "minecraft:dirt_with_roots",
               "minecraft:moss_block",
               "minecraft:mud",
               "minecraft:farmland"

@@ -7,6 +7,24 @@
     },
     "lothlorien:mallorn_acorn": {
       "textures": "textures/items/mallorn_acorn"
+    },
+    "lothlorien:elanor": {
+      "textures": "textures/items/elanor"
+    },
+    "lothlorien:niphredil": {
+      "textures": "textures/items/niphredil"
+    },
+    "lothlorien:athelas": {
+      "textures": "textures/items/athelas"
+    },
+    "lothlorien:golden_fern": {
+      "textures": "textures/items/golden_fern"
+    },
+    "lothlorien:mallorn_blossom": {
+      "textures": "textures/items/mallorn_blossom"
+    },
+    "lothlorien:mallorn_leaf_carpet": {
+      "textures": "textures/items/mallorn_leaf_carpet"
     }
   }
 }

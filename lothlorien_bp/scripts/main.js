@@ -1,6 +1,9 @@
 import { world, system, BiomeTypes } from "@minecraft/server";
 import "./blocks.js";
+import "./ground_cover.js";
+import "./bonemeal.js";
 import { handleTreeScriptEvent } from "./trees.js";
+import { leafUndersideY } from "./leaf_fall.js";
 import { DEPTH_NAMES, estimateDepth, probeCount } from "./depth.js";
 
 const BIOME_ID = "lothlorien:lothlorien";
@@ -187,10 +190,38 @@ function reportBiomeRegistration() {
   system.runTimeout(() => world.sendMessage(msg), 100);
 }
 
+// Phase 6: golden leaves let go of the canopy near each player standing in the biome. A random
+// column within LEAF_RADIUS is checked (cheap: one topmost-block lookup plus a short walk down).
+const LEAF_INTERVAL_TICKS = 12;
+const LEAF_RADIUS = 14;
+const LEAVES_ID = "lothlorien:mallorn_leaves";
+
+function fallLeaves() {
+  for (const player of world.getPlayers()) {
+    const dimension = player.dimension;
+    if (biomeAt(dimension, player.location) !== BIOME_ID) continue;
+    const x = Math.floor(player.location.x + (Math.random() * 2 - 1) * LEAF_RADIUS);
+    const z = Math.floor(player.location.z + (Math.random() * 2 - 1) * LEAF_RADIUS);
+    try {
+      const top = dimension.getTopmostBlock({ x, z });
+      if (!top || top.typeId !== LEAVES_ID) continue;
+      const y = leafUndersideY(
+        top.y,
+        (yy) => (yy === top.y ? top.typeId : dimension.getBlock({ x, y: yy, z })?.typeId),
+        (id) => id === LEAVES_ID
+      );
+      if (y !== undefined) dimension.spawnParticle("lothlorien:falling_leaf", { x: x + 0.5, y: y - 0.1, z: z + 0.5 });
+    } catch {
+      // unloaded chunk
+    }
+  }
+}
+
 // Scripting V2 runs before the world exists: touch `world` only from events.
 world.afterEvents.worldLoad.subscribe(() => {
   system.afterEvents.scriptEventReceive.subscribe(onScriptEvent);
   system.runInterval(showDebug, DEBUG_INTERVAL_TICKS);
   system.runInterval(updateDepth, DEPTH_INTERVAL_TICKS);
+  system.runInterval(fallLeaves, LEAF_INTERVAL_TICKS);
   reportBiomeRegistration();
 });

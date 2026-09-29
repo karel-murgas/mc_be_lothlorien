@@ -1,0 +1,74 @@
+{
+  "format_version": "1.13.0",
+  "minecraft:weighted_random_feature": {
+    "description": {
+      "identifier": "lothlorien:mallorn_leaf_carpet_feature"
+    },
+    "features": [
+      [
+        "lothlorien:mallorn_leaf_carpet_a1_north_feature",
+        4
+      ],
+      [
+        "lothlorien:mallorn_leaf_carpet_a1_west_feature",
+        4
+      ],
+      [
+        "lothlorien:mallorn_leaf_carpet_a1_south_feature",
+        4
+      ],
+      [
+        "lothlorien:mallorn_leaf_carpet_a1_east_feature",
+        4
+      ],
+      [
+        "lothlorien:mallorn_leaf_carpet_a2_north_feature",
+        3
+      ],
+      [
+        "lothlorien:mallorn_leaf_carpet_a2_west_feature",
+        3
+      ],
+      [
+        "lothlorien:mallorn_leaf_carpet_a2_south_feature",
+        3
+      ],
+      [
+        "lothlorien:mallorn_leaf_carpet_a2_east_feature",
+        3
+      ],
+      [
+        "lothlorien:mallorn_leaf_carpet_a3_north_feature",
+        2
+      ],
+      [
+        "lothlorien:mallorn_leaf_carpet_a3_west_feature",
+        2
+      ],
+      [
+        "lothlorien:mallorn_leaf_carpet_a3_south_feature",
+        2
+      ],
+      [
+        "lothlorien:mallorn_leaf_carpet_a3_east_feature",
+        2
+      ],
+      [
+        "lothlorien:mallorn_leaf_carpet_a4_north_feature",
+        1
+      ],
+      [
+        "lothlorien:mallorn_leaf_carpet_a4_west_feature",
+        1
+      ],
+      [
+        "lothlorien:mallorn_leaf_carpet_a4_south_feature",
+        1
+      ],
+      [
+        "lothlorien:mallorn_leaf_carpet_a4_east_feature",
+        1
+      ]
+    ]
+  }
+}

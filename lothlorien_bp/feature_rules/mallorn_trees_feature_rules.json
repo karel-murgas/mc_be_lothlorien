@@ -3,7 +3,7 @@
   "minecraft:feature_rules": {
     "description": {
       "identifier": "lothlorien:mallorn_trees_feature_rules",
-      "places_feature": "lothlorien:select_mallorn_tree_feature"
+      "places_feature": "lothlorien:select_mallorn_tree_with_litter_feature"
     },
     "conditions": {
       "placement_pass": "surface_pass",

@@ -122,13 +122,14 @@ stops the search and the level is the lowest one still certain, shown with `?` i
 bar. Probes also sampled at the player's height; biomes are 3D, so flying sampled the air.
 Old limits were 24/60 on rings to 80 (partly beyond the loaded area). Tests: `tests/run.mjs`.
 The outline follows vanilla forest shapes, so "heart" means far from any border, not a
-designed centre. Untested in game after the fix.
+designed centre. Verified in game after the fix (2026-09-29, user). Known: the level updates
+only every 3 s (`DEPTH_INTERVAL_TICKS`), which reads as a lag when crossing a border; not yet
+addressed.
 
 **B. Worldgen heart approximation**: feature rule
 `lothlorien:grove_flowers_feature_rules` (after_surface_pass, tag `lothlorien`) places
 dense dandelion patches only where `query.noise(origin/120)` > 0.3, so grove-like zones
-appear as large slow-varying regions independent of the biome border. Placeholder flower
-only; swap in Elanor/Niphredil later. Noise is world-position based, so a grove can fall
+appear as large slow-varying regions independent of the biome border. Superseded in Phase 6: the dandelion patches were replaced by Elanor/Niphredil (see below). Noise is world-position based, so a grove can fall
 on the edge; it is not tied to depth. That is the honest limit of JSON worldgen.
 
 Test (fresh world): fly over a Lothlórien region; patches should cluster in a few large
@@ -228,3 +229,112 @@ Test without a new world: `/place feature lothlorien:select_mallorn_tree_feature
 directly) on grass. **Untested in game:** custom blocks inside `tree_feature`, log orientation (default state),
 density (5/chunk is a guess), mega tree size.
 Density check: `/scriptevent lothlorien:treecount [radius]` reports trees per chunk of biome and canopy cover around you (loaded chunks only; stand inside the biome in a freshly generated area).
+
+## Phase 6 - ground identity and flora (step 5, procedural trees, postponed on purpose)
+
+Blocks: plants `elanor`, `niphredil`, `athelas`, `golden_fern` (`minecraft:geometry.cross`, `alpha_test`, no
+collision, break instantly, soil-only `placement_filter`) and two **segmented ground covers**, `mallorn_leaf_carpet`
+(opaque) and `mallorn_blossom` (cutout), made by `.claude/skills/bedrock-blocks/scripts/gen_ground_cover.py`.
+Covers work like vanilla leaf litter: state `lothlorien:amount` 1-4 = that many 8x8 quarter-tiles (1 px tall, one geo per
+amount, `geometry.lothlorien.ground_cover_1..4`), rotated by `placement_direction` permutations. Using the item on
+the cover (or on the ground under it) adds a segment; breaking drops one item per segment (`scripts/ground_cover.js`).
+Worldgen places weighted amounts (carpet 4:3:2:1, blossoms 6:3:1:1) in random directions: 16 single-block features
+each, states given in `places_block`. Each plant has an **item with the same identifier**
+(`replace_block_item`, 2D `icon`, creative group flower) and a block with no menu category, the door pattern.
+All art is placeholder; the list for the graphics agent is in `GRAPHICS_TASKS.md` step 6.
+
+Worldgen (all native JSON, no script):
+
+- **Litter with trees**: `mallorn_trees_feature_rules` now places `select_mallorn_tree_with_litter_feature`, an
+  `aggregate_feature` (`early_out: first_failure`) of the tree, a carpet scatter (90 tries, gaussian +-5) and a
+  blossom scatter (5 tries), all around the tree origin. Same idea as vanilla `*_with_leaf_litter`.
+- **Elanor**: the old dandelion grove rule, now `elanor_patch_feature_rules` (`query.noise` > 0.3, 3 patches per chunk).
+- **Niphredil**: same idea with an offset, slower noise and a stricter threshold (0.35), so its zones are separate
+  from Elanor's and rarer. The design says "more common deeper in", which JSON cannot express (no depth
+  in worldgen); noise zones are the approximation.
+- **Athelas**: 1 in 5 chunks gets one small clump (10 tries, +-3). **Golden fern**: 1 in 2 chunks, 22 tries, +-6.
+- Old `grove_flower_*` files removed. `single_block_feature` uses `enforce_placement_rules: true`, so the plants'
+  `placement_filter` (grass, dirt, podzol, moss, ...) decides where they can stand.
+
+Falling leaves: `rp/particles/falling_leaf.json` (`lothlorien:falling_leaf`, slow drifting fall, expires on
+contact) spawned by `fallLeaves` in `main.js` every 12 ticks per player inside the biome: a random column within
+14 blocks, topmost block must be a Mallorn leaf, `leaf_fall.js` (pure, tested) walks down to the first leaf with
+open air below. One particle per player per 12 ticks, so it is sparse by design.
+
+**Untested in game** (written without game access): everything above. Check first: (1) plants and carpet appear
+in the creative menu and place on grass; (2) `/place feature lothlorien:select_mallorn_tree_with_litter_feature`
+leaves carpet and blossoms around the trunk; (3) heightmap y in `after_surface_pass` may land on canopy, in
+which case flowers only appear in the open (expected); (4) `scatter_chance` is accepted in the rules;
+(5) particle spawns, falls and disappears on the ground; (6) creative groups `itemGroup.name.flower` / `.leaves`.
+
+### Vanilla plants in the biome (checked against the 1.26.50 feature rules, 2026-09-29)
+
+Vanilla places plants by biome tag, and the only removal lever is the tag. The biome has `overworld` (needed for
+ores, caves, structures, spawns), `animal`, `bee_habitat`, `lothlorien`, no `forest`. Rules that still match:
+`scatter_tall_grass_feature` (grass and tall grass, the wanted ground cover), `scatter_overworld_flower_feature`
+(dandelion/poppy mix, 1 chunk in 32), pumpkins (1 in 300), reeds near water (1 in 6), extra mushrooms.
+Ferns, forest flowers and forest grass belong to `forest`/`taiga`/... tags and do not apply. The leftovers are rare and
+deliberately not fought: excluding them needs a tag such as `plains` or `mooshroom_island`, which also switches on
+villages or mooshroom spawns. Decorative flowers added on purpose: `wild_flower_patch_feature_rules` (one small patch in 1 chunk in 3).
+**Untested in game**: segment merging and break drops, the 16 permutations, `states` inside `places_block`.
+
+### Tuning after the first in-game look (2026-09-29)
+
+Elanor was too common in the inner zone: noise threshold 0.3 -> 0.5, 2 patches per chunk, 18 tries per patch.
+Athelas is now confined to rare noise zones (threshold 0.45 on its own offset field), 1 chunk in 2 within them, 8 tries.
+Worldgen cannot see depth, so "scarce until the heart" is approximated with rare zones; a scripted post-generation
+pass keyed to `estimateDepth` is the real fix if that is not enough. Carpet density was judged fine.
+
+**Bone meal** (`scripts/bonemeal.js`, table in `flora_table.js`): vanilla bone meal on grass in the biome grew dandelions and
+poppies. The script cancels bone meal used on a grass block inside the biome and scatters 12 tries within 3 blocks: short
+grass 58, Elanor 14, Niphredil 12, golden fern 12, Athelas 4 (weights). Consumes one bone meal in survival.
+**Untested in game**: that cancelling the event stops the vanilla effect, and the `crop_growth_emitter` particle name.
+
+Second tuning (same day): Elanor zones (noise field A) and Niphredil zones (field B) are independent, so in one region
+you can see one without the other; that is what happened in the inner zone (Niphredil zones were also stricter than
+Elanor's original ones, and after Elanor was cut to 0.5 Niphredil at 0.35 was the rarer of the two by accident).
+Now Niphredil has a sparse baseline everywhere (1 chunk in 3, 6 tries) plus zones at threshold 0.25. Athelas: sparse baseline
+everywhere (1 chunk in 10, 4 tries, "rare but obtainable") plus zones at threshold 0.3 (1 in 2 chunks, 8 tries), the
+"mediocre inside" part. Both zone fields are noise, not depth (see above).
+
+Third tuning: golden fern cut to 1 chunk in 4 with 12 tries (was 1 in 2, 22). Added vanilla `minecraft:fern` (`plain_fern_patch_feature_rules`,
+1 chunk in 2, 14 tries) and extra `minecraft:short_grass` (`extra_grass_patch_feature_rules`, every chunk, 26 tries, on top of vanilla's
+own grass). Bone meal table: golden fern 12 -> 8, plain fern 6.
+
+Fourth tuning (in game: only Niphredil showed among the custom flowers). Lesson: `query.noise` thresholds are very steep. 0.3 gave "many"
+Elanor, 0.5 gave none, so a zone-only rule can vanish entirely. Every flower now has a sparse baseline everywhere plus noise zones:
+Elanor zone 0.4 (2 patches) + baseline 1 chunk in 3 (5 tries); Niphredil zone 0.35 (2 patches) + baseline 1 in 5 (5 tries, was 1 in 3);
+Athelas unchanged (zone 0.3, baseline 1 in 10). Do not go above ~0.4 on a zone rule without a baseline.
+
+Fifth tuning: flower frequency was good, patches too dense: Elanor patch 18 -> 9 tries, Niphredil patch 26 -> 11. More ground cover: plain fern every
+chunk with 22 tries, golden fern 1 chunk in 2 with 16, extra grass 60 tries. Athelas a little more: baseline 1 in 7, zones 2 in 3.
+
+Sixth tuning. Patches: Elanor and Niphredil zone patches are now 4 tries within +-2 (about 2-4 flowers, some tries fail), baselines 3 tries +-2.
+Wild decorative flowers are now the **two-block vanilla plants** (rose bush 5, peony 3, lilac 3) instead of poppy/cornflower/allium.
+A two-block plant is an `aggregate_feature` (`early_out: first_failure`): `wild_<plant>_lower_feature` (`upper_block_bit: false`,
+placement rules on) then `wild_<plant>_top_feature`, a one-iteration `scatter_feature` with `y: 1` that places the upper half
+(`upper_block_bit: true`, no placement rules). Patch size 4 tries +-2. **Untested in game**: the `y: 1` offset in a scatter, the state name
+`upper_block_bit` on rose_bush/peony/lilac (it is what vanilla `tall_grass` uses), and a lower half left alone if the upper cannot be placed.
+
+**Flicker** (user report: custom cutout plants, ferns and Mallorn leaves shimmer at high frequency; vanilla grass does not). The textures
+have strictly binary alpha, so it is not semi-transparent pixels. Hypothesis (later disproved as the sole cause: the user sees it in Fancy and Vibrant Visuals alike): the pack declares `pbr` but had no `.texture_set.json`, so
+these blocks got default material values, unlike vanilla plants which ship a MERS map (metalness 0, emissive 0, roughness ~170,
+subsurface ~105). Added `<name>.texture_set.json` + `<name>_mers.tga` (flat vanilla-like values) for elanor, niphredil, athelas, golden_fern,
+mallorn_blossom, mallorn_leaves, mallorn_sapling, mallorn_leaf_carpet. **Unconfirmed**: check in game; if it still flickers, try
+`alpha_test_single_sided` on the plants and note whether it happens with Vibrant Visuals off. Replacement art needs its own MERS map.
+
+Flicker follow-up: user confirmed it flickers in both Fancy and Vibrant Visuals, so the MERS maps are not the fix (kept, harmless). Open; the
+checklist is in `GRAPHICS_TASKS.md` ("Open problem: cutout flicker"). Suspects: thin cutout silhouettes plus mipmaps, transparent-pixel
+colour bleed, `alpha_test` mode.
+
+Bone meal on our own flora (`scripts/bonemeal.js`, tables in `flora_table.js`): on Elanor, Niphredil, golden fern or Athelas it grows more of the
+same nearby, like vanilla flowers (6 placement tries within 3 blocks; Athelas 2; a try needs grass with air above; works outside the biome too).
+On a leaf carpet or blossoms block it adds one segment; when the block is full (4) it starts a new one on nearby grass. Always consumes one
+bone meal in survival. **Untested in game.**
+
+Bone meal fix after the first test (user: a cover block spawned many covers, Athelas gave about 6 plants, Niphredil 8-10, although the code allows at
+most 2 Athelas and 6 others per use): the interact event fired several times per use, so every use acted several times. Now one use per player per
+10 ticks (`repeated()` in `bonemeal.js`). Spread tries are 4 for Elanor, Niphredil and golden fern, 2 for Athelas (a try can fail, so expect fewer).
+A full leaf carpet / blossoms block now drops one item on bone meal instead of spawning new covers (what vanilla leaf litter and pink petals do; from
+memory of the vanilla behaviour, not checked in game). The same repeated firing may affect the segment merge on click in `ground_cover.js`
+(item consumed twice?); not reported so far.

@@ -33,6 +33,24 @@
     },
     "lothlorien:mallorn_sapling": {
       "textures": "textures/blocks/mallorn_sapling"
+    },
+    "lothlorien:elanor": {
+      "textures": "textures/blocks/elanor"
+    },
+    "lothlorien:niphredil": {
+      "textures": "textures/blocks/niphredil"
+    },
+    "lothlorien:athelas": {
+      "textures": "textures/blocks/athelas"
+    },
+    "lothlorien:golden_fern": {
+      "textures": "textures/blocks/golden_fern"
+    },
+    "lothlorien:mallorn_blossom": {
+      "textures": "textures/blocks/mallorn_blossom"
+    },
+    "lothlorien:mallorn_leaf_carpet": {
+      "textures": "textures/blocks/mallorn_leaf_carpet"
     }
   }
 }

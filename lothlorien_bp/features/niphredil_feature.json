@@ -1,0 +1,16 @@
+{
+  "format_version": "1.21.40",
+  "minecraft:single_block_feature": {
+    "description": {
+      "identifier": "lothlorien:niphredil_feature"
+    },
+    "places_block": {
+      "name": "lothlorien:niphredil"
+    },
+    "enforce_survivability_rules": true,
+    "enforce_placement_rules": true,
+    "may_replace": [
+      "minecraft:air"
+    ]
+  }
+}

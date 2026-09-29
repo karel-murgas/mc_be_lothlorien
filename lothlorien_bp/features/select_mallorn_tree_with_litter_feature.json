@@ -1,0 +1,14 @@
+{
+  "format_version": "1.13.0",
+  "minecraft:aggregate_feature": {
+    "description": {
+      "identifier": "lothlorien:select_mallorn_tree_with_litter_feature"
+    },
+    "early_out": "first_failure",
+    "features": [
+      "lothlorien:select_mallorn_tree_feature",
+      "lothlorien:mallorn_leaf_carpet_scatter_feature",
+      "lothlorien:mallorn_blossom_scatter_feature"
+    ]
+  }
+}

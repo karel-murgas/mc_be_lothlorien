@@ -1,0 +1,22 @@
+{
+  "format_version": "1.13.0",
+  "minecraft:weighted_random_feature": {
+    "description": {
+      "identifier": "lothlorien:wild_flower_feature"
+    },
+    "features": [
+      [
+        "lothlorien:wild_rose_bush_feature",
+        5
+      ],
+      [
+        "lothlorien:wild_peony_feature",
+        3
+      ],
+      [
+        "lothlorien:wild_lilac_feature",
+        3
+      ]
+    ]
+  }
+}

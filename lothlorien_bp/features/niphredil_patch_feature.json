@@ -1,0 +1,32 @@
+{
+  "format_version": "1.13.0",
+  "minecraft:scatter_feature": {
+    "description": {
+      "identifier": "lothlorien:niphredil_patch_feature"
+    },
+    "iterations": 4,
+    "x": {
+      "distribution": "gaussian",
+      "extent": [
+        -2,
+        2
+      ]
+    },
+    "y": {
+      "distribution": "triangle",
+      "extent": [
+        -2,
+        2
+      ]
+    },
+    "z": {
+      "distribution": "gaussian",
+      "extent": [
+        -2,
+        2
+      ]
+    },
+    "coordinate_eval_order": "zyx",
+    "places_feature": "lothlorien:niphredil_feature"
+  }
+}

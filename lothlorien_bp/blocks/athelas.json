@@ -1,0 +1,66 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:block": {
+    "description": {
+      "identifier": "lothlorien:athelas"
+    },
+    "components": {
+      "minecraft:collision_box": false,
+      "minecraft:selection_box": {
+        "origin": [
+          -6,
+          0,
+          -6
+        ],
+        "size": [
+          12,
+          12,
+          12
+        ]
+      },
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 0
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 0
+      },
+      "minecraft:flammable": {
+        "catch_chance_modifier": 60,
+        "destroy_chance_modifier": 100
+      },
+      "minecraft:sound": {
+        "sound": "grass"
+      },
+      "minecraft:map_color": "#9fd47a",
+      "minecraft:geometry": {
+        "identifier": "minecraft:geometry.cross"
+      },
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "lothlorien:athelas",
+          "render_method": "alpha_test",
+          "ambient_occlusion": 0.0
+        }
+      },
+      "minecraft:placement_filter": {
+        "conditions": [
+          {
+            "allowed_faces": [
+              "up"
+            ],
+            "block_filter": [
+              "minecraft:grass_block",
+              "minecraft:dirt",
+              "minecraft:coarse_dirt",
+              "minecraft:podzol",
+              "minecraft:dirt_with_roots",
+              "minecraft:moss_block",
+              "minecraft:mud",
+              "minecraft:farmland"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

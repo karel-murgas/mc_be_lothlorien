@@ -1,0 +1,32 @@
+{
+  "format_version": "1.13.0",
+  "minecraft:scatter_feature": {
+    "description": {
+      "identifier": "lothlorien:plain_fern_patch_feature"
+    },
+    "iterations": 22,
+    "x": {
+      "distribution": "gaussian",
+      "extent": [
+        -5,
+        5
+      ]
+    },
+    "y": {
+      "distribution": "triangle",
+      "extent": [
+        -2,
+        2
+      ]
+    },
+    "z": {
+      "distribution": "gaussian",
+      "extent": [
+        -5,
+        5
+      ]
+    },
+    "coordinate_eval_order": "zyx",
+    "places_feature": "lothlorien:plain_fern_feature"
+  }
+}
