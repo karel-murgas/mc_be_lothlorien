@@ -8,8 +8,9 @@
       "crafting_table"
     ],
     "pattern": [
-      "EN",
-      "SH"
+      "ENE",
+      "SHS",
+      "NSL"
     ],
     "key": {
       "E": {
@@ -23,6 +24,9 @@
       },
       "H": {
         "item": "minecraft:honey_bottle"
+      },
+      "L": {
+        "item": "minecraft:leather"
       }
     },
     "unlock": [
