@@ -195,4 +195,4 @@ Leaves come out with the default state `persistent=false`, so they decay like gr
 Test without a new world: `/place feature lothlorien:select_mallorn_tree_feature ~ ~ ~` (or one of the three
 directly) on grass. **Untested in game:** custom blocks inside `tree_feature`, log orientation (default state),
 density (5/chunk is a guess), mega tree size.
-
+Density check: `/scriptevent lothlorien:treecount [radius]` reports trees per chunk of biome and canopy cover around you (loaded chunks only; stand inside the biome in a freshly generated area).
