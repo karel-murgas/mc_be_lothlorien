@@ -1,0 +1,21 @@
+{
+  "format_version": "1.21.100",
+  "minecraft:structure_set": {
+    "description": {
+      "identifier": "lothlorien:giant_mallorn"
+    },
+    "placement": {
+      "type": "minecraft:random_spread",
+      "salt": 518204731,
+      "separation": 3,
+      "spacing": 6,
+      "spread_type": "linear"
+    },
+    "structures": [
+      {
+        "structure": "lothlorien:giant_mallorn",
+        "weight": 1
+      }
+    ]
+  }
+}

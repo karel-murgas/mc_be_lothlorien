@@ -1,0 +1,24 @@
+{
+  "format_version": "1.21.100",
+  "minecraft:template_pool": {
+    "description": {
+      "identifier": "lothlorien:giant_mallorn"
+    },
+    "elements": [
+      {
+        "element": {
+          "element_type": "minecraft:single_pool_element",
+          "location": "lothlorien/mallorn_woven_05"
+        },
+        "weight": 1
+      },
+      {
+        "element": {
+          "element_type": "minecraft:single_pool_element",
+          "location": "lothlorien/mallorn_woven_07"
+        },
+        "weight": 1
+      }
+    ]
+  }
+}

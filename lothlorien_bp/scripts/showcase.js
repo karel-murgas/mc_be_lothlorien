@@ -1,11 +1,12 @@
-import { world, system, BlockPermutation } from "@minecraft/server";
+import { world, system, BlockPermutation, StructureRotation } from "@minecraft/server";
 
 // Phase 5 curation instrument. `/scriptevent lothlorien:showcase [variant]` lays out the giant Mallorn
 // structures (lothlorien:mallorn_<variant>_NN, made by tools/build_structures.mjs; no variant = all of
 // them, one block of rows per variant) on a grid of 4 columns east and south of the player, with a sign
 // in front of each ladder. Trees in unloaded chunks are retried every 2 s for 3 minutes, so fly along the
 // grid and they appear. `/scriptevent lothlorien:showcase woven 3` places only woven 3, next to the player
-// (a bare number means flet).
+// (a bare number means flet). A third word 90, 180 or 270 rotates it, to check how rotation treats the
+// custom log and fence states (jigsaw worldgen may rotate pieces).
 // Structure layout (keep in step with tools/build_structures.mjs): trunk NW cell at x/z TRUNK_AT, the
 // first block above the ground at y ROOT_DEPTH.
 const TRUNK_AT = 18;
@@ -27,11 +28,11 @@ function groundAbove(dimension, x, z) {
 
 // Places variant v number n with its trunk's north-west cell at (x, z) on the ground; false if the area
 // is not loaded.
-function placeTree(dimension, v, n, x, z) {
+function placeTree(dimension, v, n, x, z, rotation = StructureRotation.None) {
   try {
     const y = groundAbove(dimension, x + 1, z + 1);
     if (y === undefined) return false;
-    world.structureManager.place(structureId(v, n), dimension, { x: x - TRUNK_AT, y: y - ROOT_DEPTH, z: z - TRUNK_AT });
+    world.structureManager.place(structureId(v, n), dimension, { x: x - TRUNK_AT, y: y - ROOT_DEPTH, z: z - TRUNK_AT }, { rotation });
     const sign = dimension.getBlock({ x, y, z: z - 4 });
     sign.setPermutation(BlockPermutation.resolve("minecraft:standing_sign", { ground_sign_direction: 8 }));
     sign.getComponent("minecraft:sign")?.setText(`Mallorn\n${v} ${n}`);
@@ -48,10 +49,11 @@ export function handleShowcaseEvent(event, player) {
   const words = event.message.trim().split(/\s+/).filter(Boolean);
   const named = VARIANTS.includes(words[0]) ? words.shift() : undefined;
   const only = parseInt(words[0], 10);
+  const rotation = { 90: StructureRotation.Rotate90, 180: StructureRotation.Rotate180, 270: StructureRotation.Rotate270 }[words[1]] ?? StructureRotation.None;
   if (only) {
     const v = named ?? "flet";
-    const ok = world.structureManager.get(structureId(v, only)) && placeTree(dimension, v, only, px + 24, pz + 24);
-    player.sendMessage(`[lothlorien] showcase: ${v} ${only} ${ok ? "placed 24 blocks SE" : "not placed (missing or unloaded)"}`);
+    const ok = world.structureManager.get(structureId(v, only)) && placeTree(dimension, v, only, px + 24, pz + 24, rotation);
+    player.sendMessage(`[lothlorien] showcase: ${v} ${only} ${rotation} ${ok ? "placed 24 blocks SE" : "not placed (missing or unloaded)"}`);
     return true;
   }
   const pending = [];

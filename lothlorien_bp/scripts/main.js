@@ -7,7 +7,6 @@ import "./lembas.js";
 import "./athelas.js";
 import { handleTreeScriptEvent } from "./trees.js";
 import { handleShowcaseEvent } from "./showcase.js";
-import "./giants.js";
 import { leafUndersideY } from "./leaf_fall.js";
 import { DEPTH_NAMES, estimateDepth, probeCount } from "./depth.js";
 

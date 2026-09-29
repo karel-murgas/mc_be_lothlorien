@@ -259,18 +259,24 @@ Density check: `/scriptevent lothlorien:treecount [radius]` reports trees per ch
   about 700 KB each) and `scripts/giant_trees.js` (the CHOSEN names). Rerunning a variant replaces that
   variant only.
   The format and the traps are in `.claude/skills/bedrock-modding/references/09-structures.md`.
-- **Worldgen:** `feature_rules/mallorn_giant_feature_rules.json`, `before_surface_pass`, runs on chunks
-  where chunkX and chunkZ are both multiples of 3, with chance 1/3 (about one giant per 27 chunks).
-  - **A 40-wide `structure_template_feature` was cut badly at chunk borders** (in game, 2026-09-29): the
-    parts in neighbouring chunks were missing.
-  - So now the feature (`features/mallorn_giant_feature.json`) places only one block,
-    `lothlorien:giant_mallorn_seed` (looks like a Mallorn log), at the trunk's NW cell, on the heightmap, at
-    [2,10] inside the chunk. Its `minecraft:tick` (every 1-2 s) runs `scripts/giants.js`. Once the chunks
-    under the whole 40x40 footprint are loaded, that script places a random tree from `GIANT_TREES` with
-    `structureManager.place`, and the trunk overwrites the seed.
-  - Trees therefore appear when a player gets within simulation distance, not at chunk generation. Seeds
-    farther away sit as a lone log. Two giants never overlap: seeds are at least 40 apart.
-  - Written 2026-09-30, not yet seen in game.
+- **Worldgen: jigsaw structure `lothlorien:giant_mallorn`** (stable since 1.21.120; no experiment needed).
+  - `worldgen/structures/giant_mallorn.json`: biome tag `lothlorien`, step `surface_structures`, no terrain
+    adaptation. `max_depth` is 0 (one piece, no jigsaw blocks). `start_height` is -5 from `world_surface`, so
+    the roots go into the ground.
+  - `worldgen/template_pools/giant_mallorn.json`: generated from CHOSEN.
+  - `worldgen/structure_sets/giant_mallorn.json`: random_spread, spacing 6 chunks, separation 3, so there is
+    at most one giant per 6x6 chunks and giants are at least 48 blocks apart, which is more than the
+    40-wide footprint.
+  - `/locate structure lothlorien:giant_mallorn` and `/place structure lothlorien:giant_mallorn` work.
+- **History:**
+  - 2026-09-29: a 40-wide `structure_template_feature` was cut badly at chunk borders.
+  - 2026-09-30: a script-grown marker (`structureManager.place` once the footprint was loaded) replaced it.
+    It was dropped the same day, unseen, because trees appeared only within simulation distance.
+- **Written 2026-09-30, not yet seen in game.** Open questions:
+  - Is the trunk base exactly at ground level? The surface heightmap may be off by one.
+  - Jigsaw may rotate the piece. Do custom `minecraft:block_face` logs and fence connections rotate
+    correctly? Test with `/scriptevent lothlorien:showcase woven 7 90`. If branch logs point the wrong way,
+    use `mallorn_wood` (the same on every side) for branches.
 - **Curation:** `/scriptevent lothlorien:showcase [variant]` lays out candidates on a grid (4 per row, 48
   apart, variants in separate rows) south-east of the player, with a sign such as "woven 3" in front of
   each ladder. Trees in unloaded chunks are retried for 3 minutes. `/scriptevent lothlorien:showcase woven 3`

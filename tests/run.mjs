@@ -8,7 +8,6 @@ import { estimateDepth, probeCount, ringOffsets, DEPTH_RADII } from "../lothlori
 import { makeRandom } from "../lothlorien_bp/scripts/mallorn_tree.js";
 import { buildFletMallorn, LADDER, LEAF_KEEP, ROOT_DEPTH, B } from "../tools/flet_mallorn.mjs";
 import { SIZE, SIZE_Y, TRUNK_AT, CHOSEN } from "../tools/build_structures.mjs";
-import { GIANT_TREES } from "../lothlorien_bp/scripts/giant_trees.js";
 import { existsSync } from "node:fs";
 
 const L = "lothlorien:lothlorien", RIVER = "minecraft:river", FOREST = "minecraft:forest";
@@ -188,7 +187,13 @@ test("flet: tree fits the structure box and drops few leaves", () => {
   }
 });
 
-test("giants: the trees worldgen grows match CHOSEN and ship as structure files", () => {
+test("giants: the jigsaw pool matches CHOSEN, every piece ships, the structure set uses it", () => {
+  const pool = bp("worldgen/template_pools/giant_mallorn.json")["minecraft:template_pool"];
+  const GIANT_TREES = pool.elements.map((e) => e.element.location.replace("lothlorien/", ""));
+  assert.equal(bp("worldgen/structures/giant_mallorn.json")["minecraft:jigsaw"].start_pool, pool.description.identifier);
+  assert.equal(bp("worldgen/structures/giant_mallorn.json")["minecraft:jigsaw"].start_height.value.absolute, -ROOT_DEPTH);
+  const set = bp("worldgen/structure_sets/giant_mallorn.json")["minecraft:structure_set"];
+  assert.ok((set.placement.separation * 16) >= SIZE, "neighbouring giants cannot overlap");
   assert.deepEqual(GIANT_TREES, CHOSEN.map(([v, n]) => `mallorn_${v}_${String(n).padStart(2, "0")}`));
   for (const name of GIANT_TREES) {
     assert.ok(existsSync(new URL(`../lothlorien_bp/structures/lothlorien/${name}.mcstructure`, import.meta.url)), name);
