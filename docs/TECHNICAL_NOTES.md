@@ -230,7 +230,13 @@ directly) on grass. **Untested in game:** custom blocks inside `tree_feature`, l
 density (5/chunk is a guess), mega tree size.
 Density check: `/scriptevent lothlorien:treecount [radius]` reports trees per chunk of biome and canopy cover around you (loaded chunks only; stand inside the biome in a freshly generated area).
 
-## Phase 5 - giant flet Mallorns (structures; first look in game 2026-09-29: liked, flet 7 the favourite; chest loot works)
+## Phase 5 - giant Mallorns (DONE 2026-09-30, accepted in game by the user)
+
+Shipped: two lookout trees (woven 5 and 7: flet, ladder, loot chest) and four plain giants (plain 2, 3, 6 and
+8), generated as one jigsaw structure (`lothlorien:giant_mallorn`) in the biome, about 1 in 4 with a flet.
+Accepted in game but not measured separately: whether the trunk anchor keeps trunks at least 48 apart, and
+whether any jigsaw block is left at a trunk base. Recheck these if two giants ever look too close.
+The history below is kept because it records the traps.
 
 - **What:** 4x4 trunk 30-38 high (tip narrows to 2x2), sunk 5 blocks into the ground with buttress roots.
   A plank platform (radius 5.5-7, fence rim) sits on 6-8 level branches 9-12 below the top. A vanilla
