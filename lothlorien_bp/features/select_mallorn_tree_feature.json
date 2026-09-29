@@ -1,0 +1,22 @@
+{
+  "format_version": "1.13.0",
+  "minecraft:weighted_random_feature": {
+    "description": {
+      "identifier": "lothlorien:select_mallorn_tree_feature"
+    },
+    "features": [
+      [
+        "lothlorien:mallorn_simple_tree_feature",
+        25
+      ],
+      [
+        "lothlorien:mallorn_fancy_tree_feature",
+        60
+      ],
+      [
+        "lothlorien:mallorn_mega_tree_feature",
+        15
+      ]
+    ]
+  }
+}

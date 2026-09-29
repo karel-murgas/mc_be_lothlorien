@@ -183,3 +183,16 @@ bone meal, leaf decay, instruments), `blocks/mallorn_sapling.json`, `items/mallo
   `crop_growth_emitter` particle name, bone meal event cancel, sapling `placement_filter` with the
   block-item route. Plain-Node generator stats are verified.
 
+## Phase 4b — natural Mallorns (native worldgen, no script)
+
+`feature_rules/mallorn_trees_feature_rules.json` (surface_pass, tag `lothlorien`, 5 tries per chunk) places
+`select_mallorn_tree_feature` (weighted: 25 simple, 60 fancy, 15 mega/2x2). The three are vanilla
+`minecraft:tree_feature`s with our log and leaf blocks: `mallorn_simple_tree_feature` (trunk+canopy, 6-10),
+`mallorn_fancy_tree_feature` (fancy_trunk with branches, ~7-16) and `mallorn_mega_tree_feature` (2x2 trunk,
+branch canopies). Shapes are vanilla's; they lack our platform branches and archetypes, which stay for
+sapling-grown trees. The `forest` tag was removed from the biome so vanilla forest trees stop generating.
+Leaves come out with the default state `persistent=false`, so they decay like grown ones.
+Test without a new world: `/place feature lothlorien:select_mallorn_tree_feature ~ ~ ~` (or one of the three
+directly) on grass. **Untested in game:** custom blocks inside `tree_feature`, log orientation (default state),
+density (5/chunk is a guess), mega tree size.
+
