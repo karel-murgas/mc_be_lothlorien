@@ -23,7 +23,11 @@ Files:
   a nested "heart" biome is not possible (see design KB §3).
 - `amount` (0–1] ≈ fraction of target area replaced; `noise_frequency_scale` (0–100]:
   higher = smaller, more frequent patches. Tuning log: `0.35`/`10` gave a mid-sized, long narrow
-  region; then `0.5`/`4` plus old-growth birch (`birch_forest_mutated`); now `0.45`/`1`.
+  region; then `0.5`/`4` plus old-growth birch (`birch_forest_mutated`); then `0.45`/`1`, which in game
+  (2026-09-29) still cut a `minecraft:forest` at a taiga edge into a few-tree strip beside a large
+  unconverted forest. Now `0.45`/`0.25` plus `roofed_forest` (dark forest) in the **same** entry, so
+  one noise field covers forest + dark forest and adjacent ones merge. **Untested in game**: whether
+  0.25 is accepted (if not, the biome is dropped and `/locate` fails) and the resulting region sizes.
   Goal (user): a forest is converted **whole or not at all**, and neighbouring forest types
   join into one region. JSON cannot select per forest; the approximation is noise so slow
   that it is nearly constant across one forest, so `amount` decides roughly what share of
@@ -147,7 +151,7 @@ unlock on that item; the rest on planks; wood/stripped wood on log/stripped log)
 - Left out (signs, shelf, boats, ...): see `NOT_IMPLEMENTED.md` for reasons and retry notes.
 - **Untested in game** (no game access while writing): everything above. Check first: door swing/hinge, gate open pose, slab merge, log rotation, redstone opening.
 
-## Phase 4 � small Mallorn and the acorn loop
+## Phase 4 — small Mallorn and the acorn loop
 
 Files: `scripts/mallorn_tree.js` (pure generator, no Minecraft imports), `scripts/trees.js` (growth,
 bone meal, leaf decay, instruments), `blocks/mallorn_sapling.json`, `items/mallorn_acorn.json`.
@@ -186,7 +190,7 @@ bone meal, leaf decay, instruments), `blocks/mallorn_sapling.json`, `items/mallo
   `crop_growth_emitter` particle name, bone meal event cancel, sapling `placement_filter` with the
   block-item route. Plain-Node generator stats are verified.
 
-## Phase 4b � natural Mallorns (native worldgen, no script)
+## Phase 4b — natural Mallorns (native worldgen, no script)
 
 `feature_rules/mallorn_trees_feature_rules.json` (surface_pass, tag `lothlorien`, 5 tries per chunk) places
 `select_mallorn_tree_feature` (weighted: 25 simple, 60 fancy, 15 mega/2x2). The three are vanilla
