@@ -20,6 +20,9 @@
       }
     },
     "components": {
+      "minecraft:support": {
+        "shape": "fence"
+      },
       "minecraft:collision_box": false,
       "minecraft:selection_box": {
         "origin": [
