@@ -43,7 +43,10 @@ Files:
   (dropped `birch_forest`, `dappled_forest`) so the forest outline bounds regions again.
   Expect some forests to be cut by blob edges again; that is the price of a bounded size.
   `0.3`/`2` in game over several seeds: much better, bounded regions (one long narrow one, due to
-  that forest's shape); most too small for a heart. River-transparent depth liked. Now `0.3`/`1.25`. **Untested in game**: whether
+  that forest's shape); most too small for a heart. River-transparent depth liked. Now `0.3`/`1.25`.
+  `0.3`/`1.25`: rarer, not bigger (2 small regions after minutes of flying). Once blobs exceed the
+  forests, size is set by the target union and lower frequency only spaces regions out. Now
+  `0.4`/`1.25` with `birch_forest` back (bigger union, more regions). **Untested in game**: whether
   0.25 is accepted (if not, the biome is dropped and `/locate` fails) and the resulting region sizes.
   Goal (user): a forest is converted **whole or not at all**, and neighbouring forest types
   join into one region. JSON cannot select per forest; the approximation is noise so slow

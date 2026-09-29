@@ -25,8 +25,8 @@
         "replacements": [
           {
             "dimension": "minecraft:overworld",
-            "targets": [ "minecraft:forest", "minecraft:birch_forest_mutated", "minecraft:flower_forest" ],
-            "amount": 0.3,
+            "targets": [ "minecraft:forest", "minecraft:birch_forest", "minecraft:birch_forest_mutated", "minecraft:flower_forest" ],
+            "amount": 0.4,
             "noise_frequency_scale": 1.25
           }
         ]
