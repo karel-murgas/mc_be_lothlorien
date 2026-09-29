@@ -1,0 +1,25 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:item": {
+    "description": {
+      "identifier": "lothlorien:lembas_wrapped",
+      "menu_category": {
+        "category": "items",
+        "group": "minecraft:itemGroup.name.miscFood"
+      }
+    },
+    "components": {
+      "minecraft:icon": "lothlorien:lembas_wrapped",
+      "minecraft:use_animation": "eat",
+      "minecraft:use_modifiers": {
+        "use_duration": 1.0,
+        "movement_modifier": 0.5
+      },
+      "minecraft:food": {
+        "nutrition": 8,
+        "saturation_modifier": 1.2
+      },
+      "lothlorien:lembas": {}
+    }
+  }
+}

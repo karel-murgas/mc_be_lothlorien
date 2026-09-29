@@ -2,6 +2,8 @@ import { world, system, BiomeTypes } from "@minecraft/server";
 import "./blocks.js";
 import "./ground_cover.js";
 import "./bonemeal.js";
+import "./crop.js";
+import "./lembas.js";
 import { handleTreeScriptEvent } from "./trees.js";
 import { leafUndersideY } from "./leaf_fall.js";
 import { DEPTH_NAMES, estimateDepth, probeCount } from "./depth.js";

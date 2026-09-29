@@ -1,5 +1,7 @@
 import { world, system, EquipmentSlot, GameMode, ItemStack } from "@minecraft/server";
 import { BONEMEAL_TABLE, COVERS, MAX_AMOUNT, SPREAD_TRIES, pickWeighted } from "./flora_table.js";
+import { CROP, growCrop, isMature } from "./crop.js";
+import { repeatedUse } from "./use_guard.js";
 
 // Bone meal in Lothlorien (the vanilla action is cancelled and replaced):
 //  - on a grass block inside the biome: a scatter of ~12 tries within 3 blocks (grass, our flora), not vanilla flowers;
@@ -54,17 +56,6 @@ function growCover(block) {
   block.dimension.spawnItem(new ItemStack(block.typeId, 1), block.center());
 }
 
-// The interact event can fire several times for one use (held button, both hands). One bone meal must act once.
-const DEBOUNCE_TICKS = 10;
-const lastUse = new Map();
-function repeated(player) {
-  const now = system.currentTick;
-  const last = lastUse.get(player.id);
-  if (last !== undefined && now - last < DEBOUNCE_TICKS) return true;
-  lastUse.set(player.id, now);
-  return false;
-}
-
 world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   const { block, player, itemStack } = event;
   if (itemStack?.typeId !== "minecraft:bone_meal") return;
@@ -76,11 +67,14 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
     act = () => scatter(block.below() ?? block, SPREAD_TRIES[id], () => id);
   } else if (COVERS.includes(id)) {
     act = () => growCover(block);
+  } else if (id === CROP) {
+    if (isMature(block)) return; // nothing to grow: keep the bone meal
+    act = () => growCrop(block);
   } else {
     return;
   }
   event.cancel = true;
-  if (repeated(player)) return;
+  if (repeatedUse(player, "bonemeal")) return;
   system.run(() => {
     act();
     effects(block);

@@ -1,0 +1,32 @@
+{
+  "format_version": "1.20.30",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "lothlorien:lembas_dough"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      "GG",
+      "GS"
+    ],
+    "key": {
+      "G": {
+        "item": "lothlorien:western_corn_grain"
+      },
+      "S": {
+        "item": "minecraft:sugar"
+      }
+    },
+    "unlock": [
+      {
+        "item": "lothlorien:western_corn_grain"
+      }
+    ],
+    "result": {
+      "item": "lothlorien:lembas_dough",
+      "count": 2
+    }
+  }
+}

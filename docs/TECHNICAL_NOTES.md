@@ -338,3 +338,36 @@ most 2 Athelas and 6 others per use): the interact event fired several times per
 A full leaf carpet / blossoms block now drops one item on bone meal instead of spawning new covers (what vanilla leaf litter and pink petals do; from
 memory of the vanilla behaviour, not checked in game). The same repeated firing may affect the segment merge on click in `ground_cover.js`
 (item consumed twice?); not reported so far.
+
+## Phase 7 - Western Corn and Lembas
+
+Files: `blocks/western_corn.json`, `scripts/crop.js` (component + bone meal helpers), `scripts/crop_rules.js` (pure growth numbers,
+tested), `scripts/lembas.js`, items `western_corn_seeds`, `western_corn_grain`, `lembas_dough`, `lembas_cake`, `lembas_wrapped`,
+recipes `lembas_dough`, `lembas_wrapped`, `furnace_/smoker_lembas_cake`, loot tables `western_corn(.json|_mature.json)`, features
+`western_corn_*` + two feature rules. All art is placeholder (`GRAPHICS_TASKS.md` step 7).
+
+**The loop:** find wild corn in Lothlorien -> harvest (mature: 1-2 grain + 1-3 seeds; young: 1 seed) -> plant seeds on farmland
+anywhere -> grow -> craft **dough** (2x2 shaped: 3 grain + 1 sugar -> 2 dough) -> smelt in furnace or smoker -> **Lembas cake**
+(6 nutrition, "good" saturation, 1.6 s, a bit better than bread) -> craft with one Mallorn leaves block (leaf above cake) ->
+**wrapped Lembas** (8 nutrition, "supernatural" saturation = 19.2, eaten in 1.0 s, lifts the Hunger effect through the item
+component `lothlorien:lembas`). Numbers are a first guess: the plan (Phase 7 test list) asks for a balance pass.
+
+- **Crop block:** state `lothlorien:growth` 0-7, `minecraft:geometry.cross`, stage texture chosen by 7 permutations, mature
+  loot table chosen by a permutation that overrides `minecraft:loot`. Seeds place only on farmland (`block_placer.use_on`);
+  the block's own `placement_filter` also allows grass/dirt/podzol so that **worldgen** can stand mature wild corn on grass. Random-tick growth
+  (`lothlorien:crop`, `growChance` in `crop_rules.js`) happens only when the soil is farmland: 1/3 per tick on wet farmland, 1/5 dry;
+  x0.6 at light 6-8, x0.3 at light 4-5, none below 4 (wheat stops below 9, so corn also grows slowly at night and in dim glades).
+  Random ticks reach a block about once a minute, so ripening takes roughly 20-35 minutes. Bone meal (`bonemeal.js`) adds 2-5 stages.
+- **Worldgen (native JSON):** `western_corn_patch_feature_rules` (own noise field, threshold 0.4, 1 in 2 chunks in a zone, 7 tries +-2) and a very
+  sparse baseline `western_corn_sparse_feature_rules` (1 chunk in 14, 3 tries +-1) so it is always findable. Both place growth 7. "Rare clearings /
+  deeper" cannot be expressed in JSON (no depth in worldgen); the noise zones approximate it. Plan for Phase 19: tune density; the design
+  says the mandatory item needs a non-trader fallback source, which this is.
+**Game-tested 2026-09-29 (user, 1.26.52): phase done.** Wild corn found in Lothlorien; the crop grows with bone meal; dough recipe and baking work; Lembas cake and wrapped Lembas can be eaten. Two Content Log fixes were needed: `saturation_modifier` must be a number (named values are format 1.10 only), and food needs `minecraft:use_animation: "eat"` (else it could not be eaten). **Still not observed** (the list below is otherwise superseded): natural growth speed and low-light behaviour on farmland, wet vs dry farmland, mature vs young harvest drops (permutation loot override), the Hunger lift of wrapped Lembas, and hunger/saturation balance (Phase 20).
+- **Was untested when written, check first:** (1) seeds plant on farmland and only there; (2) the stage textures change as it
+  grows (permutation material_instances); (3) breaking a ripe crop gives grain and seeds, a young one only a seed (a `minecraft:loot` override in a
+  permutation is unverified; fallback if not honoured: mature drops would be seeds only, so move the drop into a `onPlayerBreak` script);
+  (4) wild corn appears in Lothlorien in small clumps on grass; (5) random ticks grow the crop (also needs no `minecraft:random_ticking` component, like the
+  sapling: if it never grows, add that first); (6) `moisturized_amount` is readable and wet farmland is faster; (7) recipes appear in the recipe book and
+  the furnace/smoker accept dough; (8) `minecraft:use_modifiers` use_duration 1.0 for wrapped Lembas and `onConsume` firing; (9) creative groups
+  `itemGroup.name.seed`, `.crop`, `.miscFood`.
+- **Not done on purpose:** trampled farmland leaving the crop on dirt (it survives on dirt but stops growing); water-flow breaking; fortune.

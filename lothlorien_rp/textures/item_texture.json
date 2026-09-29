@@ -25,6 +25,21 @@
     },
     "lothlorien:mallorn_leaf_carpet": {
       "textures": "textures/items/mallorn_leaf_carpet"
+    },
+    "lothlorien:western_corn_seeds": {
+      "textures": "textures/items/western_corn_seeds"
+    },
+    "lothlorien:western_corn_grain": {
+      "textures": "textures/items/western_corn_grain"
+    },
+    "lothlorien:lembas_dough": {
+      "textures": "textures/items/lembas_dough"
+    },
+    "lothlorien:lembas_cake": {
+      "textures": "textures/items/lembas_cake"
+    },
+    "lothlorien:lembas_wrapped": {
+      "textures": "textures/items/lembas_wrapped"
     }
   }
 }

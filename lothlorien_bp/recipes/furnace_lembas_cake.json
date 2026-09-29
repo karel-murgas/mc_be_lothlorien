@@ -1,0 +1,13 @@
+{
+  "format_version": "1.12",
+  "minecraft:recipe_furnace": {
+    "description": {
+      "identifier": "lothlorien:furnace_lembas_cake"
+    },
+    "tags": [
+      "furnace"
+    ],
+    "input": "lothlorien:lembas_dough",
+    "output": "lothlorien:lembas_cake"
+  }
+}

@@ -1,5 +1,6 @@
 import { world, system, BlockPermutation, GameMode, EquipmentSlot } from "@minecraft/server";
 import { makeRandom, buildSmallMallorn, buildBigMallorn } from "./mallorn_tree.js";
+import { repeatedUse } from "./use_guard.js";
 
 // Phase 4: Mallorn sapling growth, bone meal, leaf decay, and the tree balance instruments.
 //   lothlorien:sapling  random tick: stage 0 -> 1 -> grows a small Mallorn (needs light and room);
@@ -179,6 +180,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   const { location, dimension } = block;
   // read-only in the before event: cancel, then do the work next tick
   event.cancel = true;
+  if (repeatedUse(player, "sapling")) return;
   system.run(() => {
     const b = dimension.getBlock(location);
     if (b?.typeId !== SAPLING) return;

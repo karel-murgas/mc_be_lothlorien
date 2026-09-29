@@ -1,0 +1,21 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:item": {
+    "description": {
+      "identifier": "lothlorien:western_corn_seeds",
+      "menu_category": {
+        "category": "nature",
+        "group": "minecraft:itemGroup.name.seed"
+      }
+    },
+    "components": {
+      "minecraft:icon": "lothlorien:western_corn_seeds",
+      "minecraft:block_placer": {
+        "block": "lothlorien:western_corn",
+        "use_on": [
+          "minecraft:farmland"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "format_version": "1.20.30",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "lothlorien:lembas_wrapped"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      "L",
+      "C"
+    ],
+    "key": {
+      "L": {
+        "item": "lothlorien:mallorn_leaves"
+      },
+      "C": {
+        "item": "lothlorien:lembas_cake"
+      }
+    },
+    "unlock": [
+      {
+        "item": "lothlorien:lembas_cake"
+      }
+    ],
+    "result": {
+      "item": "lothlorien:lembas_wrapped",
+      "count": 1
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:item": {
+    "description": {
+      "identifier": "lothlorien:lembas_dough",
+      "menu_category": {
+        "category": "items",
+        "group": "minecraft:itemGroup.name.crop"
+      }
+    },
+    "components": {
+      "minecraft:icon": "lothlorien:lembas_dough"
+    }
+  }
+}

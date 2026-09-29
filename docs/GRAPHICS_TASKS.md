@@ -128,3 +128,34 @@ Things to check, cheapest first:
    the vanilla atlas settings.
 3. **Code side (Claude):** `render_method` `alpha_test` vs `alpha_test_single_sided` on the plants, and whether the leaves show it too
    with a vanilla leaf texture swapped in (isolates art from block definition).
+
+---
+
+## Step 7 - Western Corn and Lembas (Phase 7)
+
+All files are **placeholders** (vanilla wheat stages, seeds, wheat and bread, tinted gold; dough and wrapped Lembas hand-drawn
+in a few pixels). Replace each in place (same name); no JSON changes needed.
+
+| File | Used by | Placeholder |
+|---|---|---|
+| `textures/blocks/western_corn_stage_0.png` ... `_7.png` (8 files) | crop block, one per growth stage (0 seedling, 7 ripe) | vanilla `wheat_stage_N`, tinted gold |
+| `textures/items/western_corn_seeds.png` | seeds (plant on farmland) | vanilla wheat seeds |
+| `textures/items/western_corn_grain.png` | harvested grain | vanilla wheat, tinted |
+| `textures/items/lembas_dough.png` | dough (grain + sugar) | drawn blob |
+| `textures/items/lembas_cake.png` | baked, unwrapped cake | vanilla bread, tinted |
+| `textures/items/lembas_wrapped.png` | wrapped Lembas (the final food) | cake with a gold leaf stripe |
+
+### Requirements (Claude adds to this list)
+
+- **The crop is `minecraft:geometry.cross`** (two crossed planes, `alpha_test`), not the four-plane hash of vanilla wheat, so a
+  stage texture is drawn on a full 16x16 tile and seen from both diagonals. Cutout only (alpha 0 or 255). If a real four-plane
+  crop geometry is wanted, tell Claude: it needs a `.geo.json` (Blockbench) and one line in the block file.
+- **Ripe (stage 7) must be unmistakable from a distance**: the crop is meant to be found in wild clearings, where every plant
+  is stage 7. Make the ripe stage clearly golden/eared and the young stages green, so a farm reads as growing.
+- **Western Corn must not look like wheat** at a glance (design: a special crop; also do not reuse wheat's colours exactly).
+- Stages 0-7 are shown as a plant that fills the tile more with each stage; the tile bottom edge must sit on the soil line.
+- **PBR maps:** each stage has a placeholder `.texture_set.json` and `_mers.tga` (flat vanilla-plant values), like step 6.
+  Keep the set files when replacing a texture.
+- Item icons are 2D 16x16, no baked lighting. Lembas cake and wrapped Lembas must be **distinct silhouettes** (the wrapped one
+  is the leaf-wrapped, lighter, "elven" version) and the wrapped one is the one players eat most, so make it the nicest.
+- The cutout flicker problem from step 6 applies to the crop textures too; check the same list.

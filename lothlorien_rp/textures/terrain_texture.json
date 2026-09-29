@@ -51,6 +51,30 @@
     },
     "lothlorien:mallorn_leaf_carpet": {
       "textures": "textures/blocks/mallorn_leaf_carpet"
+    },
+    "lothlorien:western_corn_stage_0": {
+      "textures": "textures/blocks/western_corn_stage_0"
+    },
+    "lothlorien:western_corn_stage_1": {
+      "textures": "textures/blocks/western_corn_stage_1"
+    },
+    "lothlorien:western_corn_stage_2": {
+      "textures": "textures/blocks/western_corn_stage_2"
+    },
+    "lothlorien:western_corn_stage_3": {
+      "textures": "textures/blocks/western_corn_stage_3"
+    },
+    "lothlorien:western_corn_stage_4": {
+      "textures": "textures/blocks/western_corn_stage_4"
+    },
+    "lothlorien:western_corn_stage_5": {
+      "textures": "textures/blocks/western_corn_stage_5"
+    },
+    "lothlorien:western_corn_stage_6": {
+      "textures": "textures/blocks/western_corn_stage_6"
+    },
+    "lothlorien:western_corn_stage_7": {
+      "textures": "textures/blocks/western_corn_stage_7"
     }
   }
 }
