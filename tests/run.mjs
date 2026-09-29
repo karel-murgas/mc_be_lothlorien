@@ -192,6 +192,7 @@ test("giants: the jigsaw pool matches CHOSEN, every piece ships, the structure s
   const GIANT_TREES = pool.elements.map((e) => e.element.location.replace("lothlorien/", ""));
   assert.equal(bp("worldgen/structures/giant_mallorn.json")["minecraft:jigsaw"].start_pool, pool.description.identifier);
   assert.equal(bp("worldgen/structures/giant_mallorn.json")["minecraft:jigsaw"].start_height.value.absolute, -ROOT_DEPTH);
+  assert.ok(bp("worldgen/structures/giant_mallorn.json")["minecraft:jigsaw"].max_depth >= 1, "max_depth 0 never builds");
   const set = bp("worldgen/structure_sets/giant_mallorn.json")["minecraft:structure_set"];
   assert.ok(set.placement.separation * 2 < set.placement.spacing, "engine rule: separation < spacing / 2");
   // start chunks of neighbouring cells are at least separation + 1 chunks apart

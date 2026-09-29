@@ -52,16 +52,16 @@ function encode(root) {
 
 const stateTag = (v) => (typeof v === "boolean" ? byte(v) : typeof v === "number" ? int(v) : str(v));
 
-// blocks: Map<"x,y,z" (tree coords), { name, states, loot? }>
-export function toMcstructure(blocks) {
-  const volume = SIZE * SIZE_Y * SIZE;
+// blocks: Map<"x,y,z" (tree coords), { name, states, loot? }>. size/offset default to the giant tree box.
+export function toMcstructure(blocks, [SX, SY, SZ] = [SIZE, SIZE_Y, SIZE], [OX, OY, OZ] = [TRUNK_AT, ROOT_DEPTH, TRUNK_AT]) {
+  const volume = SX * SY * SZ;
   const layer0 = new Array(volume).fill(-1);
   const palette = [], paletteIndex = new Map(), positionData = {};
   let clipped = 0;
   for (const [k, v] of blocks) {
     const [tx, ty, tz] = k.split(",").map(Number);
-    const x = tx + TRUNK_AT, y = ty + ROOT_DEPTH, z = tz + TRUNK_AT;
-    if (x < 0 || x >= SIZE || y < 0 || y >= SIZE_Y || z < 0 || z >= SIZE) { clipped++; continue; }
+    const x = tx + OX, y = ty + OY, z = tz + OZ;
+    if (x < 0 || x >= SX || y < 0 || y >= SY || z < 0 || z >= SZ) { clipped++; continue; }
     const id = JSON.stringify([v.name, v.states]);
     if (!paletteIndex.has(id)) {
       paletteIndex.set(id, palette.length);
@@ -69,7 +69,7 @@ export function toMcstructure(blocks) {
       for (const [sk, sv] of Object.entries(v.states)) states[sk] = stateTag(sv);
       palette.push(compound({ name: str(v.name), states: compound(states), version: int(BLOCK_VERSION) }));
     }
-    const index = (x * SIZE_Y + y) * SIZE + z;
+    const index = (x * SY + y) * SZ + z;
     layer0[index] = paletteIndex.get(id);
     if (v.loot) {
       positionData[String(index)] = compound({
@@ -82,7 +82,7 @@ export function toMcstructure(blocks) {
   }
   const root = compound({
     format_version: int(1),
-    size: list(T.int, [SIZE, SIZE_Y, SIZE].map(int)),
+    size: list(T.int, [SX, SY, SZ].map(int)),
     structure: compound({
       block_indices: list(T.list, [list(T.int, layer0.map(int)), list(T.int, new Array(volume).fill(int(-1)))]),
       entities: list(T.compound, []),

@@ -268,9 +268,12 @@ Density check: `/scriptevent lothlorien:treecount [radius]` reports trees per ch
     at most one giant per 6x6 chunks and giants are at least 3 chunks (48 blocks) apart, which is more than
     the 40-wide footprint. Separation 3 was rejected by the engine (it must be less than spacing / 2), so
     nothing generated (2026-09-30).
-  - With that fixed, `/locate` found giants but nothing was built (2026-09-30). The suspected cause is
-    `max_distance_from_center.horizontal` 32, smaller than the 40-wide piece; it is now 116, as in vanilla's
-    abandoned camp. Unconfirmed; check with `/place structure lothlorien:giant_mallorn`.
+  - With that fixed, `/locate` found giants but nothing was built (2026-09-30).
+    - `/place structure` said "Jigsaw structure generation failed. Structure placed out of bounds".
+    - Six one-change test structures were placed in one new world. **The cause was `max_depth: 0`**: only
+      the tests with depth 1 or 3 built. Size, height, reach, the `.mcstructure` format and `"rigid"` made
+      no difference. `max_depth` is now 1.
+    - `max_distance_from_center` is 116 as in vanilla's camp. The earlier 32 was not the cause.
   - `/locate structure lothlorien:giant_mallorn` and `/place structure lothlorien:giant_mallorn` work.
 - **History:**
   - 2026-09-29: a 40-wide `structure_template_feature` was cut badly at chunk borders.
