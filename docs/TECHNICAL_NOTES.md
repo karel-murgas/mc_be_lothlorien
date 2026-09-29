@@ -30,7 +30,11 @@ Files:
   tried and dropped: replaced dark forest would likely lose woodland mansions. Considered, not
   added: `meadow`/`cherry_grove` (mountain biomes), `mega_taiga` (cold); no old-growth oak biome
   exists (old birch = `birch_forest_mutated`, already in). `plains` would widen regions most (our
-  trees fill it) but is very common and shares this entry's `amount`; undecided. **Untested in game**: whether
+  trees fill it) but is very common and shares this entry's `amount`; undecided.
+  In game (2026-09-29): `0.45`/`0.25` gave a region too big to find its end while flying. Likely
+  cause: near 0.5 the replaced side of the noise is one connected web (percolation), so blobs chain
+  across forests. Now `0.3`/`0.25`: amount is the dial for both coverage and connectivity;
+  frequency only sets the scale. Compare on the same seed. **Untested in game**: whether
   0.25 is accepted (if not, the biome is dropped and `/locate` fails) and the resulting region sizes.
   Goal (user): a forest is converted **whole or not at all**, and neighbouring forest types
   join into one region. JSON cannot select per forest; the approximation is noise so slow
