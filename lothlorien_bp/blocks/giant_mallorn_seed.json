@@ -1,0 +1,46 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:block": {
+    "description": {
+      "identifier": "lothlorien:giant_mallorn_seed",
+      "menu_category": {
+        "category": "none"
+      }
+    },
+    "components": {
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 2.0
+      },
+      "minecraft:sound": {
+        "sound": "wood"
+      },
+      "minecraft:map_color": "#d8c9a0",
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "lothlorien:mallorn_log_side",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "lothlorien:mallorn_log_top",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "lothlorien:mallorn_log_top",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:tick": {
+        "interval_range": [
+          20,
+          40
+        ],
+        "looping": true
+      },
+      "lothlorien:giant_seed": {},
+      "minecraft:redstone_conductivity": {
+        "redstone_conductor": true
+      }
+    }
+  }
+}

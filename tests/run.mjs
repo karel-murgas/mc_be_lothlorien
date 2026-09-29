@@ -7,7 +7,9 @@ import { MAX_GROWTH, growChance, bonemealSteps, advanceGrowth } from "../lothlor
 import { estimateDepth, probeCount, ringOffsets, DEPTH_RADII } from "../lothlorien_bp/scripts/depth.js";
 import { makeRandom } from "../lothlorien_bp/scripts/mallorn_tree.js";
 import { buildFletMallorn, LADDER, LEAF_KEEP, ROOT_DEPTH, B } from "../tools/flet_mallorn.mjs";
-import { SIZE, SIZE_Y, TRUNK_AT } from "../tools/build_structures.mjs";
+import { SIZE, SIZE_Y, TRUNK_AT, CHOSEN } from "../tools/build_structures.mjs";
+import { GIANT_TREES } from "../lothlorien_bp/scripts/giant_trees.js";
+import { existsSync } from "node:fs";
 
 const L = "lothlorien:lothlorien", RIVER = "minecraft:river", FOREST = "minecraft:forest";
 const T = new Set([RIVER]);
@@ -183,6 +185,13 @@ test("flet: tree fits the structure box and drops few leaves", () => {
       assert.ok(y + ROOT_DEPTH >= 0 && y + ROOT_DEPTH < SIZE_Y, `outside y ${k}`);
     }
     assert.ok(t.trimmed < 60, `${t.trimmed} leaves trimmed`);
+  }
+});
+
+test("giants: the trees worldgen grows match CHOSEN and ship as structure files", () => {
+  assert.deepEqual(GIANT_TREES, CHOSEN.map(([v, n]) => `mallorn_${v}_${String(n).padStart(2, "0")}`));
+  for (const name of GIANT_TREES) {
+    assert.ok(existsSync(new URL(`../lothlorien_bp/structures/lothlorien/${name}.mcstructure`, import.meta.url)), name);
   }
 });
 

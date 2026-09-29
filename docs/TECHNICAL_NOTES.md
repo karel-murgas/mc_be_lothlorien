@@ -256,19 +256,27 @@ Density check: `/scriptevent lothlorien:treecount [radius]` reports trees per ch
 - **Pipeline:** the shape is in `tools/flet_mallorn.mjs` (pure; reuses `makeBuilder` from
   `mallorn_tree.js`). `node tools/build_structures.mjs [variant|all] [count] [firstSeed]` writes
   `structures/lothlorien/mallorn_<variant>_NN.mcstructure` (40x54x40, trunk NW cell at x/z 18, ground at y 5,
-  about 700 KB each) and the matching `features/mallorn_<variant>_*`. Rerunning a variant replaces that variant only.
-  `features/mallorn_giant_feature.json` picks at random from CHOSEN.
+  about 700 KB each) and `scripts/giant_trees.js` (the CHOSEN names). Rerunning a variant replaces that
+  variant only.
   The format and the traps are in `.claude/skills/bedrock-modding/references/09-structures.md`.
 - **Worldgen:** `feature_rules/mallorn_giant_feature_rules.json`, `before_surface_pass`, runs on chunks
-  where chunkX and chunkZ are both multiples of 3, with chance 1/3 (about one giant per 27 chunks). The
-  corner lands in [0,8] of the chunk, so two giants never overlap. The heightmap is sampled at the trunk.
+  where chunkX and chunkZ are both multiples of 3, with chance 1/3 (about one giant per 27 chunks).
+  - **A 40-wide `structure_template_feature` was cut badly at chunk borders** (in game, 2026-09-29): the
+    parts in neighbouring chunks were missing.
+  - So now the feature (`features/mallorn_giant_feature.json`) places only one block,
+    `lothlorien:giant_mallorn_seed` (looks like a Mallorn log), at the trunk's NW cell, on the heightmap, at
+    [2,10] inside the chunk. Its `minecraft:tick` (every 1-2 s) runs `scripts/giants.js`. Once the chunks
+    under the whole 40x40 footprint are loaded, that script places a random tree from `GIANT_TREES` with
+    `structureManager.place`, and the trunk overwrites the seed.
+  - Trees therefore appear when a player gets within simulation distance, not at chunk generation. Seeds
+    farther away sit as a lone log. Two giants never overlap: seeds are at least 40 apart.
+  - Written 2026-09-30, not yet seen in game.
 - **Curation:** `/scriptevent lothlorien:showcase [variant]` lays out candidates on a grid (4 per row, 48
   apart, variants in separate rows) south-east of the player, with a sign such as "woven 3" in front of
   each ladder. Trees in unloaded chunks are retried for 3 minutes. `/scriptevent lothlorien:showcase woven 3`
   places one tree next to you (a bare number means flet).
 - **Chest loot is verified in game** (2026-09-29): the chest `LootTable` field in the structure fills the
-  chest when it is opened. Still unchecked: does a 40-wide
-  structure get cut at chunk borders? Do the fence connections hold? Does the ladder face the right way
+  chest when it is opened. Still unchecked: do the fence connections hold? Does the ladder face the right way
   (`facing_direction` 2)? Do normal Mallorns grow into the platform?
 - **Editing the loot by hand:** `lothlorien_bp/loot_tables/chests/mallorn_flet.json`. Pool 1 rolls once
   (miruvor or lembas). Pool 2 rolls 3-5 times from a weighted list. `weight` is relative chance, and
