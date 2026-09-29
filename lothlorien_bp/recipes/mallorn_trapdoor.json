@@ -1,0 +1,30 @@
+{
+  "format_version": "1.20.30",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "lothlorien:mallorn_trapdoor"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "group": "wooden_trap_door",
+    "pattern": [
+      "###",
+      "###"
+    ],
+    "key": {
+      "#": {
+        "item": "lothlorien:mallorn_planks"
+      }
+    },
+    "unlock": [
+      {
+        "item": "lothlorien:mallorn_planks"
+      }
+    ],
+    "result": {
+      "item": "lothlorien:mallorn_trapdoor",
+      "count": 2
+    }
+  }
+}

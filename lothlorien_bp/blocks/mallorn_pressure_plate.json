@@ -1,0 +1,96 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:block": {
+    "description": {
+      "identifier": "lothlorien:mallorn_pressure_plate",
+      "states": {
+        "lothlorien:powered": [
+          false,
+          true
+        ]
+      }
+    },
+    "components": {
+      "minecraft:tags": [
+        "wood",
+        "minecraft:is_axe_item_destructible"
+      ],
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 0.5
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 0.5
+      },
+      "minecraft:flammable": {
+        "catch_chance_modifier": 5,
+        "destroy_chance_modifier": 20,
+        "lava_flammable": "always"
+      },
+      "minecraft:sound": {
+        "sound": "wood"
+      },
+      "minecraft:instrument_sound": {
+        "up": "note.bassattack"
+      },
+      "minecraft:destruction_particles": {
+        "particle_count": 48
+      },
+      "minecraft:map_color": "#d8c9a0",
+      "minecraft:geometry": "geometry.lothlorien.mallorn_pressure_plate",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "lothlorien:mallorn_planks",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:collision_box": false,
+      "minecraft:selection_box": {
+        "origin": [
+          -7,
+          0,
+          -7
+        ],
+        "size": [
+          14,
+          1,
+          14
+        ]
+      },
+      "minecraft:redstone_producer": {
+        "power": 0
+      },
+      "minecraft:tick": {
+        "interval_range": [
+          4,
+          4
+        ],
+        "looping": true
+      },
+      "lothlorien:pressure_plate": {}
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('lothlorien:powered')",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_pressure_plate_pressed",
+          "minecraft:selection_box": {
+            "origin": [
+              -7,
+              0,
+              -7
+            ],
+            "size": [
+              14,
+              0.5,
+              14
+            ]
+          },
+          "minecraft:redstone_producer": {
+            "power": 15,
+            "strongly_powered_face": "down"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -11,8 +11,8 @@
         ],
         "min_engine_version": [
             1,
-            21,
-            120
+            26,
+            50
         ]
     },
     "modules": [

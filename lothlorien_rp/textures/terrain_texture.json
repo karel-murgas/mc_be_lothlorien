@@ -1,0 +1,35 @@
+{
+  "resource_pack_name": "lothlorien_rp",
+  "texture_name": "atlas.terrain",
+  "padding": 8,
+  "num_mip_levels": 4,
+  "texture_data": {
+    "lothlorien:mallorn_planks": {
+      "textures": "textures/blocks/mallorn_planks"
+    },
+    "lothlorien:mallorn_log_side": {
+      "textures": "textures/blocks/mallorn_log_side"
+    },
+    "lothlorien:mallorn_log_top": {
+      "textures": "textures/blocks/mallorn_log_top"
+    },
+    "lothlorien:mallorn_stripped_log_side": {
+      "textures": "textures/blocks/mallorn_stripped_log_side"
+    },
+    "lothlorien:mallorn_stripped_log_top": {
+      "textures": "textures/blocks/mallorn_stripped_log_top"
+    },
+    "lothlorien:mallorn_door_bottom": {
+      "textures": "textures/blocks/mallorn_door_bottom"
+    },
+    "lothlorien:mallorn_door_top": {
+      "textures": "textures/blocks/mallorn_door_top"
+    },
+    "lothlorien:mallorn_trapdoor": {
+      "textures": "textures/blocks/mallorn_trapdoor"
+    },
+    "lothlorien:mallorn_leaves": {
+      "textures": "textures/blocks/mallorn_leaves"
+    }
+  }
+}

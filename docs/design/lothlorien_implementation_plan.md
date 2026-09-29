@@ -277,7 +277,8 @@ Graphics pipeline + Claude for JSON.
 - custom acorn/nut item,
 - plantable sapling/acorn block,
 - small procedural Mallorn,
-- Mallorn leaf loot table,
+- Mallorn leaf loot table (saplings/acorns),
+- Mallorn leaf decay (see `NOT_IMPLEMENTED.md`): leaves not connected to a log fall off,
 - bone meal support if practical.
 
 ## Balance test
@@ -726,6 +727,37 @@ Player should be able to say:
 > "I'm clearly deeper in the forest now."
 
 without looking at debug UI.
+
+---
+
+# Phase 19b — Mallorn boats
+
+Placed at the polish stage: nothing else depends on them, and the art is the expensive part.
+Details and reasons: `NOT_IMPLEMENTED.md`.
+
+## Spike first (half a day)
+
+Custom boat entity copying vanilla `boat.json` (`buoyant`, `physics`, `rideable` seats,
+`is_collidable`, family `boat`) plus an item that spawns it. Ride it on water.
+
+Question to answer: is paddling/steering hard-coded to `minecraft:boat`, or does it work from the
+components? If hard-coded, movement must be driven by script (read rider input, apply impulse).
+
+## Build
+
+- boat + chest boat entities (chest boat: seat + inventory, or a chest block riding along),
+- carved, beautiful Mallorn model and texture (Blockbench + graphics pipeline),
+- item icons, recipes (planks; chest boat = chest + boat), loot (drops the item when broken),
+- water-only placement, break/despawn rules so idle boats do not pile up.
+
+## Success criterion
+
+A player can craft, launch, paddle and pick up a Mallorn boat, and it looks like it belongs to
+the forest.
+
+## Primary tools
+
+Claude for the entity/script, Blockbench + graphics for the model.
 
 ---
 

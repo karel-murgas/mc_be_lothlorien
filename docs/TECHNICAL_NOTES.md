@@ -105,3 +105,39 @@ on the edge; it is not tied to depth. That is the honest limit of JSON worldgen.
 Test (fresh world): fly over a Lothlórien region; patches should cluster in a few large
 zones. Judge whether that reads as "deeper = richer". If not, the next option is scripted
 post-generation decoration keyed to `estimateDepth` (not committed to; see plan).
+
+## Phase 3 — Mallorn wood set
+
+Block format is **1.26.50** and both manifests need `min_engine_version` 1.26.50 (multi-box
+collision, `minecraft:tags` and `minecraft:sound` are format-gated; `tag:*` keys no longer work).
+Reference implementations used: Bedrock Wiki custom fences, trapdoors, multi-blocks, block traits.
+
+Blocks (`lothlorien:` + `mallorn_`): `log`, `stripped_log`, `wood`, `stripped_wood`, `planks`,
+`leaves`, `stairs`, `slab`, `double_slab` (hidden), `fence`, `fence_gate`, `door`, `trapdoor`,
+`button`, `pressure_plate`. Textures are placeholders (pale oak wood, yellow poplar
+leaves); art tasks are in `GRAPHICS_TASKS.md`. Every block except leaves/double slab has an item
+that *replaces* the auto block item (needed for `minecraft:fuel`; the door also gets a 2D icon).
+Recipes and unlocks mirror vanilla wood types (planks from log/stripped log/wood/stripped wood
+unlock on that item; the rest on planks; wood/stripped wood on log/stripped log).
+
+- Tools: every wood block carries `minecraft:is_axe_item_destructible`; leaves use the hoe tag.
+- Logs: `block_face` trait + rotation permutations; axe strips (`lothlorien:strippable`).
+- Stairs: `cardinal_direction` + `vertical_half` traits; the corner shape is a custom state
+  `lothlorien:shape` computed in `blocks.js` with the Java-edition rules (on placement and when a
+  neighbouring stair is placed or broken). The engine's own `minecraft:corner` state was tried
+  first: its left/right is undocumented and it rendered wrong at both orientations we tried, so do
+  not go back to it. 5 shapes x 2 halves x 4 directions = 40 permutations, multi-box collision.
+- Slabs: `vertical_half`; merging in a `playerInteractWithBlock` world event (clicking the slab, or a
+  neighbouring block whose face points into a cell holding a slab). Stripping logs is the same
+  kind of event: a block component's `onPlayerInteract` blocks placement against the block.
+- Fence: wiki example; the `connection` trait connects to fences, gates and solid blocks; vanilla
+  fences connect via `minecraft:has_fence_connections`.
+- Door: 2-part multi-block, `open` + `hinge_right` states; script picks the hinge on placement
+  (door on the placer's left -> hinge right, else left). Rotations are derived, not copied.
+- Trapdoor/gate/door open by interact and by redstone (`lothlorien:redstone_toggle`: edge-detected
+  against a stored `powered` state because the engine also fires updates on placement/chunk load).
+- Button/plate: `minecraft:redstone_producer`; button releases after 30 ticks, plate polls
+  every 4 ticks (`minecraft:tick`). Support loss is handled in `blocks.js` (breaking the block they sit on).
+- Left out (signs, shelf, boats, ...): see `NOT_IMPLEMENTED.md` for reasons and retry notes.
+- **Untested in game** (no game access while writing): everything above. Check first: stair
+  orientation and corners, door swing/hinge, gate open pose, slab merge, log rotation, redstone opening.

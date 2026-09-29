@@ -1,0 +1,268 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:block": {
+    "description": {
+      "identifier": "lothlorien:mallorn_button",
+      "states": {
+        "lothlorien:powered": [
+          false,
+          true
+        ]
+      },
+      "traits": {
+        "minecraft:placement_position": {
+          "enabled_states": [
+            "minecraft:block_face"
+          ]
+        }
+      }
+    },
+    "components": {
+      "minecraft:tags": [
+        "wood",
+        "minecraft:is_axe_item_destructible"
+      ],
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 0.5
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 0.5
+      },
+      "minecraft:flammable": {
+        "catch_chance_modifier": 5,
+        "destroy_chance_modifier": 20,
+        "lava_flammable": "always"
+      },
+      "minecraft:sound": {
+        "sound": "wood"
+      },
+      "minecraft:instrument_sound": {
+        "up": "note.bassattack"
+      },
+      "minecraft:destruction_particles": {
+        "particle_count": 48
+      },
+      "minecraft:map_color": "#d8c9a0",
+      "minecraft:geometry": "geometry.lothlorien.mallorn_button",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "lothlorien:mallorn_planks",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:collision_box": false,
+      "minecraft:selection_box": {
+        "origin": [
+          -3,
+          0,
+          -2
+        ],
+        "size": [
+          6,
+          2,
+          4
+        ]
+      },
+      "minecraft:redstone_producer": {
+        "power": 0
+      },
+      "lothlorien:button": {
+        "ticks": 30
+      }
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'up' && q.block_state('lothlorien:powered')",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_button_pressed",
+          "minecraft:selection_box": {
+            "origin": [
+              -3,
+              0,
+              -2
+            ],
+            "size": [
+              6,
+              1,
+              4
+            ]
+          },
+          "minecraft:redstone_producer": {
+            "power": 15,
+            "strongly_powered_face": "down"
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'down'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              180,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'down' && q.block_state('lothlorien:powered')",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_button_pressed",
+          "minecraft:selection_box": {
+            "origin": [
+              -3,
+              0,
+              -2
+            ],
+            "size": [
+              6,
+              1,
+              4
+            ]
+          },
+          "minecraft:redstone_producer": {
+            "power": 15,
+            "strongly_powered_face": "up"
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'north'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              -90,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'north' && q.block_state('lothlorien:powered')",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_button_pressed",
+          "minecraft:selection_box": {
+            "origin": [
+              -3,
+              0,
+              -2
+            ],
+            "size": [
+              6,
+              1,
+              4
+            ]
+          },
+          "minecraft:redstone_producer": {
+            "power": 15,
+            "strongly_powered_face": "south"
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'south'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              90,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'south' && q.block_state('lothlorien:powered')",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_button_pressed",
+          "minecraft:selection_box": {
+            "origin": [
+              -3,
+              0,
+              -2
+            ],
+            "size": [
+              6,
+              1,
+              4
+            ]
+          },
+          "minecraft:redstone_producer": {
+            "power": 15,
+            "strongly_powered_face": "north"
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'west'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              90
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'west' && q.block_state('lothlorien:powered')",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_button_pressed",
+          "minecraft:selection_box": {
+            "origin": [
+              -3,
+              0,
+              -2
+            ],
+            "size": [
+              6,
+              1,
+              4
+            ]
+          },
+          "minecraft:redstone_producer": {
+            "power": 15,
+            "strongly_powered_face": "east"
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'east'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              -90
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'east' && q.block_state('lothlorien:powered')",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_button_pressed",
+          "minecraft:selection_box": {
+            "origin": [
+              -3,
+              0,
+              -2
+            ],
+            "size": [
+              6,
+              1,
+              4
+            ]
+          },
+          "minecraft:redstone_producer": {
+            "power": 15,
+            "strongly_powered_face": "west"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.lothlorien.mallorn_pressure_plate",
+        "texture_width": 16,
+        "texture_height": 16
+      },
+      "bones": [
+        {
+          "name": "plate",
+          "pivot": [
+            0,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -7,
+                0,
+                -7
+              ],
+              "size": [
+                14,
+                1,
+                14
+              ],
+              "uv": {
+                "north": {
+                  "uv": [
+                    1,
+                    15
+                  ],
+                  "uv_size": [
+                    14,
+                    1
+                  ]
+                },
+                "south": {
+                  "uv": [
+                    1,
+                    15
+                  ],
+                  "uv_size": [
+                    14,
+                    1
+                  ]
+                },
+                "east": {
+                  "uv": [
+                    1,
+                    15
+                  ],
+                  "uv_size": [
+                    14,
+                    1
+                  ]
+                },
+                "west": {
+                  "uv": [
+                    1,
+                    15
+                  ],
+                  "uv_size": [
+                    14,
+                    1
+                  ]
+                },
+                "up": {
+                  "uv": [
+                    1,
+                    1
+                  ],
+                  "uv_size": [
+                    14,
+                    14
+                  ]
+                },
+                "down": {
+                  "uv": [
+                    1,
+                    1
+                  ],
+                  "uv_size": [
+                    14,
+                    14
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import { world, system, BiomeTypes } from "@minecraft/server";
+import "./blocks.js";
 
 const BIOME_ID = "lothlorien:lothlorien";
 

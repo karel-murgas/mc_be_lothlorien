@@ -1,0 +1,251 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:block": {
+    "description": {
+      "identifier": "lothlorien:mallorn_door",
+      "states": {
+        "lothlorien:open": [
+          false,
+          true
+        ],
+        "lothlorien:hinge_right": [
+          false,
+          true
+        ],
+        "lothlorien:powered": [
+          false,
+          true
+        ]
+      },
+      "traits": {
+        "minecraft:multi_block": {
+          "enabled_states": [
+            "minecraft:multi_block_part"
+          ],
+          "direction": "up",
+          "parts": 2
+        },
+        "minecraft:placement_direction": {
+          "enabled_states": [
+            "minecraft:cardinal_direction"
+          ]
+        }
+      }
+    },
+    "components": {
+      "minecraft:tags": [
+        "wood",
+        "minecraft:is_axe_item_destructible"
+      ],
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 3.0
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 3
+      },
+      "minecraft:flammable": {
+        "catch_chance_modifier": 5,
+        "destroy_chance_modifier": 20,
+        "lava_flammable": "always"
+      },
+      "minecraft:sound": {
+        "sound": "wood"
+      },
+      "minecraft:instrument_sound": {
+        "up": "note.bassattack"
+      },
+      "minecraft:destruction_particles": {
+        "particle_count": 48
+      },
+      "minecraft:map_color": "#d8c9a0",
+      "minecraft:geometry": "geometry.lothlorien.mallorn_door_bottom",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "lothlorien:mallorn_door_bottom",
+          "render_method": "alpha_test_single_sided"
+        }
+      },
+      "minecraft:collision_box": {
+        "origin": [
+          -8,
+          0,
+          -8
+        ],
+        "size": [
+          16,
+          16,
+          3
+        ]
+      },
+      "minecraft:selection_box": {
+        "origin": [
+          -8,
+          0,
+          -8
+        ],
+        "size": [
+          16,
+          16,
+          3
+        ]
+      },
+      "minecraft:movable": {
+        "movement_type": "popped"
+      },
+      "minecraft:connection_rule": {
+        "accepts_connections_from": "none"
+      },
+      "minecraft:precipitation_interactions": {
+        "precipitation_behavior": "obstruct_rain"
+      },
+      "lothlorien:door": {
+        "block_state": "lothlorien:open",
+        "enable_sound": "open.wooden_door",
+        "disable_sound": "close.wooden_door"
+      },
+      "minecraft:redstone_consumer": {
+        "min_power": 0
+      },
+      "lothlorien:redstone_toggle": {
+        "open_state": "lothlorien:open",
+        "powered_state": "lothlorien:powered",
+        "enable_sound": "open.wooden_door",
+        "disable_sound": "close.wooden_door"
+      }
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('minecraft:multi_block_part') == 1",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_door_top",
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "lothlorien:mallorn_door_top",
+              "render_method": "alpha_test_single_sided"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:multi_block_part') == 0 && q.block_state('lothlorien:hinge_right')",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_door_bottom_mirror"
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:multi_block_part') == 1 && q.block_state('lothlorien:hinge_right')",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.mallorn_door_top_mirror"
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('lothlorien:open') && !q.block_state('lothlorien:hinge_right')",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              270,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('lothlorien:open') && q.block_state('lothlorien:hinge_right')",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'north' && !q.block_state('lothlorien:open')",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('lothlorien:open') && !q.block_state('lothlorien:hinge_right')",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('lothlorien:open') && q.block_state('lothlorien:hinge_right')",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              270,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'east' && !q.block_state('lothlorien:open')",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('lothlorien:open') && q.block_state('lothlorien:hinge_right')",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'west' && !q.block_state('lothlorien:open')",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              270,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('lothlorien:open') && !q.block_state('lothlorien:hinge_right')",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

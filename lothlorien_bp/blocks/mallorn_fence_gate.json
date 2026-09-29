@@ -1,0 +1,291 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:block": {
+    "description": {
+      "identifier": "lothlorien:mallorn_fence_gate",
+      "states": {
+        "lothlorien:open": [
+          false,
+          true
+        ],
+        "lothlorien:powered": [
+          false,
+          true
+        ]
+      },
+      "traits": {
+        "minecraft:placement_direction": {
+          "enabled_states": [
+            "minecraft:cardinal_direction"
+          ]
+        }
+      }
+    },
+    "components": {
+      "minecraft:tags": [
+        "wood",
+        "minecraft:is_axe_item_destructible",
+        "minecraft:has_fence_connections"
+      ],
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 2.0
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 3
+      },
+      "minecraft:flammable": {
+        "catch_chance_modifier": 5,
+        "destroy_chance_modifier": 20,
+        "lava_flammable": "always"
+      },
+      "minecraft:sound": {
+        "sound": "wood"
+      },
+      "minecraft:instrument_sound": {
+        "up": "note.bassattack"
+      },
+      "minecraft:destruction_particles": {
+        "particle_count": 48
+      },
+      "minecraft:map_color": "#d8c9a0",
+      "minecraft:geometry": "geometry.lothlorien.mallorn_fence_gate_closed",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "lothlorien:mallorn_planks",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:collision_box": {
+        "origin": [
+          -8,
+          0,
+          -2
+        ],
+        "size": [
+          16,
+          24,
+          4
+        ]
+      },
+      "minecraft:selection_box": {
+        "origin": [
+          -8,
+          0,
+          -2
+        ],
+        "size": [
+          16,
+          16,
+          4
+        ]
+      },
+      "minecraft:precipitation_interactions": {
+        "precipitation_behavior": "obstruct_rain"
+      },
+      "lothlorien:toggleable": {
+        "block_state": "lothlorien:open",
+        "enable_sound": "open.fence_gate",
+        "disable_sound": "close.fence_gate"
+      },
+      "minecraft:redstone_consumer": {
+        "min_power": 0
+      },
+      "lothlorien:redstone_toggle": {
+        "open_state": "lothlorien:open",
+        "powered_state": "lothlorien:powered",
+        "enable_sound": "open.fence_gate",
+        "disable_sound": "close.fence_gate"
+      },
+      "minecraft:liquid_detection": {
+        "detection_rules": [
+          {
+            "liquid_type": "water",
+            "can_contain_liquid": true
+          }
+        ]
+      }
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'north' && !q.block_state('lothlorien:open')",
+        "components": {
+          "minecraft:connection_rule": {
+            "accepts_connections_from": "only_fences",
+            "enabled_directions": [
+              "east",
+              "west"
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('lothlorien:open')",
+        "components": {
+          "minecraft:connection_rule": {
+            "accepts_connections_from": "only_fences",
+            "enabled_directions": [
+              "east",
+              "west"
+            ]
+          },
+          "minecraft:geometry": "geometry.lothlorien.mallorn_fence_gate_open",
+          "minecraft:collision_box": false,
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              0,
+              -8
+            ],
+            "size": [
+              16,
+              16,
+              8
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'south' && !q.block_state('lothlorien:open')",
+        "components": {
+          "minecraft:connection_rule": {
+            "accepts_connections_from": "only_fences",
+            "enabled_directions": [
+              "east",
+              "west"
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('lothlorien:open')",
+        "components": {
+          "minecraft:connection_rule": {
+            "accepts_connections_from": "only_fences",
+            "enabled_directions": [
+              "east",
+              "west"
+            ]
+          },
+          "minecraft:geometry": "geometry.lothlorien.mallorn_fence_gate_open",
+          "minecraft:collision_box": false,
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              0,
+              -8
+            ],
+            "size": [
+              16,
+              16,
+              8
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'east' && !q.block_state('lothlorien:open')",
+        "components": {
+          "minecraft:connection_rule": {
+            "accepts_connections_from": "only_fences",
+            "enabled_directions": [
+              "north",
+              "south"
+            ]
+          },
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('lothlorien:open')",
+        "components": {
+          "minecraft:connection_rule": {
+            "accepts_connections_from": "only_fences",
+            "enabled_directions": [
+              "north",
+              "south"
+            ]
+          },
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          },
+          "minecraft:geometry": "geometry.lothlorien.mallorn_fence_gate_open",
+          "minecraft:collision_box": false,
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              0,
+              -8
+            ],
+            "size": [
+              16,
+              16,
+              8
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'west' && !q.block_state('lothlorien:open')",
+        "components": {
+          "minecraft:connection_rule": {
+            "accepts_connections_from": "only_fences",
+            "enabled_directions": [
+              "north",
+              "south"
+            ]
+          },
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('lothlorien:open')",
+        "components": {
+          "minecraft:connection_rule": {
+            "accepts_connections_from": "only_fences",
+            "enabled_directions": [
+              "north",
+              "south"
+            ]
+          },
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          },
+          "minecraft:geometry": "geometry.lothlorien.mallorn_fence_gate_open",
+          "minecraft:collision_box": false,
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              0,
+              -8
+            ],
+            "size": [
+              16,
+              16,
+              8
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

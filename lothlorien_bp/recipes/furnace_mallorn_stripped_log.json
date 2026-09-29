@@ -1,0 +1,13 @@
+{
+  "format_version": "1.12",
+  "minecraft:recipe_furnace": {
+    "description": {
+      "identifier": "lothlorien:furnace_mallorn_stripped_log"
+    },
+    "tags": [
+      "furnace"
+    ],
+    "input": "lothlorien:mallorn_stripped_log",
+    "output": "minecraft:charcoal"
+  }
+}

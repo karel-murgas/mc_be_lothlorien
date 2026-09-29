@@ -1,0 +1,30 @@
+{
+  "format_version": "1.20.30",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "lothlorien:mallorn_wood_from_log"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "group": "wood",
+    "pattern": [
+      "##",
+      "##"
+    ],
+    "key": {
+      "#": {
+        "item": "lothlorien:mallorn_log"
+      }
+    },
+    "unlock": [
+      {
+        "item": "lothlorien:mallorn_log"
+      }
+    ],
+    "result": {
+      "item": "lothlorien:mallorn_wood",
+      "count": 3
+    }
+  }
+}
