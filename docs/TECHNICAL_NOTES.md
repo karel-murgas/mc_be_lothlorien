@@ -230,7 +230,7 @@ directly) on grass. **Untested in game:** custom blocks inside `tree_feature`, l
 density (5/chunk is a guess), mega tree size.
 Density check: `/scriptevent lothlorien:treecount [radius]` reports trees per chunk of biome and canopy cover around you (loaded chunks only; stand inside the biome in a freshly generated area).
 
-## Phase 5 - giant flet Mallorns (structures; written 2026-09-29, in-game test pending)
+## Phase 5 - giant flet Mallorns (structures; first look in game 2026-09-29: liked, flet 7 the favourite; chest loot works)
 
 - **What:** 4x4 trunk 30-38 high (tip narrows to 2x2), sunk 5 blocks into the ground with buttress roots.
   A plank platform (radius 5.5-7, fence rim) sits on 6-8 level branches 9-12 below the top. A vanilla
@@ -240,21 +240,39 @@ Density check: `/scriptevent lothlorien:treecount [radius]` reports trees per ch
 - **Leaves** are normal worldgen leaves (`persistent` false). Any leaf more than 8 steps through leaves
   from a log is dropped at generation time (decay reach is 10), so nothing thins out later. There are
   about 5-10 such leaves per tree.
+- **Variants** (`VARIANTS` in `tools/build_structures.mjs`, options of `buildFletMallorn`). Tree NN of every
+  variant uses the same seed.
+  - `flet`: the original design, with branches under the floor. The defaults must keep producing the same
+    trees, because flet 7 is the reference.
+  - `woven` (woven + lush, added 2026-09-29, not yet seen in game): the support branches run at floor level
+    through the platform, with planks filling the gaps, and their leafy ends reach past the rim. Lush adds
+    1-2 whorls of leafy level branches on the bare trunk plus longer leafy low branches.
+  - To experiment, add an entry to `VARIANTS` and the name to `VARIANTS` in `scripts/showcase.js`, then run
+    `node tools/build_structures.mjs <variant>`.
 - **Pipeline:** the shape is in `tools/flet_mallorn.mjs` (pure; reuses `makeBuilder` from
-  `mallorn_tree.js`). `node tools/build_structures.mjs [count] [firstSeed]` writes
-  `structures/lothlorien/mallorn_flet_NN.mcstructure` (40x54x40, trunk NW cell at x/z 18, ground at y 5,
-  about 700 KB each) and the matching `features/mallorn_flet_*`. Rerunning it replaces all of them.
+  `mallorn_tree.js`). `node tools/build_structures.mjs [variant|all] [count] [firstSeed]` writes
+  `structures/lothlorien/mallorn_<variant>_NN.mcstructure` (40x54x40, trunk NW cell at x/z 18, ground at y 5,
+  about 700 KB each) and the matching `features/mallorn_<variant>_*`. Rerunning a variant replaces that variant only.
+  `features/mallorn_giant_feature.json` picks at random from every structure file present.
   The format and the traps are in `.claude/skills/bedrock-modding/references/09-structures.md`.
-- **Worldgen:** `feature_rules/mallorn_flet_feature_rules.json`, `before_surface_pass`, runs on chunks
+- **Worldgen:** `feature_rules/mallorn_giant_feature_rules.json`, `before_surface_pass`, runs on chunks
   where chunkX and chunkZ are both multiples of 3, with chance 1/3 (about one giant per 27 chunks). The
   corner lands in [0,8] of the chunk, so two giants never overlap. The heightmap is sampled at the trunk.
-- **Curation:** `/scriptevent lothlorien:showcase` lays out all candidates on a grid (4 per row, 48
-  apart) south-east of the player, with a numbered sign in front of each ladder. Trees in unloaded chunks
-  are retried for 3 minutes. `/scriptevent lothlorien:showcase 3` places only number 3.
-- **Open questions for the first test:** does the chest `LootTable` field fill the chest? Does a 40-wide
+- **Curation:** `/scriptevent lothlorien:showcase [variant]` lays out candidates on a grid (4 per row, 48
+  apart, variants in separate rows) south-east of the player, with a sign such as "woven 3" in front of
+  each ladder. Trees in unloaded chunks are retried for 3 minutes. `/scriptevent lothlorien:showcase woven 3`
+  places one tree next to you (a bare number means flet).
+- **Chest loot is verified in game** (2026-09-29): the chest `LootTable` field in the structure fills the
+  chest when it is opened. Still unchecked: does a 40-wide
   structure get cut at chunk borders? Do the fence connections hold? Does the ladder face the right way
   (`facing_direction` 2)? Do normal Mallorns grow into the platform?
-- Tests: `tests/run.mjs` checks, over 40 seeds, that the ladder is unbroken, there is a floor at the
+- **Editing the loot by hand:** `lothlorien_bp/loot_tables/chests/mallorn_flet.json`. Pool 1 rolls once
+  (miruvor or lembas). Pool 2 rolls 3-5 times from a weighted list. `weight` is relative chance, and
+  `set_count` sets the stack size. Item ids have to exist; `.\mods verify lothlorien` catches typos. Then run
+  `.\mods deploy lothlorien` and re-enter the world. The table is rolled when a chest is first opened, so
+  unopened chests pick up the change. To see a roll without a chest, `/loot spawn ~ ~1 ~ loot "chests/mallorn_flet"`
+  should work (not tested).
+- Tests: `tests/run.mjs` checks, over 30 seeds per variant, that the ladder is unbroken, there is a floor at the
   exit, the chest has room, leaves are within reach and everything fits the box.
 
 ## Phase 6 - ground identity and flora (step 5, procedural trees, postponed on purpose)

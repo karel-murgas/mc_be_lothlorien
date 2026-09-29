@@ -139,7 +139,8 @@ test("wrapped Lembas: more nutrition than the cake, eaten faster", () => {
 });
 
 // Giant flet Mallorns (tools/flet_mallorn.mjs), over many seeds.
-const flets = Array.from({ length: 40 }, (_, i) => buildFletMallorn(makeRandom(i * 7919 + 1)));
+const flets = [{}, { woven: true, lush: true }].flatMap((opts) =>
+  Array.from({ length: 30 }, (_, i) => buildFletMallorn(makeRandom(i * 7919 + 1), opts)));
 const at = (t, x, y, z) => t.blocks.get(`${x},${y},${z}`)?.name;
 test("flet: ladder unbroken from the ground through the floor, with a floor to step onto", () => {
   for (const t of flets) {
@@ -154,7 +155,7 @@ test("flet: chest stands on the floor with room above", () => {
     const [k] = [...t.blocks].find(([, v]) => v.name === B.chest);
     const [x, y, z] = k.split(",").map(Number);
     assert.equal(y, t.floorY + 1);
-    assert.equal(at(t, x, y - 1, z), B.planks);
+    assert.ok([B.planks, B.log].includes(at(t, x, y - 1, z)));
     assert.equal(at(t, x, y + 1, z), undefined);
   }
 });

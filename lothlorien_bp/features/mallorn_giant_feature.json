@@ -2,7 +2,7 @@
   "format_version": "1.13.0",
   "minecraft:weighted_random_feature": {
     "description": {
-      "identifier": "lothlorien:mallorn_flet_feature"
+      "identifier": "lothlorien:mallorn_giant_feature"
     },
     "features": [
       [
@@ -35,6 +35,38 @@
       ],
       [
         "lothlorien:mallorn_flet_08_feature",
+        1
+      ],
+      [
+        "lothlorien:mallorn_woven_01_feature",
+        1
+      ],
+      [
+        "lothlorien:mallorn_woven_02_feature",
+        1
+      ],
+      [
+        "lothlorien:mallorn_woven_03_feature",
+        1
+      ],
+      [
+        "lothlorien:mallorn_woven_04_feature",
+        1
+      ],
+      [
+        "lothlorien:mallorn_woven_05_feature",
+        1
+      ],
+      [
+        "lothlorien:mallorn_woven_06_feature",
+        1
+      ],
+      [
+        "lothlorien:mallorn_woven_07_feature",
+        1
+      ],
+      [
+        "lothlorien:mallorn_woven_08_feature",
         1
       ]
     ]

@@ -2,8 +2,8 @@
   "format_version": "1.13.0",
   "minecraft:feature_rules": {
     "description": {
-      "identifier": "lothlorien:mallorn_flet_feature_rules",
-      "places_feature": "lothlorien:mallorn_flet_feature"
+      "identifier": "lothlorien:mallorn_giant_feature_rules",
+      "places_feature": "lothlorien:mallorn_giant_feature"
     },
     "conditions": {
       "placement_pass": "before_surface_pass",

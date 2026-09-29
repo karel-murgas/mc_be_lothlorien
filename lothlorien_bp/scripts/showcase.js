@@ -1,10 +1,11 @@
 import { world, system, BlockPermutation } from "@minecraft/server";
 
-// Phase 5 curation instrument. `/scriptevent lothlorien:showcase` lays out every giant Mallorn structure
-// (lothlorien:mallorn_flet_NN, made by tools/build_structures.mjs) on a grid of 4 columns east and south
-// of the player, with a numbered sign in front of each ladder. Trees in unloaded chunks are retried every
-// 2 s for 3 minutes, so fly along the grid and they appear. `/scriptevent lothlorien:showcase 3` places
-// only number 3, next to the player.
+// Phase 5 curation instrument. `/scriptevent lothlorien:showcase [variant]` lays out the giant Mallorn
+// structures (lothlorien:mallorn_<variant>_NN, made by tools/build_structures.mjs; no variant = all of
+// them, one block of rows per variant) on a grid of 4 columns east and south of the player, with a sign
+// in front of each ladder. Trees in unloaded chunks are retried every 2 s for 3 minutes, so fly along the
+// grid and they appear. `/scriptevent lothlorien:showcase woven 3` places only woven 3, next to the player
+// (a bare number means flet).
 // Structure layout (keep in step with tools/build_structures.mjs): trunk NW cell at x/z TRUNK_AT, the
 // first block above the ground at y ROOT_DEPTH.
 const TRUNK_AT = 18;
@@ -13,8 +14,10 @@ const SPACING = 48;
 const RETRY_TICKS = 40;
 const GIVE_UP_TICKS = 3600;
 const PASSABLE = /leaves|_log$|_wood$|grass$|fern|flower|sapling|carpet|bush|lilac|peony|rose|athelas|elanor|niphredil|corn/;
+// keep in step with VARIANTS in tools/build_structures.mjs
+const VARIANTS = ["flet", "woven"];
 
-const structureId = (n) => `lothlorien:mallorn_flet_${String(n).padStart(2, "0")}`;
+const structureId = (v, n) => `lothlorien:mallorn_${v}_${String(n).padStart(2, "0")}`;
 
 function groundAbove(dimension, x, z) {
   let b = dimension.getTopmostBlock({ x, z });
@@ -22,15 +25,16 @@ function groundAbove(dimension, x, z) {
   return b ? b.y + 1 : undefined;
 }
 
-// Places tree n with its trunk's north-west cell at (x, z) on the ground; false if the area is not loaded.
-function placeTree(dimension, n, x, z) {
+// Places variant v number n with its trunk's north-west cell at (x, z) on the ground; false if the area
+// is not loaded.
+function placeTree(dimension, v, n, x, z) {
   try {
     const y = groundAbove(dimension, x + 1, z + 1);
     if (y === undefined) return false;
-    world.structureManager.place(structureId(n), dimension, { x: x - TRUNK_AT, y: y - ROOT_DEPTH, z: z - TRUNK_AT });
+    world.structureManager.place(structureId(v, n), dimension, { x: x - TRUNK_AT, y: y - ROOT_DEPTH, z: z - TRUNK_AT });
     const sign = dimension.getBlock({ x, y, z: z - 4 });
     sign.setPermutation(BlockPermutation.resolve("minecraft:standing_sign", { ground_sign_direction: 8 }));
-    sign.getComponent("minecraft:sign")?.setText(`Mallorn\nflet ${n}`);
+    sign.getComponent("minecraft:sign")?.setText(`Mallorn\n${v} ${n}`);
     return true;
   } catch {
     return false; // unloaded chunk
@@ -41,28 +45,38 @@ export function handleShowcaseEvent(event, player) {
   if (event.id !== "lothlorien:showcase") return false;
   const dimension = player.dimension;
   const px = Math.floor(player.location.x), pz = Math.floor(player.location.z);
-  const available = [];
-  for (let n = 1; n <= 99 && world.structureManager.get(structureId(n)); n++) available.push(n);
-  if (!available.length) {
-    player.sendMessage("[lothlorien] showcase: no lothlorien:mallorn_flet_NN structures in the pack");
-    return true;
-  }
-  const only = parseInt(event.message, 10);
+  const words = event.message.trim().split(/\s+/).filter(Boolean);
+  const named = VARIANTS.includes(words[0]) ? words.shift() : undefined;
+  const only = parseInt(words[0], 10);
   if (only) {
-    const ok = available.includes(only) && placeTree(dimension, only, px + 24, pz + 24);
-    player.sendMessage(`[lothlorien] showcase: flet ${only} ${ok ? "placed 24 blocks SE" : "not placed (missing or unloaded)"}`);
+    const v = named ?? "flet";
+    const ok = world.structureManager.get(structureId(v, only)) && placeTree(dimension, v, only, px + 24, pz + 24);
+    player.sendMessage(`[lothlorien] showcase: ${v} ${only} ${ok ? "placed 24 blocks SE" : "not placed (missing or unloaded)"}`);
     return true;
   }
-  const pending = available.map((n, i) => ({ n, x: px + 24 + (i % 4) * SPACING, z: pz + 24 + Math.floor(i / 4) * SPACING }));
-  player.sendMessage(`[lothlorien] showcase: ${pending.length} flet Mallorns on a grid ${SPACING} apart, SE of here; fly along it`);
+  const pending = [];
+  let row = 0;
+  for (const v of named ? [named] : VARIANTS) {
+    let i = 0;
+    for (let n = 1; n <= 99 && world.structureManager.get(structureId(v, n)); n++, i++) {
+      pending.push({ v, n, x: px + 24 + (i % 4) * SPACING, z: pz + 24 + (row + Math.floor(i / 4)) * SPACING });
+    }
+    row += Math.ceil(i / 4);
+  }
+  if (!pending.length) {
+    player.sendMessage("[lothlorien] showcase: no giant Mallorn structures in the pack");
+    return true;
+  }
+  player.sendMessage(`[lothlorien] showcase: ${pending.length} giant Mallorns on a grid ${SPACING} apart, SE of here; fly along it`);
   const start = system.currentTick;
   const job = system.runInterval(() => {
     for (let i = pending.length - 1; i >= 0; i--) {
-      if (placeTree(dimension, pending[i].n, pending[i].x, pending[i].z)) pending.splice(i, 1);
+      const p = pending[i];
+      if (placeTree(dimension, p.v, p.n, p.x, p.z)) pending.splice(i, 1);
     }
     if (!pending.length || system.currentTick - start > GIVE_UP_TICKS) {
       system.clearRun(job);
-      player.sendMessage(`[lothlorien] showcase: done${pending.length ? `; not loaded in time: ${pending.map((p) => p.n).join(", ")}` : ""}`);
+      player.sendMessage(`[lothlorien] showcase: done${pending.length ? `; not loaded in time: ${pending.map((p) => `${p.v} ${p.n}`).join(", ")}` : ""}`);
     }
   }, RETRY_TICKS);
   return true;

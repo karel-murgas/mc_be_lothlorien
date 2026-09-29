@@ -33,8 +33,13 @@ const fromCentre = (x, z) => Math.hypot(x + 0.5 - 2, z + 0.5 - 2);
 // the two middle cells, so no branch runs up the ladder column (x 0 on the north face).
 const startCell = (d, random) => (d > 0 ? 3 : d < 0 ? 0 : 1 + (random() < 0.5 ? 1 : 0));
 
+// Options (both off = the original flet design; the defaults must keep producing the same trees per seed):
+//   woven  the support branches run at floor level, through the platform, and the planks fill the gaps
+//          between them; the branch ends still reach past the rim and carry the leaves
+//   lush   more foliage below the platform: longer low branches that always carry leaves, plus one or two
+//          whorls of leafy level branches on the bare trunk
 // Returns { height, floorY, blocks: Map<"x,y,z", { name, states, loot? }>, trimmed }.
-export function buildFletMallorn(random) {
+export function buildFletMallorn(random, { woven = false, lush = false } = {}) {
   const b = makeBuilder(random);
   const height = b.between([30, 38]);
   const floorY = height - b.between([9, 12]);
@@ -58,16 +63,18 @@ export function buildFletMallorn(random) {
     }
   }
 
-  // platform support: level branches just under the floor, poking out past its edge, leaves hanging below
+  // platform support: level branches just under the floor (woven: in it), poking out past its edge, leaves
+  // hanging below
+  const branchY = woven ? floorY : floorY - 1;
   b.shuffled().slice(0, 6 + Math.floor(random() * 3)).forEach(([dx, dz]) => {
     let x = startCell(dx, random), z = startCell(dz, random);
     const len = Math.round(radius) - 1 + b.between([1, 3]);
     for (let i = 1; i <= len; i++) {
       const stepX = dx !== 0 && (dz === 0 || i % 2 === 1);
       if (stepX) x += dx; else z += dz;
-      b.addLog(x, floorY - 1, z, stepX ? "east" : "south");
+      b.addLog(x, branchY, z, stepX ? "east" : "south");
     }
-    b.blob(x, floorY - 2, z, 2.2 + random() * 0.8, 1.8, floorY - 5, 0.7);
+    b.blob(x, branchY - 1, z, 2.2 + random() * 0.8, 1.8, floorY - 5, 0.7);
   });
 
   // low branches on the bare trunk
@@ -76,6 +83,21 @@ export function buildFletMallorn(random) {
     const [dx, dz] = DIRS8[Math.floor(random() * 8)];
     b.branch(startCell(dx, random), startCell(dz, random), dx, dz, b.between([6, floorY - 8]), b.between([3, 6]), 0.3,
       random() < 0.5 ? 1.8 : 0);
+  }
+
+  // lush: whorls of level branches on the bare trunk, each with a leaf blob, and longer leafy low branches
+  if (lush) {
+    const whorls = floorY > 20 ? 2 : 1;
+    for (let w = 0; w < whorls; w++) {
+      const y = Math.round(6 + ((floorY - 10) * (w + 1)) / (whorls + 1)) + b.between([-1, 1]);
+      b.shuffled().slice(0, 3 + Math.floor(random() * 3)).forEach(([dx, dz]) =>
+        b.branch(startCell(dx, random), startCell(dz, random), dx, dz, y, b.between([3, 6]), 0.2, 2.0 + random() * 0.8));
+    }
+    for (let i = 0, n = b.between([3, 5]); i < n; i++) {
+      const [dx, dz] = DIRS8[Math.floor(random() * 8)];
+      b.branch(startCell(dx, random), startCell(dz, random), dx, dz, b.between([5, floorY - 6]), b.between([4, 7]), 0.35,
+        1.8 + random() * 0.7);
+    }
   }
 
   // crown: rising branches round the trunk, each with a leaf blob, a blob hugging the trunk, and a cap
