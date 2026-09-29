@@ -22,7 +22,8 @@
     },
     "heightmap_projection": "world_surface",
     "max_distance_from_center": {
-      "horizontal": 32
+      "horizontal": 116,
+      "vertical": 116
     }
   }
 }
