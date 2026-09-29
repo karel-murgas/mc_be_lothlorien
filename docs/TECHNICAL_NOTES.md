@@ -81,3 +81,27 @@ Worldgen changes affect only newly generated chunks — always test in a fresh w
    the surrounding forest has some. Mobs can still walk in.
 5. Caves under the biome: hostiles or not?
 6. Vibrant Visuals on/off: colours and fog still look right.
+
+## Phase 2 — edge/heart spike
+
+**A. Runtime depth** (`scripts/main.js`, `estimateDepth`): probes 12 directions x rings at
+12/24/40/60/80 blocks with `dimension.getBiome`; the first ring containing a non-Lothlórien
+point is the nearest-border distance. Levels: outside / edge (<=24) / inner (<=60) / heart
+(farther or no border found). Runs every 3 s per player, never per tick; worst case 61
+probes. Transitions are logged in chat for players with the debug tag, and the level shows
+in the debug actionbar. `/scriptevent lothlorien:depth` prints the estimate plus the
+measured ms per estimate (200-run average) — **run it in-game and record the number here**:
+`_ms per estimate: ?_`. Limits: rings only see loaded chunks (unloaded probes are skipped,
+so depth can read low near the simulation edge), and the outline follows vanilla forest
+shapes, so "heart" means far from any border, not a designed centre.
+
+**B. Worldgen heart approximation**: feature rule
+`lothlorien:grove_flowers_feature_rules` (after_surface_pass, tag `lothlorien`) places
+dense dandelion patches only where `query.noise(origin/120)` > 0.3, so grove-like zones
+appear as large slow-varying regions independent of the biome border. Placeholder flower
+only; swap in Elanor/Niphredil later. Noise is world-position based, so a grove can fall
+on the edge; it is not tied to depth. That is the honest limit of JSON worldgen.
+
+Test (fresh world): fly over a Lothlórien region; patches should cluster in a few large
+zones. Judge whether that reads as "deeper = richer". If not, the next option is scripted
+post-generation decoration keyed to `estimateDepth` (not committed to; see plan).

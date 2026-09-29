@@ -37,8 +37,9 @@ function showDebug() {
     const biome = biomeAt(player.dimension, player.location) ?? "?";
     const { inside, total } = hostilesInBiome(player);
     const marker = biome === BIOME_ID ? "§a" : "§7";
+    const depth = DEPTH_NAMES[lastDepth.get(player.id) ?? 0];
     player.onScreenDisplay.setActionBar(
-      `${marker}${biome}§r  hostiles r${HOSTILE_SCAN_RADIUS}: ${inside} in Lórien / ${total}`
+      `${marker}${biome}§r [${depth}]  hostiles r${HOSTILE_SCAN_RADIUS}: ${inside} in Lórien / ${total}`
     );
   }
 }
@@ -89,11 +90,82 @@ function survey(player) {
   );
 }
 
+
+// Phase 2 prototype A: runtime depth estimate. Biome data cannot say "how deep inside am I",
+// so probe rings of points around the player and take the distance to the nearest non-
+// Lothlorien sample. Cheap (one getBiome per probe, a few seconds apart, never per tick).
+const DEPTH_DIRECTIONS = 12;
+const DEPTH_RADII = [12, 24, 40, 60, 80];
+const DEPTH_INTERVAL_TICKS = 60;
+// Nearest-border distance up to which the player counts as edge / inner; farther (or no
+// border within the last radius) counts as heart.
+const EDGE_LIMIT = 24;
+const INNER_LIMIT = 60;
+const DEPTH_NAMES = ["outside", "edge", "inner", "heart"];
+
+function biomeIdAt(dimension, x, y, z) {
+  try {
+    return dimension.getBiome({ x, y, z }).id;
+  } catch {
+    return undefined; // unloaded chunk
+  }
+}
+
+// Returns { level: 0-3, distance } where distance is the radius of the first ring that
+// contains a non-Lothlorien point (Infinity if all rings are inside the biome).
+function estimateDepth(player) {
+  const dim = player.dimension;
+  const { x, y, z } = player.location;
+  if (biomeIdAt(dim, x, y, z) !== BIOME_ID) return { level: 0, distance: 0 };
+  for (const r of DEPTH_RADII) {
+    for (let i = 0; i < DEPTH_DIRECTIONS; i++) {
+      const a = (2 * Math.PI * i) / DEPTH_DIRECTIONS;
+      const id = biomeIdAt(dim, x + r * Math.cos(a), y, z + r * Math.sin(a));
+      if (id !== undefined && id !== BIOME_ID) return { level: r <= EDGE_LIMIT ? 1 : r <= INNER_LIMIT ? 2 : 3, distance: r };
+    }
+  }
+  return { level: 3, distance: Infinity };
+}
+
+const lastDepth = new Map();
+
+function updateDepth() {
+  for (const player of world.getPlayers()) {
+    const { level } = estimateDepth(player);
+    const prev = lastDepth.get(player.id);
+    lastDepth.set(player.id, level);
+    if (prev !== undefined && prev !== level && player.hasTag(DEBUG_TAG)) {
+      player.sendMessage(`[lothlorien] depth: ${DEPTH_NAMES[prev]} -> ${DEPTH_NAMES[level]}`);
+    }
+  }
+}
+
+// `/scriptevent lothlorien:depth` reports the estimate and times it, so the cost of the
+// probing can be judged: the same estimate is repeated BENCH_RUNS times.
+const BENCH_RUNS = 200;
+
+function reportDepth(player) {
+  const result = estimateDepth(player);
+  const probes = DEPTH_RADII.length * DEPTH_DIRECTIONS + 1;
+  const t0 = Date.now();
+  for (let i = 0; i < BENCH_RUNS; i++) estimateDepth(player);
+  const ms = (Date.now() - t0) / BENCH_RUNS;
+  const dist = result.distance === Infinity ? `>${DEPTH_RADII[DEPTH_RADII.length - 1]}` : result.distance;
+  player.sendMessage(
+    `[lothlorien] depth ${DEPTH_NAMES[result.level]} (nearest border ~${dist} blocks); ` +
+      `worst case ${probes} probes, ${ms.toFixed(3)} ms per estimate (avg of ${BENCH_RUNS})`
+  );
+}
+
 function onScriptEvent(event) {
   const player = event.sourceEntity;
   if (!player || player.typeId !== "minecraft:player") return;
   if (event.id === "lothlorien:survey") {
     survey(player);
+    return;
+  }
+  if (event.id === "lothlorien:depth") {
+    reportDepth(player);
     return;
   }
   if (event.id !== "lothlorien:debug") return;
@@ -119,5 +191,6 @@ function reportBiomeRegistration() {
 world.afterEvents.worldLoad.subscribe(() => {
   system.afterEvents.scriptEventReceive.subscribe(onScriptEvent);
   system.runInterval(showDebug, DEBUG_INTERVAL_TICKS);
+  system.runInterval(updateDepth, DEPTH_INTERVAL_TICKS);
   reportBiomeRegistration();
 });
