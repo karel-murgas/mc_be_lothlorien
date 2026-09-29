@@ -7,7 +7,7 @@ import { MAX_GROWTH, growChance, bonemealSteps, advanceGrowth } from "../lothlor
 import { estimateDepth, probeCount, ringOffsets, DEPTH_RADII } from "../lothlorien_bp/scripts/depth.js";
 import { makeRandom } from "../lothlorien_bp/scripts/mallorn_tree.js";
 import { buildFletMallorn, LADDER, LEAF_KEEP, ROOT_DEPTH, B } from "../tools/flet_mallorn.mjs";
-import { SIZE, SIZE_Y, TRUNK_AT, CHOSEN } from "../tools/build_structures.mjs";
+import { SIZE, SIZE_Y, TRUNK_AT, CHOSEN, TRUNK_ANCHOR } from "../tools/build_structures.mjs";
 import { existsSync } from "node:fs";
 
 const L = "lothlorien:lothlorien", RIVER = "minecraft:river", FOREST = "minecraft:forest";
@@ -195,9 +195,11 @@ test("giants: the jigsaw pool matches CHOSEN, every piece ships, the structure s
   assert.ok(bp("worldgen/structures/giant_mallorn.json")["minecraft:jigsaw"].max_depth >= 1, "max_depth 0 never builds");
   const set = bp("worldgen/structure_sets/giant_mallorn.json")["minecraft:structure_set"];
   assert.ok(set.placement.separation * 2 < set.placement.spacing, "engine rule: separation < spacing / 2");
-  // start chunks of neighbouring cells are at least separation + 1 chunks apart, and the random rotation turns
-  // the piece around its corner, which can move it by a whole piece width (seen: trunks 27 apart at separation 2)
-  assert.ok((set.placement.separation + 1) * 16 >= 2 * SIZE + 16, "neighbouring giants cannot overlap");
+  // start chunks of neighbouring cells are at least separation + 1 chunks apart; the trunk anchor keeps each
+  // trunk on its start however the piece is rotated (without it, trunks were seen 27 apart at separation 2)
+  assert.equal(bp("worldgen/structures/giant_mallorn.json")["minecraft:jigsaw"].start_jigsaw_name, TRUNK_ANCHOR);
+  assert.ok((set.placement.separation + 1) * 16 >= SIZE, "neighbouring giants cannot overlap");
+  assert.deepEqual(pool.elements.map((e) => e.weight), CHOSEN.map(([, , w]) => w));
   assert.deepEqual(GIANT_TREES, CHOSEN.map(([v, n]) => `mallorn_${v}_${String(n).padStart(2, "0")}`));
   for (const name of GIANT_TREES) {
     assert.ok(existsSync(new URL(`../lothlorien_bp/structures/lothlorien/${name}.mcstructure`, import.meta.url)), name);

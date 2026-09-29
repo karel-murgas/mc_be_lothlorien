@@ -277,8 +277,21 @@ Density check: `/scriptevent lothlorien:treecount [radius]` reports trees per ch
     chunk borders.
   - Spacing 6 / separation 2 was far too dense: about 5 giants in a medium Lothlorien patch, one pair of
     trunks only about 28 blocks apart. The piece is rotated around its corner, so a trunk can move by
-    about the piece width. The set is now spacing 13 / separation 6: roughly 1 per patch, with spots at
-    least 112 blocks apart and trunks about 70+ apart. Not yet seen in game.
+    about the piece width. Spacing 13 / separation 6 was tried next; the user asked for about 11.
+  - **Now (2026-09-30, not yet seen in game): one set for all giants, with the trunk anchored.**
+    - The pool (`CHOSEN`, with weights) holds the flet trees woven 5 and 7 at weight 2 each and the plain
+      giants 2, 3, 6 and 8 at weight 3 each, so about 1 giant in 4 has a flet.
+    - The set is spacing 6 / separation 2. About 5 giants per medium patch, about 1-2 of them flets, which
+      is roughly what a separate flet grid of spacing 12 would give.
+    - One set means two giants never compete for space. Structure sets cannot exclude each other; Java's
+      `exclusion_zone` is not in Bedrock's documented fields.
+    - Trunk anchor: every piece's bottom trunk cell (1, -5, 1) is a `minecraft:jigsaw` block
+      (`JigsawBlock` entity: name `lothlorien:giant_trunk`, target and pool `minecraft:empty`, final_state
+      `lothlorien:mallorn_log`), and the structure's `start_jigsaw_name` is that name. The trunk should
+      then sit on the start point however the piece is rotated, so trunks are at least 3 chunks (48
+      blocks) apart.
+    - Plain giants are variant `plain` (`flet: false`): woven branches and lush foliage, no platform, ladder
+      or chest. `/scriptevent lothlorien:showcase plain` shows them.
   - `/locate structure lothlorien:giant_mallorn` and `/place structure lothlorien:giant_mallorn` work.
 - **History:**
   - 2026-09-29: a 40-wide `structure_template_feature` was cut badly at chunk borders.

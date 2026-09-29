@@ -79,6 +79,15 @@ export function toMcstructure(blocks, [SX, SY, SZ] = [SIZE, SIZE_Y, SIZE], [OX, 
         }),
       });
     }
+    if (v.jigsaw) {
+      positionData[String(index)] = compound({
+        block_entity_data: compound({
+          id: str("JigsawBlock"), isMovable: byte(true), name: str(v.jigsaw), target: str("minecraft:empty"),
+          target_pool: str("minecraft:empty"), final_state: str(v.finalState), joint: str("rollable"),
+          x: int(x), y: int(y), z: int(z),
+        }),
+      });
+    }
   }
   const root = compound({
     format_version: int(1),
@@ -97,10 +106,18 @@ export function toMcstructure(blocks, [SX, SY, SZ] = [SIZE, SIZE_Y, SIZE], [OX, 
 export const VARIANTS = {
   flet: {},
   woven: { woven: true, lush: true },
+  plain: { woven: true, lush: true, flet: false },
 };
 
 // Trees placed by world generation: variant + number (the number is the seed). Picked in game 2026-09-29.
-export const CHOSEN = [["woven", 5], ["woven", 7]];
+// The third value is the pool weight: flet trees (woven) are 2 x 2 = 4 of 16, so about 1 giant in 4 has a flet.
+export const CHOSEN = [["woven", 5, 2], ["woven", 7, 2], ["plain", 2, 3], ["plain", 3, 3], ["plain", 6, 3], ["plain", 8, 3]];
+
+// Jigsaw anchor: the bottom trunk cell holds a jigsaw block with this name, and the jigsaw structure's
+// start_jigsaw_name puts that block on the structure start. So the trunk stays on the start point however
+// the piece is rotated (without it, rotation about the piece corner moved trunks by up to a piece width).
+export const TRUNK_ANCHOR = "lothlorien:giant_trunk";
+export const ANCHOR_AT = { x: 1, y: -ROOT_DEPTH, z: 1 };
 
 const treeName = (variant, n) => `mallorn_${variant}_${String(n).padStart(2, "0")}`;
 
@@ -116,6 +133,9 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   };
   const write = (variant, n) => {
     const tree = buildFletMallorn(makeRandom(n * 7919), VARIANTS[variant]);
+    tree.blocks.set(`${ANCHOR_AT.x},${ANCHOR_AT.y},${ANCHOR_AT.z}`, {
+      name: "minecraft:jigsaw", states: { facing_direction: 0, rotation: 0 }, jigsaw: TRUNK_ANCHOR, finalState: "lothlorien:mallorn_log",
+    });
     const { buffer, clipped } = toMcstructure(tree.blocks);
     const name = treeName(variant, n);
     writeFileSync(join(out, `${name}.mcstructure`), buffer);
@@ -142,9 +162,9 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     format_version: "1.21.100",
     "minecraft:template_pool": {
       description: { identifier: "lothlorien:giant_mallorn" },
-      elements: CHOSEN.map(([v, n]) => ({
+      elements: CHOSEN.map(([v, n, weight]) => ({
         element: { element_type: "minecraft:single_pool_element", location: `lothlorien/${treeName(v, n)}` },
-        weight: 1,
+        weight,
       })),
     },
   }, null, 2) + "\n");

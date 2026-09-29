@@ -16,7 +16,7 @@ const RETRY_TICKS = 40;
 const GIVE_UP_TICKS = 3600;
 const PASSABLE = /leaves|_log$|_wood$|grass$|fern|flower|sapling|carpet|bush|lilac|peony|rose|athelas|elanor|niphredil|corn/;
 // keep in step with VARIANTS in tools/build_structures.mjs
-const VARIANTS = ["flet", "woven"];
+const VARIANTS = ["flet", "woven", "plain"];
 
 const structureId = (v, n) => `lothlorien:mallorn_${v}_${String(n).padStart(2, "0")}`;
 

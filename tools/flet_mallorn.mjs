@@ -36,10 +36,11 @@ const startCell = (d, random) => (d > 0 ? 3 : d < 0 ? 0 : 1 + (random() < 0.5 ? 
 // Options (both off = the original flet design; the defaults must keep producing the same trees per seed):
 //   woven  the support branches run at floor level, through the platform, and the planks fill the gaps
 //          between them; the branch ends still reach past the rim and carry the leaves
+//   flet   false = a plain giant: the same tree without platform, ladder and chest (default true)
 //   lush   more foliage below the platform: longer low branches that always carry leaves, plus one or two
 //          whorls of leafy level branches on the bare trunk
 // Returns { height, floorY, blocks: Map<"x,y,z", { name, states, loot? }>, trimmed }.
-export function buildFletMallorn(random, { woven = false, lush = false } = {}) {
+export function buildFletMallorn(random, { woven = false, lush = false, flet = true } = {}) {
   const b = makeBuilder(random);
   const height = b.between([30, 38]);
   const floorY = height - b.between([9, 12]);
@@ -116,45 +117,48 @@ export function buildFletMallorn(random, { woven = false, lush = false } = {}) {
   for (const c of tree.leaves) blocks.set(key(c.x, c.y, c.z), { name: B.leaves, states: { [`${NS}:persistent`]: false } });
   for (const c of tree.logs) blocks.set(key(c.x, c.y, c.z), { name: B.log, states: { "minecraft:block_face": c.face } });
 
-  // room to stand and to look out: no leaves from the floor to three blocks above it, well past the rim
-  for (const [k, v] of blocks) {
-    const [x, y, z] = k.split(",").map(Number);
-    if (v.name === B.leaves && y > floorY && y <= floorY + 3 && fromCentre(x, z) <= radius + 4) blocks.delete(k);
-  }
+  // the flet: platform, rim, ladder and chest (a plain giant has none of them)
+  if (flet) {
+    // room to stand and to look out: no leaves from the floor to three blocks above it, well past the rim
+    for (const [k, v] of blocks) {
+      const [x, y, z] = k.split(",").map(Number);
+      if (v.name === B.leaves && y > floorY && y <= floorY + 3 && fromCentre(x, z) <= radius + 4) blocks.delete(k);
+    }
 
-  // platform and rim (a rim cell has an 8-neighbour that is neither floor nor trunk, so the ring is 4-connected)
-  const floor = new Set();
-  const span = Math.ceil(radius) + 2;
-  for (let x = -span; x <= span + 3; x++) {
-    for (let z = -span; z <= span + 3; z++) if (!isTrunk(x, z) && fromCentre(x, z) <= radius) floor.add(`${x},${z}`);
-  }
-  const rim = new Set();
-  for (const c of floor) {
-    const [x, z] = c.split(",").map(Number);
-    if (DIRS8.some(([dx, dz]) => !floor.has(`${x + dx},${z + dz}`) && !isTrunk(x + dx, z + dz))) rim.add(c);
-  }
-  for (const c of floor) {
-    const [x, z] = c.split(",").map(Number);
-    if (blocks.get(key(x, floorY, z))?.name !== B.log) blocks.set(key(x, floorY, z), { name: B.planks, states: {} });
-  }
-  const conn = { north: [0, -1], south: [0, 1], west: [-1, 0], east: [1, 0] };
-  for (const c of rim) {
-    const [x, z] = c.split(",").map(Number);
-    const states = {};
-    for (const [side, [dx, dz]] of Object.entries(conn)) states[`minecraft:connection_${side}`] = rim.has(`${x + dx},${z + dz}`);
-    blocks.set(key(x, floorY + 1, z), { name: B.fence, states });
-  }
+    // platform and rim (a rim cell has an 8-neighbour that is neither floor nor trunk, so the ring is 4-connected)
+    const floor = new Set();
+    const span = Math.ceil(radius) + 2;
+    for (let x = -span; x <= span + 3; x++) {
+      for (let z = -span; z <= span + 3; z++) if (!isTrunk(x, z) && fromCentre(x, z) <= radius) floor.add(`${x},${z}`);
+    }
+    const rim = new Set();
+    for (const c of floor) {
+      const [x, z] = c.split(",").map(Number);
+      if (DIRS8.some(([dx, dz]) => !floor.has(`${x + dx},${z + dz}`) && !isTrunk(x + dx, z + dz))) rim.add(c);
+    }
+    for (const c of floor) {
+      const [x, z] = c.split(",").map(Number);
+      if (blocks.get(key(x, floorY, z))?.name !== B.log) blocks.set(key(x, floorY, z), { name: B.planks, states: {} });
+    }
+    const conn = { north: [0, -1], south: [0, 1], west: [-1, 0], east: [1, 0] };
+    for (const c of rim) {
+      const [x, z] = c.split(",").map(Number);
+      const states = {};
+      for (const [side, [dx, dz]] of Object.entries(conn)) states[`minecraft:connection_${side}`] = rim.has(`${x + dx},${z + dz}`);
+      blocks.set(key(x, floorY + 1, z), { name: B.fence, states });
+    }
 
-  // ladder from the ground through a hole in the floor; its column and the space in front stay clear
-  for (let y = 0; y <= floorY + 3; y++) {
-    const front = key(LADDER.x, y, LADDER.z - 1);
-    if ([B.leaves, B.log].includes(blocks.get(front)?.name)) blocks.delete(front);
-    blocks.delete(key(LADDER.x, y, LADDER.z));
-    if (y <= floorY) blocks.set(key(LADDER.x, y, LADDER.z), { name: B.ladder, states: { facing_direction: 2 } });
-  }
+    // ladder from the ground through a hole in the floor; its column and the space in front stay clear
+    for (let y = 0; y <= floorY + 3; y++) {
+      const front = key(LADDER.x, y, LADDER.z - 1);
+      if ([B.leaves, B.log].includes(blocks.get(front)?.name)) blocks.delete(front);
+      blocks.delete(key(LADDER.x, y, LADDER.z));
+      if (y <= floorY) blocks.set(key(LADDER.x, y, LADDER.z), { name: B.ladder, states: { facing_direction: 2 } });
+    }
 
-  // loot chest against the east face of the trunk, opening away from it
-  blocks.set(key(4, floorY + 1, 1), { name: B.chest, states: { "minecraft:cardinal_direction": "east" }, loot: FLET_LOOT });
+    // loot chest against the east face of the trunk, opening away from it
+    blocks.set(key(4, floorY + 1, 1), { name: B.chest, states: { "minecraft:cardinal_direction": "east" }, loot: FLET_LOOT });
+  }
 
   return { height: height + top, floorY, radius, blocks, trimmed: trimFarLeaves(blocks) };
 }
