@@ -13,4 +13,6 @@ Packs: `lothlorien_bp/` + `lothlorien_rp/`. Deploy with `mods deploy lothlorien`
 ## Status
 
 - Phase 0 (skeleton) — done.
-- Phase 1 (biome spike) — biome, client colours and fog written; awaiting in-game test.
+- Phase 1 (biome spike) — biome generates (1.26 needs `minecraft:` targets), nights are
+  peaceful (confirmed in game). Open: region shape tuning (whole-forest replacement), border
+  look, caves, Vibrant Visuals (RP now declares `pbr`; untested).

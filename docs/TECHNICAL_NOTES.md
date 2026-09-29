@@ -23,8 +23,12 @@ Files:
   a nested "heart" biome is not possible (see design KB §3).
 - `amount` (0–1] ≈ fraction of target area replaced; `noise_frequency_scale` (0–100]:
   higher = smaller, more frequent patches. Tuning log: `0.35`/`10` gave a mid-sized, long narrow
-  region; now `0.5`/`4` plus old-growth birch (`birch_forest_mutated`). The biome can never be
-  wider than the forest it replaces: its outline follows the vanilla forest shape.
+  region; then `0.5`/`4` plus old-growth birch (`birch_forest_mutated`); now `0.45`/`1`.
+  Goal (user): a forest is converted **whole or not at all**, and neighbouring forest types
+  join into one region. JSON cannot select per forest; the approximation is noise so slow
+  that it is nearly constant across one forest, so `amount` decides roughly what share of
+  forests convert. The biome can never be wider than the forests it replaces: its outline
+  follows the vanilla forest shape.
 - Append new replacement entries at the **end** of the array; inserting earlier shifts the
   noise of existing ones.
 - Stable server components: `climate`, `creature_spawn_probability`, `humidity`,
