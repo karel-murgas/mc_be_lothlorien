@@ -6,6 +6,7 @@ import "./crop.js";
 import "./lembas.js";
 import "./athelas.js";
 import { handleTreeScriptEvent } from "./trees.js";
+import { handleShowcaseEvent } from "./showcase.js";
 import { leafUndersideY } from "./leaf_fall.js";
 import { DEPTH_NAMES, estimateDepth, probeCount } from "./depth.js";
 
@@ -166,6 +167,7 @@ function onScriptEvent(event) {
   const player = event.sourceEntity;
   if (!player || player.typeId !== "minecraft:player") return;
   if (handleTreeScriptEvent(event, player)) return;
+  if (handleShowcaseEvent(event, player)) return;
   if (event.id === "lothlorien:survey") {
     survey(player);
     return;

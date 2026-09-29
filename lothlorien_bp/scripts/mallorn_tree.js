@@ -15,11 +15,11 @@ export function makeRandom(seed) {
 }
 
 const key = (x, y, z) => `${x},${y},${z}`;
-const DIRS8 = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
+export const DIRS8 = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
 
 // Shared drawing helpers. Logs are { x, y, z, face } (`face` = minecraft:block_face: "up" for a trunk,
 // "east"/"south" for a branch along x/z); leaves are { x, y, z }. Leaves never replace logs.
-function makeBuilder(random) {
+export function makeBuilder(random) {
   const logs = new Map();
   const leaves = new Map();
   const between = ([lo, hi]) => lo + Math.floor(random() * (hi - lo + 1));

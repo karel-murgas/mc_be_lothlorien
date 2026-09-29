@@ -1,0 +1,24 @@
+{
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        { "type": "item", "name": "lothlorien:miruvor", "weight": 3, "functions": [{ "function": "set_count", "count": { "min": 1, "max": 2 } }] },
+        { "type": "item", "name": "lothlorien:lembas_wrapped", "weight": 2 }
+      ]
+    },
+    {
+      "rolls": { "min": 3, "max": 5 },
+      "entries": [
+        { "type": "item", "name": "lothlorien:athelas", "weight": 4, "functions": [{ "function": "set_count", "count": { "min": 2, "max": 5 } }] },
+        { "type": "item", "name": "lothlorien:athelas_salve", "weight": 1 },
+        { "type": "item", "name": "lothlorien:western_corn_grain", "weight": 4, "functions": [{ "function": "set_count", "count": { "min": 2, "max": 6 } }] },
+        { "type": "item", "name": "lothlorien:western_corn_seeds", "weight": 2, "functions": [{ "function": "set_count", "count": { "min": 1, "max": 3 } }] },
+        { "type": "item", "name": "lothlorien:mallorn_acorn", "weight": 2, "functions": [{ "function": "set_count", "count": { "min": 1, "max": 2 } }] },
+        { "type": "item", "name": "lothlorien:elanor", "weight": 2, "functions": [{ "function": "set_count", "count": { "min": 1, "max": 3 } }] },
+        { "type": "item", "name": "lothlorien:niphredil", "weight": 2, "functions": [{ "function": "set_count", "count": { "min": 1, "max": 3 } }] },
+        { "type": "item", "name": "minecraft:emerald", "weight": 4, "functions": [{ "function": "set_count", "count": { "min": 2, "max": 6 } }] }
+      ]
+    }
+  ]
+}

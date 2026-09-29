@@ -230,6 +230,33 @@ directly) on grass. **Untested in game:** custom blocks inside `tree_feature`, l
 density (5/chunk is a guess), mega tree size.
 Density check: `/scriptevent lothlorien:treecount [radius]` reports trees per chunk of biome and canopy cover around you (loaded chunks only; stand inside the biome in a freshly generated area).
 
+## Phase 5 - giant flet Mallorns (structures; written 2026-09-29, in-game test pending)
+
+- **What:** 4x4 trunk 30-38 high (tip narrows to 2x2), sunk 5 blocks into the ground with buttress roots.
+  A plank platform (radius 5.5-7, fence rim) sits on 6-8 level branches 9-12 below the top. A vanilla
+  ladder runs up the north face of the trunk (column x 0, z -1) through a hole in the floor. A chest
+  against the east face uses `loot_tables/chests/mallorn_flet.json`. There are no leaves from the floor
+  to 3 above it within radius+4, so the view is open.
+- **Leaves** are normal worldgen leaves (`persistent` false). Any leaf more than 8 steps through leaves
+  from a log is dropped at generation time (decay reach is 10), so nothing thins out later. There are
+  about 5-10 such leaves per tree.
+- **Pipeline:** the shape is in `tools/flet_mallorn.mjs` (pure; reuses `makeBuilder` from
+  `mallorn_tree.js`). `node tools/build_structures.mjs [count] [firstSeed]` writes
+  `structures/lothlorien/mallorn_flet_NN.mcstructure` (40x54x40, trunk NW cell at x/z 18, ground at y 5,
+  about 700 KB each) and the matching `features/mallorn_flet_*`. Rerunning it replaces all of them.
+  The format and the traps are in `.claude/skills/bedrock-modding/references/09-structures.md`.
+- **Worldgen:** `feature_rules/mallorn_flet_feature_rules.json`, `before_surface_pass`, runs on chunks
+  where chunkX and chunkZ are both multiples of 3, with chance 1/3 (about one giant per 27 chunks). The
+  corner lands in [0,8] of the chunk, so two giants never overlap. The heightmap is sampled at the trunk.
+- **Curation:** `/scriptevent lothlorien:showcase` lays out all candidates on a grid (4 per row, 48
+  apart) south-east of the player, with a numbered sign in front of each ladder. Trees in unloaded chunks
+  are retried for 3 minutes. `/scriptevent lothlorien:showcase 3` places only number 3.
+- **Open questions for the first test:** does the chest `LootTable` field fill the chest? Does a 40-wide
+  structure get cut at chunk borders? Do the fence connections hold? Does the ladder face the right way
+  (`facing_direction` 2)? Do normal Mallorns grow into the platform?
+- Tests: `tests/run.mjs` checks, over 40 seeds, that the ladder is unbroken, there is a floor at the
+  exit, the chest has room, leaves are within reach and everything fits the box.
+
 ## Phase 6 - ground identity and flora (step 5, procedural trees, postponed on purpose)
 
 Blocks: plants `elanor`, `niphredil`, `athelas`, `golden_fern` (`minecraft:geometry.cross`, `alpha_test`, no

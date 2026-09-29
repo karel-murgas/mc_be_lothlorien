@@ -5,6 +5,9 @@ import { BONEMEAL_TABLE, SPREAD_TRIES, COVERS, pickWeighted } from "../lothlorie
 import { readFileSync } from "node:fs";
 import { MAX_GROWTH, growChance, bonemealSteps, advanceGrowth } from "../lothlorien_bp/scripts/crop_rules.js";
 import { estimateDepth, probeCount, ringOffsets, DEPTH_RADII } from "../lothlorien_bp/scripts/depth.js";
+import { makeRandom } from "../lothlorien_bp/scripts/mallorn_tree.js";
+import { buildFletMallorn, LADDER, LEAF_KEEP, ROOT_DEPTH, B } from "../tools/flet_mallorn.mjs";
+import { SIZE, SIZE_Y, TRUNK_AT } from "../tools/build_structures.mjs";
 
 const L = "lothlorien:lothlorien", RIVER = "minecraft:river", FOREST = "minecraft:forest";
 const T = new Set([RIVER]);
@@ -133,6 +136,53 @@ test("wrapped Lembas: more nutrition than the cake, eaten faster", () => {
   const cake = food("lembas_cake"), wrapped = food("lembas_wrapped");
   assert.ok(wrapped["minecraft:food"].nutrition > cake["minecraft:food"].nutrition);
   assert.ok(wrapped["minecraft:use_modifiers"].use_duration < cake["minecraft:use_modifiers"].use_duration, "eaten faster");
+});
+
+// Giant flet Mallorns (tools/flet_mallorn.mjs), over many seeds.
+const flets = Array.from({ length: 40 }, (_, i) => buildFletMallorn(makeRandom(i * 7919 + 1)));
+const at = (t, x, y, z) => t.blocks.get(`${x},${y},${z}`)?.name;
+test("flet: ladder unbroken from the ground through the floor, with a floor to step onto", () => {
+  for (const t of flets) {
+    for (let y = 0; y <= t.floorY; y++) assert.equal(at(t, LADDER.x, y, LADDER.z), B.ladder, `ladder gap at y ${y}`);
+    for (let y = 0; y <= t.floorY + 2; y++) assert.equal(at(t, LADDER.x, y, LADDER.z - 1) === B.leaves || at(t, LADDER.x, y, LADDER.z - 1) === B.log, false);
+    assert.equal(at(t, LADDER.x, t.floorY, LADDER.z - 1), B.planks);
+    for (let y = t.floorY + 1; y <= t.floorY + 3; y++) assert.equal(at(t, LADDER.x, y, LADDER.z), undefined, "headroom over the hole");
+  }
+});
+test("flet: chest stands on the floor with room above", () => {
+  for (const t of flets) {
+    const [k] = [...t.blocks].find(([, v]) => v.name === B.chest);
+    const [x, y, z] = k.split(",").map(Number);
+    assert.equal(y, t.floorY + 1);
+    assert.equal(at(t, x, y - 1, z), B.planks);
+    assert.equal(at(t, x, y + 1, z), undefined);
+  }
+});
+test(`flet: every leaf is within ${LEAF_KEEP} steps of a log (no decay after generation)`, () => {
+  for (const t of flets) {
+    const seen = new Set(), queue = [];
+    for (const [k, v] of t.blocks) if (v.name === B.log) { seen.add(k); queue.push([k, 0]); }
+    for (let i = 0; i < queue.length; i++) {
+      const [k, d] = queue[i];
+      if (d === LEAF_KEEP) continue;
+      const [x, y, z] = k.split(",").map(Number);
+      for (const [dx, dy, dz] of [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]]) {
+        const n = `${x + dx},${y + dy},${z + dz}`;
+        if (!seen.has(n) && t.blocks.get(n)?.name === B.leaves) { seen.add(n); queue.push([n, d + 1]); }
+      }
+    }
+    for (const [k, v] of t.blocks) if (v.name === B.leaves) assert.ok(seen.has(k), `far leaf ${k}`);
+  }
+});
+test("flet: tree fits the structure box and drops few leaves", () => {
+  for (const t of flets) {
+    for (const k of t.blocks.keys()) {
+      const [x, y, z] = k.split(",").map(Number);
+      assert.ok(x + TRUNK_AT >= 0 && x + TRUNK_AT < SIZE && z + TRUNK_AT >= 0 && z + TRUNK_AT < SIZE, `outside x/z ${k}`);
+      assert.ok(y + ROOT_DEPTH >= 0 && y + ROOT_DEPTH < SIZE_Y, `outside y ${k}`);
+    }
+    assert.ok(t.trimmed < 60, `${t.trimmed} leaves trimmed`);
+  }
 });
 
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }
