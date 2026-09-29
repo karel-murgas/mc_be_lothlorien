@@ -158,15 +158,17 @@ bone meal, leaf decay, instruments), `blocks/mallorn_sapling.json`, `items/mallo
 - **Growth:** `lothlorien:sapling` random tick; stage 0 -> 1 -> tree, each step 1/7 per tick (vanilla-like).
   The trunk needs room (air/leaves/soft plants); branches and leaves are placed only where free.
   Bone meal: 45% to advance one step, handled in a `playerInteractWithBlock` world event.
-- **Tree:** each tree draws an archetype (slender, round, spreading, tiered, leaning) that sets trunk height
-  (6-15), crown size and branch habit; trunk may lean, 2-6 branches leave at random heights in any of 8
-  directions and rise, each with its own leaf blob; crown = main blob (maybe off-centre) + blobs, so
-  crown bottoms are uneven. Seed-based; ~all trees distinct. Leaves per tree: median ~180, 5-95% = 95-300.
+- **Tree:** each tree draws an archetype (slender, round, spreading, tiered, tall) that sets trunk height
+  (6-13), crown size and branch habit. Straight trunk. Branches: 3-5 **level** branches (different
+  directions, same height, no rise) just under the crown = a base for a platform; 0-3 short lower branches at
+  random heights; 1-5 rising branches through the crown. Every branch may carry a leaf blob; the crown is a
+  main blob (maybe off-centre) + blobs, so crown bottoms are uneven. Seed-based, ~all trees distinct.
+  Average ~32 logs (~127 planks) and ~200 leaves (5-95%: ~100-320).
 - **Leaf decay:** leaves have state `lothlorien:persistent`. Player placement sets it true (never decays);
   grown/worldgen leaves are false and, on a random tick, break with drops if no Mallorn log/wood is
   within 6 steps through leaves (unloaded neighbour = assume connected).
-- **Balance (estimate):** 2% per leaf x ~185 leaves = ~3.7 acorns if every leaf is cleared; clearing about
-  half gives ~1.8, so a tree replaces itself with margin without acorns raining; bigger trees pay more. `node tests/tree_stats.mjs [n] [chance]`
+- **Balance (estimate):** 2% per leaf x ~200 leaves = ~4 acorns if every leaf is cleared; clearing about
+  half gives ~2, so a tree replaces itself with margin without acorns raining; bigger trees pay more. `node tests/tree_stats.mjs [n] [chance]`
   prints the numbers offline. In game: `/scriptevent lothlorien:grow 20` plants 20 trees on a grid around
   you, `/scriptevent lothlorien:treestats` reports the generator averages. **The 20-tree cut-down test is still to do.**
 - **Untested in game** (written without game access): random ticking without a `minecraft:random_ticking`
