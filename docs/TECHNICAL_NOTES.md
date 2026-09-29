@@ -36,7 +36,12 @@ Files:
   across forests. Now `0.3`/`0.25`: amount is the dial for both coverage and connectivity;
   frequency only sets the scale. Compare on the same seed.
   `0.3`/`0.25`: still near-endless. Reading: with five temperate forest types as targets their
-  union is itself huge, so the noise blob, not the forest, now bounds a region. Now `0.3`/`0.5`. **Untested in game**: whether
+  union is itself huge, so the noise blob, not the forest, now bounds a region. Now `0.3`/`0.5`.
+  `0.3`/`0.5` (new world, same seed): still endless, same place. Reading: since `10` gave
+  mid-sized regions, any frequency <= 1 makes blobs thousands of blocks wide, far larger than
+  any forest. Now `0.3`/`2` and targets cut to `forest`, `flower_forest`, `birch_forest_mutated`
+  (dropped `birch_forest`, `dappled_forest`) so the forest outline bounds regions again.
+  Expect some forests to be cut by blob edges again; that is the price of a bounded size. **Untested in game**: whether
   0.25 is accepted (if not, the biome is dropped and `/locate` fails) and the resulting region sizes.
   Goal (user): a forest is converted **whole or not at all**, and neighbouring forest types
   join into one region. JSON cannot select per forest; the approximation is noise so slow
@@ -108,6 +113,8 @@ measured ms per estimate (200-run average) — **run it in-game and record the n
 `_ms per estimate: ?_`. Limits: rings only see loaded chunks (unloaded probes are skipped,
 so depth can read low near the simulation edge), and the outline follows vanilla forest
 shapes, so "heart" means far from any border, not a designed centre.
+`minecraft:river` counts as inside for depth (rivers run through the biome and are not an edge);
+standing in a river counts only if Lothlórien is seen before the first foreign ring.
 
 **B. Worldgen heart approximation**: feature rule
 `lothlorien:grove_flowers_feature_rules` (after_surface_pass, tag `lothlorien`) places

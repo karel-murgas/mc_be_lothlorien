@@ -113,20 +113,33 @@ function biomeIdAt(dimension, x, y, z) {
   }
 }
 
+// Rivers cut through the biome (vanilla carves them after biome selection), so for depth a
+// river counts as Lothlorien: crossing one is not reaching the edge.
+const DEPTH_TRANSPARENT = new Set(["minecraft:river"]);
+
 // Returns { level: 0-3, distance } where distance is the radius of the first ring that
 // contains a non-Lothlorien point (Infinity if all rings are inside the biome).
 function estimateDepth(player) {
   const dim = player.dimension;
   const { x, y, z } = player.location;
-  if (biomeIdAt(dim, x, y, z) !== BIOME_ID) return { level: 0, distance: 0 };
+  const here = biomeIdAt(dim, x, y, z);
+  const inRiver = DEPTH_TRANSPARENT.has(here);
+  if (here !== BIOME_ID && !inRiver) return { level: 0, distance: 0 };
+  // Standing in a river counts only if Lothlorien is seen before the first foreign point.
+  let sawBiome = here === BIOME_ID;
   for (const r of DEPTH_RADII) {
+    let foreign = false;
     for (let i = 0; i < DEPTH_DIRECTIONS; i++) {
       const a = (2 * Math.PI * i) / DEPTH_DIRECTIONS;
       const id = biomeIdAt(dim, x + r * Math.cos(a), y, z + r * Math.sin(a));
-      if (id !== undefined && id !== BIOME_ID) return { level: r <= EDGE_LIMIT ? 1 : r <= INNER_LIMIT ? 2 : 3, distance: r };
+      if (id === BIOME_ID) sawBiome = true;
+      else if (id !== undefined && !DEPTH_TRANSPARENT.has(id)) foreign = true;
     }
+    if (!foreign) continue;
+    if (!sawBiome) return { level: 0, distance: 0 };
+    return { level: r <= EDGE_LIMIT ? 1 : r <= INNER_LIMIT ? 2 : 3, distance: r };
   }
-  return { level: 3, distance: Infinity };
+  return sawBiome ? { level: 3, distance: Infinity } : { level: 0, distance: 0 };
 }
 
 const lastDepth = new Map();
