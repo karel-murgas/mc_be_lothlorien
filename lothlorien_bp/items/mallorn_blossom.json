@@ -13,7 +13,10 @@
         "block": "lothlorien:mallorn_blossom",
         "replace_block_item": true
       },
-      "minecraft:icon": "lothlorien:mallorn_blossom"
+      "minecraft:icon": "lothlorien:mallorn_blossom",
+      "minecraft:compostable": {
+        "composting_chance": 65
+      }
     }
   }
 }

@@ -9,7 +9,10 @@
       }
     },
     "components": {
-      "minecraft:icon": "lothlorien:lembas_dough"
+      "minecraft:icon": "lothlorien:lembas_dough",
+      "minecraft:compostable": {
+        "composting_chance": 85
+      }
     }
   }
 }

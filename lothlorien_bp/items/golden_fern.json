@@ -13,7 +13,10 @@
         "block": "lothlorien:golden_fern",
         "replace_block_item": true
       },
-      "minecraft:icon": "lothlorien:golden_fern"
+      "minecraft:icon": "lothlorien:golden_fern",
+      "minecraft:compostable": {
+        "composting_chance": 65
+      }
     }
   }
 }

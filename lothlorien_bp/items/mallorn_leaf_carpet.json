@@ -13,7 +13,10 @@
         "block": "lothlorien:mallorn_leaf_carpet",
         "replace_block_item": true
       },
-      "minecraft:icon": "lothlorien:mallorn_leaf_carpet"
+      "minecraft:icon": "lothlorien:mallorn_leaf_carpet",
+      "minecraft:compostable": {
+        "composting_chance": 30
+      }
     }
   }
 }

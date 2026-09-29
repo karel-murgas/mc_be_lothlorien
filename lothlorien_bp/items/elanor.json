@@ -13,7 +13,10 @@
         "block": "lothlorien:elanor",
         "replace_block_item": true
       },
-      "minecraft:icon": "lothlorien:elanor"
+      "minecraft:icon": "lothlorien:elanor",
+      "minecraft:compostable": {
+        "composting_chance": 65
+      }
     }
   }
 }

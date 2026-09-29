@@ -60,7 +60,8 @@
             ]
           }
         ]
-      }
+      },
+      "minecraft:flower_pottable": {}
     }
   }
 }

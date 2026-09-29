@@ -13,7 +13,10 @@
         "block": "lothlorien:niphredil",
         "replace_block_item": true
       },
-      "minecraft:icon": "lothlorien:niphredil"
+      "minecraft:icon": "lothlorien:niphredil",
+      "minecraft:compostable": {
+        "composting_chance": 65
+      }
     }
   }
 }

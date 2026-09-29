@@ -13,7 +13,10 @@
         "block": "lothlorien:athelas",
         "replace_block_item": true
       },
-      "minecraft:icon": "lothlorien:athelas"
+      "minecraft:icon": "lothlorien:athelas",
+      "minecraft:compostable": {
+        "composting_chance": 65
+      }
     }
   }
 }

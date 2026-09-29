@@ -19,7 +19,15 @@
         "nutrition": 8,
         "saturation_modifier": 1.2
       },
-      "lothlorien:lembas": {}
+      "lothlorien:lembas": {},
+      "minecraft:compostable": {
+        "composting_chance": 85
+      },
+      "minecraft:tags": {
+        "tags": [
+          "minecraft:is_food"
+        ]
+      }
     }
   }
 }

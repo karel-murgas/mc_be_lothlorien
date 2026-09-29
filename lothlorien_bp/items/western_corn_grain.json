@@ -9,7 +9,10 @@
       }
     },
     "components": {
-      "minecraft:icon": "lothlorien:western_corn_grain"
+      "minecraft:icon": "lothlorien:western_corn_grain",
+      "minecraft:compostable": {
+        "composting_chance": 65
+      }
     }
   }
 }

@@ -15,6 +15,9 @@
         "use_on": [
           "minecraft:farmland"
         ]
+      },
+      "minecraft:compostable": {
+        "composting_chance": 30
       }
     }
   }
