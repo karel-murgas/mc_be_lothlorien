@@ -18,7 +18,7 @@ const STAGE = `${NS}:stage`;
 const GROW_CHANCE = 1 / 7; // per random tick and stage, like vanilla saplings
 const MIN_LIGHT = 9;
 const BONE_MEAL_CHANCE = 0.45;
-const LEAF_REACH = 6;
+const LEAF_REACH = 10;
 const NEIGHBOURS = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
 const WOOD = new Set(["log", "wood", "stripped_log", "stripped_wood"].map((n) => `${NS}:mallorn_${n}`));
 const SOFT_PLANTS = new Set(["minecraft:short_grass", "minecraft:tall_grass", "minecraft:fern", "minecraft:snow_layer", SAPLING]);
@@ -98,24 +98,49 @@ function lightAt(block) {
 
 // --- leaf decay -----------------------------------------------------------------------------
 
-// Breadth-first through Mallorn leaves; unloaded neighbours count as connected so a chunk edge
-// never strips a tree.
+// Breadth-first through Mallorn leaves; unloaded neighbours count as connected so a chunk edge never
+// strips a tree, and so does a search that grows past MAX_NODES. Big crowns put leaves 8+ steps from
+// the nearest log, hence the long reach. Every leaf on the path to the log found is remembered as
+// connected for CONNECTED_TTL ticks: without that, each random tick on an inner leaf costs hundreds of
+// getBlock calls, and a forest ticks thousands of leaves a second.
+const MAX_NODES = 4000;
+const CONNECTED_TTL = 1200;
+const connectedUntil = new Map();
+let lastPrune = 0;
+
 function connectedToWood(start) {
   const dim = start.dimension;
-  const seen = new Set();
+  const now = system.currentTick;
+  if (now - lastPrune > 6000) {
+    lastPrune = now;
+    for (const [k, t] of connectedUntil) if (t <= now) connectedUntil.delete(k);
+  }
+  const keyOf = (p) => `${dim.id}|${p.x},${p.y},${p.z}`;
+  const startKey = keyOf(start.location);
+  if ((connectedUntil.get(startKey) ?? 0) > now) return true;
+
+  const parent = new Map([[startKey, undefined]]);
+  const markPath = (k) => {
+    for (; k !== undefined; k = parent.get(k)) connectedUntil.set(k, now + CONNECTED_TTL);
+  };
   let frontier = [start.location];
-  seen.add(`${start.location.x},${start.location.y},${start.location.z}`);
+  let nodes = 0;
   for (let step = 0; step < LEAF_REACH; step++) {
     const next = [];
     for (const p of frontier) {
+      const pk = keyOf(p);
       for (const [dx, dy, dz] of NEIGHBOURS) {
         const q = { x: p.x + dx, y: p.y + dy, z: p.z + dz };
-        const k = `${q.x},${q.y},${q.z}`;
-        if (seen.has(k)) continue;
-        seen.add(k);
+        const k = keyOf(q);
+        if (parent.has(k)) continue;
+        parent.set(k, pk);
+        if (++nodes > MAX_NODES) return true;
         const b = dim.getBlock(q);
         if (!b) return true;
-        if (WOOD.has(b.typeId)) return true;
+        if (WOOD.has(b.typeId)) {
+          markPath(pk);
+          return true;
+        }
         if (b.typeId === LEAVES) next.push(q);
       }
     }

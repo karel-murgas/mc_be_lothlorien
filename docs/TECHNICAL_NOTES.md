@@ -173,7 +173,10 @@ bone meal, leaf decay, instruments), `blocks/mallorn_sapling.json`, `items/mallo
   pre-generated `.mcstructure` files placed by a feature (Phase 5).
 - **Leaf decay:** leaves have state `lothlorien:persistent`. Player placement sets it true (never decays);
   grown/worldgen leaves are false and, on a random tick, break with drops if no Mallorn log/wood is
-  within 6 steps through leaves (unloaded neighbour = assume connected).
+  within 10 steps through leaves (unloaded neighbour = assume connected). Reach was 6 at first and stripped
+  leaves off live big trees (crown leaves sit 8+ steps from any log; game-tested 2026-09-29). Verdicts are
+  cached per leaf for 60 s (path marking) to keep random-tick cost down; a felled tree's leaves therefore
+  start decaying up to a minute later.
 - **Balance (estimate):** 2% per leaf x ~200 leaves = ~4 acorns if every leaf is cleared; clearing about
   half gives ~2, so a tree replaces itself with margin without acorns raining; bigger trees pay more. `node tests/tree_stats.mjs [n] [chance]`
   prints the numbers offline. In game: `/scriptevent lothlorien:grow 20` plants 20 trees on a grid around
