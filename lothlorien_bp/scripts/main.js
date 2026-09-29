@@ -1,6 +1,7 @@
 import { world, system, BiomeTypes } from "@minecraft/server";
 import "./blocks.js";
 import { handleTreeScriptEvent } from "./trees.js";
+import { DEPTH_NAMES, estimateDepth, probeCount } from "./depth.js";
 
 const BIOME_ID = "lothlorien:lothlorien";
 
@@ -39,7 +40,8 @@ function showDebug() {
     const biome = biomeAt(player.dimension, player.location) ?? "?";
     const { inside, total } = hostilesInBiome(player);
     const marker = biome === BIOME_ID ? "§a" : "§7";
-    const depth = DEPTH_NAMES[lastDepth.get(player.id) ?? 0];
+    const last = lastDepth.get(player.id);
+    const depth = last ? depthLabel(last) : DEPTH_NAMES[0];
     player.onScreenDisplay.setActionBar(
       `${marker}${biome}§r [${depth}]  hostiles r${HOSTILE_SCAN_RADIUS}: ${inside} in Lórien / ${total}`
     );
@@ -93,64 +95,46 @@ function survey(player) {
 }
 
 
-// Phase 2 prototype A: runtime depth estimate. Biome data cannot say "how deep inside am I",
-// so probe rings of points around the player and take the distance to the nearest non-
-// Lothlorien sample. Cheap (one getBiome per probe, a few seconds apart, never per tick).
-const DEPTH_DIRECTIONS = 12;
-const DEPTH_RADII = [12, 24, 40, 60, 80];
+// Phase 2 prototype A: runtime depth estimate (the rings and levels are in depth.js). Cheap:
+// two API calls per probe, every few seconds, never per tick.
 const DEPTH_INTERVAL_TICKS = 60;
-// Nearest-border distance up to which the player counts as edge / inner; farther (or no
-// border within the last radius) counts as heart.
-const EDGE_LIMIT = 24;
-const INNER_LIMIT = 60;
-const DEPTH_NAMES = ["outside", "edge", "inner", "heart"];
-
-function biomeIdAt(dimension, x, y, z) {
-  try {
-    return dimension.getBiome({ x, y, z }).id;
-  } catch {
-    return undefined; // unloaded chunk
-  }
-}
-
-// Rivers cut through the biome (vanilla carves them after biome selection), so for depth a
-// river counts as Lothlorien: crossing one is not reaching the edge.
+// Rivers cut through the biome, so crossing one is not reaching the edge.
 const DEPTH_TRANSPARENT = new Set(["minecraft:river"]);
 
-// Returns { level: 0-3, distance } where distance is the radius of the first ring that
-// contains a non-Lothlorien point (Infinity if all rings are inside the biome).
-function estimateDepth(player) {
+// Biome at the surface (not at the player's height: biomes are 3D, and flying high would
+// sample the air). undefined = unloaded chunk.
+function surfaceSampler(player) {
   const dim = player.dimension;
-  const { x, y, z } = player.location;
-  const here = biomeIdAt(dim, x, y, z);
-  const inRiver = DEPTH_TRANSPARENT.has(here);
-  if (here !== BIOME_ID && !inRiver) return { level: 0, distance: 0 };
-  // Standing in a river counts only if Lothlorien is seen before the first foreign point.
-  let sawBiome = here === BIOME_ID;
-  for (const r of DEPTH_RADII) {
-    let foreign = false;
-    for (let i = 0; i < DEPTH_DIRECTIONS; i++) {
-      const a = (2 * Math.PI * i) / DEPTH_DIRECTIONS;
-      const id = biomeIdAt(dim, x + r * Math.cos(a), y, z + r * Math.sin(a));
-      if (id === BIOME_ID) sawBiome = true;
-      else if (id !== undefined && !DEPTH_TRANSPARENT.has(id)) foreign = true;
+  const px = Math.floor(player.location.x);
+  const pz = Math.floor(player.location.z);
+  return (dx, dz) => {
+    try {
+      const top = dim.getTopmostBlock({ x: px + dx, z: pz + dz });
+      if (!top) return undefined;
+      return dim.getBiome(top.location).id;
+    } catch {
+      return undefined;
     }
-    if (!foreign) continue;
-    if (!sawBiome) return { level: 0, distance: 0 };
-    return { level: r <= EDGE_LIMIT ? 1 : r <= INNER_LIMIT ? 2 : 3, distance: r };
-  }
-  return sawBiome ? { level: 3, distance: Infinity } : { level: 0, distance: 0 };
+  };
+}
+
+function playerDepth(player) {
+  return estimateDepth(surfaceSampler(player), BIOME_ID, DEPTH_TRANSPARENT);
+}
+
+function depthLabel(result) {
+  return DEPTH_NAMES[result.level] + (result.complete ? "" : "?");
 }
 
 const lastDepth = new Map();
 
 function updateDepth() {
   for (const player of world.getPlayers()) {
-    const { level } = estimateDepth(player);
+    const result = playerDepth(player);
     const prev = lastDepth.get(player.id);
-    lastDepth.set(player.id, level);
-    if (prev !== undefined && prev !== level && player.hasTag(DEBUG_TAG)) {
-      player.sendMessage(`[lothlorien] depth: ${DEPTH_NAMES[prev]} -> ${DEPTH_NAMES[level]}`);
+    lastDepth.set(player.id, result);
+    if (prev !== undefined && prev.level !== result.level && player.hasTag(DEBUG_TAG)) {
+      player.sendMessage(`[lothlorien] depth: ${depthLabel(prev)} -> ${depthLabel(result)}`);
     }
   }
 }
@@ -160,14 +144,14 @@ function updateDepth() {
 const BENCH_RUNS = 200;
 
 function reportDepth(player) {
-  const result = estimateDepth(player);
-  const probes = DEPTH_RADII.length * DEPTH_DIRECTIONS + 1;
+  const result = playerDepth(player);
+  const probes = probeCount();
   const t0 = Date.now();
-  for (let i = 0; i < BENCH_RUNS; i++) estimateDepth(player);
+  for (let i = 0; i < BENCH_RUNS; i++) playerDepth(player);
   const ms = (Date.now() - t0) / BENCH_RUNS;
-  const dist = result.distance === Infinity ? `>${DEPTH_RADII[DEPTH_RADII.length - 1]}` : result.distance;
+  const dist = result.distance === Infinity ? `>${result.beyond}` : result.distance;
   player.sendMessage(
-    `[lothlorien] depth ${DEPTH_NAMES[result.level]} (nearest border ~${dist} blocks); ` +
+    `[lothlorien] depth ${depthLabel(result)} (nearest border ~${dist} blocks); ` +
       `worst case ${probes} probes, ${ms.toFixed(3)} ms per estimate (avg of ${BENCH_RUNS})`
   );
 }

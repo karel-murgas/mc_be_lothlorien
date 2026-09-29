@@ -108,18 +108,21 @@ Worldgen changes affect only newly generated chunks — always test in a fresh w
 
 ## Phase 2 — edge/heart spike
 
-**A. Runtime depth** (`scripts/main.js`, `estimateDepth`): probes 12 directions x rings at
-12/24/40/60/80 blocks with `dimension.getBiome`; the first ring containing a non-Lothlórien
-point is the nearest-border distance. Levels: outside / edge (<=24) / inner (<=60) / heart
-(farther or no border found). Runs every 3 s per player, never per tick; worst case 61
-probes. Transitions are logged in chat for players with the debug tag, and the level shows
-in the debug actionbar. `/scriptevent lothlorien:depth` prints the estimate plus the
-measured ms per estimate (200-run average) — **run it in-game and record the number here**:
-`_ms per estimate: ?_`. Limits: rings only see loaded chunks (unloaded probes are skipped,
-so depth can read low near the simulation edge), and the outline follows vanilla forest
-shapes, so "heart" means far from any border, not a designed centre.
-`minecraft:river` counts as inside for depth (rivers run through the biome and are not an edge);
-standing in a river counts only if Lothlórien is seen before the first foreign ring.
+**A. Runtime depth** (`scripts/depth.js`, pure; sampler in `main.js`): probes rings at
+8/16/24/32/40 blocks (probes at most 10 blocks apart, 83 in total) at the **surface** under
+each point; the first ring with a foreign point bounds the border distance. Levels: edge
+(border <= 16), inner (<= 40), heart (farther). `minecraft:river` counts as inside. Runs every
+3 s per player, never per tick. `/scriptevent lothlorien:depth` prints the estimate and the
+ms per estimate (200-run average) — **record it here**: `_ms per estimate: ?_`.
+
+Fixed 2026-09-29 (user saw "inner" from one side and "heart" from the other): `getBiome`
+throws in unloaded chunks and those probes were skipped, so a border ahead of a flying player
+(chunks not loaded yet) was ignored and the rings ran out as "heart". Now an unreadable probe
+stops the search and the level is the lowest one still certain, shown with `?` in the debug
+bar. Probes also sampled at the player's height; biomes are 3D, so flying sampled the air.
+Old limits were 24/60 on rings to 80 (partly beyond the loaded area). Tests: `tests/run.mjs`.
+The outline follows vanilla forest shapes, so "heart" means far from any border, not a
+designed centre. Untested in game after the fix.
 
 **B. Worldgen heart approximation**: feature rule
 `lothlorien:grove_flowers_feature_rules` (after_surface_pass, tag `lothlorien`) places
