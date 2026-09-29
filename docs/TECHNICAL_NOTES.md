@@ -264,9 +264,10 @@ Density check: `/scriptevent lothlorien:treecount [radius]` reports trees per ch
     adaptation. `max_depth` is 0 (one piece, no jigsaw blocks). `start_height` is -5 from `world_surface`, so
     the roots go into the ground.
   - `worldgen/template_pools/giant_mallorn.json`: generated from CHOSEN.
-  - `worldgen/structure_sets/giant_mallorn.json`: random_spread, spacing 6 chunks, separation 3, so there is
-    at most one giant per 6x6 chunks and giants are at least 48 blocks apart, which is more than the
-    40-wide footprint.
+  - `worldgen/structure_sets/giant_mallorn.json`: random_spread, spacing 6 chunks, separation 2, so there is
+    at most one giant per 6x6 chunks and giants are at least 3 chunks (48 blocks) apart, which is more than
+    the 40-wide footprint. Separation 3 was rejected by the engine (it must be less than spacing / 2), so
+    nothing generated (2026-09-30).
   - `/locate structure lothlorien:giant_mallorn` and `/place structure lothlorien:giant_mallorn` work.
 - **History:**
   - 2026-09-29: a 40-wide `structure_template_feature` was cut badly at chunk borders.

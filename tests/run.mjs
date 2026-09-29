@@ -193,7 +193,9 @@ test("giants: the jigsaw pool matches CHOSEN, every piece ships, the structure s
   assert.equal(bp("worldgen/structures/giant_mallorn.json")["minecraft:jigsaw"].start_pool, pool.description.identifier);
   assert.equal(bp("worldgen/structures/giant_mallorn.json")["minecraft:jigsaw"].start_height.value.absolute, -ROOT_DEPTH);
   const set = bp("worldgen/structure_sets/giant_mallorn.json")["minecraft:structure_set"];
-  assert.ok((set.placement.separation * 16) >= SIZE, "neighbouring giants cannot overlap");
+  assert.ok(set.placement.separation * 2 < set.placement.spacing, "engine rule: separation < spacing / 2");
+  // start chunks of neighbouring cells are at least separation + 1 chunks apart
+  assert.ok((set.placement.separation + 1) * 16 >= SIZE, "neighbouring giants cannot overlap");
   assert.deepEqual(GIANT_TREES, CHOSEN.map(([v, n]) => `mallorn_${v}_${String(n).padStart(2, "0")}`));
   for (const name of GIANT_TREES) {
     assert.ok(existsSync(new URL(`../lothlorien_bp/structures/lothlorien/${name}.mcstructure`, import.meta.url)), name);
