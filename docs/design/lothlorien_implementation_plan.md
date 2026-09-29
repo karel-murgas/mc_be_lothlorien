@@ -605,6 +605,104 @@ Graphics/Blockbench + Claude.
 
 ---
 
+# Phase 14b — Lothlórien bees
+
+A second kind of bee, `lothlorien:mallorn_bee`, that lives on Mallorns and works only with
+Lothlórien flora. Chosen over overriding `minecraft:bee` (adding our flowers to vanilla bees): an
+override conflicts with any other add-on that touches the bee and must be re-synced by hand with
+every vanilla change. Vanilla bees stay untouched and ignore our flowers.
+
+## Decided (2026-09-29)
+
+- **Behaviour = vanilla bee.** Built from vanilla `bee.json` (newest copy: `vanilla_1.26.30`):
+  hover, pollinate, go home at night and in rain, sting like vanilla (poison by difficulty, the
+  bee dies after stinging, the swarm gets angry when its hive is broken or hit).
+- **Flowers** (pollination targets, lure, breeding, baby feeding): Elanor, Niphredil, Athelas, and
+  Mallorn blossom. Vanilla puts `cherry_leaves` and `pink_petals` in all four bee lists, and
+  Mallorn blossom (our pink-petals analogue) gets the same treatment. `mallorn_leaves` do **not**
+  count (decided, unlike vanilla `cherry_leaves`).
+- **Honey**: plain vanilla honeycomb and honey bottles.
+- **Western corn**: bees carrying nectar speed it up. Vanilla `minecraft:grows_crop` only knows
+  vanilla crops, so a script (`crop.js`) advances `lothlorien:growth` for corn under a bee that has
+  nectar, at a similar rate (vanilla: `chance 0.03`, 10 charges).
+- **Texture**: a recolour of the vanilla bee texture (pale gold / silver), reusing the vanilla bee
+  geometry and animations in the client entity file. No new model.
+- **Hives**: natural (worldgen on Mallorns, sometimes on sapling-grown trees) and craftable.
+
+## Research so far (documented, not verified in game)
+
+- Bee flower handling is not engine-hardcoded: vanilla `bee.json` lists block and item ids in
+  `move_to_block.target_blocks` (pollination), `tempt`, `breedable` and `ageable`. There is no
+  flower tag, so a custom entity just lists our block ids.
+- Entering a hive is data-driven on the bee side: `move_to_block` / `go_home` fire the event
+  `minecraft:bee_returned_to_hive` on the target block. The hive side is engine code.
+- The Bedrock hive block entity stores its occupants generically: `Occupants[]` with
+  `ActorIdentifier`, `SaveData`, `TicksLeftToStay`, `ShouldSpawnBees` (minecraft.wiki, Bedrock block
+  entity format). NBT-editor tricks storing `minecraft:npc` in a beehive exist, which suggests
+  a hive can hold and release any entity, not just `minecraft:bee`. The Java-only rule "a non-bee
+  never leaves the hive" does not apply to Bedrock.
+- Honey level rises by 1 (1% chance: 2) when a bee that has nectar leaves the hive. How Bedrock
+  decides "had nectar" is unknown: it may read `minecraft:is_charged` (the `has_nectar` group), the
+  `minecraft:has_nectar` entity property, or check for `minecraft:bee`.
+- Worldgen nests from a `single_block_feature` probably rely on `ShouldSpawnBees`, which spawns
+  **vanilla** bees. Our natural nests need our bees instead (see below).
+- The Script API (2.8.0) has no hive or occupant API: script can neither read nor fill a hive.
+
+## Spike first, in game (about an hour): can our bee use vanilla hives?
+
+Minimal `lothlorien:mallorn_bee` (vanilla copy, recoloured texture, spawn egg), an empty
+`minecraft:beehive`, and a patch of Elanor. Check, in order:
+
+1. The bee pollinates Elanor (proves `target_blocks` works with custom blocks).
+2. It enters the hive at night and comes out again as `lothlorien:mallorn_bee`.
+3. Honey level rises after nectar trips. If not, try adding the `minecraft:has_nectar` property
+   (copying the vanilla property may be refused for a custom entity).
+4. Breaking the hive angers it; shears or a bottle at level 5 work (they are hive behaviour, so they
+   should).
+5. A vanilla bee and ours share one hive without problems.
+
+**If 1-4 pass (plan A):**
+- Crafted hive = vanilla `minecraft:beehive`. Known problem (2026-09-29): Mallorn planks do not work
+  in vanilla plank recipes yet; that is being fixed separately, and the beehive recipe follows from it.
+  Optional extra: a Mallorn-styled hive recipe.
+- Natural nest = vanilla `minecraft:bee_nest` holding **our** bees. Two ways, try in order:
+  (a) a `.mcstructure` of a nest whose `Occupants` are `lothlorien:mallorn_bee` (written with a
+  Python NBT tool or saved in game with a structure block), placed by a `structure_template_feature`
+  next to the trunk; (b) a plain nest with no occupants plus a script that spawns 2-3 of our bees
+  beside new nests. Homeless vanilla-style bees look for the nearest hive (`find_hive` group) and
+  move in.
+
+**If 2 or 3 fail (plan B): our own hive block** `lothlorien:mallorn_hive` (natural and crafted
+variants), driven by script: the bee's `on_reach` fires a custom event and the script removes the
+bee and counts it, plus its nectar, in block states (occupants 0-3, `honey_level` 0-5); it releases
+them at dawn and when rain stops, spills them out angry when the hive is broken, and handles shears
+(3 honeycomb) and a glass bottle (a honey bottle). A campfire below calms the bees, like vanilla.
+More work, but all of it is under our control.
+
+## Build (after the spike)
+
+1. Bee entity + client entity + recoloured texture + spawn egg + names (`en_US`, `cs_CZ`).
+2. Hive route from the spike (plan A or B).
+3. Worldgen: aggregate `[select_mallorn_tree_feature, optional nest]` with our own copy of
+   `beehive_feature` (vanilla `may_attach_to` names only oak/birch logs and leaves). The search must
+   cover taller Mallorn trunks than the vanilla 0-6 blocks, or put the nest under a branch. Chance:
+   start at 1 tree in 20.
+4. Sapling growth (`trees.js`): a small chance of a nest when flowers are within 2 blocks, like vanilla.
+5. Corn pollination script.
+6. Tests in `tests/run.mjs` for the pure parts (corn growth chance, nest placement rules).
+
+## Success criterion
+
+In a new world, some Mallorns have nests with golden bees that work Elanor, Niphredil, Athelas and
+blossom carpets, fill with honey that harvests like vanilla, speed up nearby corn, and sting like
+vanilla bees. Vanilla bees and vanilla flowers behave as before.
+
+## Primary tools
+
+Claude (entity, features, script), image pipeline or a scripted hue shift for the texture.
+
+---
+
 # Phase 15 — Unicorn
 
 Do this after Disharmony and animal infrastructure are stable.
