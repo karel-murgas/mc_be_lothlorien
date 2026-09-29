@@ -249,11 +249,15 @@ Density check: `/scriptevent lothlorien:treecount [radius]` reports trees per ch
     1-2 whorls of leafy level branches on the bare trunk plus longer leafy low branches.
   - To experiment, add an entry to `VARIANTS` and the name to `VARIANTS` in `scripts/showcase.js`, then run
     `node tools/build_structures.mjs <variant>`.
+- **Chosen for worldgen (2026-09-29): woven 5 and woven 7** (`CHOSEN` in `tools/build_structures.mjs`). Only
+  these ship in the pack. `node tools/build_structures.mjs` rebuilds exactly that set, and
+  `node tools/build_structures.mjs <variant|all>` adds curation candidates for the showcase. They never enter
+  worldgen; run the plain command again before committing.
 - **Pipeline:** the shape is in `tools/flet_mallorn.mjs` (pure; reuses `makeBuilder` from
   `mallorn_tree.js`). `node tools/build_structures.mjs [variant|all] [count] [firstSeed]` writes
   `structures/lothlorien/mallorn_<variant>_NN.mcstructure` (40x54x40, trunk NW cell at x/z 18, ground at y 5,
   about 700 KB each) and the matching `features/mallorn_<variant>_*`. Rerunning a variant replaces that variant only.
-  `features/mallorn_giant_feature.json` picks at random from every structure file present.
+  `features/mallorn_giant_feature.json` picks at random from CHOSEN.
   The format and the traps are in `.claude/skills/bedrock-modding/references/09-structures.md`.
 - **Worldgen:** `feature_rules/mallorn_giant_feature_rules.json`, `before_surface_pass`, runs on chunks
   where chunkX and chunkZ are both multiples of 3, with chance 1/3 (about one giant per 27 chunks). The

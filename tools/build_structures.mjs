@@ -1,9 +1,12 @@
-// Writes the giant Mallorn structures for world generation:
-//   node tools/build_structures.mjs [variant|all] [count] [firstSeed]      (defaults: all 8 1)
+// Writes the giant Mallorn structures:
+//   node tools/build_structures.mjs
+//      the worldgen set: only the trees in CHOSEN (every other giant structure is removed from the pack)
+//   node tools/build_structures.mjs <variant|all> [count] [firstSeed]      (defaults 8 1)
+//      curation candidates for /scriptevent lothlorien:showcase; they replace that variant's files but never
+//      enter worldgen. Run the plain command again before committing, so the pack keeps only CHOSEN.
 // -> lothlorien_bp/structures/lothlorien/mallorn_<variant>_NN.mcstructure (id lothlorien:mallorn_<variant>_NN),
 //    features/mallorn_<variant>_NN_feature.json, and features/mallorn_giant_feature.json, which picks one of
-//    ALL structure files present at random (the feature rule feature_rules/mallorn_giant_feature_rules.json
-//    is hand-written). A variant's old files are removed before it is rebuilt; other variants are kept.
+//    CHOSEN at random (the feature rule feature_rules/mallorn_giant_feature_rules.json is hand-written).
 // Tree NN of every variant uses the same seed, so flet_07 and woven_07 share their trunk and height.
 // Each file is SIZE x SIZE_Y x SIZE with the trunk centred horizontally (cells TRUNK_AT..TRUNK_AT+3) and the
 // first block above the ground at y ROOT_DEPTH; cells the tree does not fill are structure void, so the
@@ -95,43 +98,56 @@ export const VARIANTS = {
   woven: { woven: true, lush: true },
 };
 
+// Trees placed by world generation: variant + number (the number is the seed). Picked in game 2026-09-29.
+export const CHOSEN = [["woven", 5], ["woven", 7]];
+
+const treeName = (variant, n) => `mallorn_${variant}_${String(n).padStart(2, "0")}`;
+
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  const which = process.argv[2] && isNaN(process.argv[2]) ? process.argv[2] : "all";
-  const rest = which === "all" && !isNaN(process.argv[2]) ? process.argv.slice(2) : process.argv.slice(3);
-  const count = parseInt(rest[0], 10) || 8;
-  const firstSeed = parseInt(rest[1], 10) || 1;
-  const variants = which === "all" ? Object.keys(VARIANTS) : [which];
-  for (const v of variants) if (!VARIANTS[v]) throw new Error(`unknown variant ${v}; known: ${Object.keys(VARIANTS).join(", ")}`);
+  const [which, countArg, seedArg] = process.argv.slice(2);
   const bp = join(dirname(fileURLToPath(import.meta.url)), "..", "lothlorien_bp");
   const out = join(bp, "structures", "lothlorien");
   mkdirSync(out, { recursive: true });
   const feature = (id, body) => writeFileSync(join(bp, "features", `${id}.json`),
     JSON.stringify({ format_version: "1.13.0", ...body(`lothlorien:${id}`) }, null, 2) + "\n");
-  for (const variant of variants) {
-    const prefix = `mallorn_${variant}_`;
-    for (const dir of [out, join(bp, "features")]) {
-      for (const f of readdirSync(dir)) if (f.startsWith(prefix)) unlinkSync(join(dir, f));
-    }
-    for (let i = 0; i < count; i++) {
-      const seed = firstSeed + i;
-      const tree = buildFletMallorn(makeRandom(seed * 7919), VARIANTS[variant]);
-      const { buffer, clipped } = toMcstructure(tree.blocks);
-      const name = `${prefix}${String(i + 1).padStart(2, "0")}`;
-      writeFileSync(join(out, `${name}.mcstructure`), buffer);
-      feature(`${name}_feature`, (identifier) => ({
-        "minecraft:structure_template_feature": {
-          description: { identifier }, structure_name: `lothlorien:${name}`, adjustment_radius: 0,
-          facing_direction: "north", constraints: {},
-        },
-      }));
-      const tally = (n) => [...tree.blocks.values()].filter((b) => b.name.endsWith(n)).length;
-      console.log(`${name} seed ${seed}: height ${tree.height}, floor ${tree.floorY}, radius ${tree.radius.toFixed(1)}, ` +
-        `${tally("_log")} logs, ${tally("_leaves")} leaves (${tree.trimmed} far leaves dropped), ${clipped} clipped, ${buffer.length} bytes`);
-    }
+  // removes the structure + feature files of the given variants (only numbered giant trees, nothing else)
+  const clean = (variants) => {
+    const re = new RegExp(`^mallorn_(${variants.join("|")})_\\d\\d[._]`);
+    for (const dir of [out, join(bp, "features")]) for (const f of readdirSync(dir)) if (re.test(f)) unlinkSync(join(dir, f));
+  };
+  const write = (variant, n) => {
+    const tree = buildFletMallorn(makeRandom(n * 7919), VARIANTS[variant]);
+    const { buffer, clipped } = toMcstructure(tree.blocks);
+    const name = treeName(variant, n);
+    writeFileSync(join(out, `${name}.mcstructure`), buffer);
+    feature(`${name}_feature`, (identifier) => ({
+      "minecraft:structure_template_feature": {
+        description: { identifier }, structure_name: `lothlorien:${name}`, adjustment_radius: 0,
+        facing_direction: "north", constraints: {},
+      },
+    }));
+    const tally = (t) => [...tree.blocks.values()].filter((b) => b.name.endsWith(t)).length;
+    console.log(`${name}: height ${tree.height}, floor ${tree.floorY}, radius ${tree.radius.toFixed(1)}, ` +
+      `${tally("_log")} logs, ${tally("_leaves")} leaves (${tree.trimmed} far leaves dropped), ${clipped} clipped, ${buffer.length} bytes`);
+  };
+
+  if (!which) {
+    clean(Object.keys(VARIANTS));
+    for (const [variant, n] of CHOSEN) write(variant, n);
+  } else {
+    const variants = which === "all" ? Object.keys(VARIANTS) : [which];
+    for (const v of variants) if (!VARIANTS[v]) throw new Error(`unknown variant ${v}; known: ${Object.keys(VARIANTS).join(", ")}`);
+    const count = parseInt(countArg, 10) || 8, firstSeed = parseInt(seedArg, 10) || 1;
+    clean(variants);
+    for (const v of variants) for (let n = firstSeed; n < firstSeed + count; n++) write(v, n);
+    // worldgen must not lose a chosen tree that falls outside the candidate range
+    for (const [v, n] of CHOSEN) if (variants.includes(v) && (n < firstSeed || n >= firstSeed + count)) write(v, n);
+    console.log("candidates written; run `node tools/build_structures.mjs` before committing to keep only CHOSEN in the pack");
   }
-  const all = readdirSync(out).filter((f) => f.endsWith(".mcstructure")).map((f) => f.replace(".mcstructure", "")).sort();
   feature("mallorn_giant_feature", (identifier) => ({
-    "minecraft:weighted_random_feature": { description: { identifier }, features: all.map((n) => [`lothlorien:${n}_feature`, 1]) },
+    "minecraft:weighted_random_feature": {
+      description: { identifier }, features: CHOSEN.map(([v, n]) => [`lothlorien:${treeName(v, n)}_feature`, 1]),
+    },
   }));
-  console.log(`worldgen picks from ${all.length} structures`);
+  console.log(`worldgen picks from ${CHOSEN.map(([v, n]) => treeName(v, n)).join(", ")}`);
 }

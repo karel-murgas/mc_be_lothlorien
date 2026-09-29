@@ -6,67 +6,11 @@
     },
     "features": [
       [
-        "lothlorien:mallorn_flet_01_feature",
-        1
-      ],
-      [
-        "lothlorien:mallorn_flet_02_feature",
-        1
-      ],
-      [
-        "lothlorien:mallorn_flet_03_feature",
-        1
-      ],
-      [
-        "lothlorien:mallorn_flet_04_feature",
-        1
-      ],
-      [
-        "lothlorien:mallorn_flet_05_feature",
-        1
-      ],
-      [
-        "lothlorien:mallorn_flet_06_feature",
-        1
-      ],
-      [
-        "lothlorien:mallorn_flet_07_feature",
-        1
-      ],
-      [
-        "lothlorien:mallorn_flet_08_feature",
-        1
-      ],
-      [
-        "lothlorien:mallorn_woven_01_feature",
-        1
-      ],
-      [
-        "lothlorien:mallorn_woven_02_feature",
-        1
-      ],
-      [
-        "lothlorien:mallorn_woven_03_feature",
-        1
-      ],
-      [
-        "lothlorien:mallorn_woven_04_feature",
-        1
-      ],
-      [
         "lothlorien:mallorn_woven_05_feature",
         1
       ],
       [
-        "lothlorien:mallorn_woven_06_feature",
-        1
-      ],
-      [
         "lothlorien:mallorn_woven_07_feature",
-        1
-      ],
-      [
-        "lothlorien:mallorn_woven_08_feature",
         1
       ]
     ]

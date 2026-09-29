@@ -58,8 +58,10 @@ export function handleShowcaseEvent(event, player) {
   let row = 0;
   for (const v of named ? [named] : VARIANTS) {
     let i = 0;
-    for (let n = 1; n <= 99 && world.structureManager.get(structureId(v, n)); n++, i++) {
+    for (let n = 1; n <= 99; n++) {
+      if (!world.structureManager.get(structureId(v, n))) continue; // the pack may hold only some numbers
       pending.push({ v, n, x: px + 24 + (i % 4) * SPACING, z: pz + 24 + (row + Math.floor(i / 4)) * SPACING });
+      i++;
     }
     row += Math.ceil(i / 4);
   }
