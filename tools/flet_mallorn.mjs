@@ -66,8 +66,13 @@ export function buildFletMallorn(random, { woven = false, lush = false, flet = t
 
   // platform support: level branches just under the floor (woven: in it), poking out past its edge, leaves
   // hanging below
+  // A plain giant (no flet) gets fewer of these branches, at different heights, tilted and sometimes bent.
   const branchY = woven ? floorY : floorY - 1;
-  b.shuffled().slice(0, 6 + Math.floor(random() * 3)).forEach(([dx, dz]) => {
+  if (!flet) {
+    b.shuffled().slice(0, 3 + Math.floor(random() * 4)).forEach(([dx, dz]) =>
+      bentBranch(b, random, startCell(dx, random), startCell(dz, random), dx, dz, floorY + b.between([-4, 3]),
+        Math.round(radius) - 1 + b.between([1, 3]), 0.2 + random() * 0.35, 2.4 + random() * 0.8));
+  } else b.shuffled().slice(0, 6 + Math.floor(random() * 3)).forEach(([dx, dz]) => {
     let x = startCell(dx, random), z = startCell(dz, random);
     const len = Math.round(radius) - 1 + b.between([1, 3]);
     for (let i = 1; i <= len; i++) {
@@ -92,7 +97,7 @@ export function buildFletMallorn(random, { woven = false, lush = false, flet = t
     for (let w = 0; w < whorls; w++) {
       const y = Math.round(6 + ((floorY - 10) * (w + 1)) / (whorls + 1)) + b.between([-1, 1]);
       b.shuffled().slice(0, 3 + Math.floor(random() * 3)).forEach(([dx, dz]) =>
-        b.branch(startCell(dx, random), startCell(dz, random), dx, dz, y, b.between([3, 6]), 0.2, 2.0 + random() * 0.8));
+        b.branch(startCell(dx, random), startCell(dz, random), dx, dz, y, b.between([3, 6]), flet ? 0.2 : 0.35, 2.0 + random() * 0.8));
     }
     for (let i = 0, n = b.between([3, 5]); i < n; i++) {
       const [dx, dz] = DIRS8[Math.floor(random() * 8)];
@@ -106,7 +111,7 @@ export function buildFletMallorn(random, { woven = false, lush = false, flet = t
   const dirs = b.shuffled();
   for (let i = 0; i < rising; i++) {
     const [dx, dz] = dirs[i % 8];
-    b.branch(startCell(dx, random), startCell(dz, random), dx, dz, b.between([floorY + 4, height - 3]), b.between([5, 9]), 0.45,
+    b.branch(startCell(dx, random), startCell(dz, random), dx, dz, b.between([floorY + (flet ? 4 : 1), height - 3]), b.between([5, 9]), 0.45,
       2.6 + random());
   }
   b.blob(2, height - 1, 2, 5.5, 3.5, floorY + 5, 1.0);
@@ -161,6 +166,29 @@ export function buildFletMallorn(random, { woven = false, lush = false, flet = t
   }
 
   return { height: height + top, floorY, radius, blocks, trimmed: trimFarLeaves(blocks) };
+}
+
+// A branch that rises with chance `rise` per step and may turn 45 degrees once or twice on the way (never
+// back towards the trunk); leaves grow along its top and a leaf blob sits on its tip.
+function bentBranch(b, random, sx, sz, dx, dz, y0, len, rise, blobR) {
+  const RING = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]]; // 45 degrees apart
+  const r0 = RING.findIndex(([ex, ez]) => ex === dx && ez === dz);
+  let x = sx, z = sz, y = y0, r = r0;
+  for (let i = 1; i <= len; i++) {
+    if (i > 2 && random() < 0.18) {
+      const next = (r + (random() < 0.5 ? 1 : 7)) % 8;
+      if ([0, 1, 7].includes((next - r0 + 8) % 8)) r = next; // at most 45 degrees off the first direction
+    }
+    const [cx, cz] = RING[r];
+    const stepX = cx !== 0 && (cz === 0 || i % 2 === 1);
+    if (stepX) x += cx; else z += cz;
+    if (random() < rise) y += 1;
+    b.addLog(x, y, z, stepX ? "east" : "south");
+    // leaves along the top of the branch: a leaf on most steps, now and then a small tuft
+    if (i > 1 && random() < 0.7) b.addLeaf(x, y + 1, z);
+    if (i > 2 && random() < 0.25) b.blob(x, y + 1, z, 1.4, 1.2, y + 1, 0.5);
+  }
+  b.blob(x, y + 1, z, blobR, blobR * 0.8, y - 2, 0.8);
 }
 
 // Drops leaves more than LEAF_KEEP steps (through leaves) from a log; returns how many went.

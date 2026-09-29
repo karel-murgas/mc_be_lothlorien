@@ -142,6 +142,7 @@ test("wrapped Lembas: more nutrition than the cake, eaten faster", () => {
 // Giant flet Mallorns (tools/flet_mallorn.mjs), over many seeds.
 const flets = [{}, { woven: true, lush: true }].flatMap((opts) =>
   Array.from({ length: 30 }, (_, i) => buildFletMallorn(makeRandom(i * 7919 + 1), opts)));
+const plains = Array.from({ length: 30 }, (_, i) => buildFletMallorn(makeRandom(i * 7919 + 1), { woven: true, lush: true, flet: false }));
 const at = (t, x, y, z) => t.blocks.get(`${x},${y},${z}`)?.name;
 test("flet: ladder unbroken from the ground through the floor, with a floor to step onto", () => {
   for (const t of flets) {
@@ -160,8 +161,8 @@ test("flet: chest stands on the floor with room above", () => {
     assert.equal(at(t, x, y + 1, z), undefined);
   }
 });
-test(`flet: every leaf is within ${LEAF_KEEP} steps of a log (no decay after generation)`, () => {
-  for (const t of flets) {
+test(`giants: every leaf is within ${LEAF_KEEP} steps of a log (no decay after generation)`, () => {
+  for (const t of [...flets, ...plains]) {
     const seen = new Set(), queue = [];
     for (const [k, v] of t.blocks) if (v.name === B.log) { seen.add(k); queue.push([k, 0]); }
     for (let i = 0; i < queue.length; i++) {
@@ -176,14 +177,20 @@ test(`flet: every leaf is within ${LEAF_KEEP} steps of a log (no decay after gen
     for (const [k, v] of t.blocks) if (v.name === B.leaves) assert.ok(seen.has(k), `far leaf ${k}`);
   }
 });
-test("flet: tree fits the structure box and drops few leaves", () => {
-  for (const t of flets) {
+test("giants: tree fits the structure box and drops few leaves", () => {
+  for (const t of [...flets, ...plains]) {
     for (const k of t.blocks.keys()) {
       const [x, y, z] = k.split(",").map(Number);
       assert.ok(x + TRUNK_AT >= 0 && x + TRUNK_AT < SIZE && z + TRUNK_AT >= 0 && z + TRUNK_AT < SIZE, `outside x/z ${k}`);
       assert.ok(y + ROOT_DEPTH >= 0 && y + ROOT_DEPTH < SIZE_Y, `outside y ${k}`);
     }
     assert.ok(t.trimmed < 60, `${t.trimmed} leaves trimmed`);
+  }
+});
+
+test("plain giant: no platform, fence, ladder or chest", () => {
+  for (const t of plains) {
+    for (const v of t.blocks.values()) assert.ok(![B.ladder, B.chest, B.fence, B.planks].includes(v.name), v.name);
   }
 });
 

@@ -292,6 +292,10 @@ Density check: `/scriptevent lothlorien:treecount [radius]` reports trees per ch
       blocks) apart.
     - Plain giants are variant `plain` (`flet: false`): woven branches and lush foliage, no platform, ladder
       or chest. `/scriptevent lothlorien:showcase plain` shows them.
+    - The user found their crowns too flat (2026-09-30). Plain giants now get 3-6 ring branches instead of
+      6-8, each starting 4 below to 3 above the old floor level. They tilt up 20-55% per step, may bend 45
+      degrees on the way (`bentBranch`), and grow leaves along their top as well as a blob at the tip.
+      Their crown branches start just above the ring, not 4 blocks up. Lookout trees are unchanged.
   - `/locate structure lothlorien:giant_mallorn` and `/place structure lothlorien:giant_mallorn` work.
 - **History:**
   - 2026-09-29: a 40-wide `structure_template_feature` was cut badly at chunk borders.
