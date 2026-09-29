@@ -371,3 +371,19 @@ component `lothlorien:lembas`). Numbers are a first guess: the plan (Phase 7 tes
   the furnace/smoker accept dough; (8) `minecraft:use_modifiers` use_duration 1.0 for wrapped Lembas and `onConsume` firing; (9) creative groups
   `itemGroup.name.seed`, `.crop`, `.miscFood`.
 - **Not done on purpose:** trampled farmland leaving the crop on dirt (it survives on dirt but stops growing); water-flow breaking; fortune.
+
+## Phase 8 - Athelas salve and Miruvor
+
+Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `scripts/athelas.js` (components `lothlorien:salve`,
+`lothlorien:miruvor` applying effects in `onConsume`, same pattern as `lembas.js`). Art is placeholder (generated bottles, `GRAPHICS_TASKS.md`).
+**Status: verify passes, not yet tried in game (2026-09-29).**
+
+- **Harvest:** unchanged. Athelas is a plant block; breaking it drops the Athelas item (default self-drop, no loot table). Raw Athelas is
+  *not* edible: the item already places the block, and one item cannot both place and be eaten. "Raw = weak healing" from the design is dropped
+  in favour of the salve.
+- **Salve:** 2 Athelas (vertical) over a glass bottle -> 1 salve. Drink 1.6 s, always drinkable, stack 16. Regeneration II 6 s (about 5 HP), lifts Poison.
+- **Miruvor:** Elanor + Niphredil over salve + honey bottle (2x2) -> 1 Miruvor. Drink 2.0 s, nutrition 2. Instant health I (4 HP), Regeneration II 8 s
+  (about 6 HP), Speed I 30 s, lifts Poison. Roughly a Healing II potion plus a short run; costs two rare flowers, two Athelas and honey.
+- Effects come from script because item-JSON food effects are not available in format 1.26.50 (not verified; scripts are the working pattern here).
+- **Test list:** items appear in the creative menu and recipe book (salve unlocks on picking up Athelas, Miruvor on getting a salve); drink
+  animation and can-drink at full hunger; effects apply; numbers feel expensive but not silly (Phase 20 balance pass).

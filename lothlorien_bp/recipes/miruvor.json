@@ -1,0 +1,38 @@
+{
+  "format_version": "1.20.30",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "lothlorien:miruvor"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      "EN",
+      "SH"
+    ],
+    "key": {
+      "E": {
+        "item": "lothlorien:elanor"
+      },
+      "N": {
+        "item": "lothlorien:niphredil"
+      },
+      "S": {
+        "item": "lothlorien:athelas_salve"
+      },
+      "H": {
+        "item": "minecraft:honey_bottle"
+      }
+    },
+    "unlock": [
+      {
+        "item": "lothlorien:athelas_salve"
+      }
+    ],
+    "result": {
+      "item": "lothlorien:miruvor",
+      "count": 1
+    }
+  }
+}

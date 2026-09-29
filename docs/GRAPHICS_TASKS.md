@@ -159,3 +159,10 @@ in a few pixels). Replace each in place (same name); no JSON changes needed.
 - Item icons are 2D 16x16, no baked lighting. Lembas cake and wrapped Lembas must be **distinct silhouettes** (the wrapped one
   is the leaf-wrapped, lighter, "elven" version) and the wrapped one is the one players eat most, so make it the nicest.
 - The cutout flicker problem from step 6 applies to the crop textures too; check the same list.
+
+---
+
+## Step 8 - Athelas salve and Miruvor (Phase 8)
+
+Placeholders (16x16, generated bottles): `textures/items/athelas_salve.png` (green salve in a cork-stopped vial) and
+`textures/items/miruvor.png` (golden cordial). Replace in place. Miruvor should read as precious (gold, glow) and clearly differ from the salve.

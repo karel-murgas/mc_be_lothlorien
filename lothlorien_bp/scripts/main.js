@@ -4,6 +4,7 @@ import "./ground_cover.js";
 import "./bonemeal.js";
 import "./crop.js";
 import "./lembas.js";
+import "./athelas.js";
 import { handleTreeScriptEvent } from "./trees.js";
 import { leafUndersideY } from "./leaf_fall.js";
 import { DEPTH_NAMES, estimateDepth, probeCount } from "./depth.js";

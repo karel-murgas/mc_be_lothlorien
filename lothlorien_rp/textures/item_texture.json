@@ -40,6 +40,12 @@
     },
     "lothlorien:lembas_wrapped": {
       "textures": "textures/items/lembas_wrapped"
+    },
+    "lothlorien:athelas_salve": {
+      "textures": "textures/items/athelas_salve"
+    },
+    "lothlorien:miruvor": {
+      "textures": "textures/items/miruvor"
     }
   }
 }

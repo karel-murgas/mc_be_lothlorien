@@ -1,0 +1,33 @@
+{
+  "format_version": "1.20.30",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "lothlorien:athelas_salve"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      "A",
+      "A",
+      "B"
+    ],
+    "key": {
+      "A": {
+        "item": "lothlorien:athelas"
+      },
+      "B": {
+        "item": "minecraft:glass_bottle"
+      }
+    },
+    "unlock": [
+      {
+        "item": "lothlorien:athelas"
+      }
+    ],
+    "result": {
+      "item": "lothlorien:athelas_salve",
+      "count": 1
+    }
+  }
+}
