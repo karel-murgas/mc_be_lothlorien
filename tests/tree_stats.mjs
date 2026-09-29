@@ -3,7 +3,7 @@
 import { makeRandom, buildSmallMallorn } from "../lothlorien_bp/scripts/mallorn_tree.js";
 
 const n = Number(process.argv[2] ?? 20);
-const acorn = Number(process.argv[3] ?? 0.06);
+const acorn = Number(process.argv[3] ?? 0.025);
 let logs = 0, leaves = 0, minL = 1e9, maxL = 0;
 const shapes = new Set();
 for (let i = 0; i < n; i++) {

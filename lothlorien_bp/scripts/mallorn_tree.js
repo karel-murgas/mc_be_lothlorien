@@ -1,7 +1,7 @@
 // Small Mallorn generator (Phase 4). Pure: no Minecraft imports, so it can be run and measured
 // under plain Node (tests/tree_stats.mjs). Coordinates are relative to the sapling cell (0,0,0).
 //
-// Shape: a single-block trunk 5-7 high, a noisy ellipsoid crown around its top, and two short
+// Shape: a single-block trunk 8-11 high, a noisy ellipsoid crown around its top, and two short
 // side branches each ending in a small leaf tuft. Leaves never replace logs.
 
 export function makeRandom(seed) {
@@ -21,7 +21,7 @@ const key = (x, y, z) => `${x},${y},${z}`;
 // Returns { height, logs: [{x,y,z,face}], leaves: [{x,y,z}] }.
 // `face` is the minecraft:block_face of the log: "up" for the trunk, "east"/"south" for branches.
 export function buildSmallMallorn(random) {
-  const height = 5 + Math.floor(random() * 3);
+  const height = 8 + Math.floor(random() * 4);
   const logs = new Map();
   const leaves = new Map();
 
@@ -43,7 +43,7 @@ export function buildSmallMallorn(random) {
   };
 
   // crown
-  blob(0, height - 1, 0, 2.6, 2.6, 3, 0.9);
+  blob(0, height - 1, 0, 3.0, 3.4, height - 5, 0.9);
   leaves.set(key(0, height, 0), { x: 0, y: height, z: 0 });
   leaves.set(key(0, height + 1, 0), { x: 0, y: height + 1, z: 0 });
 
@@ -52,11 +52,11 @@ export function buildSmallMallorn(random) {
   const first = Math.floor(random() * 4);
   const chosen = [dirs[first], dirs[(first + 1 + Math.floor(random() * 3)) % 4]];
   for (const [dx, dz] of chosen) {
-    const y = height - 3 + Math.floor(random() * 2);
-    const len = 2 + Math.floor(random() * 2);
+    const y = height - 4 + Math.floor(random() * 2);
+    const len = 2 + Math.floor(random() * 3);
     const face = dx !== 0 ? "east" : "south";
     for (let i = 1; i <= len; i++) logs.set(key(dx * i, y, dz * i), { x: dx * i, y, z: dz * i, face });
-    blob(dx * len, y + 1, dz * len, 1.7, 1.4, 3, 0.6);
+    blob(dx * len, y + 1, dz * len, 1.9, 1.5, height - 5, 0.6);
   }
 
   for (const k of logs.keys()) leaves.delete(k);

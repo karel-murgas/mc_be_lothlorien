@@ -174,7 +174,7 @@ export function handleTreeScriptEvent(event, player) {
     }
     player.sendMessage(
       `[lothlorien] ${n} trees: avg ${(logs / n).toFixed(1)} logs (${((logs / n) * 4).toFixed(0)} planks), ` +
-        `${(leaves / n).toFixed(0)} leaves; acorns at 4% per leaf: ${((leaves / n) * 0.04).toFixed(1)} if all leaves drop`
+        `${(leaves / n).toFixed(0)} leaves; acorns at 2.5% per leaf: ${((leaves / n) * 0.025).toFixed(1)} if all leaves drop`
     );
     return true;
   }
