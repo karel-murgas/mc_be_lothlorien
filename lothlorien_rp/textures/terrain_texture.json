@@ -81,6 +81,18 @@
     },
     "lothlorien:deer_antler": {
       "textures": "textures/blocks/deer_antler"
+    },
+    "lothlorien:mallorn_heartwood_planks": {
+      "textures": "textures/blocks/mallorn_heartwood_planks"
+    },
+    "lothlorien:mallorn_heartwood_door_bottom": {
+      "textures": "textures/blocks/mallorn_heartwood_door_bottom"
+    },
+    "lothlorien:mallorn_heartwood_door_top": {
+      "textures": "textures/blocks/mallorn_heartwood_door_top"
+    },
+    "lothlorien:mallorn_heartwood_trapdoor": {
+      "textures": "textures/blocks/mallorn_heartwood_trapdoor"
     }
   }
 }

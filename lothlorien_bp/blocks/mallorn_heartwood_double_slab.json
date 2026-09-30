@@ -2,7 +2,11 @@
   "format_version": "1.26.50",
   "minecraft:block": {
     "description": {
-      "identifier": "lothlorien:mallorn_planks"
+      "identifier": "lothlorien:mallorn_heartwood_double_slab",
+      "menu_category": {
+        "category": "none",
+        "is_hidden_in_commands": true
+      }
     },
     "components": {
       "minecraft:tags": [
@@ -29,17 +33,18 @@
       "minecraft:destruction_particles": {
         "particle_count": 48
       },
-      "minecraft:map_color": "#b5bac0",
+      "minecraft:map_color": "#cab890",
       "minecraft:geometry": "minecraft:geometry.full_block",
       "minecraft:material_instances": {
         "*": {
-          "texture": "lothlorien:mallorn_planks",
+          "texture": "lothlorien:mallorn_heartwood_planks",
           "render_method": "opaque"
         }
       },
       "minecraft:redstone_conductivity": {
         "redstone_conductor": true
-      }
+      },
+      "minecraft:loot": "loot_tables/blocks/mallorn_heartwood_double_slab.json"
     }
   }
 }

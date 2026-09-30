@@ -58,6 +58,9 @@
     },
     "lothlorien:deer_antler": {
       "textures": "textures/items/deer_antler"
+    },
+    "lothlorien:mallorn_heartwood_door": {
+      "textures": "textures/items/mallorn_heartwood_door"
     }
   }
 }

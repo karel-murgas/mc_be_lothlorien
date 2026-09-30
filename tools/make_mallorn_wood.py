@@ -1,4 +1,8 @@
-"""Mallorn wood textures: bark (log side), cut end (log top), stripped side and stripped top.
+"""Mallorn wood textures: logs (bark, cut end, stripped), silver planks, and the heartwood (golden) plank set.
+
+The heartwood set is a RECOLOUR of the silver set through SILVER_TO_GOLD (owner's rule, 2026-09-30): draw
+silver art once, the golden twin follows. Colours outside the map (e.g. the placeholder door art) are mapped by
+brightness onto the golden anchors, so any silver texture can be translated.
 
 Lore: "its pillars are of silver, for the bark of the trees is smooth and grey" (LotR II 6); beech-like
 trees, "mallorn" = gold-tree. So: smooth silver-grey bark like beech (no deep fissures) with long sheen ridges,
@@ -166,12 +170,92 @@ def stripped_side():
     return g
 
 
+# ---- silver planks: full-length boards (owner's design, 2026-09-30) ----
+# Palette for plank-family art. Every entry is a distinct colour so SILVER_TO_GOLD is a clean colour map
+# (the seam is a hair darker than the board shade for that reason).
+PLANK = {
+    "peg": (128, 135, 149),   # soft peg / short deeper gap in a seam
+    "seam": (138, 145, 158),
+    2: BARK[2], 3: BARK[3], 4: BARK[4], 5: BARK[5],
+}
+BOARDS = [(4, 4), (5, 3), (3, 4), (4, 4)]  # (height incl. seam, base tone); uneven widths break the stripes
+STROKES = [  # long grain strokes: (board, row, x start, length, tone offset); wrap horizontally
+    (0, 1, 2, 7, +1), (0, 2, 10, 5, -1), (1, 1, 6, 8, +1), (1, 2, 0, 4, -1), (1, 3, 9, 6, +1),
+    (1, 2, 13, 5, -1), (2, 1, 4, 6, -1), (2, 1, 12, 3, +1), (3, 1, 8, 7, +1), (3, 2, 1, 5, -1),
+]
+PEGS = {(0, 5), (0, 6), (1, 12), (2, 1), (3, 9), (3, 10)}  # (board, x) in the seam row
+
+
+def planks():
+    g = blank(4)
+    y0 = 0
+    for b, (h, base) in enumerate(BOARDS):
+        for x in range(N):
+            g[y0][x] = base + 1  # top edge of a board catches the light
+            for r in range(1, h - 1):
+                g[y0 + r][x] = base
+            g[y0 + h - 1][x] = "peg" if (b, x) in PEGS else "seam"
+        for bb, r, xs, ln, off in STROKES:
+            if bb == b and r < h - 1:
+                for i in range(ln):
+                    g[y0 + r][(xs + i) % N] = base + off
+        y0 += h
+    assert y0 == N
+    return g
+
+
+# ---- silver -> golden (heartwood) colour map ----
+SILVER_TO_GOLD = {
+    BARK[0]: (110, 88, 60),
+    BARK[1]: (128, 106, 74),
+    PLANK["peg"]: (126, 104, 72),
+    PLANK["seam"]: WOOD[0],
+    BARK[2]: WOOD[1],
+    BARK[3]: WOOD[2],
+    BARK[4]: WOOD[3],
+    BARK[5]: WOOD[4],
+}
+
+
+def _lum(c):
+    return 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]
+
+
+_ANCHORS = sorted((_lum(s), g) for s, g in SILVER_TO_GOLD.items())
+
+
+def to_gold(c):
+    """Map one silver colour: exact entry if listed, else by brightness between the golden anchors."""
+    if c in SILVER_TO_GOLD:
+        return SILVER_TO_GOLD[c]
+    L = _lum(c)
+    if L <= _ANCHORS[0][0]:
+        return _ANCHORS[0][1]
+    for (l0, g0), (l1, g1) in zip(_ANCHORS, _ANCHORS[1:]):
+        if L <= l1:
+            t = (L - l0) / (l1 - l0) if l1 > l0 else 0
+            return tuple(round(a + (b - a) * t) for a, b in zip(g0, g1))
+    return _ANCHORS[-1][1]
+
+
+def recolour(im):
+    im = im.convert("RGBA")
+    out = Image.new("RGBA", im.size)
+    for y in range(im.height):
+        for x in range(im.width):
+            r, g, b, a = im.getpixel((x, y))
+            out.putpixel((x, y), to_gold((r, g, b)) + (a,))
+    return out
+
+
 def to_image(g, default_ramp):
     im = Image.new("RGBA", (N, N))
     for y in range(N):
         for x in range(N):
             v = g[y][x]
-            if isinstance(v, str):  # "g1"
+            if v in ("peg", "seam"):
+                c = PLANK[v]
+            elif isinstance(v, str):  # "g1"
                 c = GOLD[int(v[1])]
             elif isinstance(v, tuple):
                 ramp = {"b": BARK, "w": WOOD, "g": GOLD}[v[0]]
@@ -184,18 +268,33 @@ def to_image(g, default_ramp):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("out", nargs="?", help="output folder (default: the pack's textures/blocks)")
+    ap.add_argument("out", nargs="?", help="textures folder (default: the pack's lothlorien_rp/textures)")
     a = ap.parse_args()
-    out = a.out or os.path.join(os.path.dirname(__file__), "..", "lothlorien_rp", "textures", "blocks")
-    os.makedirs(out, exist_ok=True)
+    here = os.path.dirname(os.path.abspath(__file__))
+    pack = os.path.join(here, "..", "lothlorien_rp", "textures")
+    out = a.out or pack
+    for sub in ("blocks", "items"):
+        os.makedirs(os.path.join(out, sub), exist_ok=True)
+    silver_planks = to_image(planks(), PLANK)
     files = {
-        "mallorn_log_side.png": to_image(bark_side(), BARK),
-        "mallorn_log_top.png": to_image(cut_end(False), WOOD),
-        "mallorn_stripped_log_side.png": to_image(stripped_side(), WOOD),
-        "mallorn_stripped_log_top.png": to_image(cut_end(True), WOOD),
+        "blocks/mallorn_log_side.png": to_image(bark_side(), BARK),
+        "blocks/mallorn_log_top.png": to_image(cut_end(False), WOOD),
+        "blocks/mallorn_stripped_log_side.png": to_image(stripped_side(), WOOD),
+        "blocks/mallorn_stripped_log_top.png": to_image(cut_end(True), WOOD),
+        "blocks/mallorn_planks.png": silver_planks,
+        "blocks/mallorn_heartwood_planks.png": recolour(silver_planks),
     }
     for name, im in files.items():
         assert im.size == (N, N) and all(p[3] == 255 for p in im.get_flattened_data()), name
+    # golden twins of silver art that is not generated here (door, trapdoor: placeholders for now)
+    for src, dst in [
+        ("blocks/mallorn_door_bottom.png", "blocks/mallorn_heartwood_door_bottom.png"),
+        ("blocks/mallorn_door_top.png", "blocks/mallorn_heartwood_door_top.png"),
+        ("blocks/mallorn_trapdoor.png", "blocks/mallorn_heartwood_trapdoor.png"),
+        ("items/mallorn_door.png", "items/mallorn_heartwood_door.png"),
+    ]:
+        files[dst] = recolour(Image.open(os.path.join(pack, src)))
+    for name, im in files.items():
         im.save(os.path.join(out, name))
     print("wrote", len(files), "textures to", os.path.normpath(out))
 

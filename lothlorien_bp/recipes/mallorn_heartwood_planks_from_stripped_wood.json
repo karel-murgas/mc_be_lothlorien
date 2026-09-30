@@ -2,7 +2,7 @@
   "format_version": "1.20.30",
   "minecraft:recipe_shaped": {
     "description": {
-      "identifier": "lothlorien:mallorn_planks_from_stripped_wood"
+      "identifier": "lothlorien:mallorn_heartwood_planks_from_stripped_wood"
     },
     "tags": [
       "crafting_table"
@@ -22,7 +22,7 @@
       }
     ],
     "result": {
-      "item": "lothlorien:mallorn_planks",
+      "item": "lothlorien:mallorn_heartwood_planks",
       "count": 4
     }
   }

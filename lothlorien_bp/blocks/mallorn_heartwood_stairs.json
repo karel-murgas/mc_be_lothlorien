@@ -2,7 +2,7 @@
   "format_version": "1.26.50",
   "minecraft:block": {
     "description": {
-      "identifier": "lothlorien:mallorn_stairs",
+      "identifier": "lothlorien:mallorn_heartwood_stairs",
       "traits": {
         "minecraft:placement_direction": {
           "enabled_states": [
@@ -41,11 +41,11 @@
       "minecraft:destruction_particles": {
         "particle_count": 48
       },
-      "minecraft:map_color": "#b5bac0",
+      "minecraft:map_color": "#cab890",
       "minecraft:geometry": "geometry.lothlorien.mallorn_stairs_straight_bottom",
       "minecraft:material_instances": {
         "*": {
-          "texture": "lothlorien:mallorn_planks",
+          "texture": "lothlorien:mallorn_heartwood_planks",
           "render_method": "opaque"
         }
       },

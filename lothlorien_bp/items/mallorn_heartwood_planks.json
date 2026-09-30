@@ -1,0 +1,27 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:item": {
+    "description": {
+      "identifier": "lothlorien:mallorn_heartwood_planks",
+      "menu_category": {
+        "category": "construction",
+        "group": "minecraft:itemGroup.name.planks"
+      }
+    },
+    "components": {
+      "minecraft:block_placer": {
+        "block": "lothlorien:mallorn_heartwood_planks",
+        "aligned_placement": true,
+        "replace_block_item": true
+      },
+      "minecraft:fuel": {
+        "duration": 15
+      },
+      "minecraft:tags": {
+        "tags": [
+          "minecraft:planks"
+        ]
+      }
+    }
+  }
+}

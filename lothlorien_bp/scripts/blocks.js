@@ -43,12 +43,11 @@ function setState(block, name, value) {
   block.setPermutation(block.permutation.withState(name, value));
 }
 
-// Door hinge: a door already standing on the placer's left makes this one hinge right (double door).
+// Door hinge: a door of the same kind on the placer's left makes this one hinge right (double door).
 const LEFT_OF_FACING = { north: [-1, 0], south: [1, 0], east: [0, -1], west: [0, 1] };
 
-function isDoor(block) {
-  return block?.typeId === `${NS}:mallorn_door`;
-}
+// Two plank sets share these blocks: silver (from logs) and heartwood (from stripped logs).
+const WOODS = ["mallorn", "mallorn_heartwood"];
 
 function setDoorOpen(block, openState, value) {
   for (const part of block.getParts()) setState(part, openState, value);
@@ -65,7 +64,7 @@ function doublePartner(block) {
   const bottom = block.getParts()[0];
   const { x, y, z } = bottom.location;
   const other = block.dimension.getBlock({ x: x + sign * left[0], y, z: z + sign * left[1] });
-  if (!isDoor(other)) return undefined;
+  if (other?.typeId !== block.typeId) return undefined;
   const p = other.permutation;
   const same = p.getState("minecraft:cardinal_direction") === perm.getState("minecraft:cardinal_direction");
   return same && p.getState(`${NS}:hinge_right`) !== hingeRight ? other : undefined;
@@ -88,7 +87,7 @@ const components = {
       if (!left) return;
       const { x, y, z } = event.block.location;
       const leftBlock = event.block.dimension.getBlock({ x: x + left[0], y, z: z + left[1] });
-      event.permutationToPlace = perm.withState(`${NS}:hinge_right`, isDoor(leftBlock));
+      event.permutationToPlace = perm.withState(`${NS}:hinge_right`, leftBlock?.typeId === perm.type.id);
     },
     onPlayerInteract({ block, dimension }, { params }) {
       const next = !block.permutation.getState(params.block_state);
@@ -159,13 +158,17 @@ system.beforeEvents.startup.subscribe(({ blockComponentRegistry }) => {
 
 // Buttons and plates have no support-loss handling of their own: when a block is broken, drop any
 // of ours that were attached to it.
-const ATTACHED_TO = {
-  [`${NS}:mallorn_pressure_plate`]: () => [0, -1, 0],
-  [`${NS}:mallorn_button`]: (perm) =>
-    ({ up: [0, -1, 0], down: [0, 1, 0], north: [0, 0, 1], south: [0, 0, -1], west: [1, 0, 0], east: [-1, 0, 0] })[
-      perm.getState("minecraft:block_face")
-    ],
-};
+const PLATE_SUPPORT = () => [0, -1, 0];
+const BUTTON_SUPPORT = (perm) =>
+  ({ up: [0, -1, 0], down: [0, 1, 0], north: [0, 0, 1], south: [0, 0, -1], west: [1, 0, 0], east: [-1, 0, 0] })[
+    perm.getState("minecraft:block_face")
+  ];
+const ATTACHED_TO = Object.fromEntries(
+  WOODS.flatMap((w) => [
+    [`${NS}:${w}_pressure_plate`, PLATE_SUPPORT],
+    [`${NS}:${w}_button`, BUTTON_SUPPORT],
+  ])
+);
 const NEIGHBOURS = [
   [0, 1, 0], [0, -1, 0], [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1],
 ];
@@ -188,7 +191,7 @@ const STRIPPED = {
   [`${NS}:mallorn_log`]: `${NS}:mallorn_stripped_log`,
   [`${NS}:mallorn_wood`]: `${NS}:mallorn_stripped_wood`,
 };
-const DOUBLE_SLAB = { [`${NS}:mallorn_slab`]: `${NS}:mallorn_double_slab` };
+const DOUBLE_SLAB = Object.fromEntries(WOODS.map((w) => [`${NS}:${w}_slab`, `${NS}:${w}_double_slab`]));
 const FACE_OFFSET = {
   Up: [0, 1, 0], Down: [0, -1, 0], North: [0, 0, -1], South: [0, 0, 1], East: [1, 0, 0], West: [-1, 0, 0],
 };

@@ -2,7 +2,7 @@
   "format_version": "1.26.50",
   "minecraft:block": {
     "description": {
-      "identifier": "lothlorien:mallorn_button",
+      "identifier": "lothlorien:mallorn_heartwood_button",
       "states": {
         "lothlorien:powered": [
           false,
@@ -42,11 +42,11 @@
       "minecraft:destruction_particles": {
         "particle_count": 48
       },
-      "minecraft:map_color": "#b5bac0",
+      "minecraft:map_color": "#cab890",
       "minecraft:geometry": "geometry.lothlorien.mallorn_button",
       "minecraft:material_instances": {
         "*": {
-          "texture": "lothlorien:mallorn_planks",
+          "texture": "lothlorien:mallorn_heartwood_planks",
           "render_method": "opaque"
         }
       },

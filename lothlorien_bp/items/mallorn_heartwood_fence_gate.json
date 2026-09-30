@@ -1,0 +1,22 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:item": {
+    "description": {
+      "identifier": "lothlorien:mallorn_heartwood_fence_gate",
+      "menu_category": {
+        "category": "construction",
+        "group": "minecraft:itemGroup.name.fenceGate"
+      }
+    },
+    "components": {
+      "minecraft:block_placer": {
+        "block": "lothlorien:mallorn_heartwood_fence_gate",
+        "aligned_placement": true,
+        "replace_block_item": true
+      },
+      "minecraft:fuel": {
+        "duration": 15
+      }
+    }
+  }
+}

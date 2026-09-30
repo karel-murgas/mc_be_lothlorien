@@ -33,7 +33,7 @@
       "minecraft:destruction_particles": {
         "particle_count": 48
       },
-      "minecraft:map_color": "#d8c9a0",
+      "minecraft:map_color": "#b5bac0",
       "minecraft:geometry": "minecraft:geometry.full_block",
       "minecraft:material_instances": {
         "*": {

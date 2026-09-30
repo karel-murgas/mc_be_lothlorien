@@ -158,6 +158,14 @@ that *replaces* the auto block item (needed for `minecraft:fuel`; the door also 
 Recipes and unlocks mirror vanilla wood types (planks from log/stripped log/wood/stripped wood
 unlock on that item; the rest on planks; wood/stripped wood on log/stripped log).
 
+**Two plank sets (2026-09-30).** Planks from log/wood are the silver `mallorn_planks`; planks from stripped
+log/wood are `mallorn_heartwood_planks` (recipes `mallorn_heartwood_planks_from_stripped_{log,wood}`). The
+heartwood family (`mallorn_heartwood_` + planks, stairs, slab, double_slab, fence, fence_gate, door, trapdoor,
+button, pressure_plate) is **generated** by `tools/make_heartwood_set.py` from the silver files: identifiers,
+texture keys and map colour swapped, geometry shared. Change the silver block, then re-run it (the test "two
+plank sets" fails when they drift). `blocks.js` lists both sets in `WOODS` (slab merge, button/plate support
+loss); a double door pairs only with the same kind of door. Silver and heartwood fences connect to each other.
+
 - Tools: every wood block carries `minecraft:is_axe_item_destructible`; leaves use the hoe tag.
 - Logs: `block_face` trait + rotation permutations; axe strips (`lothlorien:strippable`).
 - Stairs: native corners. `placement_direction` with `minecraft:corner_and_cardinal_direction`

@@ -1,0 +1,22 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:item": {
+    "description": {
+      "identifier": "lothlorien:mallorn_heartwood_button",
+      "menu_category": {
+        "category": "items",
+        "group": "minecraft:itemGroup.name.buttons"
+      }
+    },
+    "components": {
+      "minecraft:block_placer": {
+        "block": "lothlorien:mallorn_heartwood_button",
+        "aligned_placement": false,
+        "replace_block_item": true
+      },
+      "minecraft:fuel": {
+        "duration": 5
+      }
+    }
+  }
+}

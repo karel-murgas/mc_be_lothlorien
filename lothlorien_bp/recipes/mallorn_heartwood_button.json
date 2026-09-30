@@ -1,0 +1,28 @@
+{
+  "format_version": "1.20.30",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "lothlorien:mallorn_heartwood_button"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      "#"
+    ],
+    "key": {
+      "#": {
+        "item": "lothlorien:mallorn_heartwood_planks"
+      }
+    },
+    "unlock": [
+      {
+        "item": "lothlorien:mallorn_heartwood_planks"
+      }
+    ],
+    "result": {
+      "item": "lothlorien:mallorn_heartwood_button",
+      "count": 1
+    }
+  }
+}

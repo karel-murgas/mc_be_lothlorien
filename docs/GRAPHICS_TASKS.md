@@ -33,7 +33,20 @@ file with the real Mallorn art. Every block below already exists in the pack and
 `tools/make_mallorn_wood.py` (re-run to reinstall; edit the art there, not the PNGs). Bark: silver-grey, calm vertical light bands from a
 tone field, beech lenticels and two gold glints per tile (the owner picked this over ridge and curving-strand versions). Cut end: silver rim, **gold sap ring**,
 pale golden rings. Stripped: pale honey wood with long straight grain. Map colours in the four block files follow the texture averages.
-Review sheet: `.claude/skills/bedrock-art/scripts/block_sheet.py`. Next: planks, then the rest of the set.
+Review sheet: `.claude/skills/bedrock-art/scripts/block_sheet.py`.
+
+**Planks (2026-09-30), to check in game:** `mallorn_planks.png` is generated too: four full-length silver boards of uneven width
+(4/5/3/4 px), soft seams with a few "very soft" pegs, long grain strokes (owner's design: long boards, pure silver).
+
+**Two plank sets (owner's decision 2026-09-30).** Logs/wood -> silver `mallorn_*` family; stripped logs/wood -> golden
+`mallorn_heartwood_*` family (planks, stairs, slab, fence, gate, door, trapdoor, button, plate). **Heartwood art is always a recolour
+of the silver art** through `SILVER_TO_GOLD` in `make_mallorn_wood.py` (exact colour map for our palette, brightness fallback for
+anything else). Draw only the silver texture; re-run `make_mallorn_wood.py` and the golden twin follows
+(`mallorn_heartwood_planks`, `_door_bottom`, `_door_top`, `_trapdoor`, item `mallorn_heartwood_door`). Keep silver plank-family art in
+the `PLANK`/`BARK` palette so the map stays exact.
+
+**Next: carved shapes** for fence, gate, door, trapdoor, button, plate (owner wants invented carved models, not plain vanilla shapes).
+New geometry is shared by both sets; only textures differ.
 
 Design intent (from `design/lothlorien.md`): silver-grey bark, gold leaves; planks ideally with
 straight grain rather than zig-zag; fence, door and trapdoor "should look like carved" (they can get
