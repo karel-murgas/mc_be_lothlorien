@@ -17,7 +17,7 @@ import {
   ACORN_ID, BEACON_ID, GUIDE_TICKS, WHITE_DEER_ID, canBeGuided, hopStatus, horizontal, keepNaturalSpawn,
   newHop, offerRefusal, phase, pickWaypoint, trackProgress,
 } from "./white_deer_rules.js";
-import { NUT_ID, bestInRing, giftCandidates } from "./great_mallorn_rules.js";
+import { NUT_ID, borderGrid, giftCandidates, pickGiftSpot } from "./great_mallorn_rules.js";
 
 // session: { playerId, beaconId, target, bestDist, stuck, born, phase, hop, skip, bias, waiting }
 const sessions = new Map(); // deer id -> session
@@ -25,6 +25,7 @@ const searching = new Set(); // deer ids with a gift spot search in progress
 const GIFT_SPOT = "lothlorien:gift_spot"; // dynamic property on the deer: JSON {x, y, z, dim} until the gift is given
 const GIFTED = "lothlorien:gifted"; // dynamic property on the deer: true once the nut was laid
 let depthAt; // (dimension, location) -> { level }, from main.js
+let biome; // { id, transparent: Set, at(dimension, x, z) -> surface biome id or undefined (unloaded) }, from main.js
 const SWEEP_TICKS = 100; // stray beacons (no session: world reloaded, chunk came back) are removed this often
 const DIMENSIONS = ["overworld", "nether", "the_end"];
 const DOWN = { x: 0, y: -1, z: 0 };
@@ -62,24 +63,26 @@ function groundFeet(dimension, x, z) {
   }
 }
 
-// The gift spot for a deer at `origin`: farthest ring first (great_mallorn_rules.js, giftCandidates), one ring per job
-// step. Calls done({x, y, z}) or done(undefined).
+// The gift spot for a deer at `origin` (great_mallorn_rules.js, pickGiftSpot): first the border scan over the loaded grid, then
+// the candidates, a few dozen probes per job step. Calls done({x, y, z}) or done(undefined).
 function findGiftSpot(dimension, origin, done) {
   system.runJob(
     (function* () {
-      for (const ring of giftCandidates(origin.x, origin.z, Math.random() * 2 * Math.PI)) {
-        for (const c of ring) {
-          c.y = groundFeet(dimension, c.x, c.z);
-          c.level = c.y === undefined ? 0 : depthAt(dimension, { x: c.x, y: c.y, z: c.z }).level;
-        }
-        const best = bestInRing(ring);
-        if (best) {
-          done({ x: best.x, y: best.y, z: best.z });
-          return;
-        }
-        yield;
+      const border = [];
+      let n = 0;
+      for (const p of borderGrid(origin.x, origin.z)) {
+        const id = biome.at(dimension, p.x, p.z);
+        if (id !== undefined && id !== biome.id && !biome.transparent.has(id)) border.push(p);
+        if (++n % 40 === 0) yield;
       }
-      done(undefined);
+      const candidates = giftCandidates(origin.x, origin.z, Math.random() * 2 * Math.PI);
+      for (const c of candidates) {
+        c.inside = biome.at(dimension, c.x, c.z) === biome.id;
+        c.y = c.inside ? groundFeet(dimension, c.x, c.z) : undefined;
+        if (++n % 40 === 0) yield;
+      }
+      const best = pickGiftSpot(candidates, border);
+      done(best && { x: best.x, y: best.y, z: best.z });
     })()
   );
 }
@@ -362,9 +365,10 @@ function judgeNaturalSpawn(deer, depthAt) {
   }
 }
 
-// depth(dimension, location) -> { level } from scripts/depth.js (main.js supplies the in-game sampler).
-export function startWhiteDeer(depth) {
+// depth(dimension, location) -> { level } from scripts/depth.js; biomeInfo = { id, transparent, at } (main.js supplies both).
+export function startWhiteDeer(depth, biomeInfo) {
   depthAt = depth;
+  biome = biomeInfo;
   sweepBeacons(); // world load: no session survives a reload, so every beacon found is a stray
   system.runInterval(tickSessions, GUIDE_TICKS);
   world.afterEvents.entitySpawn.subscribe(({ entity, cause }) => {

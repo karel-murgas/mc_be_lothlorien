@@ -173,6 +173,10 @@ world.afterEvents.worldLoad.subscribe(() => {
   system.runInterval(fallLeaves, LEAF_INTERVAL_TICKS);
   startDisharmony(inBiome, DEBUG_TAG);
   startDeer();
-  startWhiteDeer(depthAt);
+  startWhiteDeer(depthAt, {
+    id: BIOME_ID,
+    transparent: DEPTH_TRANSPARENT,
+    at: (dimension, x, z) => surfaceSampler(dimension, { x, z })(0, 0),
+  });
   startAntlerSupport();
 });

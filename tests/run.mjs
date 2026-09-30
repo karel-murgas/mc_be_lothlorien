@@ -378,18 +378,30 @@ test("white deer: only Disharmony 0 is guided", () => {
 import * as N from "../lothlorien_bp/scripts/great_mallorn_rules.js";
 import { ANCHOR_AT } from "../tools/build_structures.mjs";
 test("gift spot: rings inside the default simulation distance, farthest first, every heading", () => {
-  const rings = N.giftCandidates(100, -40);
-  assert.deepEqual(rings.map((r) => r[0].ring), [...N.GIFT_RINGS].sort((a, b) => b - a));
-  assert.ok(N.GIFT_RINGS.every((r) => r <= 56 && r >= 32), "loaded at simulation distance 4 (64 blocks) from any spot in the player's chunk");
-  for (const ring of rings) {
-    assert.equal(ring.length, N.GIFT_HEADINGS);
-    for (const c of ring) assert.ok(Math.abs(Math.hypot(c.x - 100, c.z + 40) - c.ring) < 1.5);
-  }
+  const all = N.giftCandidates(100, -40);
+  assert.equal(all.length, N.GIFT_RINGS.length * N.GIFT_HEADINGS);
+  assert.deepEqual([...new Set(all.map((c) => c.ring))], [...N.GIFT_RINGS].sort((a, b) => b - a));
+  assert.ok(N.GIFT_RINGS.every((r) => r <= 56 && r >= 32), "loaded at simulation distance 4 (64 blocks) from any spot in the player chunk");
+  for (const c of all) assert.ok(Math.abs(Math.hypot(c.x - 100, c.z + 40) - c.ring) < 1.5);
+  const grid = N.borderGrid(0, 0);
+  assert.ok(grid.every((p) => Math.hypot(p.x, p.z) <= N.BORDER_SCAN && p.x % N.BORDER_STEP === 0));
+  assert.ok(grid.some((p) => p.x === N.BORDER_SCAN) && grid.length < 600, "covers the scan circle with a bounded probe count");
 });
-test("gift spot: only standable ground inside Lothlorien; the deepest spot of a ring wins", () => {
-  const c = (level, y = 70) => ({ x: level, z: 0, ring: 56, level, y });
-  assert.equal(N.bestInRing([c(0), { ...c(1), y: undefined }, c(0)]), undefined);
-  assert.equal(N.bestInRing([c(1), c(3), c(2)]).level, 3);
+test("gift spot: away from the known border (towards the heart), not just the farthest ring", () => {
+  // deer at 0,0; the biome border runs north-south 30 blocks to the west (x = -30)
+  const border = Array.from({ length: 25 }, (_, i) => ({ x: -30, z: -96 + i * 8 }));
+  const spots = N.giftCandidates(0, 0).map((c) => ({ ...c, y: 70, inside: c.x > -30 }));
+  const best = N.pickGiftSpot(spots, border);
+  assert.ok(best.x > 30, `leads east, away from the edge (got ${best.x}, ${best.z})`);
+  // a far spot near the edge loses to a nearer one deep in
+  const edgeFar = { x: -20, z: 0, ring: 56, y: 70, inside: true }, deepNear = { x: 36, z: 0, ring: 36, y: 70, inside: true };
+  assert.equal(N.pickGiftSpot([edgeFar, deepNear], border), deepNear);
+  // equal depth (within the slack): the longer walk wins
+  const a = { x: 40, z: 0, ring: 40, y: 70, inside: true }, b = { x: 44, z: 3, ring: 52, y: 70, inside: true };
+  assert.equal(N.pickGiftSpot([a, b], border), b);
+  // no border in sight: the longest walk; nothing standable inside: undefined
+  assert.equal(N.pickGiftSpot([a, b], []), b);
+  assert.equal(N.pickGiftSpot([{ ...a, inside: false }, { ...b, y: undefined }], border), undefined);
 });
 test("great nut: tree box and anchor match the structure builder; the sprout sits in the trunk at ground level", () => {
   assert.deepEqual([N.SIZE, N.SIZE_Y, N.TRUNK_AT, N.ROOT_DEPTH], [SIZE, SIZE_Y, TRUNK_AT, ROOT_DEPTH]);

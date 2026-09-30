@@ -672,9 +672,13 @@ than wandering (the 80-block, loaded-chunk search only found trees already in si
 script: the placed jigsaw instances live in the world save with no API; `/locate structure` finds them but `runCommand` returns only
 `successCount`; Script API 2.8.0 has no world seed (random_spread positions need it); `getBiome`/`getBlock` throw in unloaded
 chunks; and random_spread cannot be made a fixed grid (separation must be under half the spacing). So the deer now chooses the
-destination itself: `findGiftSpot` (white_deer.js) tries rings 56..36 blocks (`GIFT_RINGS`, great_mallorn_rules.js; inside the
-default simulation distance of 4 chunks whatever the player's setting, owner's wish), 16 headings from a random start, standable
-ground from the top (`groundFeet`), depth level >= 1; farthest ring wins, deepest spot within it. Dynamic properties on the deer:
+destination itself: `findGiftSpot` (white_deer.js) samples the surface biome on an 8-block grid within 96 blocks (loaded chunks
+only; other biomes = known border, rivers ignored), then 16 headings on rings 56..36 blocks (`GIFT_RINGS`, great_mallorn_rules.js;
+inside the default simulation distance of 4 chunks whatever the player's setting, owner's wish) with Lothlorien biome and standable
+ground (`groundFeet`). `pickGiftSpot`: farthest from any known border wins, ties within 8 blocks go to the longer walk. First version
+(same day) took the farthest ring with any spot inside and used depth only within it: the owner was led to the edge (a far edge spot
+beat a nearer deep one, and `depthAt` at a far spot probes 40 more blocks out, into unloaded chunks, so it reads low).
+Dynamic properties on the deer:
 `lothlorien:gift_spot` (JSON, kept until the gift is laid, so a broken guidance resumes with another acorn) and `lothlorien:gifted`.
 On arrival `giveGift` spawns the nut (lore set by script: JSON items have no lore) with totem particles. `ARRIVE_DIST` 3 (the spot is
 standable; `pickWaypoint`'s final ring now starts at radius 0). The marker block (`lothlorien:structure_marker`) and its search were removed

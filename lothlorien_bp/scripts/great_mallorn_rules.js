@@ -52,14 +52,22 @@ const NATURAL = new RegExp(
 export const isNatural = (typeId) => NATURAL.test(typeId) && !typeId.includes("stripped");
 
 // ---- The gift spot the white deer leads to ----
-// Chosen when the deer is fed, among places that are loaded at the default simulation distance (4 chunks) whatever the
-// player's own setting, so every player gets the same walk: rings from GIFT_MAX down to GIFT_MIN blocks from the deer,
-// GIFT_HEADINGS headings each. The farthest ring with a spot inside Lothlorien wins; within it, the deepest spot.
+// Candidates sit on rings GIFT_MIN..GIFT_MAX blocks from the deer (GIFT_RINGS x GIFT_HEADINGS), all loaded at the default
+// simulation distance (4 chunks) whatever the player's own setting, so every player gets the same walk.
+// Towards the heart: the biome is sampled on a grid (BORDER_STEP) over everything loaded within BORDER_SCAN of the deer; samples
+// of another biome are the known border. The spot farthest from any known border wins (owner, 2026-09-30: the first rule,
+// "farthest ring first, then depth", led to the edge, because a far spot at the edge beat a nearer one deeper in, and the depth
+// probe of a far spot ran into unloaded chunks). Spots within SCORE_SLACK of the best score count as equal; among them the
+// longest walk wins. With no border in sight at all (deep in the heart) every spot ties and the longest walk wins.
 export const GIFT_RINGS = [56, 52, 48, 44, 40, 36];
 export const GIFT_HEADINGS = 16;
+export const BORDER_SCAN = 96;
+export const BORDER_STEP = 8;
+export const SCORE_SLACK = 8;
 
+// Candidates as one list, farthest ring first: [{ x, z, ring }].
 export function giftCandidates(x, z, startAngle = 0) {
-  return GIFT_RINGS.map((r) =>
+  return GIFT_RINGS.flatMap((r) =>
     Array.from({ length: GIFT_HEADINGS }, (_, i) => {
       const a = startAngle + (i * 2 * Math.PI) / GIFT_HEADINGS;
       return { x: Math.floor(x + Math.cos(a) * r), z: Math.floor(z + Math.sin(a) * r), ring: r };
@@ -67,13 +75,28 @@ export function giftCandidates(x, z, startAngle = 0) {
   );
 }
 
-// ring: [{ x, z, ring, level, y }] with level from scripts/depth.js (0 outside, 1 edge, 2 inner, 3 heart) and y the feet
-// height (undefined = no standable ground). Returns the best spot of the ring or undefined.
-export function bestInRing(ring) {
-  let best;
-  for (const c of ring) {
-    if (c.y === undefined || !(c.level >= 1)) continue;
-    if (!best || c.level > best.level) best = c;
+// Grid points for the border scan around (x, z), inside the BORDER_SCAN circle: [{ x, z }].
+export function borderGrid(x, z) {
+  const out = [];
+  const n = Math.floor(BORDER_SCAN / BORDER_STEP);
+  for (let i = -n; i <= n; i++) {
+    for (let j = -n; j <= n; j++) {
+      if (Math.hypot(i, j) * BORDER_STEP <= BORDER_SCAN) out.push({ x: Math.floor(x) + i * BORDER_STEP, z: Math.floor(z) + j * BORDER_STEP });
+    }
   }
-  return best;
+  return out;
+}
+
+// candidates: [{ x, z, ring, y, inside }] (y = feet height or undefined, inside = the spot's own biome is Lothlorien);
+// border: [{ x, z }] known points of another biome. Returns the chosen candidate or undefined.
+export function pickGiftSpot(candidates, border) {
+  const scored = candidates
+    .filter((c) => c.inside && c.y !== undefined)
+    .map((c) => ({ c, score: border.reduce((m, b) => Math.min(m, Math.hypot(c.x - b.x, c.z - b.z)), Infinity) }));
+  if (!scored.length) return undefined;
+  const top = Math.max(...scored.map((s) => s.score));
+  const near = scored.filter((s) => (top === Infinity ? s.score === Infinity : s.score >= top - SCORE_SLACK));
+  let best;
+  for (const s of near) if (!best || s.c.ring > best.c.ring || (s.c.ring === best.c.ring && s.score > best.score)) best = s;
+  return best.c;
 }
