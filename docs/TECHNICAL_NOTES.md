@@ -692,6 +692,38 @@ Files: BP `entities/deer.json` (edited), `blocks/structure_marker.json`, `script
 (5) whether `/summon ... lothlorien:coat_white` keeps the coat when `minecraft:entity_spawned` runs; (6) whether the marker survives worldgen placement
 inside the trunk and cannot be seen or mined; (7) the white texture is a placeholder.
 
+### Pathfinding options / decision (2026-09-30, research only, nothing run in game)
+
+The owner rejected teleport-walking (jerky, fights `random_stroll`, animation doubtful). Full comparison, verified component
+names and the experiment: `.claude/skills/bedrock-mobs/references/pathfinding.md`.
+
+- **Dolphins do not help**: `behavior.find_underwater_treasure` is hard-wired to vanilla underwater ruins/shipwrecks
+  (with `minecraft:bribeable` for the feeding); it cannot target our marker. Script API 2.8.0 has no way to set a navigation target;
+  `home`/`go_home` (spawn point), POI/dweller/village goals cannot be pointed at a custom spot.
+- **Chosen design (pending the experiment): waypoint beacon.** A new invisible entity `lothlorien:guide_beacon` (no gravity, no
+  collision, no damage, timer + `instant_despawn` failsafe) is placed by script 8-14 blocks ahead on standable ground; `state_guiding` gets
+  `minecraft:behavior.follow_target_leader` (format 1.26.20+, the deer is 1.26.50) filtered on the beacon family, so the engine's navigator
+  walks the deer. Script only moves the beacon: next waypoint when the deer is within 3 blocks, another heading after 5 s without progress.
+  Fallbacks in order: `follow_mob` with the same filter, then `nearest_attackable_target` + `move_towards_target`.
+- Proof of concept (pure, tested, not wired): `tools/dev_scripts/guide_waypoints.mjs` + `guide_waypoints.test.mjs`
+  (`node tools/dev_scripts/guide_waypoints.test.mjs`). The final hop picks a standable column within 5 blocks of the buried marker.
+- **Experiment first** (decides which goal): see "Minimal in-game experiment" in `pathfinding.md` (armor stand tagged `guide_beacon`,
+  `/event entity` into three test groups).
+
+**Next step plan (after the experiment):**
+
+1. BP `entities/guide_beacon.json` (+ RP client entity with an empty geometry and a render controller, so the verifier's links pass);
+   spawn rule none, `is_spawnable false`, `is_summonable true`.
+2. `deer.json` `state_guiding`: add the winning goal at priority 2 (above tempt 3/avoid 4, below panic 1), `speed_multiplier` ~1.0;
+   remove nothing else (random_stroll 6 only runs in gaps between hops). If it still wanders at a waypoint, override it inside
+   `state_guiding` with `"minecraft:behavior.random_stroll": {"priority": 6, "interval": 1000000}` (a group component of the same name
+   replaces the base one while the group is on; not tested for this deer).
+3. Rules: move `pickWaypoint`/`hopStatus` into `white_deer_rules.js`, tests into `tests/run.mjs`; drop `pickStep`/`STEP`/`MOVE_TICKS` walking.
+4. `white_deer.js`: per session spawn one beacon at the first waypoint (`dimension.spawnEntity`), tick every 5 ticks: `hopStatus` ->
+   `beacon.teleport(next)`; "wait" = teleport the beacon to the deer's feet; end = `beacon.remove()`. Column probe = the existing
+   `probe()` but with a taller window (ray from y+6 down 12). On world load remove all stray beacons (`dimension.getEntities({type})`).
+5. Verify, deploy, run the white deer test plan below (step 5 checks the walk).
+
 ### White deer test plan (nothing here has been run in game; the marker in trees needs a NEW world)
 
 Leave and re-enter the world to load the entity and script changes. Steps 1-6 work in an old world; step 7 needs a new world.
