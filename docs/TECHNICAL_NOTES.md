@@ -745,7 +745,7 @@ Corn grain does nothing to the white deer (it is the ordinary deer's food).
 
 **Walking = engine pathfinding towards a moving helper (design from "Pathfinding options / decision" below):**
 
-- `lothlorien:guide_beacon`: no gravity, no collision, not pushable, no damage (`damage_sensor` all), fire immune, knockback resistance 1,
+- `lothlorien:guide_beacon`: no gravity, no collision, not pushable (no `pushable_by_*`; `minecraft:pushable` made the entity fail to load in format 1.26.50, game log 2026-09-30), no damage (`damage_sensor` all), fire immune, knockback resistance 1,
   collision box 0.1, not spawnable, summonable, no spawn egg; `minecraft:timer` 330 s -> event `lothlorien:expire` -> `minecraft:instant_despawn`
   (safety net: a session lasts at most 300 s). Family `lothlorien_guide_beacon`.
 - **One beacon per session**, `dimension.spawnEntity` at the first waypoint. `guide_start` puts the deer in `state_guiding`:

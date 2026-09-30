@@ -664,7 +664,8 @@ test("guide beacon: invisible, weightless, untouchable helper that removes itsel
   const c = b.components;
   assert.ok(c["minecraft:type_family"].family.includes(G.BEACON_FILTER.value));
   assert.deepEqual(c["minecraft:physics"], { has_gravity: false, has_collision: false });
-  assert.equal(c["minecraft:pushable"].is_pushable, false);
+  // Not pushable = no pushable_by_* component; minecraft:pushable is rejected by entity format 1.26.50.
+  for (const k of ["minecraft:pushable", "minecraft:pushable_by_entity", "minecraft:pushable_by_block"]) assert.equal(c[k], undefined, k);
   assert.deepEqual(c["minecraft:damage_sensor"].triggers, { cause: "all", deals_damage: "no" });
   assert.ok(!c["minecraft:is_collidable"] && !c["minecraft:despawn"]);
   const t = c["minecraft:timer"];
