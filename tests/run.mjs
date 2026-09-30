@@ -9,7 +9,7 @@ import * as D from "../lothlorien_bp/scripts/disharmony.js";
 import { makeRandom } from "../lothlorien_bp/scripts/mallorn_tree.js";
 import { buildFletMallorn, LADDER, LEAF_KEEP, ROOT_DEPTH, B } from "../tools/flet_mallorn.mjs";
 import { SIZE, SIZE_Y, TRUNK_AT, CHOSEN, TRUNK_ANCHOR } from "../tools/build_structures.mjs";
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 
 const L = "lothlorien:lothlorien", RIVER = "minecraft:river", FOREST = "minecraft:forest";
 const T = new Set([RIVER]);
@@ -843,6 +843,50 @@ test("two plank sets: logs -> silver planks, stripped -> heartwood planks; heart
   }
   const src = readFileSync(new URL("../lothlorien_bp/scripts/blocks.js", import.meta.url), "utf8");
   assert.ok(src.includes('const WOODS = ["mallorn", "mallorn_heartwood"]'), "door pairing, slab merging, button/plate support know both sets");
+});
+test("icons: every non-cube plank-family block draws its icon through item_visual with an explicit vanilla pose", () => {
+  // Without item_visual the icon was turned (stairs, gate) and auto-fitted (slab drawn big and high); a gui pose
+  // without rotation left the fence a quarter turn off. Poses: Kaioga 1.26.50 templates (tuned against vanilla).
+  const YAW = { stairs: 135, fence_gate: 135, slab: 225, fence: 225, trapdoor: 225, pressure_plate: 225, button: 225 };
+  const geos = new Map();
+  for (const f of readdirSync(new URL("../lothlorien_rp/models/blocks/", import.meta.url))) {
+    for (const g of readJson(`../lothlorien_rp/models/blocks/${f}`)["minecraft:geometry"]) geos.set(g.description.identifier, g);
+  }
+  for (const set of ["mallorn", "mallorn_heartwood"]) {
+    for (const [part, yaw] of Object.entries(YAW)) {
+      const comps = readJson(`../lothlorien_bp/blocks/${set}_${part}.json`)["minecraft:block"].components;
+      const visual = comps["minecraft:item_visual"];
+      assert.ok(visual && visual.material_instances, `${set}_${part}: item_visual with material_instances`);
+      assert.deepEqual(visual.material_instances, comps["minecraft:material_instances"], `${set}_${part}: icon uses the block's textures`);
+      const geo = geos.get(visual.geometry);
+      assert.ok(geo, `${set}_${part}: item_visual geometry ${visual.geometry} exists`);
+      const gui = geo.item_display_transforms?.gui;
+      assert.ok(gui && gui.fit_to_frame === false, `${set}_${part}: fit_to_frame off (vanilla size and height)`);
+      assert.deepEqual(gui.rotation, [30, yaw, 0], `${set}_${part}: gui rotation`);
+    }
+  }
+  // the stairs icon is a straight stair whose tall half is EAST (geometry x is mirrored: x -8..0)
+  const top = geos.get("geometry.lothlorien.mallorn_stairs_item").bones[0].cubes.find((c) => c.origin[1] === 8);
+  assert.deepEqual([top.origin, top.size], [[-8, 8, -8], [8, 8, 16]]);
+  for (const set of ["mallorn", "mallorn_heartwood"]) {
+    assert.ok(readJson(`../lothlorien_bp/items/${set}_door.json`)["minecraft:item"].components["minecraft:icon"], `${set}_door: 2D icon`);
+  }
+});
+test("fence: every material instance the fence models name is defined on the block and its icon (both sets); geometry format allows its display transforms", () => {
+  for (const g of ["mallorn_fence", "mallorn_fence_carried"]) {
+    const geo = JSON.stringify(readJson(`../lothlorien_rp/models/blocks/${g}.geo.json`));
+    const used = new Set([...geo.matchAll(/"material_instance":"(\w+)"/g)].map((x) => x[1]));
+    for (const set of ["mallorn", "mallorn_heartwood"]) {
+      const c = readJson(`../lothlorien_bp/blocks/${set}_fence.json`)["minecraft:block"].components;
+      const mi = g.endsWith("carried") ? c["minecraft:item_visual"].material_instances : c["minecraft:material_instances"];
+      for (const name of used) assert.ok(mi[name], `${set} ${g}: ${name}`);
+      assert.equal(mi["*"].texture, `lothlorien:${set}_fence_post`);
+    }
+    const f = readJson(`../lothlorien_rp/models/blocks/${g}.geo.json`);
+    const v = f.format_version.split(".").map(Number);
+    const atLeast = (w) => v[0] !== w[0] ? v[0] > w[0] : v[1] !== w[1] ? v[1] > w[1] : (v[2] ?? 0) >= w[2];
+    if (f["minecraft:geometry"][0].item_display_transforms?.shelf) assert.ok(atLeast([1, 26, 40]), `${g}: "shelf" needs format 1.26.40+`);
+  }
 });
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }
 console.log("all tests passed");

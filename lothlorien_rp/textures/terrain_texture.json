@@ -7,6 +7,9 @@
     "lothlorien:mallorn_planks": {
       "textures": "textures/blocks/mallorn_planks"
     },
+    "lothlorien:mallorn_fence_post": {
+      "textures": "textures/blocks/mallorn_fence_post"
+    },
     "lothlorien:mallorn_log_side": {
       "textures": "textures/blocks/mallorn_log_side"
     },
@@ -93,6 +96,9 @@
     },
     "lothlorien:mallorn_heartwood_trapdoor": {
       "textures": "textures/blocks/mallorn_heartwood_trapdoor"
+    },
+    "lothlorien:mallorn_heartwood_fence_post": {
+      "textures": "textures/blocks/mallorn_heartwood_fence_post"
     }
   }
 }

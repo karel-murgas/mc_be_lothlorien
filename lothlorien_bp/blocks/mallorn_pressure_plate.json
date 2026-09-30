@@ -43,6 +43,15 @@
           "render_method": "opaque"
         }
       },
+      "minecraft:item_visual": {
+        "geometry": "geometry.lothlorien.mallorn_pressure_plate",
+        "material_instances": {
+          "*": {
+            "texture": "lothlorien:mallorn_planks",
+            "render_method": "opaque"
+          }
+        }
+      },
       "minecraft:collision_box": false,
       "minecraft:light_dampening": 0,
       "minecraft:selection_box": {

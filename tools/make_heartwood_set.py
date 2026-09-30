@@ -22,7 +22,7 @@ RP = os.path.join(HERE, "..", "lothlorien_rp")
 FAMILY = ["planks", "stairs", "slab", "double_slab", "fence", "fence_gate", "door", "trapdoor", "button",
           "pressure_plate"]
 # identifiers and texture keys (namespace ':'); geometry ids use '.' and are not touched
-ID_RE = re.compile(r"lothlorien:mallorn_(double_slab|fence_gate|pressure_plate|door_bottom|door_top|planks|stairs|"
+ID_RE = re.compile(r"lothlorien:mallorn_(double_slab|fence_gate|fence_post|pressure_plate|door_bottom|door_top|planks|stairs|"
                    r"slab|fence|door|trapdoor|button)\b")
 LOOT_RE = re.compile(r"loot_tables/blocks/mallorn_(\w+)\.json")
 SILVER_RECIPES = ["button", "door", "fence", "fence_gate", "pressure_plate", "slab", "stairs", "trapdoor"]
@@ -33,7 +33,7 @@ NAMES = {  # English names
     "trapdoor": "Mallorn Heartwood Trapdoor", "button": "Mallorn Heartwood Button",
     "pressure_plate": "Mallorn Heartwood Pressure Plate",
 }
-TEXTURES = ["planks", "door_bottom", "door_top", "trapdoor"]
+TEXTURES = ["planks", "door_bottom", "door_top", "trapdoor", "fence_post"]
 
 
 def avg_hex(path):

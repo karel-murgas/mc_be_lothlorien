@@ -87,6 +87,15 @@
           "render_method": "alpha_test_single_sided"
         }
       },
+      "minecraft:item_visual": {
+        "geometry": "geometry.lothlorien.mallorn_trapdoor",
+        "material_instances": {
+          "*": {
+            "texture": "lothlorien:mallorn_trapdoor",
+            "render_method": "alpha_test_single_sided"
+          }
+        }
+      },
       "minecraft:precipitation_interactions": {
         "precipitation_behavior": "obstruct_rain"
       },

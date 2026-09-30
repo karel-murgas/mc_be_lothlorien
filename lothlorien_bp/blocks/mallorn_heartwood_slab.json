@@ -44,6 +44,15 @@
           "render_method": "opaque"
         }
       },
+      "minecraft:item_visual": {
+        "geometry": "geometry.lothlorien.mallorn_slab_bottom",
+        "material_instances": {
+          "*": {
+            "texture": "lothlorien:mallorn_heartwood_planks",
+            "render_method": "opaque"
+          }
+        }
+      },
       "minecraft:collision_box": {
         "origin": [
           -8,

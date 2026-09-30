@@ -214,14 +214,58 @@ SILVER_TO_GOLD = {
     BARK[3]: WOOD[2],
     BARK[4]: WOOD[3],
     BARK[5]: WOOD[4],
+    # gold accents swap the other way: gold on silver art becomes silver on the heartwood twin (owner, 2026-10-01)
+    GOLD[0]: BARK[1],
+    GOLD[1]: BARK[3],
+    GOLD[2]: BARK[4],
+    GOLD[3]: BARK[5],
 }
+
+
+# ---- fence post: 4 sides x 4 columns (north, west, south, east as the model maps them) ----
+# Owner's design (2026-10-01): vanilla 4x4 post, wood grain streaks, a knot on two sides, and one painted leaf per side
+# (like the falling-leaf particle), neighbouring sides at different heights. Gold on silver, silver on the heartwood twin.
+POST_LEAVES = [(0, 3, False), (1, 9, True), (2, 5, False), (3, 10, True)]  # (side, top row, mirrored)
+POST_LEAF = ["AA..",   # tip top-left, stalk bottom-right; A light, B mid, C deep gold, S stalk
+             "ABB.",
+             ".BBC",
+             "..CC",
+             "...S"]
+POST_KNOTS = {0: (1, 13), 2: (2, 1)}  # side: (x, y) dark eye, lit texel above (below at the top edge)
+
+
+def fence_post():
+    import random
+    rng = random.Random(7)  # fixed seed: the same grain every run
+    g = [[4] * N for _ in range(N)]
+    for f in range(4):
+        for x in range(4):
+            col = [[5, 4, 4, 3][x] - (1 if f == 3 else 0)] * N  # lit left, shaded right, east side a step darker
+            y = rng.randrange(3)
+            while y < N:  # grain streaks: 2-5 texels one step lighter or darker, gaps of 1-4
+                ln, d = rng.randint(2, 5), rng.choice((-1, -1, 1))
+                for i in range(y, min(N, y + ln)):
+                    col[i] += d
+                y += ln + rng.randint(1, 4)
+            for y in range(N):
+                g[y][4 * f + x] = 5 if y == 0 else min(5, max(2, col[y]))
+    for f, (kx, ky) in POST_KNOTS.items():
+        g[ky][4 * f + kx] = "seam"
+        g[ky - 1 if ky else ky + 1][4 * f + kx] = 5
+    for f, top, mirror in POST_LEAVES:
+        for r, row in enumerate(POST_LEAF):
+            for c, ch in enumerate(row[::-1] if mirror else row):
+                if ch != ".":
+                    g[top + r][4 * f + c] = {"A": ("g", 2), "B": ("g", 1), "C": ("g", 0), "S": "seam"}[ch]
+    return g
 
 
 def _lum(c):
     return 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]
 
 
-_ANCHORS = sorted((_lum(s), g) for s, g in SILVER_TO_GOLD.items())
+# brightness fallback: silver anchors only (the gold->silver swap entries would pull greys towards silver)
+_ANCHORS = sorted((_lum(s), g) for s, g in SILVER_TO_GOLD.items() if s not in GOLD)
 
 
 def to_gold(c):
@@ -284,6 +328,9 @@ def main():
         "blocks/mallorn_planks.png": silver_planks,
         "blocks/mallorn_heartwood_planks.png": recolour(silver_planks),
     }
+    silver_post = to_image(fence_post(), PLANK)
+    files["blocks/mallorn_fence_post.png"] = silver_post
+    files["blocks/mallorn_heartwood_fence_post.png"] = recolour(silver_post)
     for name, im in files.items():
         assert im.size == (N, N) and all(p[3] == 255 for p in im.get_flattened_data()), name
     # golden twins of silver art that is not generated here (door, trapdoor: placeholders for now)

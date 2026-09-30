@@ -3,13 +3,13 @@
   "minecraft:geometry": [
     {
       "description": {
-        "identifier": "geometry.lothlorien.mallorn_trapdoor",
+        "identifier": "geometry.lothlorien.mallorn_button_item",
         "texture_width": 16,
         "texture_height": 16
       },
       "bones": [
         {
-          "name": "trapdoor",
+          "name": "button",
           "pivot": [
             0,
             0,
@@ -18,74 +18,74 @@
           "cubes": [
             {
               "origin": [
-                -8,
-                0,
-                -8
+                -1,
+                6,
+                -3
               ],
               "size": [
-                16,
-                2.9,
-                16
+                2,
+                4,
+                6
               ],
               "uv": {
                 "north": {
                   "uv": [
-                    16,
-                    3
+                    7,
+                    6
                   ],
                   "uv_size": [
-                    -16,
-                    -3
-                  ]
-                },
-                "east": {
-                  "uv": [
-                    16,
-                    3
-                  ],
-                  "uv_size": [
-                    -16,
-                    -3
+                    2,
+                    4
                   ]
                 },
                 "south": {
                   "uv": [
-                    16,
-                    3
+                    7,
+                    6
                   ],
                   "uv_size": [
-                    -16,
-                    -3
+                    2,
+                    4
+                  ]
+                },
+                "east": {
+                  "uv": [
+                    5,
+                    6
+                  ],
+                  "uv_size": [
+                    6,
+                    4
                   ]
                 },
                 "west": {
                   "uv": [
-                    16,
-                    3
+                    5,
+                    6
                   ],
                   "uv_size": [
-                    -16,
-                    -3
+                    6,
+                    4
                   ]
                 },
                 "up": {
                   "uv": [
-                    0,
-                    0
+                    7,
+                    5
                   ],
                   "uv_size": [
-                    16,
-                    16
+                    2,
+                    6
                   ]
                 },
                 "down": {
                   "uv": [
-                    16,
-                    16
+                    7,
+                    5
                   ],
                   "uv_size": [
-                    -16,
-                    -16
+                    2,
+                    6
                   ]
                 }
               }

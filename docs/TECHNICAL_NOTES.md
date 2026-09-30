@@ -166,6 +166,16 @@ texture keys and map colour swapped, geometry shared. Change the silver block, t
 plank sets" fails when they drift). `blocks.js` lists both sets in `WOODS` (slab merge, button/plate support
 loss); a double door pairs only with the same kind of door. Silver and heartwood fences connect to each other.
 
+**Carved fence (2026-10-01, owner: "beautiful" in game; icon and rail colour fixed after, recheck).** `tools/make_mallorn_fence.py` writes
+`mallorn_fence.geo.json` (bones `post`, `north_rails`, `south_rails`, `west_rails`, `east_rails`: same names and
+`bone_visibility` as before) and `mallorn_fence_carried.geo.json` (icon; its `item_display_transforms` are read
+back and kept). Each rail is one 2x2 cube tilted 22.5 deg about x (inverted V towards the block edge); the other sides
+are the north rails turned in quarter steps. Post faces use the block's `*` material (`mallorn_fence_post`, 4 sides x 4
+columns); the rails and cap read a leaf-free strip of it (columns 5-6), grain turned along the rail with per-face
+`uv_rotation` (owner: rails on the planks' lit edge looked white). Geometry format **1.26.50**: the icon keeps a `shelf`
+display transform, which the game only accepts from 1.26.40 and otherwise drops the whole file (icons vanished, 2026-10-01).
+Selection and collision boxes are unchanged. The test "fence: every material instance ..." checks both sets.
+
 - Tools: every wood block carries `minecraft:is_axe_item_destructible`; leaves use the hoe tag.
 - Logs: `block_face` trait + rotation permutations; axe strips (`lothlorien:strippable`).
 - Stairs: native corners. `placement_direction` with `minecraft:corner_and_cardinal_direction`
@@ -191,6 +201,7 @@ loss); a double door pairs only with the same kind of door. Silver and heartwood
 - Button/plate: `minecraft:redstone_producer`; button releases after 30 ticks, plate polls
   every 4 ticks (`minecraft:tick`). Support loss is handled in `blocks.js` (breaking the block they sit on).
 - Left out (signs, shelf, boats, ...): see `NOT_IMPLEMENTED.md` for reasons and retry notes.
+- **Icons (2026-09-30; owner confirmed in game 2026-10-01 that the menu icons look right, 1.26.52).** Owner saw the stairs and gate icons turned, the slab big and high, the fence turned. Every non-cube plank-family block now names an icon geometry in `minecraft:item_visual` whose `item_display_transforms.gui` sets rotation, scale 0.625 and `fit_to_frame: false`: stairs `mallorn_stairs_item` (straight stair, tall half east, `[30,135,0]`, written by `gen_stairs.py`), gate `fence_gate_closed` `[30,135,0]`, slab `slab_bottom`, trapdoor, pressure plate `[30,225,0]`, fence `fence_carried` `[30,225,0]` translation -1 scale 0.62, button `mallorn_button_item` `[30,225,0]` (Java's 6x4x4 box looked turned and too wide in game, 2026-10-01; now 2x4x6 with the long face east; owner confirmed it in game 2026-10-01). Placed blocks, permutations and boxes are unchanged. Door keeps its 2D icon; planks/logs/wood are cubes. Poses come from Kaioga's 1.26.50 templates; the rule is in `bedrock-block-families/references/families.md` "Item icons", the test is "icons: ..." in `tests/run.mjs`. Check in game next to vanilla oak: stairs (tall half back left), slab (low, vanilla size), fence and gate (same diagonal as vanilla), trapdoor, plate, button.
 - **Untested in game** (no game access while writing): everything above. Check first: door swing/hinge, gate open pose, slab merge, log rotation, redstone opening.
 
 ## Phase 4 — small Mallorn and the acorn loop
