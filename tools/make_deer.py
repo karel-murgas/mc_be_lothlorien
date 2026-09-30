@@ -75,8 +75,8 @@ def cubes_adult():
     c = []
     bones = {
         "body": (None, [0, 13, 0], None),
-        "neck": ("body", [0, 19, -7], [30, 0, 0]),
-        "head": ("neck", [0, 27, -7], [-22, 0, 0]),
+        "neck_joint": ("body", [0, 19, -7], [30, 0, 0]),
+        "head": ("neck_joint", [0, 27, -7], [-22, 0, 0]),
         "ear_l": ("head", [2, 29, -8.5], [0, 0, 30]),
         "ear_r": ("head", [-2, 29, -8.5], [0, 0, -30]),
         "antler_l": ("head", [1.5, 30, -9.5], [-20, 0, 15]),
@@ -88,7 +88,7 @@ def cubes_adult():
         "leg3": ("body", [2, 13, -5], None),
     }
     c.append(("body", "body", [-3.5, 13, -7], [7, 9, 15], "body"))
-    c.append(("neck", "neck", [-2, 19, -9], [4, 8, 4], "neck"))
+    c.append(("neck", "neck_joint", [-2, 19, -9], [4, 8, 4], "neck"))
     c.append(("skull", "head", [-2.5, 25, -12], [5, 5, 6], "skull"))
     c.append(("muzzle", "head", [-1.5, 25, -15], [3, 3, 3], "muzzle"))
     c.append(("ear_l", "ear_l", [2, 29, -9], [3, 4, 1], "ear"))
@@ -104,8 +104,8 @@ def cubes_adult():
 def cubes_baby():
     bones = {
         "body": (None, [0, 6, 0], None),
-        "neck": ("body", [0, 9, -4], [25, 0, 0]),
-        "head": ("neck", [0, 12, -4], [-18, 0, 0]),
+        "neck_joint": ("body", [0, 9, -4], [25, 0, 0]),
+        "head": ("neck_joint", [0, 12, -4], [-18, 0, 0]),
         "ear_l": ("head", [1.5, 14, -6], [0, 0, 30]),
         "ear_r": ("head", [-1.5, 14, -6], [0, 0, -30]),
         "tail": ("body", [0, 10, 5], [15, 0, 0]),
@@ -116,7 +116,7 @@ def cubes_baby():
     }
     c = []
     c.append(("body", "body", [-2.5, 6, -5], [5, 5, 10], "body"))
-    c.append(("neck", "neck", [-1.5, 9, -5.5], [3, 3, 3], "neck"))
+    c.append(("neck", "neck_joint", [-1.5, 9, -5.5], [3, 3, 3], "neck"))
     c.append(("skull", "head", [-2, 11, -9.5], [4, 4, 5], "skull"))
     c.append(("muzzle", "head", [-1, 11, -11.5], [2, 2, 2], "muzzle"))
     c.append(("ear_l", "ear_l", [1.5, 14, -6.5], [2, 3, 1], "ear"))

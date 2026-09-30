@@ -42,7 +42,7 @@
           ]
         },
         {
-          "name": "neck",
+          "name": "neck_joint",
           "pivot": [
             0,
             19,
@@ -80,7 +80,7 @@
             27,
             -7
           ],
-          "parent": "neck",
+          "parent": "neck_joint",
           "rotation": [
             -22,
             0,
@@ -656,7 +656,7 @@
           ]
         },
         {
-          "name": "neck",
+          "name": "neck_joint",
           "pivot": [
             0,
             9,
@@ -694,7 +694,7 @@
             12,
             -4
           ],
-          "parent": "neck",
+          "parent": "neck_joint",
           "rotation": [
             -18,
             0,

@@ -17,8 +17,7 @@
       },
       "minecraft:food": {
         "nutrition": 8,
-        "saturation_modifier": 0.8,
-        "is_meat": true
+        "saturation_modifier": 0.8
       },
       "minecraft:tags": {
         "tags": [

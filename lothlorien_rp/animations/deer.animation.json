@@ -33,7 +33,7 @@
             0
           ]
         },
-        "neck": {
+        "neck_joint": {
           "rotation": [
             "math.cos(query.anim_time * 38.17 * 2.0) * 2.0",
             0,
@@ -86,7 +86,7 @@
             0
           ]
         },
-        "neck": {
+        "neck_joint": {
           "rotation": [
             "math.cos(query.anim_time * 30.0 + 90.0) * 5.0 - 5.0",
             0,
@@ -126,7 +126,7 @@
             "math.sin(query.life_time * 720.0) * math.pow(math.max(0.0, math.sin(query.life_time * 47.0)), 14) * 14.0"
           ]
         },
-        "neck": {
+        "neck_joint": {
           "rotation": [
             "math.sin(query.life_time * 40.0) * 1.0",
             0,

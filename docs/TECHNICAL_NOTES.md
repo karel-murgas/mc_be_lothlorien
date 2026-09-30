@@ -546,7 +546,7 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
 - Sex and antlers: enum property `lothlorien:sex` (client synced) picked by `minecraft:entity_spawned` / `entity_born`; the render
   controller shows bones `antler_*` only for `buck` adults (`part_visibility`). Loot differs by sex through two adult groups
   (`adult_doe`, `adult_buck`), because loot-table conditions cannot test a custom property; babies have no loot group.
-- Venison uses `is_meat: true` in `minecraft:food` (wolves heal with it). One furnace recipe carries the tags furnace, smoker, campfire
+- Venison is marked meat with the item tag `minecraft:is_meat` (wolves heal with it). **Not** `is_meat` inside `minecraft:food`: item format 1.26.50 rejects that field (game log, 2026-09-30: "Failed to parse field minecraft:food -> is_meat"), and the items did not load. One furnace recipe carries the tags furnace, smoker, campfire
   like vanilla `furnace_beef`.
 - Animations are procedural Molang (no keyframes): walk = `query.modified_distance_moved` diagonal legs; run = gallop pairs with
   weight `clamp((query.ground_speed - 3.5) / 2.5, 0, 1)`. **The 3.5 m/s threshold is a guess**; if the gallop never shows or shows
@@ -620,3 +620,12 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
 - From photos: the spots run along the whole back up to the rump patch (they stopped at about 3/4 before), and the field is outlined in **light**,
   not dark. Adult: rump patch 2 columns wide (was 3), no dark edge, back line and flank line in the lightest coat tone, one spot per column up to
   column 12. Fawn: same idea on its 2 coat rows, sparser so it does not read as a checkerboard.
+
+### Game-log errors after the first full deploy (2026-09-30)
+
+- `minecraft:food -> is_meat ... not present in the Schema` (both venison items failed to load): removed the field, tag `minecraft:is_meat` stays. The
+  verifier now errors on it for item format 1.21+ (it only knew the old 1.10 field), and its compostable exemption for meat reads the tag.
+- `Geometry: model already has a locator armor_offset.default_neck that doesn't exactly match the one wanting to be added` for `geometry.lothlorien.deer`.
+  Not documented anywhere; cause not proven. Hypothesis: the engine derives an armor locator from a bone named `neck`, adds it twice with different
+  values, and keeps the first ("skipping new definition", so probably harmless). The bone is now `neck_joint` (geometry, baby geometry, animations) to
+  avoid the trigger. **If the error is still in the log after this deploy, the cause is something else: report the exact text.**
