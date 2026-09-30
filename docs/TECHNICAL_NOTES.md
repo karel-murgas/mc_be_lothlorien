@@ -502,7 +502,7 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
 - A kill counts when a player is `damageSource.damagingEntity` (projectile shooters included) and the victim stood in the biome.
 - Later phases read the state with `disharmonyOf(player)` + `levelFor` / `isFriend`.
 
-## Fauna spawning spike (Phase 10, 2026-09-30, built; v1 game-tested (no despawn far away), v3 NOT yet tested)
+## Fauna spawning spike (Phase 10, 2026-09-30, built; v3 despawn game-tested OK)
 
 - Placeholder `lothlorien:test_critter` (gold rabbit model/texture, vanilla walk AI, has a spawn egg). Files: `entities/test_critter.json`,
   `spawn_rules/test_critter.json`, RP `entity/test_critter.entity.json`. Delete or reuse for Phase 11.
@@ -518,6 +518,8 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
   inactive; at the simulation edge = removed at once. Retest: (a) leave a critter behind, go past simulation distance, come
   back: it must be gone; (b) stand ~40-60 blocks away for a few minutes: numbers should thin out slowly; (c) name-tag one and
   repeat (a): it must stay. Knowledge: `.claude/skills/bedrock-mobs/references/spawning.md`.
+  **Game-tested 2026-09-30 (1.26.52): works** - critters despawn, including ones spawned under v1/v2 (the rule comes from
+  the current pack when the chunk loads). Name-tag persistence (c) not reported yet.
 - Instrument: `/scriptevent lothlorien:critters` one report (near r64 / in biome / farther loaded); `... critters watch` toggles a
   report every 15 s (chat + log). Script: `scripts/critter_watch.js`.
 - Test in a NEW world (spawn rules need no new chunks, but the biome does): (1) stand in Lórien, `watch` on, count should climb to
