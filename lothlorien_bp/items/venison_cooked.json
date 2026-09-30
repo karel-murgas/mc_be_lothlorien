@@ -4,8 +4,8 @@
     "description": {
       "identifier": "lothlorien:venison_cooked",
       "menu_category": {
-        "category": "items",
-        "group": "minecraft:itemGroup.name.miscFood"
+        "category": "equipment",
+        "group": "minecraft:itemGroup.name.cookedFood"
       }
     },
     "components": {

@@ -4,8 +4,7 @@
     "description": {
       "identifier": "lothlorien:deer_antler",
       "menu_category": {
-        "category": "nature",
-        "group": "minecraft:itemGroup.name.miscellaneous"
+        "category": "items"
       }
     },
     "components": {

@@ -4,7 +4,7 @@
     "description": {
       "identifier": "lothlorien:lembas_wrapped",
       "menu_category": {
-        "category": "items",
+        "category": "equipment",
         "group": "minecraft:itemGroup.name.miscFood"
       }
     },
