@@ -115,9 +115,9 @@ Protocol: `.claude/skills/bedrock-mobs/references/testing.md`; instrument `/scri
 | Crowds out vanilla animals | shares the `animal` pool; watch numbers next to cows/sheep | no |
 | Named mobs survive | as Phase 10 | no |
 
-## Art (placeholder quality, see `GRAPHICS_TASKS.md` step 11)
+## Art (model, body textures and antler icon final 2026-09-30; open items in `GRAPHICS_TASKS.md` step 11)
 
 `tools/make_deer.py` writes geometry, both entity textures and the three item icons; `.claude/skills/bedrock-mobs/scripts/preview_entity.py`
 renders a software preview (orthographic, approximate rotation convention) for judging shapes before the game.
 The texture was made by rule (colour ramps with hue shift, hand-placed spots, top/front light, AA-free flat shapes)
-following `bedrock-modding/references/10-art-style.md`. It has **not been seen in game**.
+following `bedrock-modding/references/10-art-style.md`. Accepted in game (1.26.52, 2026-09-30).
