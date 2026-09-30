@@ -98,9 +98,9 @@ reacts to a Disharmony III player also scares it.
 
 | Question | Decision | Tested |
 | --- | --- | --- |
-| Model | generated box model, fallow-deer look (tawny coat, pale spots, white rump, dark spine); antlers as bones `antler_l/r` shown only on adult bucks (`part_visibility`) | no |
+| Model | generated box model, fallow-deer look (tawny coat, pale spots, white rump, dark spine). Three geometries in one file: doe, buck (with antler bones `antler_l/r`), fawn; the render controller picks one (`is_baby`, then `lothlorien:sex`). No bone is called `head` (`head_joint`): the engine derives an armour locator from a `head` bone and the fawn's clashed with the adult's (see `bedrock-mobs` client.md) | loads without content-log errors (1.26.52, 2026-09-30) |
 | Variants | none yet; the white deer gets its own texture in Phase 12 | - |
-| Animations | procedural Molang: `walk` (diagonal legs, speed weighted), `run` (gallop pairs, body bob, raised tail, weight from `query.ground_speed` 3.5..6 m/s, **threshold unverified**), `idle` (ear and tail flicks), vanilla look-at-target | no |
+| Animations | procedural Molang: `walk` (diagonal legs, speed weighted), `run` (gallop pairs, body bob, raised tail, weight from `query.ground_speed` 3.5..6 m/s, **threshold unverified**), `idle` (ear and tail flicks), own `look_at_target` (copy of the vanilla one for `head_joint`) | no |
 | Sounds | placeholder vanilla horse sounds (breathe, hit, death, soft step; baby_horse for fawns); real sounds in Phase 18 | no |
 | Particles | none | - |
 
