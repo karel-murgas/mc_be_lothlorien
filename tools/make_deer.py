@@ -437,26 +437,45 @@ def venison_cooked():
 
 
 def deer_antler():
-    pal = {"o": hexc("#4b3d29"), "a": hexc("#8a7650"), "b": hexc("#b49f72"), "h": hexc("#dccb9c"), "d": hexc("#6e5a3e")}
-    rows = [
-        "................",
-        "..o.........o...",
-        ".oho.......ohoo.",
-        ".obo...o...oboo.",
-        ".obo..ohoo.obo..",
-        "..obo.obo.obo...",
-        "..obo.obo.obo...",
-        "...obooboobo....",
-        "....obbobbo.....",
-        "....obbbbbo.....",
-        ".....obbbo......",
-        ".....oabao......",
-        ".....oaado......",
-        "......oddo......",
-        ".......oo.......",
-        "................",
+    """Shed antler icon: ONE antler (a pair with a middle tine read as three antlers in game). The inner shape is
+    hand-placed; the outline is derived (every empty pixel beside the shape, 4-neighbourhood, so the gaps
+    between tines stay open). Colour is by rule so
+    it is not one flat tan: a length ramp (ivory tips -> warm tan -> red-brown near the base), light from the top-left
+    (pixels with empty space up/left are lit, down/right shaded), a knobbly burr and a darker cut base."""
+    beam = [(13, 1), (12, 2), (13, 2), (12, 3), (11, 4), (12, 4), (11, 5), (12, 5), (10, 6), (11, 6), (9, 7), (10, 7),
+            (8, 8), (9, 8), (7, 9), (8, 9), (6, 10), (7, 10), (5, 11), (6, 11)]
+    tines = [(10, 3), (10, 2), (9, 1),                  # top tine
+             (7, 7), (6, 6), (6, 5), (5, 4), (5, 3),    # middle tine
+             (5, 10), (4, 9), (4, 8), (3, 7), (3, 6)]   # brow tine
+    burr = [(3, 12), (4, 12), (5, 12), (6, 12), (7, 12), (4, 11), (7, 11)]
+    base = [(4, 13), (5, 13), (6, 13)]
+    shape = set(beam) | set(tines) | set(burr) | set(base)
+    ramp_rows = [  # (shadow, mid, light) by height
+        (3, ("#d9c9a0", "#efe4c6", "#fbf5e4")),   # tips: ivory
+        (5, ("#c2a676", "#dcc596", "#efe2bc")),
+        (7, ("#a3804f", "#bf9c68", "#d8bd8a")),
+        (9, ("#8a6340", "#a67e52", "#c29a6a")),
+        (99, ("#6e4a33", "#8a6444", "#a8825a")),  # near the base
     ]
-    return icon(rows, pal)
+    img = Image.new("RGBA", (16, 16), CLEAR)
+    for (x, y) in shape:
+        if (x, y) in base:
+            c = hexc("#4a3222")
+        elif (x, y) in burr:
+            c = hexc("#9a7650") if (x + y) % 2 == 0 else hexc("#5c3e2a")  # knobs and gaps
+        else:
+            shadow, mid, light = next(r for top, r in ramp_rows if y <= top)
+            lit = (x - 1, y) not in shape or (x, y - 1) not in shape
+            dark = (x + 1, y) not in shape or (x, y + 1) not in shape
+            c = hexc(light if lit and not dark else shadow if dark and not lit else mid)
+        img.putpixel((x, y), c)
+    for y in range(16):
+        for x in range(16):
+            if (x, y) in shape:
+                continue
+            if any(n in shape for n in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1))):
+                img.putpixel((x, y), hexc("#7a5e3e") if y <= 3 else hexc("#5a4230") if y <= 8 else hexc("#3a261a"))
+    return img
 
 
 # ---------------------------------------------------------------- main
