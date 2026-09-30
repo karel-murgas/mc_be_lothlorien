@@ -4,7 +4,7 @@ import { leafUndersideY } from "../lothlorien_bp/scripts/leaf_fall.js";
 import { BONEMEAL_TABLE, SPREAD_TRIES, COVERS, pickWeighted } from "../lothlorien_bp/scripts/flora_table.js";
 import { readFileSync } from "node:fs";
 import { MAX_GROWTH, growChance, bonemealSteps, advanceGrowth } from "../lothlorien_bp/scripts/crop_rules.js";
-import { estimateDepth, probeCount, ringOffsets, DEPTH_RADII } from "../lothlorien_bp/scripts/depth.js";
+import { estimateDepth, probeCount, ringOffsets, DEPTH_NAMES, DEPTH_RADII } from "../lothlorien_bp/scripts/depth.js";
 import * as D from "../lothlorien_bp/scripts/disharmony.js";
 import { makeRandom } from "../lothlorien_bp/scripts/mallorn_tree.js";
 import { buildFletMallorn, LADDER, LEAF_KEEP, ROOT_DEPTH, B } from "../tools/flet_mallorn.mjs";
@@ -367,7 +367,7 @@ test("antler: bucks' item is a block placer and flet chests can hold exactly one
 
 // Phase 12: white deer guidance.
 import * as W from "../lothlorien_bp/scripts/white_deer_rules.js";
-import { MARKER_AT, MARKER_BLOCK } from "../tools/build_structures.mjs";
+import { CHEST_BLOCK, MARKER_AT, MARKER_BLOCK, hasChest } from "../tools/build_structures.mjs";
 import * as G from "../tools/dev_scripts/guide_goal/variants.mjs";
 
 test("white deer: only Disharmony 0 is guided", () => {
@@ -461,29 +461,37 @@ test("white deer: phases (arrive, wait for the player, give up)", () => {
 
 const whiteEntity = () => readJson("../lothlorien_bp/entities/white_deer.json")["minecraft:entity"];
 const everything = (e) => [e.components, ...Object.values(e.component_groups)];
-test("ordinary deer: no coat variant, no guiding state, no corn lure (Phase 12 moved to its own entity)", () => {
+const GRAIN = "lothlorien:western_corn_grain";
+test("ordinary deer: no coat variant, no guiding state (Phase 12 moved to its own entity)", () => {
   const e = deerEntity();
   const text = JSON.stringify(e);
-  for (const bad of ["lothlorien:coat", "lothlorien:guiding", "state_guiding", "guide_start", "western_corn_grain", "coat_white"]) {
+  for (const bad of ["lothlorien:coat", "lothlorien:guiding", "state_guiding", "guide_start", "coat_white"]) {
     assert.ok(!text.includes(bad), bad);
-  }
-  for (const w of ["calm", "friend"]) {
-    assert.deepEqual(e.component_groups[`lothlorien:state_${w}`]["minecraft:behavior.tempt"].items, ["lothlorien:mallorn_acorn", "apple"]);
   }
   const rc = readJson("../lothlorien_rp/render_controllers/deer.render_controllers.json").render_controllers["controller.render.lothlorien.deer"];
   assert.ok(!rc.textures[0].includes("white"));
 });
-test("white deer: a separate loner entity, not tamable, not breedable, no babies, not leashable", () => {
+test("ordinary deer: Western Corn grain is the only food (lure, breeding, fawn growth); not the seeds, acorn or apple", () => {
+  const e = deerEntity();
+  for (const w of ["calm", "friend"]) assert.deepEqual(e.component_groups[`lothlorien:state_${w}`]["minecraft:behavior.tempt"].items, [GRAIN], w);
+  assert.deepEqual(e.component_groups["lothlorien:adult"]["minecraft:breedable"].breed_items, [GRAIN]);
+  assert.deepEqual(e.component_groups["lothlorien:baby"]["minecraft:ageable"].feed_items, [GRAIN]);
+  const text = JSON.stringify(e);
+  for (const bad of ["mallorn_acorn", "\"apple\"", "western_corn_seeds"]) assert.ok(!text.includes(bad), bad);
+  assert.ok(existsSync(new URL("../lothlorien_bp/items/western_corn_grain.json", import.meta.url)), "grain item exists");
+});
+test("white deer: a separate loner entity, not tamable, not breedable, no babies; leashable, no balloon", () => {
   const e = whiteEntity();
   assert.equal(e.description.identifier, W.WHITE_DEER_ID);
   assert.equal(e.description.identifier, R.WHITE_DEER_ID);
   assert.ok(e.description.is_spawnable && e.description.is_summonable);
   const keys = new Set(everything(e).flatMap((c) => Object.keys(c)));
   for (const bad of ["minecraft:breedable", "minecraft:behavior.breed", "minecraft:offspring", "minecraft:is_baby", "minecraft:ageable",
-    "minecraft:behavior.follow_parent", "minecraft:tameable", "minecraft:leashable", "minecraft:spawn_egg_interaction",
+    "minecraft:behavior.follow_parent", "minecraft:tameable", "minecraft:balloonable", "minecraft:spawn_egg_interaction",
     "minecraft:behavior.follow_mob", "minecraft:behavior.follow_owner"]) {
     assert.ok(!keys.has(bad), bad);
   }
+  assert.deepEqual(e.components["minecraft:leashable"], {}, "a lead works on it (the owner's wish)");
   assert.ok(!e.events["minecraft:entity_born"] && !e.events["minecraft:ageable_grow_up"]);
   assert.ok(!e.description.properties["lothlorien:coat"]);
   assert.deepEqual(e.components["minecraft:despawn"], { despawn_from_distance: {} });
@@ -554,26 +562,92 @@ test("white deer: holding an acorn gives the interaction the script listens for;
   }
   assert.ok(lang.includes("entity.lothlorien:white_deer.name=White Deer\n") || lang.includes("entity.lothlorien:white_deer.name=White Deer\r\n"));
 });
-test("white deer: rare single spawns in the biome, fewer than deer; drops like a deer of its sex", () => {
+test("white deer: rare single spawns in the biome at SPAWN_WEIGHT, flagged natural by the herd event", () => {
   const rule = readJson("../lothlorien_bp/spawn_rules/white_deer.json")["minecraft:spawn_rules"];
   const deer = readJson("../lothlorien_bp/spawn_rules/deer.json")["minecraft:spawn_rules"];
   assert.equal(rule.description.identifier, W.WHITE_DEER_ID);
   assert.equal(rule.description.population_control, "animal");
   const [c] = rule.conditions, [dc] = deer.conditions;
-  assert.deepEqual(c["minecraft:herd"], { min_size: 1, max_size: 1 });
+  assert.equal(rule.conditions.length, 1);
+  assert.deepEqual(c["minecraft:herd"], { min_size: 1, max_size: 1, event: "lothlorien:spawn_natural" });
   assert.equal(c["minecraft:density_limit"].surface, 1);
-  assert.ok(c["minecraft:weight"].default < dc["minecraft:weight"].default);
+  assert.equal(c["minecraft:weight"].default, W.SPAWN_WEIGHT, "tune in white_deer_rules.js and the spawn rule together");
+  assert.ok(c["minecraft:weight"].default < dc["minecraft:weight"].default, "fewer than deer");
   assert.deepEqual(c["minecraft:biome_filter"], dc["minecraft:biome_filter"]);
   const e = whiteEntity();
-  assert.equal(e.component_groups["lothlorien:adult_buck"]["minecraft:loot"].table, "loot_tables/entities/deer_buck.json");
-  assert.equal(e.component_groups["lothlorien:adult_doe"]["minecraft:loot"].table, "loot_tables/entities/deer.json");
-  const spawned = e.events["minecraft:entity_spawned"].sequence[0].randomize.map((r) => r.trigger).sort();
-  assert.deepEqual(spawned, ["lothlorien:spawn_buck", "lothlorien:spawn_doe"]);
-  assert.ok(!e.components["minecraft:experience_reward"].on_bred);
+  assert.deepEqual(e.description.properties["lothlorien:natural"], { type: "bool", default: false, client_sync: false });
+  const natural = e.events["lothlorien:spawn_natural"];
+  assert.equal(natural.set_property["lothlorien:natural"], true);
+  assert.equal(natural.trigger, "lothlorien:set_calm", "a natural spawn is fully set up even if entity_spawned does not also run");
+  assert.deepEqual(e.events["minecraft:entity_spawned"], { trigger: "lothlorien:set_calm" }, "summon and egg: never flagged");
+  assert.ok(!JSON.stringify(e.events["minecraft:entity_spawned"]).includes("natural"));
 });
-test("white deer: client entity uses the white texture on the deer models; no unused fawn texture", () => {
+test("white deer: depth table - none outside, few at the edge, more inside, all in the heart; clamps odd levels", () => {
+  assert.deepEqual([0, 1, 2, 3].map(W.spawnKeepChance), W.SPAWN_KEEP_BY_DEPTH);
+  assert.equal(W.SPAWN_KEEP_BY_DEPTH.length, DEPTH_NAMES.length, "one chance per depth level (depth.js)");
+  assert.equal(W.spawnKeepChance(0), 0);
+  assert.equal(W.spawnKeepChance(3), 1);
+  for (let l = 1; l < 4; l++) assert.ok(W.spawnKeepChance(l) > W.spawnKeepChance(l - 1), `level ${l} more than ${l - 1}`);
+  assert.equal(W.spawnKeepChance(7), 1); assert.equal(W.spawnKeepChance(-1), 0); assert.equal(W.spawnKeepChance(undefined), 0);
+  assert.ok(W.keepNaturalSpawn(3, 0.999) && !W.keepNaturalSpawn(0, 0));
+  assert.ok(W.keepNaturalSpawn(1, W.spawnKeepChance(1) - 0.001) && !W.keepNaturalSpawn(1, W.spawnKeepChance(1)));
+  // share of kept spawns over many rolls follows the table
+  let kept = 0;
+  for (let i = 0; i < 1000; i++) if (W.keepNaturalSpawn(2, i / 1000)) kept++;
+  assert.equal(kept, Math.round(W.spawnKeepChance(2) * 1000));
+  const src = readFileSync(new URL("../lothlorien_bp/scripts/white_deer.js", import.meta.url), "utf8");
+  assert.ok(src.includes("EntityInitializationCause.Loaded") && src.includes('setProperty("lothlorien:natural", false)'), "judged once, not on reload");
+});
+test("white deer: always an antlered hart; sure antler plus the usual deer drops, on any death", () => {
+  const e = whiteEntity();
+  assert.ok(!e.description.properties["lothlorien:sex"], "no sex split");
+  const text = JSON.stringify(e);
+  for (const bad of ["adult_doe", "adult_buck", "spawn_doe", "spawn_buck", "lothlorien:sex"]) assert.ok(!text.includes(bad), bad);
+  assert.equal(e.components["minecraft:loot"].table, "loot_tables/entities/white_deer.json");
+  assert.ok(!e.components["minecraft:experience_reward"].on_bred);
+  const loot = readJson("../lothlorien_bp/loot_tables/entities/white_deer.json");
+  const pool = (name) => loot.pools.find((p) => p.entries.some((x) => x.name === name));
+  const antler = pool("lothlorien:deer_antler");
+  assert.ok(antler && !antler.conditions && antler.entries.length === 1 && antler.rolls === 1, "guaranteed, no player-kill or chance condition");
+  assert.deepEqual(antler.entries[0].functions, [{ function: "set_count", count: 1 }]);
+  // leather and venison exactly as a buck deer
+  const buck = readJson("../lothlorien_bp/loot_tables/entities/deer_buck.json");
+  for (const name of ["minecraft:leather", "lothlorien:venison_raw"]) {
+    assert.deepEqual(pool(name), buck.pools.find((p) => p.entries.some((x) => x.name === name)), name);
+  }
+});
+test("white deer: leash rule - a lead always wins over guidance", () => {
+  assert.equal(W.offerRefusal({ level: 0, leashed: false }), undefined);
+  assert.equal(W.offerRefusal({ level: 0, leashed: true }), "leashed");
+  assert.equal(W.offerRefusal({ level: 2, leashed: true }), "leashed");
+  assert.equal(W.offerRefusal({ level: 1, leashed: false }), "restless");
+  const base = { toTarget: 40, toPlayer: 5, stuck: 0, age: 0, playerCalm: true };
+  assert.equal(W.phase(base), "walk");
+  assert.equal(W.phase({ ...base, leashed: true }), "leashed");
+  assert.equal(W.phase({ ...base, toTarget: 1, leashed: true }), "leashed", "even at the goal");
+  assert.equal(W.phase({ ...base, toPlayer: 30, leashed: true }), "leashed");
+  const src = readFileSync(new URL("../lothlorien_bp/scripts/white_deer.js", import.meta.url), "utf8");
+  assert.ok(src.includes('getComponent("minecraft:leashable")?.isLeashed'), "the game script reads the lead");
+});
+test("disharmony: a white deer kill counts as two deer kills, everything else as one", () => {
+  assert.equal(D.killWeight(W.WHITE_DEER_ID), 2);
+  assert.equal(D.killWeight(R.DEER_ID), 1);
+  assert.equal(D.killWeight("minecraft:cow"), 1);
+  const a = D.newState(); D.recordKill(a, D.killWeight(W.WHITE_DEER_ID));
+  const b = D.newState(); D.recordKill(b, D.killWeight(R.DEER_ID)); D.recordKill(b, D.killWeight(R.DEER_ID));
+  assert.deepEqual(a, b);
+  assert.equal(D.levelFor(a.points), 2, "straight to Disharmony II");
+  D.tick(a, true, D.DECAY_SECONDS_INSIDE); assert.equal(a.points, 1, "decays one point at a time");
+  const c = D.newState(); D.recordKill(c); assert.equal(c.points, 1, "default weight 1");
+  const game = readFileSync(new URL("../lothlorien_bp/scripts/disharmony_game.js", import.meta.url), "utf8");
+  assert.ok(game.includes("killWeight(deadEntity.typeId)"));
+});
+test("white deer: client entity uses the white texture on the antlered deer model only; no unused fawn texture", () => {
   const c = readJson("../lothlorien_rp/entity/white_deer.entity.json")["minecraft:client_entity"].description;
   assert.equal(c.identifier, W.WHITE_DEER_ID);
+  assert.deepEqual(c.geometry, { default: "geometry.lothlorien.deer_buck" }, "always antlered");
+  const rc = readJson("../lothlorien_rp/render_controllers/white_deer.render_controllers.json").render_controllers["controller.render.lothlorien.white_deer"];
+  assert.equal(rc.geometry, "Geometry.default");
   assert.deepEqual(c.textures, { default: "textures/entity/deer/deer_white" });
   assert.ok(existsSync(new URL(`../lothlorien_rp/${c.textures.default}.png`, import.meta.url)));
   assert.ok(!existsSync(new URL("../lothlorien_rp/textures/entity/deer/deer_white_baby.png", import.meta.url)));
@@ -603,17 +677,24 @@ test("guide beacon: invisible, weightless, untouchable helper that removes itsel
   assert.equal(geo.description.identifier, client.geometry.default);
   assert.ok(geo.bones.flatMap((x) => x.cubes).every((cube) => cube.size.every((v) => v === 0)), "nothing to render");
 });
-test("structure marker: unbreakable hidden block, one buried in the trunk of every chosen giant", () => {
+test("structure marker: unbreakable hidden block, buried in the trunk of exactly the chosen giants that hold a chest", () => {
   const b = readJson("../lothlorien_bp/blocks/structure_marker.json")["minecraft:block"];
   assert.equal(b.description.identifier, W.MARKER_ID);
   assert.equal(b.description.identifier, MARKER_BLOCK);
   assert.equal(b.components["minecraft:destructible_by_mining"], false);
   assert.ok(!b.description.menu_category, "not in the creative menu");
   assert.ok(MARKER_AT.y < 0 && MARKER_AT.x >= 0 && MARKER_AT.x <= 3 && MARKER_AT.z >= 0 && MARKER_AT.z <= 3, "inside the buried trunk");
+  let guided = 0;
   for (const [v, n] of CHOSEN) {
     const file = new URL(`../lothlorien_bp/structures/lothlorien/mallorn_${v}_${String(n).padStart(2, "0")}.mcstructure`, import.meta.url);
-    assert.ok(readFileSync(file).includes(Buffer.from(MARKER_BLOCK)), `${v} ${n} has the marker (run node tools/build_structures.mjs)`);
+    const bytes = readFileSync(file);
+    const chest = bytes.includes(Buffer.from(CHEST_BLOCK)), marker = bytes.includes(Buffer.from(MARKER_BLOCK));
+    assert.equal(marker, chest, `${v} ${n}: marker only with a chest (run node tools/build_structures.mjs)`);
+    if (marker) guided += 1;
   }
+  assert.ok(guided > 0, "at least one worldgen tree can be guided to");
+  // the generator rule itself: flet trees have a chest, plain giants none
+  assert.ok(flets.every((t) => hasChest(t.blocks)) && plains.every((t) => !hasChest(t.blocks)));
 });
 
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }

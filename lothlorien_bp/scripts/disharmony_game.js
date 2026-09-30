@@ -1,7 +1,7 @@
 // Disharmony in the running game: kills and deaths feed the rules in disharmony.js, state is kept
 // per player in a dynamic property (survives relogging, independent between players).
 import { world, system } from "@minecraft/server";
-import { isFriend, levelFor, newState, parse, recordDeath, recordKill, serialize, statusText, tick } from "./disharmony.js";
+import { isFriend, killWeight, levelFor, newState, parse, recordDeath, recordKill, serialize, statusText, tick } from "./disharmony.js";
 
 const PROPERTY = "lothlorien:disharmony";
 const TICK_SECONDS = 1;
@@ -61,7 +61,7 @@ export function startDisharmony(isInside, debugTag) {
       }
       const killer = damageSource.damagingEntity;
       if (killer?.typeId !== PLAYER_ID || !isInside(deadEntity.dimension, deadEntity.location)) return;
-      update(killer, disharmonyOf(killer), () => recordKill(disharmonyOf(killer)));
+      update(killer, disharmonyOf(killer), () => recordKill(disharmonyOf(killer), killWeight(deadEntity.typeId)));
     } catch {
       // entity already gone
     }

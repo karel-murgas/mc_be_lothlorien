@@ -120,9 +120,12 @@ export const TRUNK_ANCHOR = "lothlorien:giant_trunk";
 export const ANCHOR_AT = { x: 1, y: -ROOT_DEPTH, z: 1 };
 
 // Hidden structure marker (Phase 12, white-deer guidance): one unbreakable block inside the buried part of the trunk,
-// next to the anchor, 4 blocks under the ground. Every guideable structure gets one (lothlorien:structure_marker).
+// next to the anchor, 4 blocks under the ground (lothlorien:structure_marker). The white deer leads to Mallorns that hold
+// a chest, so only a tree with a chest gets one (today the flet giants; plain giants have none).
 export const MARKER_AT = { x: 2, y: -ROOT_DEPTH + 1, z: 2 };
 export const MARKER_BLOCK = "lothlorien:structure_marker";
+export const CHEST_BLOCK = "minecraft:chest";
+export const hasChest = (blocks) => [...blocks.values()].some((b) => b.name === CHEST_BLOCK);
 
 const treeName = (variant, n) => `mallorn_${variant}_${String(n).padStart(2, "0")}`;
 
@@ -141,7 +144,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     tree.blocks.set(`${ANCHOR_AT.x},${ANCHOR_AT.y},${ANCHOR_AT.z}`, {
       name: "minecraft:jigsaw", states: { facing_direction: 0, rotation: 0 }, jigsaw: TRUNK_ANCHOR, finalState: "lothlorien:mallorn_log",
     });
-    tree.blocks.set(`${MARKER_AT.x},${MARKER_AT.y},${MARKER_AT.z}`, { name: MARKER_BLOCK, states: {} });
+    if (hasChest(tree.blocks)) tree.blocks.set(`${MARKER_AT.x},${MARKER_AT.y},${MARKER_AT.z}`, { name: MARKER_BLOCK, states: {} });
     const { buffer, clipped } = toMcstructure(tree.blocks);
     const name = treeName(variant, n);
     writeFileSync(join(out, `${name}.mcstructure`), buffer);

@@ -67,10 +67,9 @@ const DEPTH_TRANSPARENT = new Set(["minecraft:river"]);
 
 // Biome at the surface (not at the player's height: biomes are 3D, and flying high would
 // sample the air). undefined = unloaded chunk.
-function surfaceSampler(player) {
-  const dim = player.dimension;
-  const px = Math.floor(player.location.x);
-  const pz = Math.floor(player.location.z);
+function surfaceSampler(dim, location) {
+  const px = Math.floor(location.x);
+  const pz = Math.floor(location.z);
   return (dx, dz) => {
     try {
       const top = dim.getTopmostBlock({ x: px + dx, z: pz + dz });
@@ -82,8 +81,11 @@ function surfaceSampler(player) {
   };
 }
 
+// Depth at any spot (the white deer's natural spawns are thinned by it, see white_deer_rules.js).
+const depthAt = (dimension, location) => estimateDepth(surfaceSampler(dimension, location), BIOME_ID, DEPTH_TRANSPARENT);
+
 function playerDepth(player) {
-  return estimateDepth(surfaceSampler(player), BIOME_ID, DEPTH_TRANSPARENT);
+  return depthAt(player.dimension, player.location);
 }
 
 function depthLabel(result) {
@@ -170,6 +172,6 @@ world.afterEvents.worldLoad.subscribe(() => {
   system.runInterval(fallLeaves, LEAF_INTERVAL_TICKS);
   startDisharmony(inBiome, DEBUG_TAG);
   startDeer();
-  startWhiteDeer();
+  startWhiteDeer(depthAt);
   startAntlerSupport();
 });

@@ -104,8 +104,7 @@
           "priority": 3,
           "speed_multiplier": 1.0,
           "items": [
-            "lothlorien:mallorn_acorn",
-            "apple"
+            "lothlorien:western_corn_grain"
           ],
           "can_get_scared": true
         }
@@ -373,8 +372,7 @@
           "priority": 3,
           "speed_multiplier": 1.0,
           "items": [
-            "lothlorien:mallorn_acorn",
-            "apple"
+            "lothlorien:western_corn_grain"
           ],
           "can_get_scared": true
         }
@@ -460,8 +458,7 @@
         "minecraft:ageable": {
           "duration": 1200,
           "feed_items": [
-            "lothlorien:mallorn_acorn",
-            "apple"
+            "lothlorien:western_corn_grain"
           ],
           "pause_growth_items": [
             "golden_dandelion"
@@ -488,8 +485,7 @@
         "minecraft:breedable": {
           "require_tame": false,
           "breed_items": [
-            "lothlorien:mallorn_acorn",
-            "apple"
+            "lothlorien:western_corn_grain"
           ],
           "breeds_with": {
             "lothlorien:deer": {}

@@ -10,8 +10,8 @@
         "minecraft:spawns_on_surface": {},
         "minecraft:spawns_on_block_filter": "minecraft:grass_block",
         "minecraft:brightness_filter": { "min": 7, "max": 15, "adjust_for_weather": false },
-        "minecraft:weight": { "default": 1 },
-        "minecraft:herd": { "min_size": 1, "max_size": 1 },
+        "minecraft:weight": { "default": 3 },
+        "minecraft:herd": { "min_size": 1, "max_size": 1, "event": "lothlorien:spawn_natural" },
         "minecraft:density_limit": { "surface": 1 },
         "minecraft:distance_filter": { "min": 24, "max": 44 },
         "minecraft:biome_filter": { "test": "has_biome_tag", "operator": "==", "value": "lothlorien" }

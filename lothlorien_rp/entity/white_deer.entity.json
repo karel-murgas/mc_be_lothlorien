@@ -10,8 +10,7 @@
         "default": "textures/entity/deer/deer_white"
       },
       "geometry": {
-        "default": "geometry.lothlorien.deer",
-        "buck": "geometry.lothlorien.deer_buck"
+        "default": "geometry.lothlorien.deer_buck"
       },
       "animations": {
         "idle": "animation.lothlorien.deer.idle",

@@ -7,15 +7,6 @@
       "is_spawnable": true,
       "is_summonable": true,
       "properties": {
-        "lothlorien:sex": {
-          "type": "enum",
-          "values": [
-            "doe",
-            "buck"
-          ],
-          "default": "doe",
-          "client_sync": true
-        },
         "lothlorien:wariness": {
           "type": "enum",
           "values": [
@@ -34,6 +25,11 @@
           "client_sync": false
         },
         "lothlorien:guiding": {
+          "type": "bool",
+          "default": false,
+          "client_sync": false
+        },
+        "lothlorien:natural": {
           "type": "bool",
           "default": false,
           "client_sync": false
@@ -494,16 +490,6 @@
           "always_look_for_leader": true,
           "search_cooldown": 5
         }
-      },
-      "lothlorien:adult_doe": {
-        "minecraft:loot": {
-          "table": "loot_tables/entities/deer.json"
-        }
-      },
-      "lothlorien:adult_buck": {
-        "minecraft:loot": {
-          "table": "loot_tables/entities/deer_buck.json"
-        }
       }
     },
     "components": {
@@ -551,8 +537,12 @@
         ]
       },
       "minecraft:nameable": {},
+      "minecraft:leashable": {},
       "minecraft:experience_reward": {
         "on_death": "query.last_hit_by_player ? Math.Random(1,3) : 0"
+      },
+      "minecraft:loot": {
+        "table": "loot_tables/entities/white_deer.json"
       },
       "minecraft:interact": {
         "interactions": [
@@ -793,44 +783,14 @@
           }
         ]
       },
-      "lothlorien:spawn_buck": {
-        "set_property": {
-          "lothlorien:sex": "buck"
-        },
-        "add": {
-          "component_groups": [
-            "lothlorien:adult_buck"
-          ]
-        }
-      },
-      "lothlorien:spawn_doe": {
-        "set_property": {
-          "lothlorien:sex": "doe"
-        },
-        "add": {
-          "component_groups": [
-            "lothlorien:adult_doe"
-          ]
-        }
-      },
       "minecraft:entity_spawned": {
-        "sequence": [
-          {
-            "randomize": [
-              {
-                "weight": 1,
-                "trigger": "lothlorien:spawn_buck"
-              },
-              {
-                "weight": 1,
-                "trigger": "lothlorien:spawn_doe"
-              }
-            ]
-          },
-          {
-            "trigger": "lothlorien:set_calm"
-          }
-        ]
+        "trigger": "lothlorien:set_calm"
+      },
+      "lothlorien:spawn_natural": {
+        "set_property": {
+          "lothlorien:natural": true
+        },
+        "trigger": "lothlorien:set_calm"
       },
       "lothlorien:guide_start": {
         "set_property": {

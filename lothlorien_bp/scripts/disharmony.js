@@ -2,7 +2,7 @@
 // them offline; disharmony_game.js wires them to players, deaths and persistence.
 //
 // State per player: { points, calm, friend }
-//   points  Disharmony points (one per kill made inside the biome)
+//   points  Disharmony points (one per kill made inside the biome; KILL_WEIGHTS lists the kills that count more)
 //   calm    seconds without a kill, counted towards the next point of decay
 //   friend  seconds spent at 0 points inside the biome, paused outside (Friend at FRIEND_SECONDS)
 
@@ -24,9 +24,13 @@ export function isFriend(state) {
   return state.friend >= FRIEND_SECONDS;
 }
 
-// A player kill inside the biome: one more point, and the peaceful streaks start over.
-export function recordKill(state) {
-  state.points++;
+// Kills that count as more than one (entity type id -> points). The white deer (white hart) counts as two deer.
+export const KILL_WEIGHTS = { "lothlorien:white_deer": 2 };
+export const killWeight = (typeId) => KILL_WEIGHTS[typeId] ?? 1;
+
+// A player kill inside the biome: `weight` more points (killWeight of the victim), and the peaceful streaks start over.
+export function recordKill(state, weight = 1) {
+  state.points += weight;
   state.calm = 0;
   state.friend = 0;
 }

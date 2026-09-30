@@ -13,6 +13,9 @@ export const ACORN_ID = "lothlorien:mallorn_acorn";
 export const MARKER_ID = "lothlorien:structure_marker";
 
 // The marker search reaches this far (blocks, horizontally) from the deer, but only through loaded chunks.
+// Markers exist only in Mallorns that hold a chest (tools/build_structures.mjs: today the two flet giants, about 1 giant
+// in 4, so roughly one per 144 chunks): 80 blocks finds one from about 4 spots in 10. Raising it costs one more job step
+// per 16x16 column and reaches chunks that may not be loaded at simulation distance 4 (64 blocks).
 export const SEARCH_RADIUS = 80;
 // Vertical window around the deer. The marker sits in the buried part of a giant Mallorn trunk (a few blocks
 // under the ground), so the window reaches far below the deer and only a little above it.
@@ -38,7 +41,30 @@ export const HOP_STUCK_TICKS = 100; // 5 s without getting a block closer to the
 // Only a calm player (Disharmony 0, Friend or not) is guided.
 export const canBeGuided = (level) => level <= 0;
 
+// Leash rule: a lead always wins over guidance. A leashed white deer refuses the acorn (kept), and a guidance ends the
+// moment the deer is leashed (beacon removed, deer back to its wariness state). One rule, no tug of war between the
+// lead and the follow goal.
+// Why the offer is refused: "leashed" | "restless" (Disharmony I+) | undefined (go ahead).
+export function offerRefusal({ level, leashed }) {
+  if (leashed) return "leashed";
+  if (!canBeGuided(level)) return "restless";
+  return undefined;
+}
+
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+// ---- Natural spawns by depth: THE place to tune how often the white deer is met. ----
+// spawn_rules/white_deer.json spawns single white deer everywhere in the biome at weight SPAWN_WEIGHT (a test keeps the
+// two equal; the deer has 10, herds of 2-4) with density_limit 1. Natural spawns fire the herd event
+// lothlorien:spawn_natural, which sets the property lothlorien:natural; white_deer.js then keeps each one with the chance
+// below for the depth level at its spot (scripts/depth.js: 0 outside, 1 edge, 2 inner, 3 heart) and removes the rest.
+// /summon and spawn eggs never set the flag, so they always work. Expected share of white deer among deer spawns, before
+// the density limit: weight 3 / (10 x 3 deer per herd) = 1 per 10 deer in the heart, 1 per 20 inner, 1 per ~67 at the edge.
+export const SPAWN_WEIGHT = 3;
+export const SPAWN_KEEP_BY_DEPTH = [0, 0.15, 0.5, 1];
+export const spawnKeepChance = (level) => SPAWN_KEEP_BY_DEPTH[clamp(Math.floor(level) || 0, 0, SPAWN_KEEP_BY_DEPTH.length - 1)];
+// `roll` is uniform in [0, 1) (Math.random() in the game).
+export const keepNaturalSpawn = (level, roll) => roll < spawnKeepChance(level);
 export const horizontal = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 
 // Chunk-aligned columns (16 x 16) covering the search circle around (x, z), nearest first; `dist` is the
@@ -129,8 +155,9 @@ export function trackProgress(session, dist, walking, ticks) {
   return session;
 }
 
-// What a guidance session does now: "arrived" | "abort" | "wait" | "walk".
-export function phase({ toTarget, toPlayer, stuck, age, playerCalm }) {
+// What a guidance session does now: "leashed" | "arrived" | "abort" | "wait" | "walk". A lead ends it first.
+export function phase({ toTarget, toPlayer, stuck, age, playerCalm, leashed = false }) {
+  if (leashed) return "leashed";
   if (toTarget <= ARRIVE_DIST) return "arrived";
   if (!playerCalm || toPlayer > ABORT_DIST || age > MAX_TICKS) return "abort";
   if (stuck >= STUCK_TICKS) return toTarget <= STUCK_ARRIVE_DIST ? "arrived" : "abort";

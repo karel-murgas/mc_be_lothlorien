@@ -1,18 +1,19 @@
 // White deer guidance in the running game (Phase 12; rules in white_deer_rules.js). Offer a Mallorn acorn to a white
 // deer (lothlorien:white_deer) while your Disharmony is 0: it finds the nearest hidden structure marker (a block in the
-// buried part of each giant Mallorn trunk) in the loaded chunks and walks towards it, waiting for the player to keep up.
+// buried trunk of each giant Mallorn that holds a chest) in the loaded chunks and walks towards it, waiting for the player
+// to keep up. A leashed white deer does not lead (white_deer_rules.js, offerRefusal). Natural spawns are thinned by depth.
 //
 // The deer is never moved by script. While it guides, it sits in the component group `lothlorien:state_guiding`
 // (entities/white_deer.json), whose follow goal makes the engine's navigator walk it to the nearest guide beacon: an
 // invisible helper entity (entities/guide_beacon.json), one per session, that this script spawns and moves ahead in
 // hops of 8-14 blocks. Several guiding deer close together may follow each other's beacon (accepted by the owner).
-import { BlockVolume, EquipmentSlot, GameMode, system, world } from "@minecraft/server";
+import { BlockVolume, EntityInitializationCause, EquipmentSlot, GameMode, system, world } from "@minecraft/server";
 import { disharmonyOf } from "./disharmony_game.js";
 import { levelFor } from "./disharmony.js";
 import { repeatedUse } from "./use_guard.js";
 import {
-  ACORN_ID, BEACON_ID, GUIDE_TICKS, MARKER_ID, SEARCH_RADIUS, WHITE_DEER_ID, canBeGuided, hopStatus, horizontal, newHop,
-  phase, pickWaypoint, searchSpan, sliceOrigins, trackProgress,
+  ACORN_ID, BEACON_ID, GUIDE_TICKS, MARKER_ID, SEARCH_RADIUS, WHITE_DEER_ID, canBeGuided, hopStatus, horizontal, keepNaturalSpawn,
+  newHop, offerRefusal, phase, pickWaypoint, searchSpan, sliceOrigins, trackProgress,
 } from "./white_deer_rules.js";
 
 // session: { playerId, beaconId, target, bestDist, stuck, born, phase, hop, skip, bias, waiting }
@@ -27,6 +28,8 @@ const PROBE_DOWN = 6;
 let sinceSweep = 0;
 
 export const isGuiding = (deerId) => sessions.has(deerId);
+
+const isLeashed = (deer) => deer.getComponent("minecraft:leashable")?.isLeashed ?? false;
 
 const say = (player, text) => {
   try {
@@ -109,7 +112,12 @@ function removeBeacon(beaconId) {
 
 function offer(player, deer) {
   if (sessions.has(deer.id) || searching.has(deer.id)) return;
-  if (!canBeGuided(levelFor(disharmonyOf(player).points))) {
+  const refusal = offerRefusal({ level: levelFor(disharmonyOf(player).points), leashed: isLeashed(deer) });
+  if (refusal === "leashed") {
+    say(player, "§7The white deer will not lead while it is held on a lead.");
+    return;
+  }
+  if (refusal) {
     say(player, "§7The white deer shies from your restless spirit.");
     return;
   }
@@ -120,6 +128,10 @@ function offer(player, deer) {
     let beaconId;
     try {
       if (!deer.isValid || !player.isValid) return;
+      if (isLeashed(deer)) {
+        say(player, "§7The white deer will not lead while it is held on a lead.");
+        return;
+      }
       if (!marker) {
         say(player, "§7The white deer sniffs the acorn, looks at you, and stays. It has nowhere to lead you.");
         return;
@@ -215,7 +227,9 @@ function tickSession(deerId, s) {
     stuck: s.stuck,
     age: system.currentTick - s.born,
     playerCalm: canBeGuided(levelFor(disharmonyOf(player).points)),
+    leashed: isLeashed(deer),
   });
+  if (s.phase === "leashed") return end(deerId, deer, player, "§7The white deer is held on a lead and stops leading you.");
   if (s.phase === "arrived") return end(deerId, deer, player, "§fThe white deer stops and looks ahead. A great tree stands near.");
   if (s.phase === "abort") return end(deerId, deer, player, "§7The white deer loses the way and lets you go.");
   const beacon = beaconOf(s, deer.dimension, s.waiting ? deer.location : s.hop.wp);
@@ -265,9 +279,32 @@ function tickSessions() {
   }
 }
 
-export function startWhiteDeer() {
+// Natural spawns only (the spawn rule's herd event sets lothlorien:natural; /summon and eggs do not): keep the white deer
+// with the depth chance of its spot (white_deer_rules.js), otherwise remove it before anyone sees it (distance_filter
+// 24-44 from the player). The flag is cleared after the roll, so a deer is judged once, not again on every chunk load.
+function judgeNaturalSpawn(deer, depthAt) {
+  try {
+    if (!deer.isValid || !deer.getProperty("lothlorien:natural")) return;
+    deer.setProperty("lothlorien:natural", false);
+    if (!keepNaturalSpawn(depthAt(deer.dimension, deer.location).level, Math.random())) deer.remove();
+  } catch {
+    // unloaded meanwhile
+  }
+}
+
+// depthAt(dimension, location) -> { level } from scripts/depth.js (main.js supplies the in-game sampler).
+export function startWhiteDeer(depthAt) {
   sweepBeacons(); // world load: no session survives a reload, so every beacon found is a stray
   system.runInterval(tickSessions, GUIDE_TICKS);
+  world.afterEvents.entitySpawn.subscribe(({ entity, cause }) => {
+    try {
+      if (cause === EntityInitializationCause.Loaded || entity.typeId !== WHITE_DEER_ID) return;
+      // one tick later: the spawn event's property is surely applied by then
+      system.runTimeout(() => judgeNaturalSpawn(entity, depthAt), 1);
+    } catch {
+      // entity gone
+    }
+  });
   world.afterEvents.playerInteractWithEntity.subscribe(({ player, target, beforeItemStack, itemStack }) => {
     try {
       if (target.typeId !== WHITE_DEER_ID || (beforeItemStack ?? itemStack)?.typeId !== ACORN_ID) return;
