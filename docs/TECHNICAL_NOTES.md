@@ -577,9 +577,12 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
   placements; floor and ceiling versions are the wall model turned by coordinates in `tools/make_antler_block.py`). The user wanted it
   placeable like an item frame: **any face of any block, ceiling too**. So the block has **no `minecraft:placement_filter`** (a filter's
   `block_filter` can only name blocks or tags, and two earlier list/tag attempts were rejected as a strange workaround). The survival
-  check an item frame has comes from script instead: `scripts/antler.js` (`lothlorien:antler_support`, pure rule in `antler_rules.js`)
-  runs on `minecraft:tick` (every 1-2 s) and destroys the block, dropping it, when the support block (opposite of the clicked
-  `minecraft:block_face`) is air or liquid. Untested: whether the support offsets match the face semantics, and whether `setblock ... destroy` drops the item.
+  check an item frame has comes from script, **event-driven like Starstone's surface devices (which also use script: `beforeOnPlayerPlace`
+  plus checks on break events; there is no data-only route)**: `scripts/antler.js` (`lothlorien:antler_support`, pure rule in
+  `antler_rules.js`). `beforeOnPlayerPlace` refuses an unreadable or air/liquid support; after `playerBreakBlock` and `blockExplode` the
+  six neighbours are checked and an antler whose support (opposite of its `minecraft:block_face`) is air or liquid is destroyed with `setblock
+  ... air destroy`. No polling tick (an earlier version used `minecraft:tick`). Not covered: pistons, water flow, other mods removing blocks.
+  Untested: whether the support offsets match the face semantics, and whether `destroy` drops the item.
   Permutations: block_face `up` = floor (4 rotations by cardinal direction), `down` = ceiling (4), four wall faces (rotated by face).
 - **Natural drop only on ground blocks, never on litter**: the worldgen feature (`single_block_feature`) has its own support rule,
   `may_attach_to: { bottom: [grass, dirt, coarse dirt, podzol, dirt with roots, moss, mud, stone], min_sides_must_attach: 1 }` and
@@ -611,3 +614,9 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
 - The fawn showed a hole in the upper legs. Two causes removed: its legs were 1.5 wide (a fractional box size puts box-UV faces between texels),
   and the leg texture had a dithered dark notch at the coat/pale border that read as a hole on a 6-unit leg. Fawn legs are now 2x6x2, antler
   cubes have whole-number sizes (positions can stay fractional), and `tools/make_deer.py` now **fails if any size is fractional or any face texel is unpainted**.
+
+### Spotted back, second pass (2026-09-30)
+
+- From photos: the spots run along the whole back up to the rump patch (they stopped at about 3/4 before), and the field is outlined in **light**,
+  not dark. Adult: rump patch 2 columns wide (was 3), no dark edge, back line and flank line in the lightest coat tone, one spot per column up to
+  column 12. Fawn: same idea on its 2 coat rows, sparser so it does not read as a checkerboard.

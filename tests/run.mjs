@@ -323,7 +323,8 @@ test("antler block: a permutation for every floor, ceiling and wall placement; n
   assert.ok(b.permutations.filter((p) => !p.condition.includes("'up'") && !p.condition.includes("'down'"))
     .every((p) => p.components["minecraft:geometry"] === "geometry.lothlorien.deer_antler_wall"));
   assert.ok(!b.components["minecraft:placement_filter"], "placeable on any block, like an item frame");
-  assert.ok(b.components["minecraft:tick"] && b.components["lothlorien:antler_support"], "falls off without support");
+  assert.ok(b.components["lothlorien:antler_support"], "support handled by script events");
+  assert.ok(!b.components["minecraft:tick"], "no polling");
 });
 test("antler support: opposite side of the clicked face; air and liquid drop it, unloaded keeps it", () => {
   assert.deepEqual(AR.supportOffset("up"), { x: 0, y: -1, z: 0 });

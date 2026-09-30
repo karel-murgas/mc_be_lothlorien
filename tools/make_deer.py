@@ -222,27 +222,26 @@ class Paint:
         self.baby = baby
 
     # --- helpers that produce a colour for a side profile pixel; i counts from the FRONT end
-    SPOTS_ADULT = {(1, 4), (2, 1), (3, 3), (4, 5), (5, 2), (6, 4), (7, 1), (8, 3), (9, 5), (10, 2), (11, 4)}
-    SPOTS_BABY = {(1, 1), (2, 2), (3, 0), (4, 1), (5, 2), (6, 0), (7, 1), (8, 2), (3, 2)}
+    # Spot rows per side profile (i counts from the front). They run from the shoulder to the rump patch, as on
+    # the real animal, and the field is outlined in LIGHT (back line, flank line, edge of the rump patch).
+    SPOTS_ADULT = {(1, 4), (2, 1), (3, 3), (4, 5), (5, 2), (6, 4), (7, 1), (8, 3), (9, 5), (10, 2), (11, 4), (12, 1)}
+    SPOTS_BABY = {(1, 1), (3, 2), (4, 1), (6, 2), (7, 1)}
 
     def coat_body_side(self, i, j, w, h):
         # i counts from the front end, j from the back line down to the belly
         belly_rows = 1 if self.baby else 2
+        last = h - belly_rows - 1  # lowest coat row
         if j >= h - belly_rows:  # pale belly, darker on the bottom row
             return ramp(BELLY, 2 if j == h - belly_rows else 1)
-        if i >= w - (2 if self.baby else 3) and j >= 1:  # rump patch
-            return ramp(BELLY, 3 if j < h - belly_rows - 1 else 2)
-        if not self.baby and i == w - 4 and 1 <= j <= h - belly_rows - 2:  # dark edge in front of the patch
-            return ramp(COAT, 1)
-        last = h - belly_rows - 1  # lowest coat row: shadow
-        base = 4 if j == 0 else 1 if j == last else 2 if j == last - 1 else 3
-        if self.baby:
-            base = 3 if j == 0 else 2
-        if i <= 1 and 0 < j < last:  # shoulder a touch darker
-            base -= 1
+        if i >= w - 2 and j >= 1:  # rump patch
+            return ramp(BELLY, 3 if j < last else 2)
+        if j == 0 or j == last:  # light outline: back line and flank line
+            return ramp(COAT, 4)
         if (i, j) in (self.SPOTS_BABY if self.baby else self.SPOTS_ADULT):
             return ramp(SPOT, 1 if j <= 2 else 0)
-        return ramp(COAT, base)
+        if self.baby:
+            return ramp(COAT, 3 if j == 1 else 2)
+        return ramp(COAT, 3 if j <= 3 else 2)
 
     def body(self, cv, name_faces):
         f = name_faces

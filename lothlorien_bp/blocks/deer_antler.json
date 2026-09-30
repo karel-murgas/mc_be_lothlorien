@@ -47,13 +47,6 @@
           "render_method": "opaque"
         }
       },
-      "minecraft:tick": {
-        "interval_range": [
-          20,
-          40
-        ],
-        "looping": true
-      },
       "lothlorien:antler_support": {}
     },
     "permutations": [
