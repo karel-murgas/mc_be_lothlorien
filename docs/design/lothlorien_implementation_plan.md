@@ -555,9 +555,12 @@ its own entity `lothlorien:white_deer` (a rare loner: no herd, no breeding, no b
 Disharmony 0 starts guidance (the knowledge base said Western Corn; the owner changed it to the acorn). It walks by the engine's own
 pathfinding, following an invisible helper `lothlorien:guide_beacon` that script moves ahead in 8-14 block hops (goal
 `follow_target_leader`; fallbacks prepared in `tools/dev_scripts/guide_goal/`, to be decided by an in-game experiment). The marker is the
-block `lothlorien:structure_marker` buried in every giant Mallorn (worldgen change: **new world needed** to get markers into trees).
-Design, assumptions, the goal experiment and the in-game test plan: `TECHNICAL_NOTES.md` (White deer guidance). Only the giant Mallorns
-exist as structures so far; Phase 16 structures must add the marker._
+block `lothlorien:structure_marker` buried in the trunk of every giant Mallorn **that holds a chest** (today the two flet giants, about 1
+giant in 4; worldgen change: **new world needed** to get markers into trees). Second owner round, built 2026-09-30 (static checks only):
+the white deer is always an antlered hart with a sure antler drop, leashable (a lead always wins over guidance), counts double for
+Disharmony, spawns more in the heart than at the edges (script filter on natural spawns by depth); ordinary deer eat only Western Corn
+grain. Design, assumptions, the goal experiment and the in-game test plan: `TECHNICAL_NOTES.md` (White deer guidance). Only the giant
+Mallorns exist as structures so far; a Phase 16 structure is guided to only if it holds a chest and gets the marker._
 
 Add variant / separate entity.
 

@@ -508,6 +508,8 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
   points and all timers**. Friend = 10 minutes at 0 points inside; progress is paused outside (neither gained nor lost) and Friend lasts
   outside (status just hidden); only a kill or a death loses it.
 - A kill counts when a player is `damageSource.damagingEntity` (projectile shooters included) and the victim stood in the biome.
+  It adds `killWeight(typeId)` points (`KILL_WEIGHTS` in `disharmony.js`): 1 for anything, **2 for the white deer** (owner, 2026-09-30:
+  a white hart counts as two deer; 0 points -> Disharmony II at once, each point still decays on its own timer).
 - Later phases read the state with `disharmonyOf(player)` + `levelFor` / `isFriend`.
 
 ## Fauna spawning spike (Phase 10, 2026-09-30, built; v3 despawn game-tested OK)
@@ -547,7 +549,9 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
 - **Alarm**: a player hurting (or killing) a deer fires `lothlorien:alarm` on every deer within 20 blocks: group `state_alarmed`
   (flee 36, no luring) with a `minecraft:timer` of 20 s whose event `lothlorien:alarm_over` re-triggers the state stored in
   the property. The script skips deer with `lothlorien:alarmed` so it never cuts an alarm short.
-- **Goal priorities matter**: breed 2, tempt 3, avoid 4. Tempt must outrank avoid or a deer lured with an acorn would run away
+- **Food**: Western Corn grain (`lothlorien:western_corn_grain`) is the deer's only food since 2026-09-30 (owner): tempt, `breed_items` and the
+  fawn's `ageable.feed_items`. Before it was Mallorn acorn or apple; the acorn now belongs to the white deer only. Seeds do not count.
+- **Goal priorities matter**: breed 2, tempt 3, avoid 4. Tempt must outrank avoid or a deer lured with corn would run away
   the moment the player comes within flight distance (edge oscillation). Breeding must outrank both or it never completes
   with the player standing next to the pair.
 - Sex and antlers: enum property `lothlorien:sex` (client synced) picked by `minecraft:entity_spawned` / `entity_born`; the render
@@ -564,12 +568,12 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
 ### Deer test plan (new world not required for the entity; the biome needs new chunks)
 
 1. `/summon lothlorien:deer` several times: adult does (no antlers), bucks (antlers), a fawn now and then; spawn egg works; egg on an adult makes a fawn.
-2. Walk at a deer: it should flee at ~10 blocks (5 when sneaking). Hold an acorn or apple: it comes closer; run at it: it gets scared.
-3. `/scriptevent lothlorien:disharmony 4` then approach: flight at ~30 blocks, acorn no longer lures. `... 0`, wait: back to 10. Friend (10 calm minutes inside the biome): you can walk up to ~3 blocks.
+2. Walk at a deer: it should flee at ~10 blocks (5 when sneaking). Hold Western Corn grain: it comes closer (acorn, apple and corn seeds do not lure); run at it: it gets scared.
+3. `/scriptevent lothlorien:disharmony 4` then approach: flight at ~30 blocks, corn no longer lures. `... 0`, wait: back to 10. Friend (10 calm minutes inside the biome): you can walk up to ~3 blocks.
 4. Hit one deer (or shoot): the rest of the herd within 20 blocks bolts for ~20 s.
 5. Run animation: does the gallop show while fleeing? Does it show while strolling (it must not)? Adjust the 3.5 threshold.
 6. Kill a few: venison, leather, bucks sometimes antlers; cook venison in furnace, smoker, campfire; eat it.
-7. Breed two with acorns: fawn appears, follows parent, grows up in about 20 min (acorns speed it up), a buck fawn gets antlers when grown.
+7. Breed two with Western Corn grain: fawn appears, follows parent, grows up in about 20 min (corn grain speeds it up), a buck fawn gets antlers when grown. Acorns do nothing to deer.
 8. Spawning: dev-only `critters watch` (copy `tools/dev_scripts/critter_watch.js` back in): herds of 2-4 appear in the biome, stay bounded after travelling (Phase 10 protocol); do they crowd cows/sheep?
 9. Look: side, front and back views of adult doe, buck and fawn; note what to redo for the graphics pass.
 
@@ -653,11 +657,14 @@ for worldgen carpet; already-turned dirt does not turn back by itself, it regrow
 
 History: the first build (commit `3426cec`) made the white deer a coat variant of `lothlorien:deer`, lured and offered with
 Western Corn grain, and walked it by script teleport steps. The owner rejected teleport-walking and asked for a separate
-animal offered a Mallorn acorn; this section describes the rebuild.
+animal offered a Mallorn acorn; this section describes the rebuild. Second owner round (2026-09-30, built the same day, static checks
+only): leashable with "a lead always wins", always an antlered hart with a sure antler drop, a kill costs 2 Disharmony points, natural
+spawns thinned by depth, markers only in Mallorns with a chest; ordinary deer eat only Western Corn grain.
 
-Files: BP `entities/white_deer.json`, `spawn_rules/white_deer.json`, `entities/guide_beacon.json`, `blocks/structure_marker.json`,
-`scripts/white_deer.js` (game wiring), `scripts/white_deer_rules.js` (pure numbers, waypoints, tested), `scripts/deer.js` + `deer_rules.js`
-(wariness and alarm for both deer types), `structures/lothlorien/*.mcstructure` (marker, unchanged since `3426cec`). RP `entity/white_deer.entity.json`,
+Files: BP `entities/white_deer.json`, `spawn_rules/white_deer.json`, `loot_tables/entities/white_deer.json`, `entities/guide_beacon.json`,
+`blocks/structure_marker.json`, `scripts/white_deer.js` (game wiring), `scripts/white_deer_rules.js` (pure numbers, waypoints, leash rule, depth
+spawn table, tested), `scripts/deer.js` + `deer_rules.js` (wariness and alarm for both deer types), `scripts/disharmony.js` (kill weight),
+`scripts/main.js` (`depthAt`), `structures/lothlorien/*.mcstructure` (marker in the flet giants only since 2026-09-30). RP `entity/white_deer.entity.json`,
 `render_controllers/white_deer.render_controllers.json`, `entity/guide_beacon.entity.json`, `models/entity/guide_beacon.geo.json` (one zero-size
 cube: renders nothing but passes the verifier's "geometry has no cubes" check), `textures/entity/guide_beacon.png` (16x16, fully transparent),
 `textures/entity/deer/deer_white.png` (from `tools/make_deer.py`), `sounds.json`, `texts/en_US.lang`. Dev only (not shipped):
@@ -668,30 +675,71 @@ cube: renders nothing but passes the verifier's "geometry has no cubes" check), 
 - **Separate entity `lothlorien:white_deer`, "White Deer"**, spawn egg (white `#e3e7ee` / grey `#a6adbb`). A **loner**: the deer has no herd
   goal in its entity (its groups come from the spawn rule's `herd` and its breeding), so the white deer simply has neither: spawn herd 1-1, no
   `breedable`/`behavior.breed`/`offspring`, no baby group, no `ageable`/`follow_parent`, no `spawn_egg_interaction` (an egg on it makes no fawn),
-  not tamable. **Not leashable and no balloon** either (my choice: a wild guide animal, not livestock; a lead would also drag it off a guidance).
-  Own family `lothlorien_white_deer` (+ `mob`), not `lothlorien_deer`.
-- **Sex and model**: property `lothlorien:sex` 50/50 at spawn, does without and bucks with antlers, the same two adult geometries as the deer,
-  one texture `deer_white.png` (the unused white fawn texture was deleted and `make_deer.py` no longer writes it).
-- **Drops (consistent with `design/drops.md`, "Deer and white deer")**: the deer's own tables by sex: doe = leather 0-2 + venison 1-3;
-  buck = the same + antler 30 % on player kills. XP 1-3 on a player kill. Killing it is still a kill for Disharmony.
-- **Spawn rule** (`spawn_rules/white_deer.json`): same surface, grass, light 7-15 and biome tag as the deer; **weight 1** (deer 10, whose herds
-  are 2-4), **herd 1**, `density_limit.surface` **1** (at most one white deer in a player's spawn area), `distance_filter` 24-44 (a bit farther
-  than the deer's 12, so it is not seen popping in), pool `animal`. Expect roughly one white deer per 25-30 deer where they spawn; tune the weight.
+  not tamable. **Leashable** since the owner's second round (2026-09-30, "I would like lead to work on him"): `minecraft:leashable {}` in
+  `components`, as the vanilla cow (defaults: soft/hard/break distances, can be stolen); no `leashable_to` (nothing is tied to it). No balloon:
+  `minecraft:balloonable` is an Education Edition feature, leaving it out costs nothing. Own family `lothlorien_white_deer` (+ `mob`).
+- **Lead vs guidance (rule "a lead always wins")**: `offerRefusal` and `phase` in `white_deer_rules.js`, read in `white_deer.js` through
+  `getComponent("minecraft:leashable")?.isLeashed` (2.8.0 `EntityLeashableComponent.isLeashed`). A leashed white deer refuses the acorn
+  (acorn kept; checked again when the marker search finishes); leashing it while it guides ends the guidance on the next 5-tick check
+  (beacon removed, `guide_end` back to its wariness). Picked over "unleash it when guidance starts" (takes the player's lead away) and
+  "ignore the lead" (the follow goal and the lead would tug against each other).
+- **Always antlered (white hart)**: no `lothlorien:sex` property, no doe/buck groups or events; the client entity has one geometry,
+  `geometry.lothlorien.deer_buck`, and the render controller uses `Geometry.default`. One texture `deer_white.png` (the unused white fawn
+  texture was deleted and `make_deer.py` no longer writes it). The ordinary deer keeps its sexes. A white deer saved before this change
+  may keep an old `adult_*` group name the entity no longer defines (expected to be dropped by the engine; its loot now comes from `components`).
+- **Drops (consistent with `design/drops.md`, "Deer and white deer")**: own table `loot_tables/entities/white_deer.json` in `components`:
+  leather 0-2 and venison 1-3 exactly as a buck deer, plus **one deer antler every time, on any death** (no `killed_by_player`, no chance:
+  it cannot breed, so there is nothing to farm, and a hart killed by a wolf still leaves its antlers). XP 1-3 on a player kill.
+  Killing it costs **2 Disharmony points** (see Disharmony core).
+- **Spawn rule** (`spawn_rules/white_deer.json`): same surface, grass, light 7-15 and biome tag as the deer; **weight 3** (deer 10, whose herds
+  are 2-4), **herd 1** with herd `event` `lothlorien:spawn_natural`, `density_limit.surface` **1** (at most one white deer in a player's spawn
+  area), `distance_filter` 24-44 (a bit farther than the deer's 12, so it is not seen popping in), pool `animal`. Then thinned by depth (below).
+- **Spawn by depth** (owner, 2026-09-30: fewer near the edges, more in the heart). Spawn rules cannot read the mod's depth, so: the spawn
+  rule spawns everywhere in the biome; its herd event sets the entity property `lothlorien:natural`; `white_deer.js` listens to
+  `world.afterEvents.entitySpawn` (cause not `Loaded`), one tick later reads the flag, clears it, estimates `depth.js` at the deer's own spot
+  (the same ring probe as the player readout, `depthAt` from `main.js`, about 80 probes, only for this rare mob) and keeps it with
+  `SPAWN_KEEP_BY_DEPTH` = outside 0, edge 0.15, inner 0.5, heart 1, else `entity.remove()`. **One place to tune**: `SPAWN_WEIGHT` and
+  `SPAWN_KEEP_BY_DEPTH` in `white_deer_rules.js` (a test keeps `SPAWN_WEIGHT` equal to the spawn rule's weight).
+  Expected frequency, before the density limit: weight 3 against the deer's 10 x ~3 per herd = about 1 white deer per 10 deer spawned in
+  the heart, 1 per 20 in the inner forest, 1 per ~67 at the edge (was 1 per 30 everywhere). With `density_limit` 1 you meet at most one at a
+  time; in the heart one should usually show up within a visit of some minutes. Unverified in game: tune after walking around.
+  Options weighed: (a) spawn-rule conditions that correlate with depth (none exist: no biome-distance filter, height does not follow depth);
+  (b) script-driven spawning near players (full control, but bypasses the engine's cap, light and placement rules and needs its own counting);
+  (c) **chosen**: data-driven spawn + script filter, cheap (runs only when a white deer spawns) and safe: `/summon` and the spawn egg do not
+  fire the herd event, so they are never filtered, and if the herd event does not reach the entity the filter simply never fires (base rate
+  everywhere: fails open). The herd `event` was preferred over `minecraft:permute_type` with `<event>` because vanilla relies on it for
+  natural spawns (fox babies, horse colours). Test hook: `/summon lothlorien:white_deer ~ ~ ~ lothlorien:spawn_natural` goes through the filter.
+  Residual effects: a removed spawn was a spawn attempt used up (that cycle spawns nothing else there); the pool and density limit count
+  live entities, so the cap is free again at once; `remove()` drops no loot, gives no XP and is not a death (no Disharmony, no alarm). The
+  deer exists for one tick at 24-44 blocks (not normally seen). Assumptions: that the herd event replaces or runs along with
+  `minecraft:entity_spawned` (both paths end in `set_calm`, so either works), and that the flag is readable one tick after the spawn event.
 - **Wariness**: the same state groups and flight distances as the deer (`calm` 10 / 5 sneaking ... `l3` 30, alarmed 36 for 20 s), driven by
   `deer.js` (`DEER_TYPES` in `deer_rules.js`). Only the **Mallorn acorn** lures it (calm and Friend only, `can_get_scared`); apples do not.
   Hurting or killing it alarms deer within 20 blocks, and hurting a deer nearby alarms it too (it is shy, not deaf); an alarm ends a guidance.
-- **Ordinary deer**: back to exactly its pre-`3426cec` entity, client entity and render controller (no coat, no guiding state, no corn lure).
+- **Ordinary deer**: back to its pre-`3426cec` entity, client entity and render controller (no coat, no guiding state); since 2026-09-30 its
+  only food is Western Corn grain (see Deer).
 
 **The offer**: right-click an adult white deer holding a **Mallorn acorn** (`lothlorien:mallorn_acorn`) while your Disharmony is 0 (Friend
 included; level I and up: "shies from your restless spirit"). The entity has a `minecraft:interact` entry for a hand holding the acorn
 (`use_item false`, text "Offer Acorn"): the 2.8.0 declarations say `playerInteractWithEntity` fires after a *successful* interaction, so
 without an interaction on the entity the script might never hear of it (**unverified** which is needed). The script then searches for the
 nearest marker; the acorn is consumed (survival) **only when guidance starts** (marker found, first waypoint found, beacon spawned).
-Corn grain has no role for deer any more.
+Corn grain does nothing to the white deer (it is the ordinary deer's food).
 
-- **Marker** `lothlorien:structure_marker` (unchanged): unbreakable, full cube with the Mallorn log side texture, no item, not in the creative menu
-  (the verifier warns about the missing `menu_category`: intended). One per giant Mallorn at trunk cell (2, -4, 2), about 4 blocks under the
-  ground inside the buried part of the trunk. Hand-place one for testing: `/setblock <x> <y> <z> lothlorien:structure_marker`.
+- **Marker** `lothlorien:structure_marker`: unbreakable, full cube with the Mallorn log side texture, no item, not in the creative menu
+  (the verifier warns about the missing `menu_category`: intended). At trunk cell (2, -4, 2), about 4 blocks under the ground inside the
+  buried part of the trunk, **only in a Mallorn that holds a chest** (owner, 2026-09-30: the deer leads to a Mallorn with a chest).
+  `tools/build_structures.mjs` places it when the tree has a `minecraft:chest` (`hasChest`); the chest is the flet's loot chest
+  (`loot_tables/chests/mallorn_flet.json`) on the platform, so the deer brings you to the foot of the tree and the ladder goes up to it.
+  **What exists today**: of the 6 worldgen giants only `mallorn_woven_05` and `mallorn_woven_07` (the flet trees, pool weight 4 of 16, about
+  1 giant in 4, roughly one per 144 chunks) have a chest and a marker; the 4 plain giants lost their marker (structures regenerated
+  2026-09-30, otherwise byte-identical; the woven files did not change). **Missing**: no other structure with a chest exists; the Phase 16
+  plan (simple flet, root shrine, pool/garden) says "every guideable structure gets its hidden marker" but plans no chests, so a Phase 16
+  structure is guided to only if it gets a chest (or the rule is widened then). Hand-place one for testing:
+  `/setblock <x> <y> <z> lothlorien:structure_marker` (the search does not look for the chest; the marker stands for it).
+- **Search radius** kept at **80 blocks**: with markers only in flet giants, a random spot has one in reach about 4 times in 10
+  (0.55 expected in the 80-block circle). A larger radius (e.g. 128: about 3 in 4) costs one job step per 16x16 column (about 2.5 times the
+  steps) and reaches chunks that may not be loaded at simulation distance 4 (64 blocks); it is one constant, `SEARCH_RADIUS`, if the owner wants it.
 - **Finding the marker** (unchanged): `dimension.getBlocks(BlockVolume, {includeTypes: [marker]}, true)` over chunk-sized columns, nearest
   first, in a `system.runJob` (one column per step), radius **80 blocks**, y from 40 below to 16 above the deer, loaded chunks only.
 
@@ -722,8 +770,8 @@ Corn grain has no role for deer any more.
   (all three dimensions, loaded chunks). Exception for the experiment: a beacon **named or tagged `guide_beacon`** is left alone (its own timer
   removes it). A white deer still in `state_guiding` after a reload is released by `deer.js` within 2 s of a player being near.
 - Two white deer guiding close together may follow each other's beacon: accepted by the owner (no per-area limit).
-- **Not done**: guidance to a specific structure type, remembering markers, sound or particles, Phase 16 structures (pools, shrines) must place
-  the marker too.
+- **Not done**: guidance to a specific structure type, remembering markers, sound or particles; Phase 16 structures get the marker only if
+  they hold a chest (see Marker).
 
 **Unverified assumptions (the experiment settles the first three):** (1) that `follow_target_leader` accepts a non-mob helper entity (no
 movement, no AI) as leader at all; the docs only say "entities passing `leader_filters`"; (2) whether its leader search range is `within_radius`
@@ -731,7 +779,10 @@ movement, no AI) as leader at all; the docs only say "entities passing `leader_f
 `follow_distance 1` makes it stop near a beacon at its feet (the "wait") rather than fidget; (4) that the beacon is truly invisible: zero-size cube
 and transparent texture, but it may still cast a small shadow or show a hit box outline; (5) whether `playerInteractWithEntity` needs the
 `minecraft:interact` entry, and whether the acorn (a block placer item) places a sapling instead when you miss the deer; (6) all the old items:
-`getBlocks` cost, probe rays under custom ground cover, the marker surviving worldgen, placeholder white texture.
+`getBlocks` cost, probe rays under custom ground cover, the marker surviving worldgen, placeholder white texture; (7) second round: that the
+spawn rule's herd `event` reaches a herd of one (skip count 0) and the flag is set one tick later, that `entitySpawn` does not report a
+natural spawn as `Loaded`, that `isLeashed` turns true as soon as a lead attaches, and that the `follow_target_leader` goal does not fight a lead
+in the 5 ticks before the guidance ends.
 
 ### How to test and how to switch goals if the first does not work
 
@@ -762,15 +813,22 @@ names and the experiment: `.claude/skills/bedrock-mobs/references/pathfinding.md
 
 ### White deer test plan (nothing here has been run in game; natural spawns and the marker in trees need a NEW world)
 
-Leave and re-enter the world to load the entity and script changes. `/summon` works in an old world: steps 1 and 3-7 do not need a new
-world; step 2 (natural spawns in fresh chunks) and step 8 (markers inside generated trees) do.
+Leave and re-enter the world to load the entity and script changes. `/summon` works in an old world: steps 1, 3, 3b and 4-7 (and the
+`spawn_natural` filter check in step 2) do not need a new world; step 2's natural spawns (fresh chunks) and step 8 (markers inside generated
+trees; the 2026-09-30 structures put markers only in flet giants, trees generated before still have the old marker in every giant) do.
 
-1. `/summon lothlorien:white_deer` a few times: white coat, pale pink ears, nose and hooves; does and bucks (antlers); never a fawn. Spawn egg
-   "White Deer Spawn Egg" in the creative menu; using an egg on a white deer does nothing special. A lead does not attach. Content log clean
-   (watch for `guide_beacon` geometry or render errors too).
-2. NEW world, natural spawns: walk the biome; white deer appear alone, rarely (count deer and white deer over a while), never in the herds.
-3. `/give @s lothlorien:mallorn_acorn 16`; with Disharmony 0 hold it: a calm white deer comes to you (tempt), an apple does not lure it.
-   Ordinary deer: acorn and apple lure them as before, corn grain does not.
+1. `/summon lothlorien:white_deer` a few times: white coat, pale pink ears, nose and hooves; **every one has antlers**; never a fawn. Spawn egg
+   "White Deer Spawn Egg" in the creative menu; using an egg on a white deer does nothing special. Content log clean (watch for
+   `guide_beacon` geometry or render errors, and for unknown-group messages from white deer saved before this change).
+   **Lead**: a lead attaches and it follows on the lead; while leashed, offer an acorn: "will not lead while it is held on a lead", acorn kept.
+2. NEW world, natural spawns: walk the biome; white deer appear alone, never in herds; noticeably more in the heart than near the edges
+   (`/scriptevent lothlorien:debug` shows the depth). Count deer and white deer per depth level over a while and note the numbers here.
+   Filter check in any world: `/summon lothlorien:white_deer ~ ~ ~ lothlorien:spawn_natural` at the edge should vanish about 85 times in
+   100 (heart: never; outside the biome: always); plain `/summon` and the egg always stay.
+3. `/give @s lothlorien:mallorn_acorn 16`; with Disharmony 0 hold it: a calm white deer comes to you (tempt), an apple or corn does not lure it.
+   Ordinary deer: only Western Corn grain lures them (acorn, apple and seeds do not); two deer fed corn grain breed.
+3b. Kill a white deer (survival, inside the biome, Disharmony 0): always one deer antler plus leather 0-2 and venison 1-3; chat says
+   "Disharmony II" (2 points). A white deer killed by `/kill` or a wolf also drops the antler.
 4. No marker: right-click an adult white deer with the acorn far from any giant Mallorn (old world, no markers): "has nowhere to lead you",
    acorn NOT consumed. The hover text says "Offer Acorn".
 5. Manual marker: `/setblock ~30 ~-4 ~ lothlorien:structure_marker`, then offer the acorn: "takes the acorn ... Follow it", acorn consumed
@@ -778,13 +836,16 @@ world; step 2 (natural spawns in fresh chunks) and step 8 (markers inside genera
    it moves in hops towards the marker, stops and waits when you are more than 12 blocks behind, carries on when you catch up, and stops near
    the marker with "A great tree stands near". No visible beacon, no shadow travelling ahead of it.
 6. Refusals and endings: `/scriptevent lothlorien:disharmony 1`, offer: "shies from your restless spirit". Start a guidance, then
-   `/scriptevent lothlorien:disharmony 3` or hit the deer: it stops (hit: deer nearby bolt). Walk 50 blocks away: it gives up. After each
-   ending `/testfor @e[type=lothlorien:guide_beacon]` should find nothing within about 5 s.
+   `/scriptevent lothlorien:disharmony 3` or hit the deer: it stops (hit: deer nearby bolt). Walk 50 blocks away: it gives up. Put a lead on
+   it mid-guidance: "is held on a lead and stops leading you", it stays on the lead. After each ending
+   `/testfor @e[type=lothlorien:guide_beacon]` should find nothing within about 5 s.
 7. Save and reload mid-guidance: the deer returns to normal wariness within about 2 s of you being near; no beacon left
    (`/testfor @e[type=lothlorien:guide_beacon]`).
-8. NEW world: find a giant Mallorn, dig down beside the trunk base: in survival the marker cannot be mined (looks like log bark); in creative
-   `/testforblock` at trunk cell (2, -4, 2) relative to the trunk's north-west corner at ground level should say `lothlorien:structure_marker`.
-   Summon a white deer within 80 blocks and offer an acorn: it leads to the nearest giant (up to 80 blocks, over hills and round trunks).
+8. NEW world: find a giant Mallorn **with a flet** (platform, ladder, chest), dig down beside the trunk base: in survival the marker cannot be
+   mined (looks like log bark); in creative `/testforblock` at trunk cell (2, -4, 2) relative to the trunk's north-west corner at ground level
+   should say `lothlorien:structure_marker`; the same cell of a plain giant (no flet) is a log. Summon a white deer within 80 blocks of a flet
+   giant and offer an acorn: it leads to that tree (not to a nearer plain giant), over hills and round trunks; with only plain giants in reach:
+   "nowhere to lead you", acorn kept.
 9. Two players: only the offering player is followed; a second player at Disharmony 3 nearby does not change the guidance. Two white deer
    guiding close together may swap beacons (accepted).
 10. Performance: the marker search must not spike a tick (job-sliced); try with a high render distance.
