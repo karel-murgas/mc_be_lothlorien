@@ -1,0 +1,864 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "lothlorien:white_deer",
+      "spawn_category": "creature",
+      "is_spawnable": true,
+      "is_summonable": true,
+      "properties": {
+        "lothlorien:sex": {
+          "type": "enum",
+          "values": [
+            "doe",
+            "buck"
+          ],
+          "default": "doe",
+          "client_sync": true
+        },
+        "lothlorien:wariness": {
+          "type": "enum",
+          "values": [
+            "calm",
+            "l1",
+            "l2",
+            "l3",
+            "friend"
+          ],
+          "default": "calm",
+          "client_sync": false
+        },
+        "lothlorien:alarmed": {
+          "type": "bool",
+          "default": false,
+          "client_sync": false
+        },
+        "lothlorien:guiding": {
+          "type": "bool",
+          "default": false,
+          "client_sync": false
+        }
+      }
+    },
+    "component_groups": {
+      "lothlorien:state_calm": {
+        "minecraft:behavior.avoid_mob_type": {
+          "priority": 4,
+          "entity_types": [
+            {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  },
+                  {
+                    "test": "is_sneaking",
+                    "subject": "other",
+                    "value": false
+                  }
+                ]
+              },
+              "max_dist": 10,
+              "walk_speed_multiplier": 1.3,
+              "sprint_speed_multiplier": 1.6
+            },
+            {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  },
+                  {
+                    "test": "is_sneaking",
+                    "subject": "other",
+                    "value": true
+                  }
+                ]
+              },
+              "max_dist": 5,
+              "walk_speed_multiplier": 1.3,
+              "sprint_speed_multiplier": 1.6
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "wolf"
+              },
+              "max_dist": 12,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.8
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "monster"
+              },
+              "max_dist": 8,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.8
+            }
+          ]
+        },
+        "minecraft:behavior.tempt": {
+          "priority": 3,
+          "speed_multiplier": 1,
+          "items": [
+            "lothlorien:mallorn_acorn"
+          ],
+          "can_get_scared": true
+        }
+      },
+      "lothlorien:state_l1": {
+        "minecraft:behavior.avoid_mob_type": {
+          "priority": 4,
+          "entity_types": [
+            {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  },
+                  {
+                    "test": "is_sneaking",
+                    "subject": "other",
+                    "value": false
+                  }
+                ]
+              },
+              "max_dist": 13,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.7
+            },
+            {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  },
+                  {
+                    "test": "is_sneaking",
+                    "subject": "other",
+                    "value": true
+                  }
+                ]
+              },
+              "max_dist": 6,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.7
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "wolf"
+              },
+              "max_dist": 12,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.8
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "monster"
+              },
+              "max_dist": 8,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.8
+            }
+          ]
+        }
+      },
+      "lothlorien:state_l2": {
+        "minecraft:behavior.avoid_mob_type": {
+          "priority": 4,
+          "entity_types": [
+            {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  },
+                  {
+                    "test": "is_sneaking",
+                    "subject": "other",
+                    "value": false
+                  }
+                ]
+              },
+              "max_dist": 20,
+              "walk_speed_multiplier": 1.5,
+              "sprint_speed_multiplier": 1.9
+            },
+            {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  },
+                  {
+                    "test": "is_sneaking",
+                    "subject": "other",
+                    "value": true
+                  }
+                ]
+              },
+              "max_dist": 10,
+              "walk_speed_multiplier": 1.5,
+              "sprint_speed_multiplier": 1.9
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "wolf"
+              },
+              "max_dist": 12,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.8
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "monster"
+              },
+              "max_dist": 8,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.8
+            }
+          ]
+        }
+      },
+      "lothlorien:state_l3": {
+        "minecraft:behavior.avoid_mob_type": {
+          "priority": 4,
+          "entity_types": [
+            {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  },
+                  {
+                    "test": "is_sneaking",
+                    "subject": "other",
+                    "value": false
+                  }
+                ]
+              },
+              "max_dist": 30,
+              "walk_speed_multiplier": 1.6,
+              "sprint_speed_multiplier": 2.1
+            },
+            {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  },
+                  {
+                    "test": "is_sneaking",
+                    "subject": "other",
+                    "value": true
+                  }
+                ]
+              },
+              "max_dist": 15,
+              "walk_speed_multiplier": 1.6,
+              "sprint_speed_multiplier": 2.1
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "wolf"
+              },
+              "max_dist": 12,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.8
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "monster"
+              },
+              "max_dist": 8,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.8
+            }
+          ]
+        }
+      },
+      "lothlorien:state_friend": {
+        "minecraft:behavior.avoid_mob_type": {
+          "priority": 4,
+          "entity_types": [
+            {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  },
+                  {
+                    "test": "is_sneaking",
+                    "subject": "other",
+                    "value": false
+                  }
+                ]
+              },
+              "max_dist": 3,
+              "walk_speed_multiplier": 1.1,
+              "sprint_speed_multiplier": 1.3
+            },
+            {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  },
+                  {
+                    "test": "is_sneaking",
+                    "subject": "other",
+                    "value": true
+                  }
+                ]
+              },
+              "max_dist": 2,
+              "walk_speed_multiplier": 1.1,
+              "sprint_speed_multiplier": 1.3
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "wolf"
+              },
+              "max_dist": 12,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.8
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "monster"
+              },
+              "max_dist": 8,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.8
+            }
+          ]
+        },
+        "minecraft:behavior.tempt": {
+          "priority": 3,
+          "speed_multiplier": 1,
+          "items": [
+            "lothlorien:mallorn_acorn"
+          ],
+          "can_get_scared": true
+        }
+      },
+      "lothlorien:state_alarmed": {
+        "minecraft:behavior.avoid_mob_type": {
+          "priority": 4,
+          "entity_types": [
+            {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  },
+                  {
+                    "test": "is_sneaking",
+                    "subject": "other",
+                    "value": false
+                  }
+                ]
+              },
+              "max_dist": 36,
+              "walk_speed_multiplier": 1.6,
+              "sprint_speed_multiplier": 2.1
+            },
+            {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  },
+                  {
+                    "test": "is_sneaking",
+                    "subject": "other",
+                    "value": true
+                  }
+                ]
+              },
+              "max_dist": 18,
+              "walk_speed_multiplier": 1.6,
+              "sprint_speed_multiplier": 2.1
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "wolf"
+              },
+              "max_dist": 12,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.8
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "monster"
+              },
+              "max_dist": 8,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.8
+            }
+          ]
+        },
+        "minecraft:timer": {
+          "time": 20,
+          "looping": false,
+          "time_down_event": {
+            "event": "lothlorien:alarm_over",
+            "target": "self"
+          }
+        }
+      },
+      "lothlorien:state_guiding": {
+        "minecraft:behavior.avoid_mob_type": {
+          "priority": 4,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "wolf"
+              },
+              "max_dist": 12,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.8
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "monster"
+              },
+              "max_dist": 8,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.8
+            }
+          ]
+        },
+        "minecraft:behavior.follow_target_leader": {
+          "priority": 2,
+          "leader_filters": {
+            "test": "is_family",
+            "subject": "other",
+            "value": "lothlorien_guide_beacon"
+          },
+          "follow_distance": 1,
+          "within_radius": 24,
+          "speed_multiplier": 1,
+          "always_look_for_leader": true,
+          "search_cooldown": 5
+        }
+      },
+      "lothlorien:adult_doe": {
+        "minecraft:loot": {
+          "table": "loot_tables/entities/deer.json"
+        }
+      },
+      "lothlorien:adult_buck": {
+        "minecraft:loot": {
+          "table": "loot_tables/entities/deer_buck.json"
+        }
+      }
+    },
+    "components": {
+      "minecraft:type_family": {
+        "family": [
+          "lothlorien_white_deer",
+          "mob"
+        ]
+      },
+      "minecraft:collision_box": {
+        "width": 0.9,
+        "height": 1.4
+      },
+      "minecraft:health": {
+        "value": 14,
+        "max": 14
+      },
+      "minecraft:movement": {
+        "value": 0.24
+      },
+      "minecraft:navigation.walk": {
+        "can_path_over_water": true,
+        "avoid_water": true,
+        "avoid_damage_blocks": true
+      },
+      "minecraft:movement.basic": {},
+      "minecraft:jump.static": {},
+      "minecraft:physics": {},
+      "minecraft:pushable_by_entity": {},
+      "minecraft:pushable_by_block": {},
+      "minecraft:breathable": {
+        "total_supply": 15,
+        "suffocate_time": 0
+      },
+      "minecraft:hurt_on_condition": {
+        "damage_conditions": [
+          {
+            "filters": {
+              "test": "in_lava",
+              "subject": "self"
+            },
+            "cause": "lava",
+            "damage_per_tick": 4
+          }
+        ]
+      },
+      "minecraft:nameable": {},
+      "minecraft:experience_reward": {
+        "on_death": "query.last_hit_by_player ? Math.Random(1,3) : 0"
+      },
+      "minecraft:interact": {
+        "interactions": [
+          {
+            "on_interact": {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  },
+                  {
+                    "test": "has_equipment",
+                    "domain": "hand",
+                    "subject": "other",
+                    "value": "lothlorien:mallorn_acorn"
+                  }
+                ]
+              }
+            },
+            "use_item": false,
+            "swing": true,
+            "cooldown": 1,
+            "interact_text": "action.interact.lothlorien.offer_acorn"
+          }
+        ]
+      },
+      "minecraft:is_hidden_when_invisible": {},
+      "minecraft:despawn": {
+        "despawn_from_distance": {}
+      },
+      "minecraft:conditional_bandwidth_optimization": {},
+      "minecraft:ambient_sound_interval": {
+        "value": 12,
+        "range": 20,
+        "event_name": "ambient"
+      },
+      "minecraft:behavior.float": {
+        "priority": 0
+      },
+      "minecraft:behavior.panic": {
+        "priority": 1,
+        "speed_multiplier": 1.8
+      },
+      "minecraft:behavior.random_stroll": {
+        "priority": 6,
+        "speed_multiplier": 0.7
+      },
+      "minecraft:behavior.look_at_player": {
+        "priority": 7,
+        "look_distance": 6,
+        "probability": 0.02
+      },
+      "minecraft:behavior.random_look_around": {
+        "priority": 9
+      }
+    },
+    "events": {
+      "lothlorien:set_calm": {
+        "set_property": {
+          "lothlorien:wariness": "calm",
+          "lothlorien:alarmed": false,
+          "lothlorien:guiding": false
+        },
+        "remove": {
+          "component_groups": [
+            "lothlorien:state_calm",
+            "lothlorien:state_l1",
+            "lothlorien:state_l2",
+            "lothlorien:state_l3",
+            "lothlorien:state_friend",
+            "lothlorien:state_alarmed",
+            "lothlorien:state_guiding"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "lothlorien:state_calm"
+          ]
+        }
+      },
+      "lothlorien:set_l1": {
+        "set_property": {
+          "lothlorien:wariness": "l1",
+          "lothlorien:alarmed": false,
+          "lothlorien:guiding": false
+        },
+        "remove": {
+          "component_groups": [
+            "lothlorien:state_calm",
+            "lothlorien:state_l1",
+            "lothlorien:state_l2",
+            "lothlorien:state_l3",
+            "lothlorien:state_friend",
+            "lothlorien:state_alarmed",
+            "lothlorien:state_guiding"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "lothlorien:state_l1"
+          ]
+        }
+      },
+      "lothlorien:set_l2": {
+        "set_property": {
+          "lothlorien:wariness": "l2",
+          "lothlorien:alarmed": false,
+          "lothlorien:guiding": false
+        },
+        "remove": {
+          "component_groups": [
+            "lothlorien:state_calm",
+            "lothlorien:state_l1",
+            "lothlorien:state_l2",
+            "lothlorien:state_l3",
+            "lothlorien:state_friend",
+            "lothlorien:state_alarmed",
+            "lothlorien:state_guiding"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "lothlorien:state_l2"
+          ]
+        }
+      },
+      "lothlorien:set_l3": {
+        "set_property": {
+          "lothlorien:wariness": "l3",
+          "lothlorien:alarmed": false,
+          "lothlorien:guiding": false
+        },
+        "remove": {
+          "component_groups": [
+            "lothlorien:state_calm",
+            "lothlorien:state_l1",
+            "lothlorien:state_l2",
+            "lothlorien:state_l3",
+            "lothlorien:state_friend",
+            "lothlorien:state_alarmed",
+            "lothlorien:state_guiding"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "lothlorien:state_l3"
+          ]
+        }
+      },
+      "lothlorien:set_friend": {
+        "set_property": {
+          "lothlorien:wariness": "friend",
+          "lothlorien:alarmed": false,
+          "lothlorien:guiding": false
+        },
+        "remove": {
+          "component_groups": [
+            "lothlorien:state_calm",
+            "lothlorien:state_l1",
+            "lothlorien:state_l2",
+            "lothlorien:state_l3",
+            "lothlorien:state_friend",
+            "lothlorien:state_alarmed",
+            "lothlorien:state_guiding"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "lothlorien:state_friend"
+          ]
+        }
+      },
+      "lothlorien:alarm": {
+        "set_property": {
+          "lothlorien:alarmed": true,
+          "lothlorien:guiding": false
+        },
+        "remove": {
+          "component_groups": [
+            "lothlorien:state_calm",
+            "lothlorien:state_l1",
+            "lothlorien:state_l2",
+            "lothlorien:state_l3",
+            "lothlorien:state_friend",
+            "lothlorien:state_alarmed",
+            "lothlorien:state_guiding"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "lothlorien:state_alarmed"
+          ]
+        }
+      },
+      "lothlorien:alarm_over": {
+        "sequence": [
+          {
+            "filters": {
+              "test": "enum_property",
+              "domain": "lothlorien:wariness",
+              "value": "calm"
+            },
+            "trigger": "lothlorien:set_calm"
+          },
+          {
+            "filters": {
+              "test": "enum_property",
+              "domain": "lothlorien:wariness",
+              "value": "l1"
+            },
+            "trigger": "lothlorien:set_l1"
+          },
+          {
+            "filters": {
+              "test": "enum_property",
+              "domain": "lothlorien:wariness",
+              "value": "l2"
+            },
+            "trigger": "lothlorien:set_l2"
+          },
+          {
+            "filters": {
+              "test": "enum_property",
+              "domain": "lothlorien:wariness",
+              "value": "l3"
+            },
+            "trigger": "lothlorien:set_l3"
+          },
+          {
+            "filters": {
+              "test": "enum_property",
+              "domain": "lothlorien:wariness",
+              "value": "friend"
+            },
+            "trigger": "lothlorien:set_friend"
+          }
+        ]
+      },
+      "lothlorien:spawn_buck": {
+        "set_property": {
+          "lothlorien:sex": "buck"
+        },
+        "add": {
+          "component_groups": [
+            "lothlorien:adult_buck"
+          ]
+        }
+      },
+      "lothlorien:spawn_doe": {
+        "set_property": {
+          "lothlorien:sex": "doe"
+        },
+        "add": {
+          "component_groups": [
+            "lothlorien:adult_doe"
+          ]
+        }
+      },
+      "minecraft:entity_spawned": {
+        "sequence": [
+          {
+            "randomize": [
+              {
+                "weight": 1,
+                "trigger": "lothlorien:spawn_buck"
+              },
+              {
+                "weight": 1,
+                "trigger": "lothlorien:spawn_doe"
+              }
+            ]
+          },
+          {
+            "trigger": "lothlorien:set_calm"
+          }
+        ]
+      },
+      "lothlorien:guide_start": {
+        "set_property": {
+          "lothlorien:guiding": true
+        },
+        "remove": {
+          "component_groups": [
+            "lothlorien:state_calm",
+            "lothlorien:state_l1",
+            "lothlorien:state_l2",
+            "lothlorien:state_l3",
+            "lothlorien:state_friend",
+            "lothlorien:state_alarmed",
+            "lothlorien:state_guiding"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "lothlorien:state_guiding"
+          ]
+        }
+      },
+      "lothlorien:guide_end": {
+        "set_property": {
+          "lothlorien:guiding": false
+        },
+        "trigger": "lothlorien:alarm_over"
+      }
+    }
+  }
+}

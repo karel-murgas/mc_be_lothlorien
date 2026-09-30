@@ -368,6 +368,7 @@ test("antler: bucks' item is a block placer and flet chests can hold exactly one
 // Phase 12: white deer guidance.
 import * as W from "../lothlorien_bp/scripts/white_deer_rules.js";
 import { MARKER_AT, MARKER_BLOCK } from "../tools/build_structures.mjs";
+import * as G from "../tools/dev_scripts/guide_goal/variants.mjs";
 
 test("white deer: only Disharmony 0 is guided", () => {
   assert.equal(W.canBeGuided(0), true);
@@ -381,15 +382,60 @@ test("white deer: search columns are chunk-aligned, nearest first, and stay insi
   assert.deepEqual(W.searchSpan(64, -64, 320), { from: 24, to: 80 });
   assert.deepEqual(W.searchSpan(-60, -64, 320), { from: -64, to: -44 }); // clamped to the world floor
 });
-test("white deer: a step heads straight for the target, turns round an obstacle, gives up when boxed in", () => {
-  const from = { x: 0, y: 64, z: 0 }, target = { x: 10, z: 0 };
-  const free = W.pickStep(from, target, (x, z, y) => y);
-  assert.ok(Math.abs(free.x - W.STEP) < 1e-9 && Math.abs(free.z) < 1e-9 && free.turn === 0);
-  const wall = (x, z, y) => (x > 0.1 && Math.abs(z) < 0.1 ? undefined : y); // blocked dead ahead only
-  const round = W.pickStep(from, target, wall, 1);
-  assert.ok(round.turn !== 0 && round.x > 0);
-  assert.equal(W.pickStep(from, target, () => undefined), undefined);
-  assert.equal(W.pickStep(from, target, (x, z, y) => y + 1).y, 65); // the probe decides the standing height
+const flat = () => 64; // every column standable at y 64
+const at0 = { x: 0, y: 64, z: 0 };
+test("waypoints: open ground gives a HOP-block waypoint straight at the target", () => {
+  const w = W.pickWaypoint(at0, { x: 80, z: 0 }, flat);
+  assert.equal(w.final, false);
+  assert.ok(Math.abs(w.x - W.HOP) < 1e-9 && Math.abs(w.z) < 1e-9 && w.y === 64);
+  assert.ok(W.HOP <= 14 && W.MIN_HOP >= 8, "hops of 8-14 blocks");
+});
+test("waypoints: a lake ahead turns the heading, bias side first; a near wall shortens the hop", () => {
+  const lake = (x, z) => (x > 4 && Math.abs(z) < 20 ? undefined : 64);
+  const w = W.pickWaypoint(at0, { x: 80, z: 0 }, lake, { bias: -1 });
+  assert.equal(w.turn, -1);
+  assert.ok(Math.abs(w.z) >= 20 || w.x <= 4);
+  const wall = (x) => (x > 10 ? undefined : 64);
+  const v = W.pickWaypoint(at0, { x: 80, z: 0 }, wall);
+  assert.ok(v.turn === 0 && v.x <= 10 && v.x >= W.MIN_HOP);
+});
+test("waypoints: a skipped heading is not reused; boxed in gives undefined", () => {
+  assert.notEqual(W.pickWaypoint(at0, { x: 80, z: 0 }, flat, { skip: new Set([0]) }).deg, 0);
+  assert.equal(W.pickWaypoint(at0, { x: 80, z: 0 }, () => undefined), undefined);
+});
+test("waypoints: the final hop lands within FINAL_RING of a buried marker, on the deer's side", () => {
+  const trunk = (x, z) => (W.horizontal({ x, z }, { x: 10, z: 0 }) < 2 ? undefined : 64);
+  const w = W.pickWaypoint(at0, { x: 10, z: 0 }, trunk);
+  assert.equal(w.final, true);
+  assert.ok(w.x < 10 && W.horizontal(w, { x: 10, z: 0 }) <= W.FINAL_RING && W.FINAL_RING <= 5);
+});
+test("waypoints: 80 blocks of open ground is 6 hops", () => {
+  let p = { ...at0 }, n = 0;
+  while (n < 20) {
+    const w = W.pickWaypoint(p, { x: 80, z: 0 }, flat);
+    n++;
+    if (w.final) break;
+    p = { x: w.x, y: w.y, z: w.z };
+  }
+  assert.equal(n, 6);
+});
+test("hop status: reached, progress, stuck after 5 s", () => {
+  const hop = W.newHop({ x: 14, z: 0 }, at0);
+  assert.equal(hop.best, 14);
+  assert.equal(W.hopStatus(hop, { x: 14 - W.REACHED, z: 0 }, W.GUIDE_TICKS), "next");
+  assert.equal(W.hopStatus(hop, { x: 5, z: 0 }, W.GUIDE_TICKS), "go");
+  assert.equal(hop.stuck, 0);
+  let s;
+  for (let t = 0; t < W.HOP_STUCK_TICKS; t += W.GUIDE_TICKS) s = W.hopStatus(hop, { x: 5, z: 0 }, W.GUIDE_TICKS);
+  assert.equal(s, "retry");
+  assert.equal(W.HOP_STUCK_TICKS, 100);
+  assert.ok(W.GUIDE_TICKS <= 5);
+});
+test("white deer: no teleport stepping left in the rules or the game script", () => {
+  for (const k of ["pickStep", "STEP", "MOVE_TICKS", "headings"]) assert.ok(!(k in W), k);
+  const src = readFileSync(new URL("../lothlorien_bp/scripts/white_deer.js", import.meta.url), "utf8");
+  assert.ok(!/deer\.teleport\(/.test(src), "the deer itself is never teleported");
+  assert.ok(src.includes("spawnEntity(BEACON_ID"), "one beacon per session");
 });
 test("white deer: progress resets the stuck timer, standing still does not", () => {
   const s = { bestDist: 50, stuck: 0 };
@@ -412,37 +458,150 @@ test("white deer: phases (arrive, wait for the player, give up)", () => {
   assert.equal(ph({ stuck: W.STUCK_TICKS, toTarget: W.STUCK_ARRIVE_DIST }), "arrived");
   assert.equal(ph({ age: W.MAX_TICKS + 1 }), "abort");
 });
-test("white deer: the entity has a white coat, a guiding state and the events the script fires", () => {
+
+const whiteEntity = () => readJson("../lothlorien_bp/entities/white_deer.json")["minecraft:entity"];
+const everything = (e) => [e.components, ...Object.values(e.component_groups)];
+test("ordinary deer: no coat variant, no guiding state, no corn lure (Phase 12 moved to its own entity)", () => {
   const e = deerEntity();
-  assert.deepEqual(e.description.properties["lothlorien:coat"].values, ["tawny", "white"]);
-  assert.equal(e.description.properties["lothlorien:coat"].client_sync, true);
-  assert.equal(e.description.properties["lothlorien:guiding"].type, "bool");
-  for (const ev of ["lothlorien:coat_white", "lothlorien:guide_start", "lothlorien:guide_end"]) assert.ok(e.events[ev], ev);
-  // the guiding state is one of the mutually exclusive state groups: every switch removes it, only guide_start adds it
+  const text = JSON.stringify(e);
+  for (const bad of ["lothlorien:coat", "lothlorien:guiding", "state_guiding", "guide_start", "western_corn_grain", "coat_white"]) {
+    assert.ok(!text.includes(bad), bad);
+  }
+  for (const w of ["calm", "friend"]) {
+    assert.deepEqual(e.component_groups[`lothlorien:state_${w}`]["minecraft:behavior.tempt"].items, ["lothlorien:mallorn_acorn", "apple"]);
+  }
+  const rc = readJson("../lothlorien_rp/render_controllers/deer.render_controllers.json").render_controllers["controller.render.lothlorien.deer"];
+  assert.ok(!rc.textures[0].includes("white"));
+});
+test("white deer: a separate loner entity, not tamable, not breedable, no babies, not leashable", () => {
+  const e = whiteEntity();
+  assert.equal(e.description.identifier, W.WHITE_DEER_ID);
+  assert.equal(e.description.identifier, R.WHITE_DEER_ID);
+  assert.ok(e.description.is_spawnable && e.description.is_summonable);
+  const keys = new Set(everything(e).flatMap((c) => Object.keys(c)));
+  for (const bad of ["minecraft:breedable", "minecraft:behavior.breed", "minecraft:offspring", "minecraft:is_baby", "minecraft:ageable",
+    "minecraft:behavior.follow_parent", "minecraft:tameable", "minecraft:leashable", "minecraft:spawn_egg_interaction",
+    "minecraft:behavior.follow_mob", "minecraft:behavior.follow_owner"]) {
+    assert.ok(!keys.has(bad), bad);
+  }
+  assert.ok(!e.events["minecraft:entity_born"] && !e.events["minecraft:ageable_grow_up"]);
+  assert.ok(!e.description.properties["lothlorien:coat"]);
+  assert.deepEqual(e.components["minecraft:despawn"], { despawn_from_distance: {} });
+  assert.ok(e.components["minecraft:type_family"].family.includes("lothlorien_white_deer"));
+  assert.ok(!e.components["minecraft:type_family"].family.includes("lothlorien_deer"), "own family");
+});
+test("white deer: same wariness states and flight distances as the deer; only the acorn lures it", () => {
+  const e = whiteEntity(), d = deerEntity();
+  for (const w of [...R.WARINESS, "alarmed"]) {
+    assert.deepEqual(e.component_groups[`lothlorien:state_${w}`]["minecraft:behavior.avoid_mob_type"],
+      d.component_groups[`lothlorien:state_${w}`]["minecraft:behavior.avoid_mob_type"], w);
+    assert.ok(e.events[R.setEventFor(w)] || w === "alarmed", w);
+  }
+  const lured = (w) => e.component_groups[`lothlorien:state_${w}`]["minecraft:behavior.tempt"]?.items;
+  assert.deepEqual(["calm", "friend"].map(lured), [[W.ACORN_ID], [W.ACORN_ID]]);
+  assert.deepEqual(["l1", "l2", "l3", "alarmed"].map(lured), [undefined, undefined, undefined, undefined]);
+  assert.deepEqual(e.events["lothlorien:alarm_over"], d.events["lothlorien:alarm_over"]);
+  assert.equal(e.component_groups["lothlorien:state_alarmed"]["minecraft:timer"].time_down_event.event, "lothlorien:alarm_over");
+  for (const k of ["minecraft:behavior.panic", "minecraft:behavior.float", "minecraft:behavior.random_stroll", "minecraft:navigation.walk", "minecraft:movement"]) {
+    assert.deepEqual(e.components[k], d.components[k], k);
+  }
+  assert.ok(R.DEER_TYPES.includes(W.WHITE_DEER_ID), "deer.js drives its wariness and alarm");
+});
+test("white deer: guiding state follows the beacon (one goal, below panic, above avoid) and only guide_start adds it", () => {
+  const e = whiteEntity();
   const g = "lothlorien:state_guiding";
   for (const [name, ev] of Object.entries(e.events)) {
-    if (name.startsWith("lothlorien:set_") || name === "lothlorien:alarm") assert.ok(ev.remove.component_groups.includes(g), name);
-    if (name.startsWith("lothlorien:set_") || name === "lothlorien:alarm") assert.equal(ev.set_property["lothlorien:guiding"], false, name);
+    if (name.startsWith("lothlorien:set_") || name === "lothlorien:alarm") {
+      assert.ok(ev.remove.component_groups.includes(g), name);
+      assert.equal(ev.set_property["lothlorien:guiding"], false, name);
+    }
+    if (name !== "lothlorien:guide_start") assert.ok(!ev.add?.component_groups?.includes(g), name);
   }
   assert.deepEqual(e.events["lothlorien:guide_start"].add.component_groups, [g]);
+  assert.equal(e.events["lothlorien:guide_start"].set_property["lothlorien:guiding"], true);
   assert.equal(e.events["lothlorien:guide_end"].trigger, "lothlorien:alarm_over");
-  // guided deer flee only wolves and monsters, never the player, and are not lured
   const guiding = e.component_groups[g];
   assert.ok(!guiding["minecraft:behavior.tempt"]);
   assert.deepEqual(guiding["minecraft:behavior.avoid_mob_type"].entity_types.map((t) => t.filters.value).sort(), ["monster", "wolf"]);
-  // about 1 in 25 natural spawns is white, born fawns never
-  const nat = e.events["minecraft:entity_spawned"].sequence.find((s) => s.randomize?.some((r) => r.trigger === "lothlorien:coat_white"));
-  assert.ok(nat && nat.randomize.reduce((a, r) => a + r.weight, 0) === 25);
-  assert.ok(!JSON.stringify(e.events["minecraft:entity_born"]).includes("coat_white"));
-  // corn lures deer in the calm states (needed to get within reach of a white deer)
-  for (const w of ["calm", "friend"]) assert.ok(e.component_groups[`lothlorien:state_${w}`]["minecraft:behavior.tempt"].items.includes(W.CORN_ID), w);
-  assert.ok(existsSync(new URL(`../lothlorien_bp/items/${W.CORN_ID.split(":")[1]}.json`, import.meta.url)), "corn item exists");
+  // the goal is exactly one of the prepared variants (switch_guide_goal.mjs), the shipped one is follow_target_leader
+  const variant = G.currentVariant(e);
+  assert.ok(variant, "a known guide goal variant");
+  for (const [k, v] of Object.entries(G.VARIANTS[variant](G.BEACON_FILTER))) assert.deepEqual(guiding[k], v, k);
+  assert.equal(variant, "leader", "shipped goal (change this line together with a switch)");
+  const prios = Object.keys(G.VARIANTS[variant](G.BEACON_FILTER)).map((k) => guiding[k].priority);
+  assert.ok(prios.every((p) => p > e.components["minecraft:behavior.panic"].priority && p < guiding["minecraft:behavior.avoid_mob_type"].priority));
+  const within = guiding["minecraft:behavior.follow_target_leader"]?.within_radius ?? 24;
+  assert.ok(within > W.HOP + W.REACHED, "the beacon stays inside the goal's radius");
+  assert.ok(Number(readJson("../lothlorien_bp/entities/white_deer.json").format_version.split(".")[1]) >= 26, "follow_target_leader needs 1.26.20+");
 });
-test("white deer: client entity has both white textures on disk and the render controller picks them", () => {
-  const tex = readJson("../lothlorien_rp/entity/deer.entity.json")["minecraft:client_entity"].description.textures;
-  for (const k of ["white", "white_baby"]) assert.ok(existsSync(new URL(`../lothlorien_rp/${tex[k]}.png`, import.meta.url)), k);
-  const rc = readJson("../lothlorien_rp/render_controllers/deer.render_controllers.json").render_controllers["controller.render.lothlorien.deer"];
-  assert.ok(rc.textures[0].includes("Texture.white") && rc.textures[0].includes("Texture.white_baby"));
+test("white deer: no experiment groups shipped (switch_guide_goal.mjs --clean)", () => {
+  const e = whiteEntity();
+  assert.ok(![...Object.keys(e.component_groups), ...Object.keys(e.events)].some((k) => k.startsWith("lothlorien:test_")));
+  const copy = structuredClone(e);
+  G.removeExperiment(G.addExperiment(copy));
+  assert.deepEqual(copy, e, "experiment add + clean round-trips");
+  for (const name of Object.keys(G.VARIANTS)) assert.equal(G.currentVariant(G.applyVariant(structuredClone(e), name)), name, name);
+});
+test("white deer: holding an acorn gives the interaction the script listens for; the item is not used up by the engine", () => {
+  const e = whiteEntity();
+  const [i] = e.components["minecraft:interact"].interactions;
+  assert.ok(JSON.stringify(i.on_interact.filters).includes(W.ACORN_ID));
+  assert.equal(i.use_item, false);
+  assert.ok(existsSync(new URL(`../lothlorien_bp/items/${W.ACORN_ID.split(":")[1]}.json`, import.meta.url)), "acorn item exists");
+  const lang = readFileSync(new URL("../lothlorien_rp/texts/en_US.lang", import.meta.url), "utf8");
+  for (const key of [i.interact_text, "entity.lothlorien:white_deer.name", "item.spawn_egg.entity.lothlorien:white_deer.name"]) {
+    assert.ok(lang.includes(`${key}=`), key);
+  }
+  assert.ok(lang.includes("entity.lothlorien:white_deer.name=White Deer\n") || lang.includes("entity.lothlorien:white_deer.name=White Deer\r\n"));
+});
+test("white deer: rare single spawns in the biome, fewer than deer; drops like a deer of its sex", () => {
+  const rule = readJson("../lothlorien_bp/spawn_rules/white_deer.json")["minecraft:spawn_rules"];
+  const deer = readJson("../lothlorien_bp/spawn_rules/deer.json")["minecraft:spawn_rules"];
+  assert.equal(rule.description.identifier, W.WHITE_DEER_ID);
+  assert.equal(rule.description.population_control, "animal");
+  const [c] = rule.conditions, [dc] = deer.conditions;
+  assert.deepEqual(c["minecraft:herd"], { min_size: 1, max_size: 1 });
+  assert.equal(c["minecraft:density_limit"].surface, 1);
+  assert.ok(c["minecraft:weight"].default < dc["minecraft:weight"].default);
+  assert.deepEqual(c["minecraft:biome_filter"], dc["minecraft:biome_filter"]);
+  const e = whiteEntity();
+  assert.equal(e.component_groups["lothlorien:adult_buck"]["minecraft:loot"].table, "loot_tables/entities/deer_buck.json");
+  assert.equal(e.component_groups["lothlorien:adult_doe"]["minecraft:loot"].table, "loot_tables/entities/deer.json");
+  const spawned = e.events["minecraft:entity_spawned"].sequence[0].randomize.map((r) => r.trigger).sort();
+  assert.deepEqual(spawned, ["lothlorien:spawn_buck", "lothlorien:spawn_doe"]);
+  assert.ok(!e.components["minecraft:experience_reward"].on_bred);
+});
+test("white deer: client entity uses the white texture on the deer models; no unused fawn texture", () => {
+  const c = readJson("../lothlorien_rp/entity/white_deer.entity.json")["minecraft:client_entity"].description;
+  assert.equal(c.identifier, W.WHITE_DEER_ID);
+  assert.deepEqual(c.textures, { default: "textures/entity/deer/deer_white" });
+  assert.ok(existsSync(new URL(`../lothlorien_rp/${c.textures.default}.png`, import.meta.url)));
+  assert.ok(!existsSync(new URL("../lothlorien_rp/textures/entity/deer/deer_white_baby.png", import.meta.url)));
+  assert.ok(c.spawn_egg, "spawn egg");
+  const geo = readFileSync(new URL("../lothlorien_rp/models/entity/deer.geo.json", import.meta.url), "utf8");
+  for (const g of Object.values(c.geometry)) assert.ok(geo.includes(`"${g}"`), g);
+  assert.ok(readJson("../lothlorien_rp/sounds.json").entity_sounds.entities[W.WHITE_DEER_ID], "sounds");
+});
+test("guide beacon: invisible, weightless, untouchable helper that removes itself; no spawn rule", () => {
+  const b = readJson("../lothlorien_bp/entities/guide_beacon.json")["minecraft:entity"];
+  assert.equal(b.description.identifier, W.BEACON_ID);
+  assert.equal(b.description.is_spawnable, false);
+  assert.equal(b.description.is_summonable, true, "spawnEntity and /summon need it");
+  const c = b.components;
+  assert.ok(c["minecraft:type_family"].family.includes(G.BEACON_FILTER.value));
+  assert.deepEqual(c["minecraft:physics"], { has_gravity: false, has_collision: false });
+  assert.equal(c["minecraft:pushable"].is_pushable, false);
+  assert.deepEqual(c["minecraft:damage_sensor"].triggers, { cause: "all", deals_damage: "no" });
+  assert.ok(!c["minecraft:is_collidable"] && !c["minecraft:despawn"]);
+  const t = c["minecraft:timer"];
+  assert.ok(t.time * 20 > W.MAX_TICKS && !t.looping, "outlives the longest session");
+  assert.ok(b.component_groups[b.events[t.time_down_event.event].add.component_groups[0]]["minecraft:instant_despawn"]);
+  assert.ok(!existsSync(new URL("../lothlorien_bp/spawn_rules/guide_beacon.json", import.meta.url)));
+  const client = readJson("../lothlorien_rp/entity/guide_beacon.entity.json")["minecraft:client_entity"].description;
+  assert.ok(!client.spawn_egg, "no spawn egg");
+  const geo = readJson("../lothlorien_rp/models/entity/guide_beacon.geo.json")["minecraft:geometry"][0];
+  assert.equal(geo.description.identifier, client.geometry.default);
+  assert.ok(geo.bones.flatMap((x) => x.cubes).every((cube) => cube.size.every((v) => v === 0)), "nothing to render");
 });
 test("structure marker: unbreakable hidden block, one buried in the trunk of every chosen giant", () => {
   const b = readJson("../lothlorien_bp/blocks/structure_marker.json")["minecraft:block"];

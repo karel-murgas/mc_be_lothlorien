@@ -1,0 +1,20 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "lothlorien:guide_beacon",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/guide_beacon"
+      },
+      "geometry": {
+        "default": "geometry.lothlorien.guide_beacon"
+      },
+      "render_controllers": [
+        "controller.render.default"
+      ]
+    }
+  }
+}

@@ -9,7 +9,7 @@
         }
       ],
       "textures": [
-        "query.is_baby ? (query.property('lothlorien:coat') == 'white' ? Texture.white_baby : Texture.baby) : (query.property('lothlorien:coat') == 'white' ? Texture.white : Texture.default)"
+        "query.is_baby ? Texture.baby : Texture.default"
       ]
     }
   }

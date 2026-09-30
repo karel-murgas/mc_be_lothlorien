@@ -32,20 +32,6 @@
           "type": "bool",
           "default": false,
           "client_sync": false
-        },
-        "lothlorien:coat": {
-          "type": "enum",
-          "values": [
-            "tawny",
-            "white"
-          ],
-          "default": "tawny",
-          "client_sync": true
-        },
-        "lothlorien:guiding": {
-          "type": "bool",
-          "default": false,
-          "client_sync": false
         }
       }
     },
@@ -119,8 +105,7 @@
           "speed_multiplier": 1.0,
           "items": [
             "lothlorien:mallorn_acorn",
-            "apple",
-            "lothlorien:western_corn_grain"
+            "apple"
           ],
           "can_get_scared": true
         }
@@ -389,8 +374,7 @@
           "speed_multiplier": 1.0,
           "items": [
             "lothlorien:mallorn_acorn",
-            "apple",
-            "lothlorien:western_corn_grain"
+            "apple"
           ],
           "can_get_scared": true
         }
@@ -525,33 +509,6 @@
         "minecraft:loot": {
           "table": "loot_tables/entities/deer_buck.json"
         }
-      },
-      "lothlorien:state_guiding": {
-        "minecraft:behavior.avoid_mob_type": {
-          "priority": 4,
-          "entity_types": [
-            {
-              "filters": {
-                "test": "is_family",
-                "subject": "other",
-                "value": "wolf"
-              },
-              "max_dist": 12,
-              "walk_speed_multiplier": 1.4,
-              "sprint_speed_multiplier": 1.8
-            },
-            {
-              "filters": {
-                "test": "is_family",
-                "subject": "other",
-                "value": "monster"
-              },
-              "max_dist": 8,
-              "walk_speed_multiplier": 1.4,
-              "sprint_speed_multiplier": 1.8
-            }
-          ]
-        }
       }
     },
     "components": {
@@ -649,8 +606,7 @@
       "lothlorien:set_calm": {
         "set_property": {
           "lothlorien:wariness": "calm",
-          "lothlorien:alarmed": false,
-          "lothlorien:guiding": false
+          "lothlorien:alarmed": false
         },
         "remove": {
           "component_groups": [
@@ -659,8 +615,7 @@
             "lothlorien:state_l2",
             "lothlorien:state_l3",
             "lothlorien:state_friend",
-            "lothlorien:state_alarmed",
-            "lothlorien:state_guiding"
+            "lothlorien:state_alarmed"
           ]
         },
         "add": {
@@ -672,8 +627,7 @@
       "lothlorien:set_l1": {
         "set_property": {
           "lothlorien:wariness": "l1",
-          "lothlorien:alarmed": false,
-          "lothlorien:guiding": false
+          "lothlorien:alarmed": false
         },
         "remove": {
           "component_groups": [
@@ -682,8 +636,7 @@
             "lothlorien:state_l2",
             "lothlorien:state_l3",
             "lothlorien:state_friend",
-            "lothlorien:state_alarmed",
-            "lothlorien:state_guiding"
+            "lothlorien:state_alarmed"
           ]
         },
         "add": {
@@ -695,8 +648,7 @@
       "lothlorien:set_l2": {
         "set_property": {
           "lothlorien:wariness": "l2",
-          "lothlorien:alarmed": false,
-          "lothlorien:guiding": false
+          "lothlorien:alarmed": false
         },
         "remove": {
           "component_groups": [
@@ -705,8 +657,7 @@
             "lothlorien:state_l2",
             "lothlorien:state_l3",
             "lothlorien:state_friend",
-            "lothlorien:state_alarmed",
-            "lothlorien:state_guiding"
+            "lothlorien:state_alarmed"
           ]
         },
         "add": {
@@ -718,8 +669,7 @@
       "lothlorien:set_l3": {
         "set_property": {
           "lothlorien:wariness": "l3",
-          "lothlorien:alarmed": false,
-          "lothlorien:guiding": false
+          "lothlorien:alarmed": false
         },
         "remove": {
           "component_groups": [
@@ -728,8 +678,7 @@
             "lothlorien:state_l2",
             "lothlorien:state_l3",
             "lothlorien:state_friend",
-            "lothlorien:state_alarmed",
-            "lothlorien:state_guiding"
+            "lothlorien:state_alarmed"
           ]
         },
         "add": {
@@ -741,8 +690,7 @@
       "lothlorien:set_friend": {
         "set_property": {
           "lothlorien:wariness": "friend",
-          "lothlorien:alarmed": false,
-          "lothlorien:guiding": false
+          "lothlorien:alarmed": false
         },
         "remove": {
           "component_groups": [
@@ -751,8 +699,7 @@
             "lothlorien:state_l2",
             "lothlorien:state_l3",
             "lothlorien:state_friend",
-            "lothlorien:state_alarmed",
-            "lothlorien:state_guiding"
+            "lothlorien:state_alarmed"
           ]
         },
         "add": {
@@ -763,8 +710,7 @@
       },
       "lothlorien:alarm": {
         "set_property": {
-          "lothlorien:alarmed": true,
-          "lothlorien:guiding": false
+          "lothlorien:alarmed": true
         },
         "remove": {
           "component_groups": [
@@ -773,8 +719,7 @@
             "lothlorien:state_l2",
             "lothlorien:state_l3",
             "lothlorien:state_friend",
-            "lothlorien:state_alarmed",
-            "lothlorien:state_guiding"
+            "lothlorien:state_alarmed"
           ]
         },
         "add": {
@@ -892,25 +837,6 @@
             ]
           },
           {
-            "filters": {
-              "test": "enum_property",
-              "domain": "lothlorien:coat",
-              "value": "tawny"
-            },
-            "randomize": [
-              {
-                "weight": 24,
-                "set_property": {
-                  "lothlorien:coat": "tawny"
-                }
-              },
-              {
-                "weight": 1,
-                "trigger": "lothlorien:coat_white"
-              }
-            ]
-          },
-          {
             "trigger": "lothlorien:set_calm"
           }
         ]
@@ -973,38 +899,6 @@
             }
           }
         ]
-      },
-      "lothlorien:guide_start": {
-        "set_property": {
-          "lothlorien:guiding": true
-        },
-        "remove": {
-          "component_groups": [
-            "lothlorien:state_calm",
-            "lothlorien:state_l1",
-            "lothlorien:state_l2",
-            "lothlorien:state_l3",
-            "lothlorien:state_friend",
-            "lothlorien:state_alarmed",
-            "lothlorien:state_guiding"
-          ]
-        },
-        "add": {
-          "component_groups": [
-            "lothlorien:state_guiding"
-          ]
-        }
-      },
-      "lothlorien:guide_end": {
-        "set_property": {
-          "lothlorien:guiding": false
-        },
-        "trigger": "lothlorien:alarm_over"
-      },
-      "lothlorien:coat_white": {
-        "set_property": {
-          "lothlorien:coat": "white"
-        }
       }
     }
   }

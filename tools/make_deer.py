@@ -3,7 +3,7 @@
     python -B mods/lothlorien/tools/make_deer.py
 
 Output (overwritten every run): lothlorien_rp/models/entity/deer.geo.json,
-lothlorien_rp/textures/entity/deer/{deer,deer_baby,deer_white,deer_white_baby}.png, lothlorien_rp/textures/items/{venison_raw,
+lothlorien_rp/textures/entity/deer/{deer,deer_baby,deer_white}.png, lothlorien_rp/textures/items/{venison_raw,
 venison_cooked,deer_antler}.png. Boxes are laid out by a shelf packer (Bedrock box UV); every face is
 painted by hand-placed rules (colour ramps with hue shift, no noise), following
 `.claude/skills/bedrock-art/references/style.md`. Seen only in this script's preview
@@ -35,7 +35,7 @@ EYE = hexc("#120b09")
 EYE_GLINT = hexc("#e8dcc0")
 CLEAR = (0, 0, 0, 0)
 
-# White deer (Phase 12): same model and UV layout, its own palette. Cool blue-violet shadows on a white coat, faint silver
+# White deer (Phase 12, entity lothlorien:white_deer, adults only): same model and UV layout, its own palette. Cool blue-violet shadows on a white coat, faint silver
 # spots, pale pink nose, hooves and inner ears. Swapped in for the second texture pass in main().
 WHITE_PALETTE = {
     "COAT": [hexc(c) for c in ("#7f8798", "#a6adbb", "#c9cfd9", "#e3e7ee", "#f7f8fb")],
@@ -535,10 +535,8 @@ def main():
     tawny = {k: globals()[k] for k in WHITE_PALETTE}
     globals().update(WHITE_PALETTE)
     white_adult = build("geometry.lothlorien.deer", False, None, None)[1]
-    white_baby = build("geometry.lothlorien.deer_baby", True, None, None)[1]
     globals().update(tawny)
     white_adult.save(RP / "textures/entity/deer/deer_white.png")
-    white_baby.save(RP / "textures/entity/deer/deer_white_baby.png")
     venison_raw().save(RP / "textures/items/venison_raw.png")
     venison_cooked().save(RP / "textures/items/venison_cooked.png")
     deer_antler().save(RP / "textures/items/deer_antler.png")
@@ -548,7 +546,6 @@ def main():
         preview(adult_tex, out / "deer.png")
         preview(baby_tex, out / "deer_baby.png")
         preview(white_adult, out / "deer_white.png")
-        preview(white_baby, out / "deer_white_baby.png")
         for n in ("venison_raw", "venison_cooked", "deer_antler"):
             preview(Image.open(RP / f"textures/items/{n}.png"), out / f"{n}.png", 16)
     print("deer art written")

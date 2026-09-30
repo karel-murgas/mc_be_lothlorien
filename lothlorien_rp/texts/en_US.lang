@@ -59,3 +59,7 @@ item.lothlorien:venison_cooked=Cooked Venison
 tile.lothlorien:deer_antler.name=Deer Antler
 item.lothlorien:deer_antler=Deer Antler
 tile.lothlorien:structure_marker.name=Lothlorien Structure Marker
+entity.lothlorien:white_deer.name=White Deer
+item.spawn_egg.entity.lothlorien:white_deer.name=White Deer Spawn Egg
+entity.lothlorien:guide_beacon.name=Guide Beacon
+action.interact.lothlorien.offer_acorn=Offer Acorn

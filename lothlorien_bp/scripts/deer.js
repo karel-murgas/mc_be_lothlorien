@@ -1,20 +1,23 @@
 // Deer in the running game: wariness follows the nearest player's Disharmony, and a player
-// hurting a deer alarms the herd. The flight behaviour itself is JSON (entities/deer.json).
+// hurting a deer alarms the herd. The flight behaviour itself is JSON (entities/deer.json, entities/white_deer.json).
 import { world, system } from "@minecraft/server";
 import { disharmonyOf } from "./disharmony_game.js";
 import { isFriend, levelFor } from "./disharmony.js";
 import { isGuiding } from "./white_deer.js";
-import { ALARM_RADIUS, DEER_ID, WATCH_RADIUS, pickWariness, setEventFor, warinessFor } from "./deer_rules.js";
+import { ALARM_RADIUS, DEER_TYPES, WATCH_RADIUS, pickWariness, setEventFor, warinessFor } from "./deer_rules.js";
 
 const INTERVAL_TICKS = 40;
 const PLAYER_ID = "minecraft:player";
+
+const nearDeer = (dimension, location, maxDistance) =>
+  DEER_TYPES.flatMap((type) => dimension.getEntities({ type, location, maxDistance }));
 
 function updateWariness() {
   const seen = new Map(); // deer id -> { deer, candidates }
   for (const player of world.getPlayers()) {
     const state = disharmonyOf(player);
     const wariness = warinessFor(levelFor(state.points), isFriend(state));
-    for (const deer of player.dimension.getEntities({ type: DEER_ID, location: player.location, maxDistance: WATCH_RADIUS })) {
+    for (const deer of nearDeer(player.dimension, player.location, WATCH_RADIUS)) {
       const entry = seen.get(deer.id) ?? { deer, candidates: [] };
       const dx = deer.location.x - player.location.x, dz = deer.location.z - player.location.z;
       entry.candidates.push({ distance: Math.hypot(dx, dz), wariness });
@@ -25,7 +28,7 @@ function updateWariness() {
     try {
       if (deer.getProperty("lothlorien:alarmed")) continue; // the alarm timer hands back to the state
       if (deer.getProperty("lothlorien:guiding")) {
-        // a white deer being guided keeps its guiding state; one with no session (world reloaded mid-guidance) is released
+        // a guiding white deer keeps its guiding state; one with no session (world reloaded mid-guidance) is released
         if (!isGuiding(deer.id)) deer.triggerEvent("lothlorien:guide_end");
         continue;
       }
@@ -38,7 +41,7 @@ function updateWariness() {
 }
 
 function alarmAround(dimension, location) {
-  for (const deer of dimension.getEntities({ type: DEER_ID, location, maxDistance: ALARM_RADIUS })) {
+  for (const deer of nearDeer(dimension, location, ALARM_RADIUS)) {
     try {
       deer.triggerEvent("lothlorien:alarm");
     } catch {
@@ -50,12 +53,12 @@ function alarmAround(dimension, location) {
 export function startDeer() {
   system.runInterval(updateWariness, INTERVAL_TICKS);
   world.afterEvents.entityHurt.subscribe(({ hurtEntity, damageSource }) => {
-    if (hurtEntity.typeId !== DEER_ID || damageSource.damagingEntity?.typeId !== PLAYER_ID) return;
+    if (!DEER_TYPES.includes(hurtEntity.typeId) || damageSource.damagingEntity?.typeId !== PLAYER_ID) return;
     alarmAround(hurtEntity.dimension, hurtEntity.location);
   });
   world.afterEvents.entityDie.subscribe(({ deadEntity, damageSource }) => {
     try {
-      if (deadEntity.typeId !== DEER_ID || damageSource.damagingEntity?.typeId !== PLAYER_ID) return;
+      if (!DEER_TYPES.includes(deadEntity.typeId) || damageSource.damagingEntity?.typeId !== PLAYER_ID) return;
       alarmAround(deadEntity.dimension, deadEntity.location);
     } catch {
       // entity already gone
