@@ -188,8 +188,9 @@ redo it by hand in Blockbench; the pipeline stays valid (same bone names, same f
 ### Requirements (Claude adds to this list)
 
 - **Bone names are contracts**: `body neck_joint head ear_l ear_r antler_l antler_r tail leg0..leg3` (leg0 hind right, leg1 hind left, leg2
-  front right, leg3 front left). The animations (`animations/deer.animation.json`), vanilla `look_at_target` (rotates `head`) and the render
-  controller (hides `antler_*` on does and fawns) depend on them. A Blockbench model must keep the names and pivots (legs at the hip).
+  front right, leg3 front left). The animations (`animations/deer.animation.json`) and vanilla `look_at_target` (rotates `head`) depend on them.
+  The adult exists as two geometries on one texture layout: `geometry.lothlorien.deer` (no antlers, does) and `geometry.lothlorien.deer_buck`
+  (the same plus `antler_l`/`antler_r`); the render controller picks by sex. Keep the two in step when editing. A Blockbench model must keep the names and pivots (legs at the hip).
 - The baby geometry is authored at its **real in-game size** (the BP scales the baby by 0.5, the client entity scales the model by 2 to undo it).
 - Both body textures share one sheet per model; if you go above 64x64 keep one size for adult and fawn (no mixels).
 - **White deer (Phase 12)** will need its own adult texture (and a fawn one): white coat, pale pink nose and ears, optional faint silver shimmer.

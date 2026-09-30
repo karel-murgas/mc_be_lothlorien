@@ -2,7 +2,7 @@
   "format_version": "1.8.0",
   "render_controllers": {
     "controller.render.lothlorien.deer": {
-      "geometry": "query.is_baby ? Geometry.baby : Geometry.default",
+      "geometry": "query.is_baby ? Geometry.baby : (query.property('lothlorien:sex') == 'buck' ? Geometry.buck : Geometry.default)",
       "materials": [
         {
           "*": "Material.default"
@@ -10,11 +10,6 @@
       ],
       "textures": [
         "query.is_baby ? Texture.baby : Texture.default"
-      ],
-      "part_visibility": [
-        {
-          "antler_*": "query.property('lothlorien:sex') == 'buck' && !query.is_baby"
-        }
       ]
     }
   }

@@ -467,12 +467,19 @@ def check_painted(cubes, uvs, img):
 
 
 def build(ident, baby, out_geo, out_tex):
+    """Returns ([geometry dicts], texture). The adult gives two geometries on ONE texture layout: `ident` (no antlers,
+    for does) and `ident_buck` (with antlers). Antlers are separate geometries, not hidden bones: hiding bones with
+    part_visibility made the engine log a conflicting armor_offset.default_neck locator for the adult (game 1.26.52)."""
     bones, cubes = (cubes_baby() if baby else cubes_adult())
     uvs = pack(cubes)
-    geo = geometry(ident, bones, cubes, uvs)
     img = paint_model(baby, cubes, uvs)
     check_painted(cubes, uvs, img)
-    return geo, img
+    if baby:
+        return geometry(ident, bones, cubes, uvs)["minecraft:geometry"], img
+    bare_bones = {k: v for k, v in bones.items() if not k.startswith("antler_")}
+    bare_cubes = [c for c in cubes if c[4] != "antler"]
+    return (geometry(ident, bare_bones, bare_cubes, uvs)["minecraft:geometry"]
+            + geometry(ident + "_buck", bones, cubes, uvs)["minecraft:geometry"]), img
 
 
 def preview(img, path, scale=8):
@@ -485,8 +492,7 @@ def main():
     adult_geo, adult_tex = build("geometry.lothlorien.deer", False, None, None)
     baby_geo, baby_tex = build("geometry.lothlorien.deer_baby", True, None, None)
     # one geo file may hold several geometries
-    merged = {"format_version": "1.12.0",
-              "minecraft:geometry": adult_geo["minecraft:geometry"] + baby_geo["minecraft:geometry"]}
+    merged = {"format_version": "1.12.0", "minecraft:geometry": adult_geo + baby_geo}
     (RP / "models/entity/deer.geo.json").write_text(json.dumps(merged, indent=2) + "\n")
     adult_tex.save(RP / "textures/entity/deer/deer.png")
     baby_tex.save(RP / "textures/entity/deer/deer_baby.png")

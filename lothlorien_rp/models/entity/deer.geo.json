@@ -186,6 +186,332 @@
           ]
         },
         {
+          "name": "tail",
+          "pivot": [
+            0,
+            21,
+            8
+          ],
+          "parent": "body",
+          "rotation": [
+            15,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -1.5,
+                16.5,
+                7.5
+              ],
+              "size": [
+                3,
+                5,
+                2
+              ],
+              "uv": [
+                22,
+                39
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg0",
+          "pivot": [
+            -2,
+            13,
+            6
+          ],
+          "parent": "body",
+          "cubes": [
+            {
+              "origin": [
+                -3.0,
+                0,
+                5.0
+              ],
+              "size": [
+                2,
+                13,
+                2
+              ],
+              "uv": [
+                44,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg1",
+          "pivot": [
+            2,
+            13,
+            6
+          ],
+          "parent": "body",
+          "cubes": [
+            {
+              "origin": [
+                1.0,
+                0,
+                5.0
+              ],
+              "size": [
+                2,
+                13,
+                2
+              ],
+              "uv": [
+                52,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg2",
+          "pivot": [
+            -2,
+            13,
+            -5
+          ],
+          "parent": "body",
+          "cubes": [
+            {
+              "origin": [
+                -3.0,
+                0,
+                -6.0
+              ],
+              "size": [
+                2,
+                13,
+                2
+              ],
+              "uv": [
+                0,
+                24
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg3",
+          "pivot": [
+            2,
+            13,
+            -5
+          ],
+          "parent": "body",
+          "cubes": [
+            {
+              "origin": [
+                1.0,
+                0,
+                -6.0
+              ],
+              "size": [
+                2,
+                13,
+                2
+              ],
+              "uv": [
+                8,
+                24
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": {
+        "identifier": "geometry.lothlorien.deer_buck",
+        "texture_width": 64,
+        "texture_height": 64,
+        "visible_bounds_width": 3,
+        "visible_bounds_height": 3.5,
+        "visible_bounds_offset": [
+          0,
+          1.25,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "body",
+          "pivot": [
+            0,
+            13,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -3.5,
+                13,
+                -7
+              ],
+              "size": [
+                7,
+                9,
+                15
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "neck_joint",
+          "pivot": [
+            0,
+            19,
+            -7
+          ],
+          "parent": "body",
+          "rotation": [
+            30,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -2,
+                19,
+                -9
+              ],
+              "size": [
+                4,
+                8,
+                4
+              ],
+              "uv": [
+                16,
+                24
+              ]
+            }
+          ]
+        },
+        {
+          "name": "head",
+          "pivot": [
+            0,
+            27,
+            -7
+          ],
+          "parent": "neck_joint",
+          "rotation": [
+            -22,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -2.5,
+                25,
+                -12
+              ],
+              "size": [
+                5,
+                5,
+                6
+              ],
+              "uv": [
+                0,
+                39
+              ]
+            },
+            {
+              "origin": [
+                -1.5,
+                25,
+                -15
+              ],
+              "size": [
+                3,
+                3,
+                3
+              ],
+              "uv": [
+                32,
+                39
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ear_l",
+          "pivot": [
+            2,
+            29,
+            -8.5
+          ],
+          "parent": "head",
+          "rotation": [
+            0,
+            0,
+            30
+          ],
+          "cubes": [
+            {
+              "origin": [
+                2,
+                29,
+                -9
+              ],
+              "size": [
+                3,
+                4,
+                1
+              ],
+              "uv": [
+                52,
+                39
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ear_r",
+          "pivot": [
+            -2,
+            29,
+            -8.5
+          ],
+          "parent": "head",
+          "rotation": [
+            0,
+            0,
+            -30
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -5,
+                29,
+                -9
+              ],
+              "size": [
+                3,
+                4,
+                1
+              ],
+              "uv": [
+                0,
+                50
+              ]
+            }
+          ]
+        },
+        {
           "name": "antler_l",
           "pivot": [
             1.5,

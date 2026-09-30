@@ -628,4 +628,7 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
 - `Geometry: model already has a locator armor_offset.default_neck that doesn't exactly match the one wanting to be added` for `geometry.lothlorien.deer`.
   Not documented anywhere; cause not proven. Hypothesis: the engine derives an armor locator from a bone named `neck`, adds it twice with different
   values, and keeps the first ("skipping new definition", so probably harmless). The bone is now `neck_joint` (geometry, baby geometry, animations) to
-  avoid the trigger. **If the error is still in the log after this deploy, the cause is something else: report the exact text.**
+  avoid the trigger. **That did not help** (same log text after the rename; the rename stays, it is harmless). New hypothesis: the error comes from the
+  render controller's `part_visibility` hiding the antler bones on does and fawns (the fawn geometry has no antlers and logged nothing). Antlers are now a
+  separate geometry `geometry.lothlorien.deer_buck` (adult + antlers) next to `deer` (no antlers) and `deer_baby`, all on the same texture layout; the render
+  controller picks by `query.property('lothlorien:sex')`. **If the error is still there, report it again.**

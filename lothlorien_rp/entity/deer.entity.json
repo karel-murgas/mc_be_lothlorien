@@ -12,6 +12,7 @@
       },
       "geometry": {
         "default": "geometry.lothlorien.deer",
+        "buck": "geometry.lothlorien.deer_buck",
         "baby": "geometry.lothlorien.deer_baby"
       },
       "animations": {
