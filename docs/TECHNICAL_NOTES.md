@@ -501,3 +501,26 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
   outside (status just hidden); only a kill or a death loses it.
 - A kill counts when a player is `damageSource.damagingEntity` (projectile shooters included) and the victim stood in the biome.
 - Later phases read the state with `disharmonyOf(player)` + `levelFor` / `isFriend`.
+
+## Fauna spawning spike (Phase 10, 2026-09-30, built; v1 game-tested (no despawn far away), v3 NOT yet tested)
+
+- Placeholder `lothlorien:test_critter` (gold rabbit model/texture, vanilla walk AI, has a spawn egg). Files: `entities/test_critter.json`,
+  `spawn_rules/test_critter.json`, RP `entity/test_critter.entity.json`. Delete or reuse for Phase 11.
+- Spawn rule: surface, grass, light 7-15, herd 1-2, `density_limit.surface 6`, `distance_filter` 12-44, biome tag `lothlorien` only.
+  `population_control: "animal"` is a fixed engine pool shared with cows, sheep, etc. (no custom pools exist): the critter
+  competes with vanilla animals for that cap. Watch whether Lórien animals crowd out (or are crowded out by) vanilla ones.
+- Despawn v2 (after game test 1): not persistent, `random_chance` 20, farther than 54 blocks from a player. v1 also had `inactivity_timer` 300 (copied from vanilla rabbit/sheep, which also require light < 8, i.e. they despawn only at night): a rabbit trapped in a hole, 100+ blocks away, never despawned. Suspects: (a) the inactivity timer never elapses for a mob that keeps trying to walk; (b) despawn filters only run while the entity ticks, i.e. inside simulation distance, so the working window is only "54 blocks .. simulation distance"; a mob left far away is saved with its chunk and is not evaluated. Retest v2 by standing ~58-62 blocks from a critter (simulation distance 4 = 64 blocks).
+  (Correction: the note that "no vanilla entity uses `despawn_from_distance`" was wrong; the search only covered the old base
+  `vanilla/` folder. Every current vanilla mob (1.26.x update packs) uses `{"despawn_from_distance": {}}`.)
+- Despawn v3 (2026-09-30): `{"despawn_from_distance": {}}`, the engine's standard rules. Per the docs, `filters` REPLACE those rules,
+  including the instant despawn at the simulation edge, so v1/v2 could never remove a critter left beyond simulation distance.
+  Standard rules (documented defaults): > 128 blocks from every player = removed at once; 32-128 = 1-in-800 roll after 30 s
+  inactive; at the simulation edge = removed at once. Retest: (a) leave a critter behind, go past simulation distance, come
+  back: it must be gone; (b) stand ~40-60 blocks away for a few minutes: numbers should thin out slowly; (c) name-tag one and
+  repeat (a): it must stay. Knowledge: `.claude/skills/bedrock-mobs/references/spawning.md`.
+- Instrument: `/scriptevent lothlorien:critters` one report (near r64 / in biome / farther loaded); `... critters watch` toggles a
+  report every 15 s (chat + log). Script: `scripts/critter_watch.js`.
+- Test in a NEW world (spawn rules need no new chunks, but the biome does): (1) stand in Lórien, `watch` on, count should climb to
+  the density limit and stay; (2) run 200+ blocks away and back several times, count near you must recover, "farther loaded" must
+  not grow unbounded; (3) leave 2-3 min far away, then return: old critters gone or few; (4) compare with vanilla animals in the
+  adjacent forest (same pool); (5) two players in different places if possible. Record numbers here.

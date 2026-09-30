@@ -243,5 +243,22 @@ test("disharmony: status hidden outside, saved state round-trips, junk is tolera
   assert.deepEqual(D.parse(undefined), D.newState()); assert.deepEqual(D.parse("{oops"), D.newState());
 });
 
+// Phase 10: the placeholder critter must spawn by our biome tag only and be able to despawn.
+test("test critter: biome-only spawn rule with density limit", () => {
+  const r = JSON.parse(readFileSync(new URL("../lothlorien_bp/spawn_rules/test_critter.json", import.meta.url), "utf8"));
+  const rules = r["minecraft:spawn_rules"];
+  assert.equal(rules.description.identifier, "lothlorien:test_critter");
+  for (const c of rules.conditions) {
+    assert.equal(c["minecraft:biome_filter"].value, "lothlorien");
+    assert.ok(c["minecraft:density_limit"].surface > 0);
+  }
+});
+test("test critter: has a despawn rule and is not persistent", () => {
+  const e = JSON.parse(readFileSync(new URL("../lothlorien_bp/entities/test_critter.json", import.meta.url), "utf8"));
+  const comps = e["minecraft:entity"].components;
+  assert.ok(comps["minecraft:despawn"]);
+  assert.ok(!comps["minecraft:persistent"]);
+});
+
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }
 console.log("all tests passed");
