@@ -446,6 +446,12 @@ test("great nut: unique rare item that plants the sprout; sprout grows like a sa
   assert.ok(/playerPlaceBlock[\s\S]*40 blocks wide/.test(src), "planting warns about the space");
   assert.ok(readFileSync(new URL("../lothlorien_bp/scripts/main.js", import.meta.url), "utf8").includes('import "./great_mallorn.js"'));
 });
+test("the actionbar is only the Disharmony / Friend status (and the debug readout); other messages use chat", () => {
+  for (const f of ["white_deer.js", "great_mallorn.js", "deer.js", "trees.js", "athelas.js", "lembas.js", "crop.js", "antler.js"]) {
+    const src = readFileSync(new URL(`../lothlorien_bp/scripts/${f}`, import.meta.url), "utf8");
+    assert.ok(!src.includes("setActionBar"), f);
+  }
+});
 test("white deer: the gift is given once per deer, the spot is kept until then, the acorn only goes when it leads", () => {
   const src = readFileSync(new URL("../lothlorien_bp/scripts/white_deer.js", import.meta.url), "utf8");
   assert.ok(!/findMarker|getBlocks\(|MARKER/.test(src), "no marker search left");

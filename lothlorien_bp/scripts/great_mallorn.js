@@ -122,5 +122,5 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   if (block.typeId !== SPROUT_ID || itemStack?.typeId !== "minecraft:bone_meal") return;
   event.cancel = true;
   if (repeatedUse(player, "great_sprout")) return;
-  system.run(() => player.onScreenDisplay.setActionBar("§7A Great Mallorn will not be hurried."));
+  system.run(() => player.sendMessage("§7A Great Mallorn will not be hurried.")); // chat: the action bar shows Disharmony
 });

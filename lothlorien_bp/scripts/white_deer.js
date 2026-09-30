@@ -40,7 +40,7 @@ const isLeashed = (deer) => deer.getComponent("minecraft:leashable")?.isLeashed 
 
 const say = (player, text) => {
   try {
-    player.onScreenDisplay.setActionBar(text);
+    player.sendMessage(text); // chat: the action bar belongs to the Disharmony / Friend status (disharmony_game.js)
   } catch {
     // player left
   }

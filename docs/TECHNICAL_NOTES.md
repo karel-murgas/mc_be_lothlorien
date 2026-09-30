@@ -504,7 +504,8 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
 - Rules in `scripts/disharmony.js` (pure, tested), wiring in `scripts/disharmony_game.js`; state per player in dynamic
   property `lothlorien:disharmony` (`{points, calm, friend}`). `/scriptevent lothlorien:disharmony [points]` shows or sets it.
 - Decided with the user: a point decays after **3 min inside** the biome, **6 min outside** (KB said "inside only"; changed).
-  Status text is shown on the actionbar only inside the biome. A kill restarts the decay timer; **player death resets
+  Status text is shown on the actionbar only inside the biome. **The actionbar belongs to this status** (and the dev debug readout):
+  one-off messages (white deer, Great Mallorn sprout) go to chat, or they overwrite the status (owner, 2026-09-30; a test checks it). A kill restarts the decay timer; **player death resets
   points and all timers**. Friend = 10 minutes at 0 points inside; progress is paused outside (neither gained nor lost) and Friend lasts
   outside (status just hidden); only a kill or a death loses it.
 - A kill counts when a player is `damageSource.damagingEntity` (projectile shooters included) and the victim stood in the biome.
