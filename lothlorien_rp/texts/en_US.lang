@@ -56,4 +56,5 @@ entity.lothlorien:deer.name=Deer
 item.spawn_egg.entity.lothlorien:deer.name=Deer Spawn Egg
 item.lothlorien:venison_raw=Raw Venison
 item.lothlorien:venison_cooked=Cooked Venison
+tile.lothlorien:deer_antler.name=Deer Antler
 item.lothlorien:deer_antler=Deer Antler

@@ -194,3 +194,10 @@ redo it by hand in Blockbench; the pipeline stays valid (same bone names, same f
 - Both body textures share one sheet per model; if you go above 64x64 keep one size for adult and fawn (no mixels).
 - **White deer (Phase 12)** will need its own adult texture (and a fawn one): white coat, pale pink nose and ears, optional faint silver shimmer.
 - Sound: placeholder vanilla horse sounds until Phase 18.
+
+### Step 11b - Deer antler block
+
+`textures/blocks/deer_antler.png` (16x16 palette strips, bone columns 0-3, wood columns 4-7) and
+`models/blocks/deer_antler_floor.geo.json`, `deer_antler_wall.geo.json` are generated (`tools/make_antler_block.py`). A hand-made model
+(slanted beams, a real skull plate, carved Mallorn plaque) would be much nicer. Keep the geometry identifiers and the orientation: wall model
+back at +z, front at -z; the floor shed lies along z.

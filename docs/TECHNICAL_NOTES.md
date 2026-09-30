@@ -565,3 +565,23 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
 7. Breed two with acorns: fawn appears, follows parent, grows up in about 20 min (acorns speed it up), a buck fawn gets antlers when grown.
 8. Spawning: `/scriptevent lothlorien:critters watch`: herds of 2-4 appear in the biome, stay bounded after travelling (Phase 10 protocol); do they crowd cows/sheep?
 9. Look: side, front and back views of adult doe, buck and fawn; note what to redo for the graphics pass.
+
+## Deer antler block (Phase 11, 2026-09-30, built; static checks only, not yet seen in game)
+
+- `lothlorien:deer_antler` is a block; the item of the same name (bucks drop it) is its `block_placer`. Traits `placement_position`
+  (`minecraft:block_face`) and `placement_direction` (`minecraft:cardinal_direction`). **Top face = a shed antler lying on the
+  floor** (geometry `deer_antler_floor`, rotated by cardinal direction); **side face = antler trophy on a wooden plaque** (geometry
+  `deer_antler_wall`, back against the wall, rotated by the clicked face: north 0, west 90, south 180, east 270 as for stairs). No ceiling
+  placement. Whether the rotations are right (plaque really against the wall, front out) is the first thing to check in game.
+- `minecraft:placement_filter`: floor on grass, dirt variants, moss, mud, stone and Mallorn planks/logs; walls on the same plus vanilla
+  planks, logs, cobblestone and stone bricks. The list is deliberate: no tag syntax in `block_filter` was risked, and the filter is what stops
+  worldgen placing antlers on the canopy (`query.heightmap` includes leaves). Add block names to the list to widen it. The block has no
+  support check afterwards: it stays if its support is broken.
+- Geometry is built from axis-aligned cubes with per-face UV strips of a 16x16 palette texture (`textures/blocks/deer_antler.png`), by
+  `tools/make_antler_block.py`. Antler slants are stepped cubes on purpose (the sign of block-geometry rotation under the mirrored-x rule is unverified).
+- **Natural drop**: rule `deer_antler_drop_feature_rules` (after surface pass, biome tag, `scatter_chance` 1/64 per chunk) -> scatter of 3
+  tries within about 3 blocks -> weighted pick of four facings, all `up`. Giants are one structure per ~36 chunks (about 1 in 4 a lookout tree =
+  ~1/144 per chunk), so 1/64 sits between them; a test pins that. Real frequency will be lower (tries on leaves, water or off-biome fail): tune
+  the denominator after walking around.
+- **Chest**: `loot_tables/chests/mallorn_flet.json` pool 2 has the antler, `set_count 1`, weight 2 (of 19).
+- Verifier: a block that also mounts on walls is no longer classed as a "plant" (no composter / flower pot / bone-meal demands).

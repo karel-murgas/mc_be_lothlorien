@@ -92,7 +92,7 @@ reacts to a Disharmony III player also scares it.
 | Drops | doe: leather 0-2, raw venison 1-3 (cooked if killed burning), looting +0-1. Buck: the same + **deer antler** 30 % (+5 % per looting level), player kills only. Fawns drop nothing | no |
 | Venison | raw: 3 hunger, 1.8 saturation; cooked: 8 hunger, 12.8 saturation (steak level, `is_meat` so wolves take it); furnace, smoker, campfire | no |
 | XP | 1-3 on player kill, 1-7 on breeding | no |
-| Antler use | item only for now; chandelier with the lamp is Phase 17. Natural shed antler block: not built (`NOT_IMPLEMENTED.md`) | - |
+| Antler use | item only for now; chandelier with the lamp is Phase 17. The item is a placeable block (floor shed, wall trophy), a rare natural drop in the biome and one in flet chests (`TECHNICAL_NOTES.md`, Deer antler) | - |
 
 ## G. Look and sound
 

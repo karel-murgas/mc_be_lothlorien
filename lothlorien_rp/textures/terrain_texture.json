@@ -75,6 +75,9 @@
     },
     "lothlorien:western_corn_stage_7": {
       "textures": "textures/blocks/western_corn_stage_7"
+    },
+    "lothlorien:deer_antler": {
+      "textures": "textures/blocks/deer_antler"
     }
   }
 }

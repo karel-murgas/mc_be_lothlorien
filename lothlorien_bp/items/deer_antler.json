@@ -4,12 +4,16 @@
     "description": {
       "identifier": "lothlorien:deer_antler",
       "menu_category": {
-        "category": "items",
+        "category": "nature",
         "group": "minecraft:itemGroup.name.miscellaneous"
       }
     },
     "components": {
-      "minecraft:icon": "lothlorien:deer_antler"
+      "minecraft:icon": "lothlorien:deer_antler",
+      "minecraft:block_placer": {
+        "block": "lothlorien:deer_antler",
+        "replace_block_item": true
+      }
     }
   }
 }

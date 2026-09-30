@@ -525,8 +525,8 @@ Claude.
 # Phase 11 — Deer
 
 _Status 2026-09-30: built and deployed, static checks only, **not yet tested in game**. Model and textures are generated
-placeholders (`tools/make_deer.py`), queued in `GRAPHICS_TASKS.md` step 11. Shed-antler world feature not built
-(`NOT_IMPLEMENTED.md`). Design sheet `docs/mobs/deer.md`, notes and test plan in `TECHNICAL_NOTES.md` (Deer)._
+placeholders (`tools/make_deer.py`), queued in `GRAPHICS_TASKS.md` step 11. Shed-antler block + floor drop + flet chest entry built
+(`TECHNICAL_NOTES.md`, Deer antler). Design sheet `docs/mobs/deer.md`, notes and test plan in `TECHNICAL_NOTES.md` (Deer)._
 
 Implement first because it proves most terrestrial-animal mechanics.
 

@@ -1,0 +1,26 @@
+{
+  "format_version": "1.13.0",
+  "minecraft:weighted_random_feature": {
+    "description": {
+      "identifier": "lothlorien:deer_antler_feature"
+    },
+    "features": [
+      [
+        "lothlorien:deer_antler_north_feature",
+        1
+      ],
+      [
+        "lothlorien:deer_antler_west_feature",
+        1
+      ],
+      [
+        "lothlorien:deer_antler_south_feature",
+        1
+      ],
+      [
+        "lothlorien:deer_antler_east_feature",
+        1
+      ]
+    ]
+  }
+}

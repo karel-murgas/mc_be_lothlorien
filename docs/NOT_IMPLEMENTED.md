@@ -15,7 +15,7 @@ game data (1.26.52), the Microsoft creator docs and the Bedrock Wiki, in 2026-09
 | **Stair/slab waterlogging visuals, snow logging** | Partial | Slabs, stairs, fences, gates and trapdoors accept water; no snowlogging. |
 | **Leaf decay, acorn drops** | Done (Phase 4), untested in game | Original plan, as built (`scripts/trees.js`): Leaves are currently permanent and drop only with shears (5% stick). Decay is a script job: leaves get `minecraft:random_ticking` and a custom component whose `onRandomTick` searches (breadth-first, max 6 blocks, through Mallorn leaves) for a Mallorn log/wood; none found -> break with drops. Player-placed leaves must not decay (vanilla "persistent"): a `lothlorien:persistent` state set in `beforeOnPlayerPlace`; worldgen/structure leaves keep the default (decaying). Cost is bounded (random ticks only, early exit). Do it with the Phase 4 tree work so saplings drop from it. |
 | **Chest/boat, hopper, dispenser interactions** | n/a | Not part of the wood set. |
-| **Shed antlers as a world feature / mineable block** | Not built (Phase 11) | Design wish: rare antlers lying on the forest floor, mineable and hangable on walls. Needs a custom block (geometry, texture) and a feature rule placing it in the biome. The item `lothlorien:deer_antler` already exists (bucks drop it, 30 %); the chandelier use belongs to Phase 17. |
+| **Shed antlers as a world feature / placeable block** | Done (Phase 11), untested in game | See `TECHNICAL_NOTES.md` (Deer antler). The chandelier use belongs to Phase 17. |
 | **Deer grazing** | Left out | Vanilla `eat_block` turns grass blocks into dirt, which would bare the golden forest floor. A grazing animation without the block change needs script. |
 
 ## Redstone

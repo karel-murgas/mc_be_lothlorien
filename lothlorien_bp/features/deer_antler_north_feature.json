@@ -1,0 +1,20 @@
+{
+  "format_version": "1.21.40",
+  "minecraft:single_block_feature": {
+    "description": {
+      "identifier": "lothlorien:deer_antler_north_feature"
+    },
+    "places_block": {
+      "name": "lothlorien:deer_antler",
+      "states": {
+        "minecraft:block_face": "up",
+        "minecraft:cardinal_direction": "north"
+      }
+    },
+    "enforce_survivability_rules": true,
+    "enforce_placement_rules": true,
+    "may_replace": [
+      "minecraft:air"
+    ]
+  }
+}

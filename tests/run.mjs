@@ -308,5 +308,38 @@ test("deer: biome-only spawn rule with density limit, standard despawn, not pers
   assert.ok(!comps["minecraft:persistent"]);
 });
 
+// Deer antler block and its drop.
+test("antler block: a permutation for every floor direction and every wall face", () => {
+  const b = readJson("../lothlorien_bp/blocks/deer_antler.json")["minecraft:block"];
+  const conds = b.permutations.map((p) => p.condition);
+  for (const d of ["north", "east", "south", "west"]) {
+    assert.ok(conds.some((c) => c.includes("'up'") && c.includes(`'${d}'`)), `floor ${d}`);
+    assert.ok(conds.some((c) => c.includes(`block_face') == '${d}'`) && !c.includes("'up'")), `wall ${d}`);
+  }
+  const wall = b.permutations.filter((p) => !p.condition.includes("'up'"));
+  for (const p of wall) assert.equal(p.components["minecraft:geometry"], "geometry.lothlorien.deer_antler_wall");
+  const faces = b.components["minecraft:placement_filter"].conditions.flatMap((c) => c.allowed_faces);
+  assert.deepEqual([...new Set(faces)].sort(), ["east", "north", "south", "up", "west"]);
+});
+test("antler drop: every feature it names exists; rarity sits between plain giants and lookout trees", () => {
+  const f = (n) => readJson(`../lothlorien_bp/features/${n}.json`);
+  const rule = readJson("../lothlorien_bp/feature_rules/deer_antler_drop_feature_rules.json")["minecraft:feature_rules"];
+  assert.equal(rule.description.places_feature, "lothlorien:deer_antler_drop_feature");
+  const scatter = f("deer_antler_drop_feature")["minecraft:scatter_feature"];
+  const weighted = f(scatter.places_feature.split(":")[1])["minecraft:weighted_random_feature"];
+  for (const [name] of weighted.features) assert.ok(f(name.split(":")[1])["minecraft:single_block_feature"], name);
+  // giants: one structure per ~6x6 chunks, about 1 in 4 a lookout tree (flet) => 1/36 and 1/144 per chunk
+  const perChunk = rule.distribution.scatter_chance.numerator / rule.distribution.scatter_chance.denominator;
+  assert.ok(perChunk < 1 / 36 && perChunk > 1 / 144, `per chunk ${perChunk}`);
+});
+test("antler: bucks' item is a block placer and flet chests can hold exactly one", () => {
+  const item = readJson("../lothlorien_bp/items/deer_antler.json")["minecraft:item"].components;
+  assert.equal(item["minecraft:block_placer"].block, "lothlorien:deer_antler");
+  const chest = readJson("../lothlorien_bp/loot_tables/chests/mallorn_flet.json");
+  const e = chest.pools.flatMap((p) => p.entries).find((x) => x.name === "lothlorien:deer_antler");
+  assert.ok(e, "antler in chest");
+  assert.equal(e.functions[0].count, 1);
+});
+
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }
 console.log("all tests passed");
