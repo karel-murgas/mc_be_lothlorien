@@ -44,6 +44,7 @@
         }
       },
       "minecraft:collision_box": false,
+      "minecraft:light_dampening": 0,
       "minecraft:selection_box": {
         "origin": [
           -7,

@@ -632,3 +632,12 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
   render controller's `part_visibility` hiding the antler bones on does and fawns (the fawn geometry has no antlers and logged nothing). Antlers are now a
   separate geometry `geometry.lothlorien.deer_buck` (adult + antlers) next to `deer` (no antlers) and `deer_baby`, all on the same texture layout; the render
   controller picks by `query.property('lothlorien:sex')`. **If the error is still there, report it again.**
+
+### Grass under leaf carpet turned to dirt (2026-09-30)
+
+User report: grass under the golden leaf carpet on the forest floor turned to dirt. Cause: no block set
+`minecraft:light_dampening`, which defaults to 15, so every carpet, petal, flower and the shed antler blocked all light
+to the grass below (the leaves already had 1). Nothing in script or worldgen replaces grass. Added
+`"minecraft:light_dampening": 0` to leaf carpet, blossom, Athelas, Elanor, Niphredil, golden fern, western corn,
+sapling, deer antler, pressure plate and button. **In game to check:** grass under fresh carpet stays green (new world
+for worldgen carpet; already-turned dirt does not turn back by itself, it regrows only by grass spreading).
