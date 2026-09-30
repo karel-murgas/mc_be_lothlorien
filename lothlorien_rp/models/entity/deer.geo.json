@@ -22,13 +22,6 @@
             13,
             0
           ],
-          "locators": {
-            "armor_offset.default_neck": [
-              0,
-              13,
-              0
-            ]
-          },
           "cubes": [
             {
               "origin": [
@@ -81,7 +74,7 @@
           ]
         },
         {
-          "name": "head",
+          "name": "head_joint",
           "pivot": [
             0,
             27,
@@ -135,7 +128,7 @@
             29,
             -8.5
           ],
-          "parent": "head",
+          "parent": "head_joint",
           "rotation": [
             0,
             0,
@@ -167,7 +160,7 @@
             29,
             -8.5
           ],
-          "parent": "head",
+          "parent": "head_joint",
           "rotation": [
             0,
             0,
@@ -355,13 +348,6 @@
             13,
             0
           ],
-          "locators": {
-            "armor_offset.default_neck": [
-              0,
-              13,
-              0
-            ]
-          },
           "cubes": [
             {
               "origin": [
@@ -414,7 +400,7 @@
           ]
         },
         {
-          "name": "head",
+          "name": "head_joint",
           "pivot": [
             0,
             27,
@@ -468,7 +454,7 @@
             29,
             -8.5
           ],
-          "parent": "head",
+          "parent": "head_joint",
           "rotation": [
             0,
             0,
@@ -500,7 +486,7 @@
             29,
             -8.5
           ],
-          "parent": "head",
+          "parent": "head_joint",
           "rotation": [
             0,
             0,
@@ -532,7 +518,7 @@
             30,
             -9.5
           ],
-          "parent": "head",
+          "parent": "head_joint",
           "rotation": [
             -20,
             0,
@@ -676,7 +662,7 @@
             30,
             -9.5
           ],
-          "parent": "head",
+          "parent": "head_joint",
           "rotation": [
             -20,
             0,
@@ -976,13 +962,6 @@
             6,
             0
           ],
-          "locators": {
-            "armor_offset.default_neck": [
-              0,
-              13,
-              0
-            ]
-          },
           "cubes": [
             {
               "origin": [
@@ -1035,7 +1014,7 @@
           ]
         },
         {
-          "name": "head",
+          "name": "head_joint",
           "pivot": [
             0,
             12,
@@ -1089,7 +1068,7 @@
             14,
             -6
           ],
-          "parent": "head",
+          "parent": "head_joint",
           "rotation": [
             0,
             0,
@@ -1121,7 +1100,7 @@
             14,
             -6
           ],
-          "parent": "head",
+          "parent": "head_joint",
           "rotation": [
             0,
             0,

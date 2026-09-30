@@ -19,7 +19,7 @@
         "idle": "animation.lothlorien.deer.idle",
         "walk": "animation.lothlorien.deer.walk",
         "run": "animation.lothlorien.deer.run",
-        "look_at_target": "animation.common.look_at_target"
+        "look_at_target": "animation.lothlorien.deer.look_at_target"
       },
       "scripts": {
         "scale": "query.is_baby ? 2.0 : 1.0",

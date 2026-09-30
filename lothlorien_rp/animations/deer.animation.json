@@ -134,6 +134,21 @@
           ]
         }
       }
+    },
+    "animation.lothlorien.deer.look_at_target": {
+      "loop": true,
+      "bones": {
+        "head_joint": {
+          "relative_to": {
+            "rotation": "entity"
+          },
+          "rotation": [
+            "query.target_x_rotation - this",
+            "query.target_y_rotation - this",
+            0.0
+          ]
+        }
+      }
     }
   }
 }

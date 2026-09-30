@@ -71,16 +71,22 @@ def antler_cubes(bone, s, y0, z0):
     ]
 
 
+# No bone is called "head": the engine apparently derives an armor_offset.default_neck locator from it (babies can
+# wear armour since 1.26.10), and the fawn's lower head gives a different value from the adult's. Every geometry after the first then logs
+# "model already has a locator armor_offset.default_neck that doesn't exactly match" (game 1.26.52). Declaring the locator
+# does not stop the derivation, it only adds a third value. look_at_target is our own copy for head_joint.
+
+
 def cubes_adult():
     c = []
     bones = {
         "body": (None, [0, 13, 0], None),
         "neck_joint": ("body", [0, 19, -7], [30, 0, 0]),
-        "head": ("neck_joint", [0, 27, -7], [-22, 0, 0]),
-        "ear_l": ("head", [2, 29, -8.5], [0, 0, 30]),
-        "ear_r": ("head", [-2, 29, -8.5], [0, 0, -30]),
-        "antler_l": ("head", [1.5, 30, -9.5], [-20, 0, 15]),
-        "antler_r": ("head", [-1.5, 30, -9.5], [-20, 0, -15]),
+        "head_joint": ("neck_joint", [0, 27, -7], [-22, 0, 0]),
+        "ear_l": ("head_joint", [2, 29, -8.5], [0, 0, 30]),
+        "ear_r": ("head_joint", [-2, 29, -8.5], [0, 0, -30]),
+        "antler_l": ("head_joint", [1.5, 30, -9.5], [-20, 0, 15]),
+        "antler_r": ("head_joint", [-1.5, 30, -9.5], [-20, 0, -15]),
         "tail": ("body", [0, 21, 8], [15, 0, 0]),
         "leg0": ("body", [-2, 13, 6], None),
         "leg1": ("body", [2, 13, 6], None),
@@ -89,8 +95,8 @@ def cubes_adult():
     }
     c.append(("body", "body", [-3.5, 13, -7], [7, 9, 15], "body"))
     c.append(("neck", "neck_joint", [-2, 19, -9], [4, 8, 4], "neck"))
-    c.append(("skull", "head", [-2.5, 25, -12], [5, 5, 6], "skull"))
-    c.append(("muzzle", "head", [-1.5, 25, -15], [3, 3, 3], "muzzle"))
+    c.append(("skull", "head_joint", [-2.5, 25, -12], [5, 5, 6], "skull"))
+    c.append(("muzzle", "head_joint", [-1.5, 25, -15], [3, 3, 3], "muzzle"))
     c.append(("ear_l", "ear_l", [2, 29, -9], [3, 4, 1], "ear"))
     c.append(("ear_r", "ear_r", [-5, 29, -9], [3, 4, 1], "ear"))
     c.append(("tail", "tail", [-1.5, 16.5, 7.5], [3, 5, 2], "tail"))
@@ -105,9 +111,9 @@ def cubes_baby():
     bones = {
         "body": (None, [0, 6, 0], None),
         "neck_joint": ("body", [0, 9, -4], [25, 0, 0]),
-        "head": ("neck_joint", [0, 12, -4], [-18, 0, 0]),
-        "ear_l": ("head", [1.5, 14, -6], [0, 0, 30]),
-        "ear_r": ("head", [-1.5, 14, -6], [0, 0, -30]),
+        "head_joint": ("neck_joint", [0, 12, -4], [-18, 0, 0]),
+        "ear_l": ("head_joint", [1.5, 14, -6], [0, 0, 30]),
+        "ear_r": ("head_joint", [-1.5, 14, -6], [0, 0, -30]),
         "tail": ("body", [0, 10, 5], [15, 0, 0]),
         "leg0": ("body", [-1.5, 6, 3.5], None),
         "leg1": ("body", [1.5, 6, 3.5], None),
@@ -117,8 +123,8 @@ def cubes_baby():
     c = []
     c.append(("body", "body", [-2.5, 6, -5], [5, 5, 10], "body"))
     c.append(("neck", "neck_joint", [-1.5, 9, -5.5], [3, 3, 3], "neck"))
-    c.append(("skull", "head", [-2, 11, -9.5], [4, 4, 5], "skull"))
-    c.append(("muzzle", "head", [-1, 11, -11.5], [2, 2, 2], "muzzle"))
+    c.append(("skull", "head_joint", [-2, 11, -9.5], [4, 4, 5], "skull"))
+    c.append(("muzzle", "head_joint", [-1, 11, -11.5], [2, 2, 2], "muzzle"))
     c.append(("ear_l", "ear_l", [1.5, 14, -6.5], [2, 3, 1], "ear"))
     c.append(("ear_r", "ear_r", [-3.5, 14, -6.5], [2, 3, 1], "ear"))
     c.append(("tail", "tail", [-1, 7.5, 5], [2, 3, 1], "tail"))
@@ -150,13 +156,6 @@ def pack(cubes):
     return out
 
 
-# The engine keeps ONE armor_offset.default_neck locator per entity, apparently derived per geometry (from the body) when the
-# geometry does not declare it. The baby's lower body gave a different value, so every other geometry of the entity
-# logged "model already has a locator armor_offset.default_neck that doesn't exactly match" (game 1.26.52).
-# Declaring the same value in every geometry keeps them identical. Deer wear no armour, so the position is cosmetic.
-NECK_LOCATOR = {"armor_offset.default_neck": [0, 13, 0]}
-
-
 def geometry(ident, bones, cubes, uvs):
     bone_list = []
     for bname, (parent, pivot, rot) in bones.items():
@@ -165,8 +164,6 @@ def geometry(ident, bones, cubes, uvs):
             b["parent"] = parent
         if rot:
             b["rotation"] = rot
-        if bname == "body":
-            b["locators"] = dict(NECK_LOCATOR)
         bone_list.append(b)
     for name, bone, origin, size, _role in cubes:
         entry = next(b for b in bone_list if b["name"] == bone)
