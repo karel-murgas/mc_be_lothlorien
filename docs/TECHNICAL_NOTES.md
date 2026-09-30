@@ -519,7 +519,7 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
   back: it must be gone; (b) stand ~40-60 blocks away for a few minutes: numbers should thin out slowly; (c) name-tag one and
   repeat (a): it must stay. Knowledge: `.claude/skills/bedrock-mobs/references/spawning.md`.
   **Game-tested 2026-09-30 (1.26.52): works** - critters despawn, including ones spawned under v1/v2 (the rule comes from
-  the current pack when the chunk loads). Name-tag persistence (c) not reported yet.
+  the current pack when the chunk loads). Name-tagged critter stays (c): OK. Phase 10 spike done.
 - Instrument: `/scriptevent lothlorien:critters` one report (near r64 / in biome / farther loaded); `... critters watch` toggles a
   report every 15 s (chat + log). Script: `scripts/critter_watch.js`.
 - Test in a NEW world (spawn rules need no new chunks, but the biome does): (1) stand in Lórien, `watch` on, count should climb to

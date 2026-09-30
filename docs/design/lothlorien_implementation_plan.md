@@ -493,7 +493,7 @@ Claude.
 
 # Phase 10 — Fauna spawning safety spike
 
-_Status 2026-09-30: built and deployed, awaiting game test; see `TECHNICAL_NOTES.md` (Fauna spawning spike)._
+_Status 2026-09-30: done, game-tested (standard despawn rules work, name-tagged critters stay); see `TECHNICAL_NOTES.md` (Fauna spawning spike)._
 
 Before creating all animals, make one ugly placeholder critter.
 
