@@ -437,18 +437,20 @@ def venison_cooked():
 
 
 def deer_antler():
-    """Shed antler icon: ONE antler (a pair with a middle tine read as three antlers in game). The inner shape is
-    hand-placed; the outline is derived (every empty pixel beside the shape, 4-neighbourhood, so the gaps
-    between tines stay open). Colour is by rule so
-    it is not one flat tan: a length ramp (ivory tips -> warm tan -> red-brown near the base), light from the top-left
-    (pixels with empty space up/left are lit, down/right shaded), a knobbly burr and a darker cut base."""
-    beam = [(13, 1), (12, 2), (13, 2), (12, 3), (11, 4), (12, 4), (11, 5), (12, 5), (10, 6), (11, 6), (9, 7), (10, 7),
-            (8, 8), (9, 8), (7, 9), (8, 9), (6, 10), (7, 10), (5, 11), (6, 11)]
-    tines = [(10, 3), (10, 2), (9, 1),                  # top tine
-             (7, 7), (6, 6), (6, 5), (5, 4), (5, 3),    # middle tine
-             (5, 10), (4, 9), (4, 8), (3, 7), (3, 6)]   # brow tine
-    burr = [(3, 12), (4, 12), (5, 12), (6, 12), (7, 12), (4, 11), (7, 11)]
-    base = [(4, 13), (5, 13), (6, 13)]
+    """Antler icon: a pair on a small skull plate, like the placed block (a V, two antlers out to the sides, two
+    tines each). Nothing may rise from the middle: an earlier pair with a centre tine read as three antlers. The right
+    antler is hand-placed and mirrored; the outline is derived (every empty pixel beside the shape, 4-neighbourhood, so
+    the gaps between tines stay open). Colour is by rule so it is not one flat tan: a length ramp (ivory tips -> warm
+    tan -> red-brown near the base), light from the top-left (pixels with empty space up/left are lit, down/right
+    shaded), a knobbly skull plate and a darker underside."""
+    right = [(9, 10), (10, 10), (10, 9), (11, 9), (11, 8), (12, 8), (11, 7), (12, 7), (12, 6), (13, 6),
+             (12, 5), (13, 5), (13, 4), (13, 3), (14, 3), (14, 2), (14, 1),   # beam out to the tip
+             (10, 7), (10, 6), (10, 5),                                       # inner tine
+             (12, 3), (12, 2), (11, 1)]                                       # upper tine
+    beam = right + [(15 - x, y) for x, y in right]
+    tines = []
+    burr = [(x, y) for x in range(6, 10) for y in (11, 12)]
+    base = [(7, 13), (8, 13)]
     shape = set(beam) | set(tines) | set(burr) | set(base)
     ramp_rows = [  # (shadow, mid, light) by height
         (3, ("#d9c9a0", "#efe4c6", "#fbf5e4")),   # tips: ivory
