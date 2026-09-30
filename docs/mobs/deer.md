@@ -35,7 +35,7 @@ Files: BP `entities/deer.json` (generated once from a throw-away script, now edi
 
 | Question | Decision | Tested |
 | --- | --- | --- |
-| Movement | walks; `jump.static`; avoids water and damage blocks; no wall climbing | no |
+| Movement | walks; `jump.static`; avoids water and damage blocks; no `can_climb` (no ladders, vines, scaffolding) | no |
 | Water | floats (`behavior.float`), breathes air | no |
 | Hazards | lava 4/tick like vanilla; fire and fall damage are engine defaults | no |
 | Pushed, leash | pushable by entities and blocks; leashable (adult can be a leash anchor) | no |
@@ -49,7 +49,7 @@ Goal priorities: 0 float, 1 panic (x1.8), 2 breed, 3 tempt, 4 avoid, 5 follow pa
 | Question | Decision | Tested |
 | --- | --- | --- |
 | Idle life | strolls, looks around, ears and tail flick (animation). **No grazing**: `eat_block` turns grass into dirt and would bare the golden forest floor | no |
-| Reaction to the player | flees by **wariness state** (see below); sneaking halves the flight distance | no: does not flee a **creative** player (engine, 1.26.52); retest in survival |
+| Reaction to the player | flees by **wariness state** (see below); sneaking halves the flight distance | flees in survival at Disharmony I; not from a **creative** player (1.26.52, 2026-09-30) |
 | Reaction to mobs | flees wolves within 12 and monsters within 8 | no |
 | Vanilla mobs reacting to it | none (own family) | - |
 | Panic | on any damage (x1.8); fawns too | no |
@@ -61,7 +61,7 @@ Goal priorities: 0 float, 1 panic (x1.8), 2 breed, 3 tempt, 4 avoid, 5 follow pa
 | State | Disharmony | Flight distance (walking / sneaking) | Food lures it |
 | --- | --- | --- | --- |
 | `calm` | 0 | 10 / 5 | yes |
-| `l1` | I | 13 / 6 | yes |
+| `l1` | I | 13 / 6 | no |
 | `l2` | II | 20 / 10 | no |
 | `l3` | III | 30 / 15 | no |
 | `friend` | Friend of Lothlorien | 3 / 2 | yes |
@@ -77,7 +77,7 @@ reacts to a Disharmony III player also scares it.
 
 | Question | Decision | Tested |
 | --- | --- | --- |
-| Luring | Mallorn acorn or apple, `can_get_scared` (fast movement scares it); off at Disharmony II+ and while alarmed | no |
+| Luring | Mallorn acorn or apple, `can_get_scared` (fast movement scares it); off from Disharmony I and while alarmed | no |
 | Leading | leashable | no |
 | Breeding | same two foods, `require_tame false`, any doe/buck pair, fawn follows parent, grows up in 20 min (feed to speed up) | no |
 | Babies | fawn model with spots; spawn egg on an adult makes a fawn | no |

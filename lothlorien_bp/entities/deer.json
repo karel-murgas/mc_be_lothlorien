@@ -173,15 +173,6 @@
               "sprint_speed_multiplier": 1.8
             }
           ]
-        },
-        "minecraft:behavior.tempt": {
-          "priority": 3,
-          "speed_multiplier": 1.0,
-          "items": [
-            "lothlorien:mallorn_acorn",
-            "apple"
-          ],
-          "can_get_scared": true
         }
       },
       "lothlorien:state_l2": {
@@ -545,7 +536,6 @@
       },
       "minecraft:movement.basic": {},
       "minecraft:jump.static": {},
-      "minecraft:can_climb": {},
       "minecraft:physics": {},
       "minecraft:pushable_by_entity": {},
       "minecraft:pushable_by_block": {},

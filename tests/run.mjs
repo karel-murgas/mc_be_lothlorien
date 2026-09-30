@@ -281,7 +281,7 @@ test("deer: every wariness has a state group and a set event; flight distance gr
 test("deer: only calm states can be lured; the alarm hands back through the property", () => {
   const e = deerEntity();
   const lured = (w) => !!e.component_groups[`lothlorien:state_${w}`]["minecraft:behavior.tempt"];
-  assert.deepEqual(["calm", "l1", "friend", "l2", "l3", "alarmed"].map(lured), [true, true, true, false, false, false]);
+  assert.deepEqual(["calm", "l1", "friend", "l2", "l3", "alarmed"].map(lured), [true, false, true, false, false, false]);
   const back = e.events["lothlorien:alarm_over"].sequence.map((s) => s.trigger).sort();
   assert.deepEqual(back, R.WARINESS.map(R.setEventFor).sort());
   assert.equal(e.component_groups["lothlorien:state_alarmed"]["minecraft:timer"].time_down_event.event, "lothlorien:alarm_over");
