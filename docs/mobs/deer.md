@@ -49,7 +49,7 @@ Goal priorities: 0 float, 1 panic (x1.8), 2 breed, 3 tempt, 4 avoid, 5 follow pa
 | Question | Decision | Tested |
 | --- | --- | --- |
 | Idle life | strolls, looks around, ears and tail flick (animation). **No grazing**: `eat_block` turns grass into dirt and would bare the golden forest floor | no |
-| Reaction to the player | flees by **wariness state** (see below); sneaking halves the flight distance | no |
+| Reaction to the player | flees by **wariness state** (see below); sneaking halves the flight distance | no: does not flee a **creative** player (engine, 1.26.52); retest in survival |
 | Reaction to mobs | flees wolves within 12 and monsters within 8 | no |
 | Vanilla mobs reacting to it | none (own family) | - |
 | Panic | on any damage (x1.8); fawns too | no |
