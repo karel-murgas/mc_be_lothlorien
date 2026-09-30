@@ -13,6 +13,8 @@ in place (same name) so no JSON changes are needed.
 
 ## Step 1 — Mallorn wood set (Phase 3)
 
+**Read `docs/MALLORN_WOOD_LESSONS.md` first** (the owner's taste, gold budget, workflow, generators, traps).
+
 Currently **placeholders** copied from vanilla: pale oak wood, yellow poplar leaves. Replace each
 file with the real Mallorn art. Every block below already exists in the pack and uses these files.
 
