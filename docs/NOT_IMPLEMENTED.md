@@ -17,6 +17,7 @@ game data (1.26.52), the Microsoft creator docs and the Bedrock Wiki, in 2026-09
 | **Chest/boat, hopper, dispenser interactions** | n/a | Not part of the wood set. |
 | **Shed antlers as a world feature / placeable block** | Done (Phase 11), untested in game | See `TECHNICAL_NOTES.md` (Deer antler). The chandelier use belongs to Phase 17. |
 | **Deer grazing** | Left out | Vanilla `eat_block` turns grass blocks into dirt, which would bare the golden forest floor. A grazing animation without the block change needs script. |
+| **White deer guidance to structures** | Prototype (Phase 12), untested in game | Built with a hidden `lothlorien:structure_marker` in each giant Mallorn, a loaded-chunk `getBlocks` search (80 blocks) and scripted teleport steps for the walking (no entity "walk to" API; `move_to_block` reaches only about 16 blocks). Not done: markers for future structure types (Phase 16), remembering markers, a real path finder, particles/sounds, white spawn egg. See `TECHNICAL_NOTES.md` (White deer guidance). |
 
 ## Redstone
 

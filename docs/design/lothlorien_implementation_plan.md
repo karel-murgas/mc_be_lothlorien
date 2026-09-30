@@ -550,6 +550,11 @@ Blockbench + graphics + Claude.
 
 # Phase 12 — White deer guidance
 
+_Status 2026-09-30: built and deployed as an **optional prototype**, static checks only, **nothing tested in game**. White deer is a
+coat variant of `lothlorien:deer` (property `lothlorien:coat`), the marker is the block `lothlorien:structure_marker` buried in every giant
+Mallorn (worldgen change: **new world needed** to get markers into trees). Design, assumptions and the in-game test plan:
+`TECHNICAL_NOTES.md` (White deer guidance). Only the giant Mallorns exist as structures so far; Phase 16 structures must add the marker._
+
 Add variant / separate entity.
 
 Prototype structure marker system:

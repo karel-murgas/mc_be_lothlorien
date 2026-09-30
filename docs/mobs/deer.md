@@ -28,7 +28,7 @@ Files: BP `entities/deer.json` (generated once from a throw-away script, now edi
 | Light, time | light 7-15 (day and moonlit clearings; no time filter) | no |
 | Group | herd 2-4, weight 10, `density_limit.surface 8`, `distance_filter` 12-44; 10 % of spawns are fawns | no |
 | Pool | `population_control: animal` (shared with cows and sheep; engine pools are fixed) | no |
-| Special spawns | none. White deer (Phase 12) will be a variant | - |
+| Special spawns | white deer: 1 in 25 natural spawns is white (property `lothlorien:coat`), Phase 12, `TECHNICAL_NOTES.md` White deer guidance | no |
 | Despawn | standard `despawn_from_distance`; name tag keeps it (verified for the Phase 10 critter) | no |
 
 ## C. Body in the world
@@ -83,7 +83,7 @@ reacts to a Disharmony III player also scares it.
 | Babies | fawn model with spots; spawn egg on an adult makes a fawn | no |
 | Taming, healing, riding | not wanted | - |
 | Other | name tag (nameable) | no |
-| Mod systems | Disharmony + Friend via the wariness states; white-deer guidance is Phase 12 | no |
+| Mod systems | Disharmony + Friend via the wariness states; white deer can be offered Western corn grain at Disharmony 0 and then guides to the nearest structure marker (Phase 12, prototype) | no |
 
 ## F. Death and rewards
 
@@ -99,7 +99,7 @@ reacts to a Disharmony III player also scares it.
 | Question | Decision | Tested |
 | --- | --- | --- |
 | Model | generated box model, fallow-deer look (tawny coat, pale spots, white rump, dark spine). Three geometries in one file: doe, buck (with antler bones `antler_l/r`), fawn; the render controller picks one (`is_baby`, then `lothlorien:sex`). No bone is called `head` (`head_joint`): the engine derives an armour locator from a `head` bone and the fawn's clashed with the adult's (see `bedrock-mobs` client.md) | loads without content-log errors (1.26.52, 2026-09-30) |
-| Variants | none yet; the white deer gets its own texture in Phase 12 | - |
+| Variants | white coat (adult + fawn textures `deer_white`, `deer_white_baby`, placeholder palette swap by `make_deer.py`, Phase 12); render controller picks by `lothlorien:coat` | no |
 | Animations | procedural Molang: `walk` (diagonal legs, speed weighted), `run` (gallop pairs, body bob, raised tail, weight from `query.ground_speed` 3.5..6 m/s, **threshold unverified**), `idle` (ear and tail flicks), own `look_at_target` (copy of the vanilla one for `head_joint`) | no |
 | Sounds | placeholder vanilla horse sounds (breathe, hit, death, soft step; baby_horse for fawns); real sounds in Phase 18 | no |
 | Particles | none | - |
