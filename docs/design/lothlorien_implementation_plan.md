@@ -524,8 +524,7 @@ Claude.
 
 # Phase 11 — Deer
 
-_Status 2026-09-30: built and deployed, static checks only, **not yet tested in game**. Model and textures are generated
-placeholders (`tools/make_deer.py`), queued in `GRAPHICS_TASKS.md` step 11. Shed-antler block + floor drop + flet chest entry built
+_Status 2026-09-30: built, deployed, and game tested. Model and textures final and approved. Shed-antler block + floor drop + flet chest entry built
 (`TECHNICAL_NOTES.md`, Deer antler). Design sheet `docs/mobs/deer.md`, notes and test plan in `TECHNICAL_NOTES.md` (Deer)._
 
 Implement first because it proves most terrestrial-animal mechanics.
@@ -550,7 +549,8 @@ Blockbench + graphics + Claude.
 
 # Phase 12 — White deer guidance
 
-_Status 2026-09-30: rebuilt and deployed as an **optional prototype**, static checks only, **nothing tested in game**. The white deer is
+_Status 2026-09-30: **done**. Tested in game by the owner (1.26.52): luring, taming, guidance, the gift and the Great Mallorn nut growing
+into a flet giant work. The white deer is
 its own entity `lothlorien:white_deer` (a rare loner: no herd, no breeding, no babies, not tamable); offering it a **Mallorn acorn** at
 Disharmony 0 starts guidance (the knowledge base said Western Corn; the owner changed it to the acorn). It walks by the engine's own
 pathfinding, following an invisible helper `lothlorien:guide_beacon` that script moves ahead in 8-14 block hops (goal

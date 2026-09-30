@@ -666,7 +666,7 @@ to the grass below (the leaves already had 1). Nothing in script or worldgen rep
 sapling, deer antler, pressure plate and button. **In game to check:** grass under fresh carpet stays green (new world
 for worldgen carpet; already-turned dirt does not turn back by itself, it regrows only by grass spreading).
 
-## White deer guidance (Phase 12, 2026-09-30, rebuilt with engine pathfinding; static checks only, NOTHING tested in game)
+## White deer guidance (Phase 12, 2026-09-30, rebuilt with engine pathfinding; DONE: owner playtest 1.26.52 - guidance, gift and nut growth work)
 
 **Gift (owner, 2026-09-30, replaces leading to flet giants; static checks only):** leading to the nearest flet marker was no better
 than wandering (the 80-block, loaded-chunk search only found trees already in sight). Finding farther trees is not possible from

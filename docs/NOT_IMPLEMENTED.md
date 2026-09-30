@@ -17,7 +17,7 @@ game data (1.26.52), the Microsoft creator docs and the Bedrock Wiki, in 2026-09
 | **Chest/boat, hopper, dispenser interactions** | n/a | Not part of the wood set. |
 | **Shed antlers as a world feature / placeable block** | Done (Phase 11), untested in game | See `TECHNICAL_NOTES.md` (Deer antler). The chandelier use belongs to Phase 17. |
 | **Deer grazing** | Left out | Vanilla `eat_block` turns grass blocks into dirt, which would bare the golden forest floor. A grazing animation without the block change needs script. |
-| **White deer guidance to structures** | Replaced 2026-09-30 by the gift, untested in game | Leading to hidden markers in flet giants was dropped and the markers removed (script only sees loaded chunks; placed structures cannot be located). The white deer now leads once to a spot it picks and lays a Great Mallorn nut (`docs/mobs/white_deer.md`, `TECHNICAL_NOTES.md` White deer guidance). Not done: sounds, the in-game goal experiment (`tools/dev_scripts/guide_goal/`). |
+| **White deer guidance to structures** | Replaced 2026-09-30 by the gift, done and tested in game (owner, 1.26.52) | Leading to hidden markers in flet giants was dropped and the markers removed (script only sees loaded chunks; placed structures cannot be located). The white deer now leads once to a spot it picks and lays a Great Mallorn nut (`docs/mobs/white_deer.md`, `TECHNICAL_NOTES.md` White deer guidance). Not done: sounds, the in-game goal experiment (`tools/dev_scripts/guide_goal/`). |
 
 ## Redstone
 
