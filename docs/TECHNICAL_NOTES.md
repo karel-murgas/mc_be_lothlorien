@@ -80,13 +80,21 @@ Spawn rules and feature rules find biomes only by tag.
 - The biome is 3D: caves under a replaced forest may also be Lothlórien, and then equally
   monster-free. Test it; decide whether that is acceptable.
 
+## Pack cleanup (2026-09-30)
+
+Helper `/scriptevent` commands that only served development were taken out of `lothlorien_bp/scripts/`:
+`showcase`, `grow`, `growbig`, `treestats`, `treecount`, `critters`, `deer`, `survey` and the world-load biome
+registration message. Copies live in `tools/dev_scripts/` (see its README); the last commit that still had them
+in the pack is `dc1182e` (`git show dc1182e:lothlorien_bp/scripts/<file>`). Kept in the pack: `depth`, `debug`
+(its actionbar shows depth) and `disharmony [points]` (the deer test plan needs it). Dev tooling belongs outside the packs.
+
 ## Debug instrument
 
-`/scriptevent lothlorien:debug` toggles an actionbar showing the biome id underfoot and the
-hostile mobs within 64 blocks (in-biome / total). `/scriptevent lothlorien:survey` samples
-the loaded surface within 160 blocks and reports the Lothlórien share, how much of it is
-water, and the direction/coordinates of its centre. At world load the script says in chat
-whether the biome registered. Spike-only; remove or gate it later.
+`/scriptevent lothlorien:debug` toggles an actionbar showing the biome id underfoot, the depth
+level and the hostile mobs within 64 blocks (in-biome / total). Kept in the pack (it shows the depth).
+**Removed from the pack (2026-09-30 cleanup, code in `tools/dev_scripts/biome_debug.js`, git `dc1182e`):**
+`/scriptevent lothlorien:survey` (Lothlórien share and centre within 160 blocks) and the world-load chat
+line saying whether the biome registered.
 
 `/locate biome` returns the **nearest** point of the biome, often its edge, and that edge
 can be shallow coastal water: vanilla forest extends into water where the terrain dips
@@ -197,8 +205,8 @@ bone meal, leaf decay, instruments), `blocks/mallorn_sapling.json`, `items/mallo
 - **Big Mallorn:** four saplings in a 2x2 square grow one tree with a 2x2 trunk (like vanilla dark oak): 15-24
   high, flared root logs, crown of a big blob plus 3-5 satellites, 5-8 level platform branches (3-7 long) under the
   crown, 2-5 low and 3-6 rising branches. ~140 logs (~560 planks), ~1500 leaves (~30 acorns if all cleared, for the
-  4 planted). Placement is spread over ticks with `system.runJob`. Debug: `/scriptevent lothlorien:growbig [n]`.
-- **Where trees come from:** the generators run in script, so they work for saplings and debug commands only.
+  4 planted). Placement is spread over ticks with `system.runJob`. Debug command `growbig`: removed from the pack, see `tools/dev_scripts/tree_debug.js`.
+- **Where trees come from:** the generators run in script, so they work for saplings only (the old debug commands are in `tools/dev_scripts/tree_debug.js`).
   Feature rules cannot call script, so **world generation cannot use them directly**; natural Mallorns need
   pre-generated `.mcstructure` files placed by a feature (Phase 5).
 - **Leaf decay:** leaves have state `lothlorien:persistent`. Player placement sets it true (never decays);
@@ -209,8 +217,8 @@ bone meal, leaf decay, instruments), `blocks/mallorn_sapling.json`, `items/mallo
   start decaying up to a minute later.
 - **Balance (estimate):** 2% per leaf x ~200 leaves = ~4 acorns if every leaf is cleared; clearing about
   half gives ~2, so a tree replaces itself with margin without acorns raining; bigger trees pay more. `node tests/tree_stats.mjs [n] [chance]`
-  prints the numbers offline. In game: `/scriptevent lothlorien:grow 20` plants 20 trees on a grid around
-  you, `/scriptevent lothlorien:treestats` reports the generator averages. **The 20-tree cut-down test is still to do.**
+  prints the numbers offline. The in-game helpers `grow`, `growbig` and `treestats` were removed from the pack in the 2026-09-30 cleanup
+  (`tools/dev_scripts/tree_debug.js`, git `dc1182e`); copy it back in for the test, or plant saplings. **The 20-tree cut-down test is still to do.**
 - **Untested in game** (written without game access): random ticking without a `minecraft:random_ticking`
   component (if leaves never decay or saplings never grow, add it first), `block.getLightLevel()` values,
   `crop_growth_emitter` particle name, bone meal event cancel, sapling `placement_filter` with the
@@ -228,7 +236,7 @@ Leaves come out with the default state `persistent=false`, so they decay like gr
 Test without a new world: `/place feature lothlorien:select_mallorn_tree_feature ~ ~ ~` (or one of the three
 directly) on grass. **Untested in game:** custom blocks inside `tree_feature`, log orientation (default state),
 density (5/chunk is a guess), mega tree size.
-Density check: `/scriptevent lothlorien:treecount [radius]` reports trees per chunk of biome and canopy cover around you (loaded chunks only; stand inside the biome in a freshly generated area).
+Density check (helper removed from the pack, now `tools/dev_scripts/tree_debug.js`): `/scriptevent lothlorien:treecount [radius]` reports trees per chunk of biome and canopy cover around you (loaded chunks only; stand inside the biome in a freshly generated area).
 
 ## Phase 5 - giant Mallorns (DONE 2026-09-30, accepted in game by the user)
 
@@ -297,7 +305,7 @@ The history below is kept because it records the traps.
       then sit on the start point however the piece is rotated, so trunks are at least 3 chunks (48
       blocks) apart.
     - Plain giants are variant `plain` (`flet: false`): woven branches and lush foliage, no platform, ladder
-      or chest. `/scriptevent lothlorien:showcase plain` shows them.
+      or chest. `showcase` (now `tools/dev_scripts/showcase.js`, removed from the pack) showed them.
     - The user found their crowns too flat (2026-09-30). Plain giants now get 3-6 ring branches instead of
       6-8, each starting 4 below to 3 above the old floor level. They tilt up 20-55% per step, may bend 45
       degrees on the way (`bentBranch`), and grow leaves along their top as well as a blob at the tip.
@@ -310,9 +318,9 @@ The history below is kept because it records the traps.
 - **Written 2026-09-30, not yet seen in game.** Open questions:
   - Is the trunk base exactly at ground level? The surface heightmap may be off by one.
   - Jigsaw may rotate the piece. Do custom `minecraft:block_face` logs and fence connections rotate
-    correctly? Test with `/scriptevent lothlorien:showcase woven 7 90`. If branch logs point the wrong way,
+    correctly? Test with the dev-only `showcase woven 7 90` (`tools/dev_scripts/showcase.js`). If branch logs point the wrong way,
     use `mallorn_wood` (the same on every side) for branches.
-- **Curation:** `/scriptevent lothlorien:showcase [variant]` lays out candidates on a grid (4 per row, 48
+- **Curation** (helper moved out of the pack 2026-09-30 to `tools/dev_scripts/showcase.js`; git `dc1182e`): `/scriptevent lothlorien:showcase [variant]` lays out candidates on a grid (4 per row, 48
   apart, variants in separate rows) south-east of the player, with a sign such as "woven 3" in front of
   each ladder. Trees in unloaded chunks are retried for 3 minutes. `/scriptevent lothlorien:showcase woven 3`
   places one tree next to you (a bare number means flet).
@@ -520,8 +528,7 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
   repeat (a): it must stay. Knowledge: `.claude/skills/bedrock-mobs/references/spawning.md`.
   **Game-tested 2026-09-30 (1.26.52): works** - critters despawn, including ones spawned under v1/v2 (the rule comes from
   the current pack when the chunk loads). Name-tagged critter stays (c): OK. Phase 10 spike done.
-- Instrument: `/scriptevent lothlorien:critters` one report (near r64 / in biome / farther loaded); `... critters watch` toggles a
-  report every 15 s (chat + log). Script: `scripts/critter_watch.js`.
+- Instrument `/scriptevent lothlorien:critters [watch]` (counts): removed from the pack 2026-09-30, now `tools/dev_scripts/critter_watch.js` (git `dc1182e`).
 - Test in a NEW world (spawn rules need no new chunks, but the biome does): (1) stand in Lórien, `watch` on, count should climb to
   the density limit and stay; (2) run 200+ blocks away and back several times, count near you must recover, "farther loaded" must
   not grow unbounded; (3) leave 2-3 min far away, then return: old critters gone or few; (4) compare with vanilla animals in the
@@ -531,7 +538,7 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
 ## Deer (Phase 11, 2026-09-30, built; static checks only, not yet tested in game)
 
 - Design sheet with every decision: `docs/mobs/deer.md`. Replaced the Phase 10 `test_critter` (files deleted; the
-  `/scriptevent lothlorien:critters` counter now counts deer).
+  dev-only critters counter counted deer; it has since left the pack).
 - **Disharmony avoidance without per-player filters**: entity filters cannot read a player's Disharmony (it is a
   dynamic property). So the entity has one component group per wariness state (`lothlorien:state_calm|l1|l2|l3|friend|alarmed`),
   each holding its own `behavior.avoid_mob_type` (flight distance, sneaking halves it) and, where allowed, `behavior.tempt`.
@@ -563,7 +570,7 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
 5. Run animation: does the gallop show while fleeing? Does it show while strolling (it must not)? Adjust the 3.5 threshold.
 6. Kill a few: venison, leather, bucks sometimes antlers; cook venison in furnace, smoker, campfire; eat it.
 7. Breed two with acorns: fawn appears, follows parent, grows up in about 20 min (acorns speed it up), a buck fawn gets antlers when grown.
-8. Spawning: `/scriptevent lothlorien:critters watch`: herds of 2-4 appear in the biome, stay bounded after travelling (Phase 10 protocol); do they crowd cows/sheep?
+8. Spawning: dev-only `critters watch` (copy `tools/dev_scripts/critter_watch.js` back in): herds of 2-4 appear in the biome, stay bounded after travelling (Phase 10 protocol); do they crowd cows/sheep?
 9. Look: side, front and back views of adult doe, buck and fawn; note what to redo for the graphics pass.
 
 ## Deer antler block (Phase 11, 2026-09-30, built; static checks only, not yet seen in game)

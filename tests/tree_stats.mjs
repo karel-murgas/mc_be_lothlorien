@@ -1,5 +1,5 @@
 // Offline balance estimate: node tests/tree_stats.mjs [trees] [acornChance]
-// Mirrors the leaf loot table; the in-game check is `/scriptevent lothlorien:treestats`.
+// Mirrors the leaf loot table; the in-game variant is in tools/dev_scripts/tree_debug.js.
 import { makeRandom, buildSmallMallorn, buildBigMallorn } from "../lothlorien_bp/scripts/mallorn_tree.js";
 
 const n = Number(process.argv[2] ?? 20);

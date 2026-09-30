@@ -2,7 +2,7 @@
 //   node tools/build_structures.mjs
 //      the worldgen set: only the trees in CHOSEN (every other giant structure is removed from the pack)
 //   node tools/build_structures.mjs <variant|all> [count] [firstSeed]      (defaults 8 1)
-//      curation candidates for /scriptevent lothlorien:showcase; they replace that variant's files but never
+//      curation candidates for the dev-only showcase (tools/dev_scripts/showcase.js); they replace that variant's files but never
 //      enter worldgen. Run the plain command again before committing, so the pack keeps only CHOSEN.
 // -> lothlorien_bp/structures/lothlorien/mallorn_<variant>_NN.mcstructure (id lothlorien:mallorn_<variant>_NN)
 //    and worldgen/template_pools/giant_mallorn.json (the CHOSEN trees) for the jigsaw structure
@@ -11,7 +11,7 @@
 // Tree NN of every variant uses the same seed, so flet_07 and woven_07 share their trunk and height.
 // Each file is SIZE x SIZE_Y x SIZE with the trunk centred horizontally (cells TRUNK_AT..TRUNK_AT+3) and the
 // first block above the ground at y ROOT_DEPTH; cells the tree does not fill are structure void, so the
-// terrain and plants around it survive. Keep TRUNK_AT / ROOT_DEPTH in step with scripts/showcase.js and
+// terrain and plants around it survive. Keep TRUNK_AT / ROOT_DEPTH in step with tools/dev_scripts/showcase.js and
 // with start_height (-ROOT_DEPTH) in worldgen/structures/giant_mallorn.json.
 import { writeFileSync, mkdirSync, readdirSync, unlinkSync } from "node:fs";
 import { dirname, join } from "node:path";

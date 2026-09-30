@@ -310,7 +310,7 @@ Claude + graphics.
 
 **Status: done 2026-09-30.** The procedural generator shipped as one parametrised builder, not a primitive
 toolkit: `tools/flet_mallorn.mjs` (variants flet / woven / plain) plus `tools/build_structures.mjs` (writes
-`.mcstructure`) and the showcase curation command. Six curated giants generate as a jigsaw structure. Details
+`.mcstructure`) and the showcase curation command (moved out of the pack to `tools/dev_scripts/showcase.js`, 2026-09-30). Six curated giants generate as a jigsaw structure. Details
 and traps: `docs/TECHNICAL_NOTES.md`, Phase 5.
 
 Build the reusable structure-generation toolkit before hand-authoring many trees.

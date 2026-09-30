@@ -106,8 +106,9 @@ reacts to a Disharmony III player also scares it.
 
 ## H. Health of the world
 
-Protocol: `.claude/skills/bedrock-mobs/references/testing.md`; instrument `/scriptevent lothlorien:critters [watch]`
-(counts deer) and `/scriptevent lothlorien:deer` (wariness, sex, fawns, alarmed).
+Protocol: `.claude/skills/bedrock-mobs/references/testing.md`; instruments `/scriptevent lothlorien:critters [watch]`
+(counts deer) and `/scriptevent lothlorien:deer` (wariness, sex, fawns, alarmed) were removed from the pack in the
+2026-09-30 cleanup: copies in `tools/dev_scripts/`, code in git at `dc1182e`.
 
 | Question | Decision | Tested |
 | --- | --- | --- |
