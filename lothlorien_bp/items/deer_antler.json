@@ -4,7 +4,7 @@
     "description": {
       "identifier": "lothlorien:deer_antler",
       "menu_category": {
-        "category": "items"
+        "category": "nature"
       }
     },
     "components": {

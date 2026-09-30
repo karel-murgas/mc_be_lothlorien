@@ -4,8 +4,7 @@
     "description": {
       "identifier": "lothlorien:athelas_salve",
       "menu_category": {
-        "category": "equipment",
-        "group": "minecraft:itemGroup.name.miscFood"
+        "category": "items"
       }
     },
     "components": {
