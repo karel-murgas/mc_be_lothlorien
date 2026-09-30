@@ -1,0 +1,51 @@
+{
+  "entity_sounds": {
+    "entities": {
+      "lothlorien:deer": {
+        "volume": 1.0,
+        "pitch": [
+          0.9,
+          1.1
+        ],
+        "events": {
+          "ambient": "mob.horse.breathe",
+          "hurt": "mob.horse.hit",
+          "death": "mob.horse.death",
+          "step": {
+            "sound": "mob.horse.soft",
+            "volume": 0.5,
+            "pitch": [
+              1.0,
+              1.3
+            ]
+          }
+        },
+        "variants": {
+          "key": "query.is_baby ? 'baby' : 'adult'",
+          "map": {
+            "baby": {
+              "pitch": [
+                1.2,
+                1.5
+              ],
+              "events": {
+                "ambient": "mob.baby_horse.breathe",
+                "ambient.baby": "mob.baby_horse.breathe",
+                "hurt": "mob.baby_horse.hurt",
+                "death": "mob.baby_horse.death",
+                "step": {
+                  "sound": "mob.horse.soft",
+                  "volume": 0.3,
+                  "pitch": [
+                    1.3,
+                    1.6
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

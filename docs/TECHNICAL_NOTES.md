@@ -526,3 +526,43 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
   the density limit and stay; (2) run 200+ blocks away and back several times, count near you must recover, "farther loaded" must
   not grow unbounded; (3) leave 2-3 min far away, then return: old critters gone or few; (4) compare with vanilla animals in the
   adjacent forest (same pool); (5) two players in different places if possible. Record numbers here.
+
+
+## Deer (Phase 11, 2026-09-30, built; static checks only, not yet tested in game)
+
+- Design sheet with every decision: `docs/mobs/deer.md`. Replaced the Phase 10 `test_critter` (files deleted; the
+  `/scriptevent lothlorien:critters` counter now counts deer).
+- **Disharmony avoidance without per-player filters**: entity filters cannot read a player's Disharmony (it is a
+  dynamic property). So the entity has one component group per wariness state (`lothlorien:state_calm|l1|l2|l3|friend|alarmed`),
+  each holding its own `behavior.avoid_mob_type` (flight distance, sneaking halves it) and, where allowed, `behavior.tempt`.
+  `scripts/deer.js` runs every 2 s: each player votes with their own state for the deer within 40 blocks, the nearest player
+  wins, and the script fires `lothlorien:set_<state>` only when the `lothlorien:wariness` property differs. Trade-off: with two
+  players near one deer it follows the nearest one; the avoid component still flees from both.
+- **Alarm**: a player hurting (or killing) a deer fires `lothlorien:alarm` on every deer within 20 blocks: group `state_alarmed`
+  (flee 36, no luring) with a `minecraft:timer` of 20 s whose event `lothlorien:alarm_over` re-triggers the state stored in
+  the property. The script skips deer with `lothlorien:alarmed` so it never cuts an alarm short.
+- **Goal priorities matter**: breed 2, tempt 3, avoid 4. Tempt must outrank avoid or a deer lured with an acorn would run away
+  the moment the player comes within flight distance (edge oscillation). Breeding must outrank both or it never completes
+  with the player standing next to the pair.
+- Sex and antlers: enum property `lothlorien:sex` (client synced) picked by `minecraft:entity_spawned` / `entity_born`; the render
+  controller shows bones `antler_*` only for `buck` adults (`part_visibility`). Loot differs by sex through two adult groups
+  (`adult_doe`, `adult_buck`), because loot-table conditions cannot test a custom property; babies have no loot group.
+- Venison uses `is_meat: true` in `minecraft:food` (wolves heal with it). One furnace recipe carries the tags furnace, smoker, campfire
+  like vanilla `furnace_beef`.
+- Animations are procedural Molang (no keyframes): walk = `query.modified_distance_moved` diagonal legs; run = gallop pairs with
+  weight `clamp((query.ground_speed - 3.5) / 2.5, 0, 1)`. **The 3.5 m/s threshold is a guess**; if the gallop never shows or shows
+  when strolling, tune it in `entity/deer.entity.json` (and `run` weight). Bone rotation convention used by the preview and the
+  model (from vanilla horse): bone x rotation positive = top leans towards -z (forward); z rotation is right-handed.
+- Model and textures come from `tools/make_deer.py` (see `GRAPHICS_TASKS.md` step 11). Sounds are placeholder vanilla horse sounds.
+
+### Deer test plan (new world not required for the entity; the biome needs new chunks)
+
+1. `/summon lothlorien:deer` several times: adult does (no antlers), bucks (antlers), a fawn now and then; spawn egg works; egg on an adult makes a fawn.
+2. Walk at a deer: it should flee at ~10 blocks (5 when sneaking). Hold an acorn or apple: it comes closer; run at it: it gets scared.
+3. `/scriptevent lothlorien:disharmony 4` then approach: flight at ~30 blocks, acorn no longer lures. `... 0`, wait: back to 10. Friend (10 calm minutes inside the biome): you can walk up to ~3 blocks.
+4. Hit one deer (or shoot): the rest of the herd within 20 blocks bolts for ~20 s.
+5. Run animation: does the gallop show while fleeing? Does it show while strolling (it must not)? Adjust the 3.5 threshold.
+6. Kill a few: venison, leather, bucks sometimes antlers; cook venison in furnace, smoker, campfire; eat it.
+7. Breed two with acorns: fawn appears, follows parent, grows up in about 20 min (acorns speed it up), a buck fawn gets antlers when grown.
+8. Spawning: `/scriptevent lothlorien:critters watch`: herds of 2-4 appear in the biome, stay bounded after travelling (Phase 10 protocol); do they crowd cows/sheep?
+9. Look: side, front and back views of adult doe, buck and fawn; note what to redo for the graphics pass.

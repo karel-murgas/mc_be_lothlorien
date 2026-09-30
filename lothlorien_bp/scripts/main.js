@@ -10,6 +10,7 @@ import { handleShowcaseEvent } from "./showcase.js";
 import { leafUndersideY } from "./leaf_fall.js";
 import { handleDisharmonyEvent, startDisharmony } from "./disharmony_game.js";
 import { handleCritterEvent, startCritterWatch } from "./critter_watch.js";
+import { handleDeerEvent, startDeer } from "./deer.js";
 import { DEPTH_NAMES, estimateDepth, probeCount } from "./depth.js";
 
 const BIOME_ID = "lothlorien:lothlorien";
@@ -174,6 +175,7 @@ function onScriptEvent(event) {
   if (handleShowcaseEvent(event, player)) return;
   if (handleDisharmonyEvent(event, player)) return;
   if (handleCritterEvent(event, player, inBiome)) return;
+  if (handleDeerEvent(event, player)) return;
   if (event.id === "lothlorien:survey") {
     survey(player);
     return;
@@ -236,5 +238,6 @@ world.afterEvents.worldLoad.subscribe(() => {
   system.runInterval(fallLeaves, LEAF_INTERVAL_TICKS);
   startDisharmony(inBiome, DEBUG_TAG);
   startCritterWatch(inBiome);
+  startDeer();
   reportBiomeRegistration();
 });

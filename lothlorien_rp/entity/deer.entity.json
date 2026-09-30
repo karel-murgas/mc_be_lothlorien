@@ -1,0 +1,45 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "lothlorien:deer",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/deer/deer",
+        "baby": "textures/entity/deer/deer_baby"
+      },
+      "geometry": {
+        "default": "geometry.lothlorien.deer",
+        "baby": "geometry.lothlorien.deer_baby"
+      },
+      "animations": {
+        "idle": "animation.lothlorien.deer.idle",
+        "walk": "animation.lothlorien.deer.walk",
+        "run": "animation.lothlorien.deer.run",
+        "look_at_target": "animation.common.look_at_target"
+      },
+      "scripts": {
+        "scale": "query.is_baby ? 2.0 : 1.0",
+        "animate": [
+          "idle",
+          {
+            "walk": "query.modified_move_speed * (1.0 - math.clamp((query.ground_speed - 3.5) / 2.5, 0.0, 1.0))"
+          },
+          {
+            "run": "math.clamp((query.ground_speed - 3.5) / 2.5, 0.0, 1.0)"
+          },
+          "look_at_target"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.lothlorien.deer"
+      ],
+      "spawn_egg": {
+        "base_color": "#9a6a3e",
+        "overlay_color": "#f1e4c3"
+      }
+    }
+  }
+}

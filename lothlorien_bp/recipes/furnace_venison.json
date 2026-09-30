@@ -1,0 +1,15 @@
+{
+  "format_version": "1.12",
+  "minecraft:recipe_furnace": {
+    "description": {
+      "identifier": "lothlorien:furnace_venison"
+    },
+    "tags": [
+      "furnace",
+      "smoker",
+      "campfire"
+    ],
+    "input": "lothlorien:venison_raw",
+    "output": "lothlorien:venison_cooked"
+  }
+}

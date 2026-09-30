@@ -166,3 +166,31 @@ in a few pixels). Replace each in place (same name); no JSON changes needed.
 
 Placeholders (16x16, generated bottles): `textures/items/athelas_salve.png` (green salve in a cork-stopped vial) and
 `textures/items/miruvor.png` (golden cordial). Replace in place. Miruvor should read as precious (gold, glow) and clearly differ from the salve.
+
+
+---
+
+## Step 11 - Deer (Phase 11)
+
+Everything below is **generated placeholder art** (`tools/make_deer.py`, preview with `.claude/skills/bedrock-mobs/scripts/preview_entity.py`). Claude made a real
+attempt following `bedrock-modding/references/10-art-style.md` (colour ramps with hue shift, light from above and front, hand-placed
+spots, no noise or banding) and judged it only through the software preview, **never in game**. If it looks wrong or flat in game,
+redo it by hand in Blockbench; the pipeline stays valid (same bone names, same file names).
+
+| File | Used by | State |
+| --- | --- | --- |
+| `models/entity/deer.geo.json` (`geometry.lothlorien.deer`, `deer_baby`) | adult and fawn model, 64x64 texture, 1 px = 1 unit | generated boxes; proper Blockbench model with slanted parts, hock joints, a real muzzle would be better |
+| `textures/entity/deer/deer.png` | adult (does and bucks; antler cubes are on the same sheet) | fallow-deer palette, pale spots, white rump, dark spine |
+| `textures/entity/deer/deer_baby.png` | fawn | darker, bold spots along the back |
+| `textures/items/venison_raw.png`, `venison_cooked.png` | items | chop on a bone, 16x16 |
+| `textures/items/deer_antler.png` | item | pair of antlers on a skull plate, 16x16 |
+
+### Requirements (Claude adds to this list)
+
+- **Bone names are contracts**: `body neck head ear_l ear_r antler_l antler_r tail leg0..leg3` (leg0 hind right, leg1 hind left, leg2
+  front right, leg3 front left). The animations (`animations/deer.animation.json`), vanilla `look_at_target` (rotates `head`) and the render
+  controller (hides `antler_*` on does and fawns) depend on them. A Blockbench model must keep the names and pivots (legs at the hip).
+- The baby geometry is authored at its **real in-game size** (the BP scales the baby by 0.5, the client entity scales the model by 2 to undo it).
+- Both body textures share one sheet per model; if you go above 64x64 keep one size for adult and fawn (no mixels).
+- **White deer (Phase 12)** will need its own adult texture (and a fawn one): white coat, pale pink nose and ears, optional faint silver shimmer.
+- Sound: placeholder vanilla horse sounds until Phase 18.

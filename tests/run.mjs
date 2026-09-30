@@ -243,20 +243,59 @@ test("disharmony: status hidden outside, saved state round-trips, junk is tolera
   assert.deepEqual(D.parse(undefined), D.newState()); assert.deepEqual(D.parse("{oops"), D.newState());
 });
 
-// Phase 10: the placeholder critter must spawn by our biome tag only and be able to despawn.
-test("test critter: biome-only spawn rule with density limit", () => {
-  const r = JSON.parse(readFileSync(new URL("../lothlorien_bp/spawn_rules/test_critter.json", import.meta.url), "utf8"));
-  const rules = r["minecraft:spawn_rules"];
-  assert.equal(rules.description.identifier, "lothlorien:test_critter");
+// Phase 11: deer.
+import * as R from "../lothlorien_bp/scripts/deer_rules.js";
+const readJson = (p) => JSON.parse(readFileSync(new URL(p, import.meta.url), "utf8"));
+const deerEntity = () => readJson("../lothlorien_bp/entities/deer.json")["minecraft:entity"];
+const avoidRadius = (e, w) => e.component_groups[`lothlorien:state_${w}`]["minecraft:behavior.avoid_mob_type"].entity_types[0].max_dist;
+
+test("deer: wariness follows Disharmony level; Friend only at level 0", () => {
+  assert.equal(R.warinessFor(0, false), "calm");
+  assert.equal(R.warinessFor(0, true), "friend");
+  assert.deepEqual([1, 2, 3].map((l) => R.warinessFor(l, false)), ["l1", "l2", "l3"]);
+  assert.equal(R.warinessFor(2, true), "l2");
+});
+test("deer: the nearest player decides, nobody near decides nothing", () => {
+  assert.equal(R.pickWariness([{ distance: 20, wariness: "l3" }, { distance: 8, wariness: "calm" }]), "calm");
+  assert.equal(R.pickWariness([]), undefined);
+});
+test("deer: every wariness has a state group and a set event; flight distance grows with Disharmony", () => {
+  const e = deerEntity();
+  for (const w of R.WARINESS) {
+    assert.ok(e.component_groups[`lothlorien:state_${w}`], `group ${w}`);
+    assert.ok(e.events[R.setEventFor(w)], `event ${w}`);
+  }
+  const r = (w) => avoidRadius(e, w);
+  assert.ok(r("friend") < r("calm") && r("calm") < r("l1") && r("l1") < r("l2") && r("l2") < r("l3"));
+  assert.ok(R.WATCH_RADIUS > r("l3") && R.WATCH_RADIUS > r("alarmed"), "watch radius covers the flight distances");
+});
+test("deer: only calm states can be lured; the alarm hands back through the property", () => {
+  const e = deerEntity();
+  const lured = (w) => !!e.component_groups[`lothlorien:state_${w}`]["minecraft:behavior.tempt"];
+  assert.deepEqual(["calm", "l1", "friend", "l2", "l3", "alarmed"].map(lured), [true, true, true, false, false, false]);
+  const back = e.events["lothlorien:alarm_over"].sequence.map((s) => s.trigger).sort();
+  assert.deepEqual(back, R.WARINESS.map(R.setEventFor).sort());
+  assert.equal(e.component_groups["lothlorien:state_alarmed"]["minecraft:timer"].time_down_event.event, "lothlorien:alarm_over");
+});
+test("deer: bucks drop antlers, does do not; babies drop nothing", () => {
+  const e = deerEntity();
+  assert.equal(e.component_groups["lothlorien:adult_buck"]["minecraft:loot"].table, "loot_tables/entities/deer_buck.json");
+  assert.equal(e.component_groups["lothlorien:adult_doe"]["minecraft:loot"].table, "loot_tables/entities/deer.json");
+  assert.ok(!e.component_groups["lothlorien:baby"]["minecraft:loot"]);
+  assert.ok(!e.components["minecraft:loot"]);
+  const names = (t) => readJson(`../lothlorien_bp/${t}`).pools.flatMap((p) => p.entries.map((x) => x.name));
+  assert.ok(!names("loot_tables/entities/deer.json").includes("lothlorien:deer_antler"));
+  assert.ok(names("loot_tables/entities/deer_buck.json").includes("lothlorien:deer_antler"));
+});
+test("deer: biome-only spawn rule with density limit, standard despawn, not persistent", () => {
+  const rules = readJson("../lothlorien_bp/spawn_rules/deer.json")["minecraft:spawn_rules"];
+  assert.equal(rules.description.identifier, R.DEER_ID);
   for (const c of rules.conditions) {
     assert.equal(c["minecraft:biome_filter"].value, "lothlorien");
     assert.ok(c["minecraft:density_limit"].surface > 0);
   }
-});
-test("test critter: has a despawn rule and is not persistent", () => {
-  const e = JSON.parse(readFileSync(new URL("../lothlorien_bp/entities/test_critter.json", import.meta.url), "utf8"));
-  const comps = e["minecraft:entity"].components;
-  assert.ok(comps["minecraft:despawn"]);
+  const comps = deerEntity().components;
+  assert.deepEqual(comps["minecraft:despawn"], { despawn_from_distance: {} });
   assert.ok(!comps["minecraft:persistent"]);
 });
 

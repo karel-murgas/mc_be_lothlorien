@@ -46,6 +46,15 @@
     },
     "lothlorien:miruvor": {
       "textures": "textures/items/miruvor"
+    },
+    "lothlorien:venison_raw": {
+      "textures": "textures/items/venison_raw"
+    },
+    "lothlorien:venison_cooked": {
+      "textures": "textures/items/venison_cooked"
+    },
+    "lothlorien:deer_antler": {
+      "textures": "textures/items/deer_antler"
     }
   }
 }

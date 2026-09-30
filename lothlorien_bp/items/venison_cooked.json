@@ -1,0 +1,31 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:item": {
+    "description": {
+      "identifier": "lothlorien:venison_cooked",
+      "menu_category": {
+        "category": "items",
+        "group": "minecraft:itemGroup.name.miscFood"
+      }
+    },
+    "components": {
+      "minecraft:icon": "lothlorien:venison_cooked",
+      "minecraft:use_animation": "eat",
+      "minecraft:use_modifiers": {
+        "use_duration": 1.6,
+        "movement_modifier": 0.5
+      },
+      "minecraft:food": {
+        "nutrition": 8,
+        "saturation_modifier": 0.8,
+        "is_meat": true
+      },
+      "minecraft:tags": {
+        "tags": [
+          "minecraft:is_food",
+          "minecraft:is_meat"
+        ]
+      }
+    }
+  }
+}
