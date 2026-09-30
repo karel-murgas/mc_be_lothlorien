@@ -52,7 +52,7 @@
       "minecraft:geometry": "geometry.lothlorien.mallorn_fence_gate_closed",
       "minecraft:material_instances": {
         "*": {
-          "texture": "lothlorien:mallorn_heartwood_planks",
+          "texture": "lothlorien:mallorn_heartwood_fence_post",
           "render_method": "opaque"
         }
       },
@@ -60,7 +60,7 @@
         "geometry": "geometry.lothlorien.mallorn_fence_gate_closed",
         "material_instances": {
           "*": {
-            "texture": "lothlorien:mallorn_heartwood_planks",
+            "texture": "lothlorien:mallorn_heartwood_fence_post",
             "render_method": "opaque"
           }
         }

@@ -176,6 +176,14 @@ columns); the rails and cap read a leaf-free strip of it (columns 5-6), grain tu
 display transform, which the game only accepts from 1.26.40 and otherwise drops the whole file (icons vanished, 2026-10-01).
 Selection and collision boxes are unchanged. The test "fence: every material instance ..." checks both sets.
 
+**Carved fence gate (2026-10-01, deployed, not yet seen in game).** `tools/make_mallorn_gate.py` writes
+`mallorn_fence_gate_closed.geo.json` (bones `posts`, `rails`; its `item_display_transforms` are read back, icon pose
+`[30,135,0]` kept) and `_open.geo.json` (bones `posts`, `leaves`), sharing `seg()`/`turn()`/`geometry()` with the fence
+generator. The +x half is built along z, turned onto +x; the -x half is it turned 180 deg. Open = each half turned a quarter
+about its post (+x about (7,0) once, -x about (-7,0) three times), so the leaves lie at z -1..-7 like the old open model and
+inside the open selection box. Both sets now use the `*` texture `mallorn_fence_post` / `mallorn_heartwood_fence_post`
+(no new texture key). States, permutations, boxes, sounds, redstone and recipes unchanged. Test "gate: ...".
+
 - Tools: every wood block carries `minecraft:is_axe_item_destructible`; leaves use the hoe tag.
 - Logs: `block_face` trait + rotation permutations; axe strips (`lothlorien:strippable`).
 - Stairs: native corners. `placement_direction` with `minecraft:corner_and_cardinal_direction`

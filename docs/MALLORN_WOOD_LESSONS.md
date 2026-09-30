@@ -49,4 +49,8 @@ Status of each asset: `GRAPHICS_TASKS.md` step 1. How the blocks are built: `TEC
   `newline=""` and keep each file's endings, or every line shows as changed (or a text replacement silently misses).
 - Blockbench: rendering the same model path again reuses the old texture, and it keeps rendered PNGs open (write new names).
 - Cube slopes: build them from end points (`seg()`), check the sign on a side view (the first try drew V dips).
+- `seg()` is right in both directions (rising to -z or +z; checked on side views 2026-10-01). A 2x2 rail frame seen from a
+  camera slightly above can read as a V when it is a ^: judge the slope on a level side view, not on the front render.
+- Gate (2026-10-01): 2x2 gate posts cannot carry the 4x5 leaf; they read leaf-free columns of the post texture. A leaf on
+  the gate needs a 4-wide face (variant C's centre post), which splits in half when the gate opens.
 - Refer to the owner with neutral pronouns in notes.

@@ -888,5 +888,31 @@ test("fence: every material instance the fence models name is defined on the blo
     if (f["minecraft:geometry"][0].item_display_transforms?.shelf) assert.ok(atLeast([1, 26, 40]), `${g}: "shelf" needs format 1.26.40+`);
   }
 });
+test("gate: carved models (tools/make_mallorn_gate.py) wear the fence post texture in both sets; bones, icon pose and open side kept", () => {
+  const closed = readJson("../lothlorien_rp/models/blocks/mallorn_fence_gate_closed.geo.json");
+  const open = readJson("../lothlorien_rp/models/blocks/mallorn_fence_gate_open.geo.json");
+  for (const [f, bones] of [[closed, ["posts", "rails"]], [open, ["posts", "leaves"]]]) {
+    assert.equal(f.format_version, "1.26.50");
+    const g = f["minecraft:geometry"][0];
+    assert.deepEqual(g.bones.map((b) => b.name), bones);
+    assert.ok(g.bones.every((b) => b.cubes.length > 0));
+    assert.ok(!JSON.stringify(g).includes("material_instance"), "every face uses the block's * material");
+  }
+  const gui = closed["minecraft:geometry"][0].item_display_transforms.gui;
+  assert.deepEqual([gui.rotation, gui.fit_to_frame], [[30, 135, 0], false], "icon pose confirmed in game");
+  // open leaves swing to -z, inside the open selection box (z -8..0)
+  for (const c of open["minecraft:geometry"][0].bones[1].cubes) {
+    assert.ok(c.origin[2] >= -8.5 && c.origin[2] + c.size[2] <= 1.5, `open leaf at z ${c.origin[2]}`);
+  }
+  const atlas = readJson("../lothlorien_rp/textures/terrain_texture.json").texture_data;
+  for (const set of ["mallorn", "mallorn_heartwood"]) {
+    const c = readJson(`../lothlorien_bp/blocks/${set}_fence_gate.json`)["minecraft:block"].components;
+    for (const mi of [c["minecraft:material_instances"], c["minecraft:item_visual"].material_instances]) {
+      assert.equal(mi["*"].texture, `lothlorien:${set}_fence_post`);
+      assert.ok(atlas[mi["*"].texture], `${set}: texture key in terrain_texture.json`);
+    }
+    assert.equal(c["minecraft:item_visual"].geometry, "geometry.lothlorien.mallorn_fence_gate_closed");
+  }
+});
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }
 console.log("all tests passed");
