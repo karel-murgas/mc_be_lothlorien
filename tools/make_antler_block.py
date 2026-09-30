@@ -1,8 +1,8 @@
-"""Generates the placeable deer antler block: one pair of big mounted antlers, hung on a wall or lying on the floor.
+"""Generates the placeable deer antler block: one pair of big mounted antlers, hung on a wall, lying on the floor or hanging from a ceiling.
 
     python -B mods/lothlorien/tools/make_antler_block.py
 
-Output (overwritten every run): lothlorien_rp/models/blocks/deer_antler_{wall,floor}.geo.json and
+Output (overwritten every run): lothlorien_rp/models/blocks/deer_antler_{wall,floor,ceiling}.geo.json and
 lothlorien_rp/textures/blocks/deer_antler.png.
 
 The wall model is authored once (back against the wall at +z, tips up, width filling the 16-unit block). The floor
@@ -71,6 +71,11 @@ def to_floor(cubes):
     return [(x, y, z, sx, sy, sz) for x, y, z, sx, sy, sz in out]
 
 
+def to_ceiling(floor_cubes):
+    """The floor model flipped upside down, hanging from the ceiling (skull against it, tips still pointing to -z)."""
+    return [(x, 16.0 - (y + sy), z, sx, sy, sz) for x, y, z, sx, sy, sz in floor_cubes]
+
+
 def clamp(cubes):
     """Keep every cube inside the block (-8..8, 0..16): a block geometry outside it is cut off."""
     out = []
@@ -117,7 +122,8 @@ def main():
     (RP / "models/blocks").mkdir(parents=True, exist_ok=True)
     wall = clamp(wall_layout())
     floor = clamp(to_floor(wall_layout()))
-    for name, cubes in (("wall", wall), ("floor", floor)):
+    ceiling = clamp(to_ceiling(to_floor(wall_layout())))
+    for name, cubes in (("wall", wall), ("floor", floor), ("ceiling", ceiling)):
         (RP / f"models/blocks/deer_antler_{name}.geo.json").write_text(
             json.dumps(geo(f"geometry.lothlorien.deer_antler_{name}", cubes), indent=2) + "\n")
         lo, hi = bounds(cubes)

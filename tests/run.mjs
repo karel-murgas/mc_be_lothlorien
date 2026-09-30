@@ -309,17 +309,40 @@ test("deer: biome-only spawn rule with density limit, standard despawn, not pers
 });
 
 // Deer antler block and its drop.
-test("antler block: a permutation for every floor direction and every wall face", () => {
+import * as AR from "../lothlorien_bp/scripts/antler_rules.js";
+test("antler block: a permutation for every floor, ceiling and wall placement; no block-list filter", () => {
   const b = readJson("../lothlorien_bp/blocks/deer_antler.json")["minecraft:block"];
   const conds = b.permutations.map((p) => p.condition);
   for (const d of ["north", "east", "south", "west"]) {
     assert.ok(conds.some((c) => c.includes("'up'") && c.includes(`'${d}'`)), `floor ${d}`);
-    assert.ok(conds.some((c) => c.includes(`block_face') == '${d}'`) && !c.includes("'up'")), `wall ${d}`);
+    assert.ok(conds.some((c) => c.includes("'down'") && c.includes(`'${d}'`)), `ceiling ${d}`);
+    assert.ok(conds.some((c) => c.includes(`block_face') == '${d}'`) && !c.includes("'up'") && !c.includes("'down'")), `wall ${d}`);
   }
-  const wall = b.permutations.filter((p) => !p.condition.includes("'up'"));
-  for (const p of wall) assert.equal(p.components["minecraft:geometry"], "geometry.lothlorien.deer_antler_wall");
-  const faces = b.components["minecraft:placement_filter"].conditions.flatMap((c) => c.allowed_faces);
-  assert.deepEqual([...new Set(faces)].sort(), ["east", "north", "south", "up", "west"]);
+  const geo = (frag) => b.permutations.filter((p) => p.condition.includes(frag)).map((p) => p.components["minecraft:geometry"]);
+  assert.ok(geo("'down'").every((g) => g === "geometry.lothlorien.deer_antler_ceiling"));
+  assert.ok(b.permutations.filter((p) => !p.condition.includes("'up'") && !p.condition.includes("'down'"))
+    .every((p) => p.components["minecraft:geometry"] === "geometry.lothlorien.deer_antler_wall"));
+  assert.ok(!b.components["minecraft:placement_filter"], "placeable on any block, like an item frame");
+  assert.ok(b.components["minecraft:tick"] && b.components["lothlorien:antler_support"], "falls off without support");
+});
+test("antler support: opposite side of the clicked face; air and liquid drop it, unloaded keeps it", () => {
+  assert.deepEqual(AR.supportOffset("up"), { x: 0, y: -1, z: 0 });
+  assert.deepEqual(AR.supportOffset("down"), { x: 0, y: 1, z: 0 });
+  assert.deepEqual(AR.supportOffset("north"), { x: 0, y: 0, z: 1 });
+  assert.deepEqual(AR.supportOffset("east"), { x: -1, y: 0, z: 0 });
+  assert.equal(AR.isUnsupported({ isAir: true, isLiquid: false }), true);
+  assert.equal(AR.isUnsupported({ isAir: false, isLiquid: true }), true);
+  assert.equal(AR.isUnsupported({ isAir: false, isLiquid: false }), false);
+  assert.equal(AR.isUnsupported(undefined), false);
+});
+test("antler drop: only on ground blocks, never on litter", () => {
+  for (const d of ["north", "east", "south", "west"]) {
+    const f = readJson(`../lothlorien_bp/features/deer_antler_${d}_feature.json`)["minecraft:single_block_feature"];
+    assert.deepEqual(f.may_replace, ["minecraft:air"]);
+    const bottom = f.may_attach_to.bottom.map((x) => x.name);
+    assert.ok(bottom.includes("minecraft:grass_block"));
+    assert.ok(!bottom.some((n) => n.includes("carpet") || n.includes("blossom")), "no litter as support");
+  }
 });
 test("antler drop: every feature it names exists; rarity sits between plain giants and lookout trees", () => {
   const f = (n) => readJson(`../lothlorien_bp/features/${n}.json`);

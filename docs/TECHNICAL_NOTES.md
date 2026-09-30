@@ -573,26 +573,26 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
   floor** (geometry `deer_antler_floor`, rotated by cardinal direction); **side face = antler trophy on a wooden plaque** (geometry
   `deer_antler_wall`, back against the wall, rotated by the clicked face: north 0, west 90, south 180, east 270 as for stairs). No ceiling
   placement. Whether the rotations are right (plaque really against the wall, front out) is the first thing to check in game.
-- **Revised 2026-09-30 after the first look**: one model (a big pair of mounted antlers, filling the 16x16 face), hung on walls and lying on
-  its back on the floor (same cube list, turned by coordinates in `tools/make_antler_block.py`); no plaque (a trophy block may come later).
-  `minecraft:placement_filter` now has two conditions (floor: `up`; wall: four sides) whose `block_filter` starts with the tag descriptor
-  `query.any_tag('minecraft:is_pickaxe_item_destructible', ..._axe_..., ..._shovel_..., 'dirt', 'stone', 'wood', 'log')` (vanilla writes tag
-  descriptors this way) plus explicit names; the floor condition also accepts Mallorn leaf carpet and blossoms as support. Before, it was a
-  short name list, which left most blocks unusable. The filter still keeps worldgen off the canopy: leaves are in none of those tags.
-  **Unverified: how much of the world the tags cover.** If a block you expect is refused, add its name to the `block_filter` list. The
-  filter is also a survival check: the antler pops off when its support is removed (MS docs).
-- **Drop under leaf litter**: about a third of the floor is carpet/blossom, so the first version mostly failed (the cell the heightmap returns
-  held or sat on litter). The features now replace the litter (`may_replace`: air, carpet, blossoms, the flowers, fern, short grass) and the
-  scatter's y is -1 or 0 so both heightmap readings (above the litter, or at its cell) reach a grass-supported cell.
-- Geometry is built from axis-aligned cubes with per-face UV strips of a 16x16 palette texture (`textures/blocks/deer_antler.png`), by
-  `tools/make_antler_block.py`. Antler slants are stepped cubes on purpose (the sign of block-geometry rotation under the mirrored-x rule is unverified).
-  Selection boxes: floor 16x4.5x16, wall 16x16x4.5 against the back.
+- **Placement (final form, 2026-09-30)**: one model, a big pair of mounted antlers filling the 16x16 face (same cube list for all three
+  placements; floor and ceiling versions are the wall model turned by coordinates in `tools/make_antler_block.py`). The user wanted it
+  placeable like an item frame: **any face of any block, ceiling too**. So the block has **no `minecraft:placement_filter`** (a filter's
+  `block_filter` can only name blocks or tags, and two earlier list/tag attempts were rejected as a strange workaround). The survival
+  check an item frame has comes from script instead: `scripts/antler.js` (`lothlorien:antler_support`, pure rule in `antler_rules.js`)
+  runs on `minecraft:tick` (every 1-2 s) and destroys the block, dropping it, when the support block (opposite of the clicked
+  `minecraft:block_face`) is air or liquid. Untested: whether the support offsets match the face semantics, and whether `setblock ... destroy` drops the item.
+  Permutations: block_face `up` = floor (4 rotations by cardinal direction), `down` = ceiling (4), four wall faces (rotated by face).
+- **Natural drop only on ground blocks, never on litter**: the worldgen feature (`single_block_feature`) has its own support rule,
+  `may_attach_to: { bottom: [grass, dirt, coarse dirt, podzol, dirt with roots, moss, mud, stone], min_sides_must_attach: 1 }` and
+  `may_replace: [air]`. Leaf carpet or a blossom in the target cell blocks the placement (cell not air), and a cell above litter has litter
+  below (not in the list), so an antler can never float on litter. The price is that about a third of the floor is excluded, so the real
+  frequency is lower than the 1/64 per chunk on paper. (An earlier version replaced the litter; the user did not want antlers to look like they float.)
 - **Natural drop**: rule `deer_antler_drop_feature_rules` (after surface pass, biome tag, `scatter_chance` 1/64 per chunk) -> scatter of 3
   tries within about 3 blocks -> weighted pick of four facings, all `up`. Giants are one structure per ~36 chunks (about 1 in 4 a lookout tree =
   ~1/144 per chunk), so 1/64 sits between them; a test pins that. Real frequency will be lower (tries on leaves, water or off-biome fail): tune
   the denominator after walking around.
 - **Chest**: `loot_tables/chests/mallorn_flet.json` pool 2 has the antler, `set_count 1`, weight 2 (of 19).
 - Verifier: a block that also mounts on walls is no longer classed as a "plant" (no composter / flower pot / bone-meal demands).
+- Selection boxes: floor 16x4.5x16, wall 16x16x4.5 against the back, ceiling 16x4.5x16 at the top.
 
 ### Deer model changes after the first look (2026-09-30)
 
@@ -605,3 +605,9 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
   fewer elements (style guide). The texture paints coat down to 45 % then pale lower leg and a dark hoof.
 - Antlers: each side now has a 9.5-unit beam, brow, bez and back tines, two upright crown prongs and two side tines (was a beam and three small bits).
 - Blockbench MCP tools were not available in this session (they load after a restart); these edits were made in `tools/make_deer.py`.
+
+### Fawn legs and whole-number box sizes (2026-09-30)
+
+- The fawn showed a hole in the upper legs. Two causes removed: its legs were 1.5 wide (a fractional box size puts box-UV faces between texels),
+  and the leg texture had a dithered dark notch at the coat/pale border that read as a hole on a 6-unit leg. Fawn legs are now 2x6x2, antler
+  cubes have whole-number sizes (positions can stay fractional), and `tools/make_deer.py` now **fails if any size is fractional or any face texel is unpainted**.

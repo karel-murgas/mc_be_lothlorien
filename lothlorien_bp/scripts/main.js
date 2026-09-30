@@ -4,6 +4,7 @@ import "./ground_cover.js";
 import "./bonemeal.js";
 import "./crop.js";
 import "./lembas.js";
+import "./antler.js";
 import "./athelas.js";
 import { handleTreeScriptEvent } from "./trees.js";
 import { handleShowcaseEvent } from "./showcase.js";

@@ -57,15 +57,17 @@ def antler_cubes(bone, s, y0, z0):
     def box(name, x, y, z, sx, sy, sz):
         ox = x if s == 1 else -x - sx
         return (f"{bone}_{name}", bone, [ox, y0 + y, z0 + z], [sx, sy, sz], "antler")
+    # Whole-number sizes only: a fractional box size makes the box-UV faces land between texels in game and
+    # leaves holes (the fawn's 1.5-wide legs showed see-through gaps, 2026-09-30).
     return [
-        box("beam", 1.0, 0, 0, 1.5, 9.5, 1.5),
-        box("brow", 1.0, 1.5, -3.5, 1.3, 1.3, 3.6),
-        box("bez", 1.0, 4.2, -3.0, 1.3, 1.3, 3.1),
-        box("back", 1.0, 6.0, 1.2, 1.3, 1.3, 2.5),
-        box("crown_a", 1.0, 8.0, -1.4, 1.3, 4.0, 1.3),
-        box("crown_b", 2.3, 7.0, -0.1, 1.3, 4.5, 1.3),
-        box("out_a", 2.0, 3.0, 0, 2.6, 1.3, 1.3),   # tines to the side, so the pair reads as branched from the front
-        box("out_b", 2.0, 5.8, 0, 2.2, 1.3, 1.3),
+        box("beam", 1.0, 0, 0, 2, 10, 2),
+        box("brow", 1.0, 1.5, -4, 1, 1, 4),
+        box("bez", 1.0, 4.2, -3, 1, 1, 3),
+        box("back", 1.0, 6.0, 2, 1, 1, 3),
+        box("crown_a", 1.0, 8.0, -1.4, 1, 4, 1),
+        box("crown_b", 3.0, 7.0, 0.5, 1, 5, 1),
+        box("out_a", 3.0, 3.0, 0.5, 3, 1, 1),   # tines to the side, so the pair reads as branched from the front
+        box("out_b", 3.0, 5.8, 0.5, 2, 1, 1),
     ]
 
 
@@ -121,7 +123,7 @@ def cubes_baby():
     c.append(("ear_r", "ear_r", [-3.5, 14, -6.5], [2, 3, 1], "ear"))
     c.append(("tail", "tail", [-1, 7.5, 5], [2, 3, 1], "tail"))
     for i, (x, z) in enumerate(((-2.5, 2.5), (0.5, 2.5), (-2.5, -4), (0.5, -4))):
-        c.extend(leg_cubes(i, x, z, 6, 2, 1.5))
+        c.extend(leg_cubes(i, x, z, 6, 2, 2))
     return bones, c
 
 
@@ -337,7 +339,7 @@ class Paint:
             cut = int(h * 0.45)  # coat down to here, then the pale lower leg
             if j < cut:
                 return ramp(COAT, (3 if j < 1 else 2) + (1 if self.baby else 0))
-            if j == cut and i % 2 == 0:
+            if j == cut and i % 2 == 0 and h >= 10:  # (not on the fawn: there it read as a hole)
                 return ramp(COAT, 1)  # a broken edge rather than a ruler line
             return ramp(BELLY, 1 if j < h - 4 else 0)
         for k in ("east", "west", "north", "south"):
@@ -453,11 +455,25 @@ def deer_antler():
 
 
 # ---------------------------------------------------------------- main
+def check_painted(cubes, uvs, img):
+    """Every face texel of every cube must be painted and every size a whole number (see antler_cubes)."""
+    for name, _bone, _o, size, _role in cubes:
+        if any(v != int(v) for v in size):
+            raise SystemExit(f"{name}: fractional size {size} leaves holes in box UV")
+        for face, (x, y, w, h) in faces(*uvs[name], size).items():
+            for j in range(h):
+                for i in range(w):
+                    if img.getpixel((x + i, y + j))[3] == 0:
+                        raise SystemExit(f"{name}.{face}: unpainted texel at {(x + i, y + j)}")
+
+
 def build(ident, baby, out_geo, out_tex):
     bones, cubes = (cubes_baby() if baby else cubes_adult())
     uvs = pack(cubes)
     geo = geometry(ident, bones, cubes, uvs)
-    return geo, paint_model(baby, cubes, uvs)
+    img = paint_model(baby, cubes, uvs)
+    check_painted(cubes, uvs, img)
+    return geo, img
 
 
 def preview(img, path, scale=8):

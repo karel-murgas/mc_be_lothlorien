@@ -47,61 +47,14 @@
           "render_method": "opaque"
         }
       },
-      "minecraft:placement_filter": {
-        "conditions": [
-          {
-            "allowed_faces": [
-              "up"
-            ],
-            "block_filter": [
-              {
-                "tags": "query.any_tag('minecraft:is_pickaxe_item_destructible','minecraft:is_axe_item_destructible','minecraft:is_shovel_item_destructible','dirt','stone','wood','log')"
-              },
-              "minecraft:grass_block",
-              "minecraft:dirt",
-              "minecraft:coarse_dirt",
-              "minecraft:podzol",
-              "minecraft:dirt_with_roots",
-              "minecraft:moss_block",
-              "minecraft:mud",
-              "minecraft:stone",
-              "lothlorien:mallorn_planks",
-              "lothlorien:mallorn_log",
-              "lothlorien:mallorn_wood",
-              "lothlorien:mallorn_stripped_log",
-              "lothlorien:mallorn_stripped_wood",
-              "lothlorien:mallorn_leaf_carpet",
-              "lothlorien:mallorn_blossom"
-            ]
-          },
-          {
-            "allowed_faces": [
-              "north",
-              "south",
-              "east",
-              "west"
-            ],
-            "block_filter": [
-              {
-                "tags": "query.any_tag('minecraft:is_pickaxe_item_destructible','minecraft:is_axe_item_destructible','minecraft:is_shovel_item_destructible','dirt','stone','wood','log')"
-              },
-              "minecraft:grass_block",
-              "minecraft:dirt",
-              "minecraft:coarse_dirt",
-              "minecraft:podzol",
-              "minecraft:dirt_with_roots",
-              "minecraft:moss_block",
-              "minecraft:mud",
-              "minecraft:stone",
-              "lothlorien:mallorn_planks",
-              "lothlorien:mallorn_log",
-              "lothlorien:mallorn_wood",
-              "lothlorien:mallorn_stripped_log",
-              "lothlorien:mallorn_stripped_wood"
-            ]
-          }
-        ]
-      }
+      "minecraft:tick": {
+        "interval_range": [
+          20,
+          40
+        ],
+        "looping": true
+      },
+      "lothlorien:antler_support": {}
     },
     "permutations": [
       {
@@ -248,6 +201,106 @@
               16,
               16,
               4.5
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'down' && q.block_state('minecraft:cardinal_direction') == 'north'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.deer_antler_ceiling",
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          },
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              11.5,
+              -8
+            ],
+            "size": [
+              16,
+              4.5,
+              16
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'down' && q.block_state('minecraft:cardinal_direction') == 'west'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.deer_antler_ceiling",
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          },
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              11.5,
+              -8
+            ],
+            "size": [
+              16,
+              4.5,
+              16
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'down' && q.block_state('minecraft:cardinal_direction') == 'south'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.deer_antler_ceiling",
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          },
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              11.5,
+              -8
+            ],
+            "size": [
+              16,
+              4.5,
+              16
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'down' && q.block_state('minecraft:cardinal_direction') == 'east'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.deer_antler_ceiling",
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              270,
+              0
+            ]
+          },
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              11.5,
+              -8
+            ],
+            "size": [
+              16,
+              4.5,
+              16
             ]
           }
         }
