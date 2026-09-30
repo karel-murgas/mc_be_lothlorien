@@ -6,7 +6,7 @@ Output (overwritten every run): lothlorien_rp/models/entity/deer.geo.json,
 lothlorien_rp/textures/entity/deer/{deer,deer_baby}.png, lothlorien_rp/textures/items/{venison_raw,
 venison_cooked,deer_antler}.png. Boxes are laid out by a shelf packer (Bedrock box UV); every face is
 painted by hand-placed rules (colour ramps with hue shift, no noise), following
-`.claude/skills/bedrock-modding/references/10-art-style.md`. Seen only in this script's preview
+`.claude/skills/bedrock-art/references/style.md`. Seen only in this script's preview
 (`--preview`), not yet in game: treat the look as a placeholder until the graphics pass.
 """
 import json

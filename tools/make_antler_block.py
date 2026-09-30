@@ -170,7 +170,7 @@ def clamp(cubes):
 
 
 # (mirror h, mirror v, uv_rotation) for the skull side faces on the turned-over models; found by rendering all
-# four sides in Blockbench (tools/bb_render.py): the eye socket must sit at the skull front, next to the snout.
+# four sides in Blockbench (.claude/skills/bedrock-art/scripts/bb_render.py): the eye socket must sit at the skull front, next to the snout.
 EAST_FLOOR, WEST_FLOOR = (True, False, 90), (False, True, 90)
 EAST_CEIL, WEST_CEIL = (False, False, 90), (True, True, 90)
 
