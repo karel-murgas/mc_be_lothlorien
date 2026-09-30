@@ -255,9 +255,18 @@ test("deer: wariness follows Disharmony level; Friend only at level 0", () => {
   assert.deepEqual([1, 2, 3].map((l) => R.warinessFor(l, false)), ["l1", "l2", "l3"]);
   assert.equal(R.warinessFor(2, true), "l2");
 });
-test("deer: the nearest player decides, nobody near decides nothing", () => {
-  assert.equal(R.pickWariness([{ distance: 20, wariness: "l3" }, { distance: 8, wariness: "calm" }]), "calm");
+test("deer: the most severe player inside their own flight radius decides", () => {
+  const pick = (...c) => R.pickWariness(c.map(([distance, wariness]) => ({ distance, wariness })));
+  assert.equal(pick([25, "l3"], [5, "calm"]), "l3");
+  assert.equal(pick([35, "l3"], [5, "calm"]), "calm"); // l3 player too far to matter
+  assert.equal(pick([15, "l2"], [12, "l1"], [2, "friend"]), "l2");
+  assert.equal(pick([2, "friend"], [8, "calm"]), "calm");
+  assert.equal(pick([30, "l2"], [35, "calm"]), "l2"); // nobody inside their radius: nearest decides
   assert.equal(R.pickWariness([]), undefined);
+});
+test("deer: flight radii match the entity file", () => {
+  const e = deerEntity();
+  for (const w of R.WARINESS) assert.equal(avoidRadius(e, w), R.FLIGHT_RADIUS[w], w);
 });
 test("deer: every wariness has a state group and a set event; flight distance grows with Disharmony", () => {
   const e = deerEntity();

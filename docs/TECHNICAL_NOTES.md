@@ -535,9 +535,8 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
 - **Disharmony avoidance without per-player filters**: entity filters cannot read a player's Disharmony (it is a
   dynamic property). So the entity has one component group per wariness state (`lothlorien:state_calm|l1|l2|l3|friend|alarmed`),
   each holding its own `behavior.avoid_mob_type` (flight distance, sneaking halves it) and, where allowed, `behavior.tempt`.
-  `scripts/deer.js` runs every 2 s: each player votes with their own state for the deer within 40 blocks, the nearest player
-  wins, and the script fires `lothlorien:set_<state>` only when the `lothlorien:wariness` property differs. Trade-off: with two
-  players near one deer it follows the nearest one; the avoid component still flees from both.
+  `scripts/deer.js` runs every 2 s: each player votes with their own state for the deer within 40 blocks, the most severe state among
+  players inside their own state's flight radius wins (none close enough: the nearest player), and the script fires `lothlorien:set_<state>` only when the `lothlorien:wariness` property differs. Trade-off: the avoid component still flees from every player at the winning state's distance.
 - **Alarm**: a player hurting (or killing) a deer fires `lothlorien:alarm` on every deer within 20 blocks: group `state_alarmed`
   (flee 36, no luring) with a `minecraft:timer` of 20 s whose event `lothlorien:alarm_over` re-triggers the state stored in
   the property. The script skips deer with `lothlorien:alarmed` so it never cuts an alarm short.

@@ -56,7 +56,7 @@ Goal priorities: 0 float, 1 panic (x1.8), 2 breed, 3 tempt, 4 avoid, 5 follow pa
 | Hostile | not hostile, no attack | - |
 
 **Wariness states** (component groups `lothlorien:state_<name>`, switched by events `lothlorien:set_<name>`;
-`scripts/deer.js` sets them every 2 s from the **nearest player's** Disharmony, radius 40):
+`scripts/deer.js` sets them every 2 s from the players' Disharmony, radius 40):
 
 | State | Disharmony | Flight distance (walking / sneaking) | Food lures it |
 | --- | --- | --- | --- |
@@ -67,9 +67,11 @@ Goal priorities: 0 float, 1 panic (x1.8), 2 breed, 3 tempt, 4 avoid, 5 follow pa
 | `friend` | Friend of Lothlorien | 3 / 2 | yes |
 | `alarmed` | (any) | 36 / 18 for 20 s, then back to the stored state | no |
 
-A player hurting a deer alarms every deer within 20 blocks of it (`lothlorien:alarm`, timer 20 s). With
-several players near, the deer follows the nearest one (one player's record must not affect another's
-experience); the flight component still applies to every player.
+A player hurting a deer alarms every deer within 20 blocks of it (`lothlorien:alarm`, timer 20 s).
+With several players near, the **most severe state among players inside their own state's flight radius** wins
+(Disharmony III within 30, II within 20, I within 13, calm within 10, Friend within 3); if nobody is that close, the
+nearest player decides. The flight component still applies to every player, so a calm player 25 blocks from a deer that
+reacts to a Disharmony III player also scares it.
 
 ## E. Player interaction
 

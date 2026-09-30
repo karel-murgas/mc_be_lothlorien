@@ -22,10 +22,19 @@ export function warinessFor(level, friend) {
 
 export const setEventFor = (wariness) => `lothlorien:set_${wariness}`;
 
-// candidates: [{ distance, wariness }] one per player near a deer. The nearest player decides
-// (one player's Disharmony must not make a deer react to another player's record).
+// Flight distance of each state (must match entities/deer.json; a test compares them). A player
+// only decides a deer's state while within this distance of it.
+export const FLIGHT_RADIUS = { friend: 3, calm: 10, l1: 13, l2: 20, l3: 30 };
+const SEVERITY = ["friend", "calm", "l1", "l2", "l3"];
+
+// candidates: [{ distance, wariness }] one per player near a deer. The most severe state among
+// players inside their own state's flight radius wins (a Disharmony III player 25 blocks away
+// outweighs a calm player 5 blocks away); if nobody is that close, the nearest player decides.
 export function pickWariness(candidates) {
-  let best;
-  for (const c of candidates) if (!best || c.distance < best.distance) best = c;
-  return best?.wariness;
+  let worst, nearest;
+  for (const c of candidates) {
+    if (!nearest || c.distance < nearest.distance) nearest = c;
+    if (c.distance <= FLIGHT_RADIUS[c.wariness] && (!worst || SEVERITY.indexOf(c.wariness) > SEVERITY.indexOf(worst.wariness))) worst = c;
+  }
+  return (worst ?? nearest)?.wariness;
 }
