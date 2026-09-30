@@ -10,6 +10,7 @@ painted by hand-placed rules (colour ramps with hue shift, no noise), following
 (`--preview`), not yet in game: treat the look as a placeholder until the graphics pass.
 """
 import json
+import os
 import sys
 from pathlib import Path
 from PIL import Image
@@ -36,16 +37,48 @@ CLEAR = (0, 0, 0, 0)
 
 # ---------------------------------------------------------------- model definitions
 # cube: (name, bone, origin, size, role). Bones: (name, parent, pivot, rotation).
+LEGS = os.environ.get("DEER_LEGS", "slim")  # slim | sturdy | step: leg shape, see docs/mobs/deer.md
+
+
+def leg_cubes(i, x, z, height, w_up, w_low=None):
+    """One leg as a single cube (slim/sturdy) or an upper thigh plus thinner cannon (step)."""
+    if LEGS == "step":
+        up_h = height * 0.55
+        return [(f"leg{i}_up", f"leg{i}", [x, height - up_h, z], [w_up, up_h, w_up], "leg_up"),
+                (f"leg{i}_low", f"leg{i}", [x + 0.5, 0, z + 0.5], [w_up - 1, height - up_h, w_up - 1], "leg_low")]
+    w = w_up if LEGS == "sturdy" else (w_low or w_up - 1)
+    off = (w_up - w) / 2
+    return [(f"leg{i}", f"leg{i}", [x + off, 0, z + off], [w, height, w], "leg")]
+
+
+def antler_cubes(bone, s, y0, z0):
+    """One antler, +x side for s=1 and mirrored for s=-1. y0/z0 = base on the head. Main beam, brow and bez tines
+    forward, a back tine, a crown of two upright prongs."""
+    def box(name, x, y, z, sx, sy, sz):
+        ox = x if s == 1 else -x - sx
+        return (f"{bone}_{name}", bone, [ox, y0 + y, z0 + z], [sx, sy, sz], "antler")
+    return [
+        box("beam", 1.0, 0, 0, 1.5, 9.5, 1.5),
+        box("brow", 1.0, 1.5, -3.5, 1.3, 1.3, 3.6),
+        box("bez", 1.0, 4.2, -3.0, 1.3, 1.3, 3.1),
+        box("back", 1.0, 6.0, 1.2, 1.3, 1.3, 2.5),
+        box("crown_a", 1.0, 8.0, -1.4, 1.3, 4.0, 1.3),
+        box("crown_b", 2.3, 7.0, -0.1, 1.3, 4.5, 1.3),
+        box("out_a", 2.0, 3.0, 0, 2.6, 1.3, 1.3),   # tines to the side, so the pair reads as branched from the front
+        box("out_b", 2.0, 5.8, 0, 2.2, 1.3, 1.3),
+    ]
+
+
 def cubes_adult():
     c = []
     bones = {
         "body": (None, [0, 13, 0], None),
         "neck": ("body", [0, 19, -7], [30, 0, 0]),
-        "head": ("neck", [0, 30, -7], [-22, 0, 0]),
-        "ear_l": ("head", [2, 32, -8.5], [0, 0, -30]),
-        "ear_r": ("head", [-2, 32, -8.5], [0, 0, 30]),
-        "antler_l": ("head", [1.5, 33, -9.5], [-20, 0, -15]),
-        "antler_r": ("head", [-1.5, 33, -9.5], [-20, 0, 15]),
+        "head": ("neck", [0, 27, -7], [-22, 0, 0]),
+        "ear_l": ("head", [2, 29, -8.5], [0, 0, 30]),
+        "ear_r": ("head", [-2, 29, -8.5], [0, 0, -30]),
+        "antler_l": ("head", [1.5, 30, -9.5], [-20, 0, 15]),
+        "antler_r": ("head", [-1.5, 30, -9.5], [-20, 0, -15]),
         "tail": ("body", [0, 21, 8], [15, 0, 0]),
         "leg0": ("body", [-2, 13, 6], None),
         "leg1": ("body", [2, 13, 6], None),
@@ -53,23 +86,16 @@ def cubes_adult():
         "leg3": ("body", [2, 13, -5], None),
     }
     c.append(("body", "body", [-3.5, 13, -7], [7, 9, 15], "body"))
-    c.append(("neck", "neck", [-2, 19, -9], [4, 11, 4], "neck"))
-    c.append(("skull", "head", [-2.5, 28, -12], [5, 5, 6], "skull"))
-    c.append(("muzzle", "head", [-1.5, 28, -15], [3, 3, 3], "muzzle"))
-    c.append(("ear_l", "ear_l", [2, 32, -9], [3, 4, 1], "ear"))
-    c.append(("ear_r", "ear_r", [-5, 32, -9], [3, 4, 1], "ear"))
+    c.append(("neck", "neck", [-2, 19, -9], [4, 8, 4], "neck"))
+    c.append(("skull", "head", [-2.5, 25, -12], [5, 5, 6], "skull"))
+    c.append(("muzzle", "head", [-1.5, 25, -15], [3, 3, 3], "muzzle"))
+    c.append(("ear_l", "ear_l", [2, 29, -9], [3, 4, 1], "ear"))
+    c.append(("ear_r", "ear_r", [-5, 29, -9], [3, 4, 1], "ear"))
     c.append(("tail", "tail", [-1.5, 16.5, 7.5], [3, 5, 2], "tail"))
     for i, (x, z) in enumerate(((-3.5, 4.5), (0.5, 4.5), (-3.5, -6.5), (0.5, -6.5))):
-        c.append((f"leg{i}_up", f"leg{i}", [x, 6, z], [3, 7, 3], "leg_up"))
-        c.append((f"leg{i}_low", f"leg{i}", [x + 0.5, 0, z + 0.5], [2, 6, 2], "leg_low"))
-    # antlers: +x side, mirrored for -x
-    for bone, s in (("antler_l", 1), ("antler_r", -1)):
-        def ox(x, w):
-            return [x, 0, 0] if s == 1 else [-x - w, 0, 0]
-        c.append((bone + "_beam", bone, [ox(1, 1)[0], 33, -9.5], [1, 7, 1], "antler"))
-        c.append((bone + "_brow", bone, [ox(1, 1)[0], 34, -12], [1, 1, 2.5], "antler"))
-        c.append((bone + "_back", bone, [ox(1, 1)[0], 37, -8.5], [1, 1, 2], "antler"))
-        c.append((bone + "_fork", bone, [ox(1, 1)[0], 39, -11], [1, 3, 1], "antler"))
+        c.extend(leg_cubes(i, x, z, 13, 3))
+    c.extend(antler_cubes("antler_l", 1, 30, -9.5))
+    c.extend(antler_cubes("antler_r", -1, 30, -9.5))
     return bones, c
 
 
@@ -77,9 +103,9 @@ def cubes_baby():
     bones = {
         "body": (None, [0, 6, 0], None),
         "neck": ("body", [0, 9, -4], [25, 0, 0]),
-        "head": ("neck", [0, 13, -4], [-18, 0, 0]),
-        "ear_l": ("head", [1.5, 15, -6], [0, 0, -30]),
-        "ear_r": ("head", [-1.5, 15, -6], [0, 0, 30]),
+        "head": ("neck", [0, 12, -4], [-18, 0, 0]),
+        "ear_l": ("head", [1.5, 14, -6], [0, 0, 30]),
+        "ear_r": ("head", [-1.5, 14, -6], [0, 0, -30]),
         "tail": ("body", [0, 10, 5], [15, 0, 0]),
         "leg0": ("body", [-1.5, 6, 3.5], None),
         "leg1": ("body", [1.5, 6, 3.5], None),
@@ -88,15 +114,14 @@ def cubes_baby():
     }
     c = []
     c.append(("body", "body", [-2.5, 6, -5], [5, 5, 10], "body"))
-    c.append(("neck", "neck", [-1.5, 9, -5.5], [3, 4, 3], "neck"))
-    c.append(("skull", "head", [-2, 12, -9.5], [4, 4, 5], "skull"))
-    c.append(("muzzle", "head", [-1, 12, -11.5], [2, 2, 2], "muzzle"))
-    c.append(("ear_l", "ear_l", [1.5, 15, -6.5], [2, 3, 1], "ear"))
-    c.append(("ear_r", "ear_r", [-3.5, 15, -6.5], [2, 3, 1], "ear"))
+    c.append(("neck", "neck", [-1.5, 9, -5.5], [3, 3, 3], "neck"))
+    c.append(("skull", "head", [-2, 11, -9.5], [4, 4, 5], "skull"))
+    c.append(("muzzle", "head", [-1, 11, -11.5], [2, 2, 2], "muzzle"))
+    c.append(("ear_l", "ear_l", [1.5, 14, -6.5], [2, 3, 1], "ear"))
+    c.append(("ear_r", "ear_r", [-3.5, 14, -6.5], [2, 3, 1], "ear"))
     c.append(("tail", "tail", [-1, 7.5, 5], [2, 3, 1], "tail"))
     for i, (x, z) in enumerate(((-2.5, 2.5), (0.5, 2.5), (-2.5, -4), (0.5, -4))):
-        c.append((f"leg{i}_up", f"leg{i}", [x, 3, z], [2, 3, 2], "leg_up"))
-        c.append((f"leg{i}_low", f"leg{i}", [x + 0.25, 0, z + 0.25], [1.5, 3, 1.5], "leg_low"))
+        c.extend(leg_cubes(i, x, z, 6, 2, 1.5))
     return bones, c
 
 
@@ -302,6 +327,23 @@ class Paint:
             fill(cv, f[k], lambda i, j, w, h: ramp(COAT, 1) if j < 2 else ramp(BELLY, 2))
         fill(cv, f["top"], lambda i, j, w, h: ramp(COAT, 1))
         fill(cv, f["bottom"], lambda i, j, w, h: ramp(BELLY, 3))
+
+    def leg(self, cv, f):
+        def side(i, j, w, h):
+            if j >= h - 1:
+                return ramp(DARK, 1)  # hoof
+            if j == h - 2:
+                return ramp(DARK, 2)
+            cut = int(h * 0.45)  # coat down to here, then the pale lower leg
+            if j < cut:
+                return ramp(COAT, (3 if j < 1 else 2) + (1 if self.baby else 0))
+            if j == cut and i % 2 == 0:
+                return ramp(COAT, 1)  # a broken edge rather than a ruler line
+            return ramp(BELLY, 1 if j < h - 4 else 0)
+        for k in ("east", "west", "north", "south"):
+            fill(cv, f[k], side)
+        fill(cv, f["top"], lambda i, j, w, h: ramp(COAT, 2))
+        fill(cv, f["bottom"], lambda i, j, w, h: ramp(DARK, 0))
 
     def leg_up(self, cv, f):
         side = lambda i, j, w, h: ramp(COAT, (3 if j < 1 else 2 if j < h - 2 else 1) + (1 if self.baby else 0))

@@ -13,10 +13,10 @@
       ]
     },
     "y": {
-      "distribution": "gaussian",
+      "distribution": "uniform",
       "extent": [
-        -2,
-        2
+        -1,
+        1
       ]
     },
     "z": {

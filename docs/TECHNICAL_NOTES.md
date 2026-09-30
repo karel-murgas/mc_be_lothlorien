@@ -573,15 +573,35 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
   floor** (geometry `deer_antler_floor`, rotated by cardinal direction); **side face = antler trophy on a wooden plaque** (geometry
   `deer_antler_wall`, back against the wall, rotated by the clicked face: north 0, west 90, south 180, east 270 as for stairs). No ceiling
   placement. Whether the rotations are right (plaque really against the wall, front out) is the first thing to check in game.
-- `minecraft:placement_filter`: floor on grass, dirt variants, moss, mud, stone and Mallorn planks/logs; walls on the same plus vanilla
-  planks, logs, cobblestone and stone bricks. The list is deliberate: no tag syntax in `block_filter` was risked, and the filter is what stops
-  worldgen placing antlers on the canopy (`query.heightmap` includes leaves). Add block names to the list to widen it. The block has no
-  support check afterwards: it stays if its support is broken.
+- **Revised 2026-09-30 after the first look**: one model (a big pair of mounted antlers, filling the 16x16 face), hung on walls and lying on
+  its back on the floor (same cube list, turned by coordinates in `tools/make_antler_block.py`); no plaque (a trophy block may come later).
+  `minecraft:placement_filter` now has two conditions (floor: `up`; wall: four sides) whose `block_filter` starts with the tag descriptor
+  `query.any_tag('minecraft:is_pickaxe_item_destructible', ..._axe_..., ..._shovel_..., 'dirt', 'stone', 'wood', 'log')` (vanilla writes tag
+  descriptors this way) plus explicit names; the floor condition also accepts Mallorn leaf carpet and blossoms as support. Before, it was a
+  short name list, which left most blocks unusable. The filter still keeps worldgen off the canopy: leaves are in none of those tags.
+  **Unverified: how much of the world the tags cover.** If a block you expect is refused, add its name to the `block_filter` list. The
+  filter is also a survival check: the antler pops off when its support is removed (MS docs).
+- **Drop under leaf litter**: about a third of the floor is carpet/blossom, so the first version mostly failed (the cell the heightmap returns
+  held or sat on litter). The features now replace the litter (`may_replace`: air, carpet, blossoms, the flowers, fern, short grass) and the
+  scatter's y is -1 or 0 so both heightmap readings (above the litter, or at its cell) reach a grass-supported cell.
 - Geometry is built from axis-aligned cubes with per-face UV strips of a 16x16 palette texture (`textures/blocks/deer_antler.png`), by
   `tools/make_antler_block.py`. Antler slants are stepped cubes on purpose (the sign of block-geometry rotation under the mirrored-x rule is unverified).
+  Selection boxes: floor 16x4.5x16, wall 16x16x4.5 against the back.
 - **Natural drop**: rule `deer_antler_drop_feature_rules` (after surface pass, biome tag, `scatter_chance` 1/64 per chunk) -> scatter of 3
   tries within about 3 blocks -> weighted pick of four facings, all `up`. Giants are one structure per ~36 chunks (about 1 in 4 a lookout tree =
   ~1/144 per chunk), so 1/64 sits between them; a test pins that. Real frequency will be lower (tries on leaves, water or off-biome fail): tune
   the denominator after walking around.
 - **Chest**: `loot_tables/chests/mallorn_flet.json` pool 2 has the antler, `set_count 1`, weight 2 (of 19).
 - Verifier: a block that also mounts on walls is no longer classed as a "plant" (no composter / flower pot / bone-meal demands).
+
+### Deer model changes after the first look (2026-09-30)
+
+- User feedback: neck too long, **antlers leaned inward and met in the middle**, legs of two thicknesses unclear, antlers should be bigger; texture liked.
+- **Rotation convention learned**: bone z rotation has the same negated handedness as x (see `bedrock-mobs/references/client.md`). Ears and antlers had
+  the wrong sign (ears too, although that was not noticed); all four flipped, and `preview_entity.py` corrected.
+- Neck 11 -> 8 units (head, ears and antlers moved down 3). Fawn neck 4 -> 3.
+- **Legs: one slim cube per leg (2x13x2 adult, 1.5x6x1.5 fawn) instead of a 3-wide thigh over a 2-wide cannon.** Rendered the three options in the
+  preview (`DEER_LEGS=slim|sturdy|step`): the stepped one looked like a sleeve, the 3-wide one was chunky for a deer, the slim one read best and is
+  fewer elements (style guide). The texture paints coat down to 45 % then pale lower leg and a dark hoof.
+- Antlers: each side now has a 9.5-unit beam, brow, bez and back tines, two upright crown prongs and two side tines (was a beam and three small bits).
+- Blockbench MCP tools were not available in this session (they load after a restart); these edits were made in `tools/make_deer.py`.

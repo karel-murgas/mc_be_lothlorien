@@ -14,7 +14,15 @@
     "enforce_survivability_rules": true,
     "enforce_placement_rules": true,
     "may_replace": [
-      "minecraft:air"
+      "minecraft:air",
+      "lothlorien:mallorn_leaf_carpet",
+      "lothlorien:mallorn_blossom",
+      "lothlorien:elanor",
+      "lothlorien:niphredil",
+      "lothlorien:athelas",
+      "lothlorien:golden_fern",
+      "minecraft:short_grass",
+      "minecraft:fern"
     ]
   }
 }

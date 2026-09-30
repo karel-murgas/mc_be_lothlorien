@@ -20,14 +20,14 @@
       "minecraft:collision_box": false,
       "minecraft:selection_box": {
         "origin": [
-          -3,
+          -8,
           0,
-          -7
+          -8
         ],
         "size": [
-          6,
-          4,
-          14
+          16,
+          4.5,
+          16
         ]
       },
       "minecraft:destructible_by_mining": {
@@ -54,29 +54,9 @@
               "up"
             ],
             "block_filter": [
-              "minecraft:grass_block",
-              "minecraft:dirt",
-              "minecraft:coarse_dirt",
-              "minecraft:podzol",
-              "minecraft:dirt_with_roots",
-              "minecraft:moss_block",
-              "minecraft:mud",
-              "minecraft:stone",
-              "lothlorien:mallorn_planks",
-              "lothlorien:mallorn_log",
-              "lothlorien:mallorn_wood",
-              "lothlorien:mallorn_stripped_log",
-              "lothlorien:mallorn_stripped_wood"
-            ]
-          },
-          {
-            "allowed_faces": [
-              "north",
-              "south",
-              "east",
-              "west"
-            ],
-            "block_filter": [
+              {
+                "tags": "query.any_tag('minecraft:is_pickaxe_item_destructible','minecraft:is_axe_item_destructible','minecraft:is_shovel_item_destructible','dirt','stone','wood','log')"
+              },
               "minecraft:grass_block",
               "minecraft:dirt",
               "minecraft:coarse_dirt",
@@ -90,29 +70,34 @@
               "lothlorien:mallorn_wood",
               "lothlorien:mallorn_stripped_log",
               "lothlorien:mallorn_stripped_wood",
-              "minecraft:oak_planks",
-              "minecraft:spruce_planks",
-              "minecraft:birch_planks",
-              "minecraft:jungle_planks",
-              "minecraft:acacia_planks",
-              "minecraft:dark_oak_planks",
-              "minecraft:mangrove_planks",
-              "minecraft:cherry_planks",
-              "minecraft:pale_oak_planks",
-              "minecraft:bamboo_planks",
-              "minecraft:oak_log",
-              "minecraft:spruce_log",
-              "minecraft:birch_log",
-              "minecraft:jungle_log",
-              "minecraft:acacia_log",
-              "minecraft:dark_oak_log",
-              "minecraft:mangrove_log",
-              "minecraft:cherry_log",
-              "minecraft:pale_oak_log",
-              "minecraft:cobblestone",
-              "minecraft:stone_bricks",
-              "minecraft:mossy_cobblestone",
-              "minecraft:mossy_stone_bricks"
+              "lothlorien:mallorn_leaf_carpet",
+              "lothlorien:mallorn_blossom"
+            ]
+          },
+          {
+            "allowed_faces": [
+              "north",
+              "south",
+              "east",
+              "west"
+            ],
+            "block_filter": [
+              {
+                "tags": "query.any_tag('minecraft:is_pickaxe_item_destructible','minecraft:is_axe_item_destructible','minecraft:is_shovel_item_destructible','dirt','stone','wood','log')"
+              },
+              "minecraft:grass_block",
+              "minecraft:dirt",
+              "minecraft:coarse_dirt",
+              "minecraft:podzol",
+              "minecraft:dirt_with_roots",
+              "minecraft:moss_block",
+              "minecraft:mud",
+              "minecraft:stone",
+              "lothlorien:mallorn_planks",
+              "lothlorien:mallorn_log",
+              "lothlorien:mallorn_wood",
+              "lothlorien:mallorn_stripped_log",
+              "lothlorien:mallorn_stripped_wood"
             ]
           }
         ]
@@ -180,14 +165,14 @@
           },
           "minecraft:selection_box": {
             "origin": [
-              -5,
-              3,
-              3
+              -8,
+              0,
+              3.5
             ],
             "size": [
-              10,
-              13,
-              5
+              16,
+              16,
+              4.5
             ]
           }
         }
@@ -205,14 +190,14 @@
           },
           "minecraft:selection_box": {
             "origin": [
-              -5,
-              3,
-              3
+              -8,
+              0,
+              3.5
             ],
             "size": [
-              10,
-              13,
-              5
+              16,
+              16,
+              4.5
             ]
           }
         }
@@ -230,14 +215,14 @@
           },
           "minecraft:selection_box": {
             "origin": [
-              -5,
-              3,
-              3
+              -8,
+              0,
+              3.5
             ],
             "size": [
-              10,
-              13,
-              5
+              16,
+              16,
+              4.5
             ]
           }
         }
@@ -255,14 +240,14 @@
           },
           "minecraft:selection_box": {
             "origin": [
-              -5,
-              3,
-              3
+              -8,
+              0,
+              3.5
             ],
             "size": [
-              10,
-              13,
-              5
+              16,
+              16,
+              4.5
             ]
           }
         }
