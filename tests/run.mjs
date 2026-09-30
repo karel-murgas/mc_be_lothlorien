@@ -367,7 +367,7 @@ test("antler: bucks' item is a block placer and flet chests can hold exactly one
 
 // Phase 12: white deer guidance.
 import * as W from "../lothlorien_bp/scripts/white_deer_rules.js";
-import { CHEST_BLOCK, MARKER_AT, MARKER_BLOCK, hasChest } from "../tools/build_structures.mjs";
+import { CHEST_BLOCK, hasChest } from "../tools/build_structures.mjs";
 import * as G from "../tools/dev_scripts/guide_goal/variants.mjs";
 
 test("white deer: only Disharmony 0 is guided", () => {
@@ -436,7 +436,7 @@ test("great nut: unique rare item that plants the sprout; sprout grows like a sa
 });
 test("white deer: the gift is given once per deer, the spot is kept until then, the acorn only goes when it leads", () => {
   const src = readFileSync(new URL("../lothlorien_bp/scripts/white_deer.js", import.meta.url), "utf8");
-  assert.ok(!/findMarker|getBlocks\(/.test(src), "no marker search left");
+  assert.ok(!/findMarker|getBlocks\(|MARKER/.test(src), "no marker search left");
   assert.ok(/getDynamicProperty\(GIFTED\)[\s\S]*return;/.test(src), "a gifted deer refuses (acorn kept)");
   assert.ok(src.includes("setDynamicProperty(GIFTED, true)") && src.includes("setDynamicProperty(GIFT_SPOT, undefined)"));
   assert.ok(/function arrive[\s\S]*giveGift/.test(src), "arrival lays the nut");
@@ -464,7 +464,7 @@ test("waypoints: a skipped heading is not reused; boxed in gives undefined", () 
   assert.notEqual(W.pickWaypoint(at0, { x: 80, z: 0 }, flat, { skip: new Set([0]) }).deg, 0);
   assert.equal(W.pickWaypoint(at0, { x: 80, z: 0 }, () => undefined), undefined);
 });
-test("waypoints: the final hop lands within FINAL_RING of a buried marker, on the deer's side", () => {
+test("waypoints: the final hop lands within FINAL_RING of a blocked target, on the deer's side", () => {
   const trunk = (x, z) => (W.horizontal({ x, z }, { x: 10, z: 0 }) < 2 ? undefined : 64);
   const w = W.pickWaypoint(at0, { x: 10, z: 0 }, trunk);
   assert.equal(w.final, true);
@@ -794,25 +794,16 @@ test("guide beacon: invisible, weightless, untouchable helper that removes itsel
   assert.equal(geo.description.identifier, client.geometry.default);
   assert.ok(geo.bones.flatMap((x) => x.cubes).every((cube) => cube.size.every((v) => v === 0)), "nothing to render");
 });
-test("structure marker: unbreakable hidden block, buried in the trunk of exactly the chosen giants that hold a chest", () => {
-  const b = readJson("../lothlorien_bp/blocks/structure_marker.json")["minecraft:block"];
-  assert.equal(b.description.identifier, W.MARKER_ID);
-  assert.equal(b.description.identifier, MARKER_BLOCK);
-  assert.equal(b.components["minecraft:destructible_by_mining"], false);
-  assert.ok(!b.description.menu_category, "not in the creative menu");
-  assert.ok(MARKER_AT.y < 0 && MARKER_AT.x >= 0 && MARKER_AT.x <= 3 && MARKER_AT.z >= 0 && MARKER_AT.z <= 3, "inside the buried trunk");
-  let guided = 0;
+test("giant structures: the flet giants the nut grows hold a chest, plain giants none; no leftover marker blocks", () => {
   for (const [v, n] of CHOSEN) {
-    const file = new URL(`../lothlorien_bp/structures/lothlorien/mallorn_${v}_${String(n).padStart(2, "0")}.mcstructure`, import.meta.url);
-    const bytes = readFileSync(file);
-    const chest = bytes.includes(Buffer.from(CHEST_BLOCK)), marker = bytes.includes(Buffer.from(MARKER_BLOCK));
-    assert.equal(marker, chest, `${v} ${n}: marker only with a chest (run node tools/build_structures.mjs)`);
-    if (marker) guided += 1;
+    const id = `lothlorien:mallorn_${v}_${String(n).padStart(2, "0")}`;
+    const bytes = readFileSync(new URL(`../lothlorien_bp/structures/${id.replace(":", "/")}.mcstructure`, import.meta.url));
+    assert.equal(bytes.includes(Buffer.from(CHEST_BLOCK)), N.FLET_TREES.includes(id), `${id}: chest only in the flet giants`);
+    assert.ok(!bytes.includes(Buffer.from("structure_marker")), `${id}: marker removed (run node tools/build_structures.mjs)`);
   }
-  assert.ok(guided > 0, "at least one worldgen tree can be guided to");
+  assert.ok(!existsSync(new URL("../lothlorien_bp/blocks/structure_marker.json", import.meta.url)));
   // the generator rule itself: flet trees have a chest, plain giants none
   assert.ok(flets.every((t) => hasChest(t.blocks)) && plains.every((t) => !hasChest(t.blocks)));
 });
-
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }
 console.log("all tests passed");

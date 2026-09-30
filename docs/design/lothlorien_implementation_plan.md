@@ -554,23 +554,21 @@ _Status 2026-09-30: rebuilt and deployed as an **optional prototype**, static ch
 its own entity `lothlorien:white_deer` (a rare loner: no herd, no breeding, no babies, not tamable); offering it a **Mallorn acorn** at
 Disharmony 0 starts guidance (the knowledge base said Western Corn; the owner changed it to the acorn). It walks by the engine's own
 pathfinding, following an invisible helper `lothlorien:guide_beacon` that script moves ahead in 8-14 block hops (goal
-`follow_target_leader`; fallbacks prepared in `tools/dev_scripts/guide_goal/`, to be decided by an in-game experiment). The marker is the
-block `lothlorien:structure_marker` buried in the trunk of every giant Mallorn **that holds a chest** (today the two flet giants, about 1
-giant in 4; worldgen change: **new world needed** to get markers into trees). Second owner round, built 2026-09-30 (static checks only):
+`follow_target_leader`; fallbacks prepared in `tools/dev_scripts/guide_goal/`, to be decided by an in-game experiment). Third owner round
+(2026-09-30): leading to hidden markers in flet giants was dropped (a loaded-chunk search only finds trees already in sight; script cannot
+locate placed structures) and the markers removed. Instead, once per deer, it leads 36-56 blocks to a spot it picks inside the biome and
+lays its gift, a **Great Mallorn nut** that grows like a sapling into a flet giant anywhere. Second owner round, built 2026-09-30 (static checks only):
 the white deer is always an antlered hart with a sure antler drop, leashable (a lead always wins over guidance), counts double for
 Disharmony, spawns more in the heart than at the edges (script filter on natural spawns by depth); ordinary deer eat only Western Corn
-grain. Design, assumptions, the goal experiment and the in-game test plan: `TECHNICAL_NOTES.md` (White deer guidance). Only the giant
-Mallorns exist as structures so far; a Phase 16 structure is guided to only if it holds a chest and gets the marker._
+grain. Design, assumptions, the goal experiment and the in-game test plan: `TECHNICAL_NOTES.md` (White deer guidance)._
 
 Add variant / separate entity.
 
-Prototype structure marker system:
+Guidance to a gift (built instead of the original marker idea, see status above):
 
-- player offers Western Corn while eligible,
-- hidden marker block in Lothlórien structures,
-- search practical radius,
-- deer selects nearest known marker,
-- guided movement.
+- player offers a Mallorn acorn while eligible,
+- the deer picks a spot inside the biome and leads there (engine pathfinding),
+- it lays a Great Mallorn nut, once per deer.
 
 Keep this feature optional until it proves stable.
 
@@ -765,7 +763,6 @@ Then expand:
 
 Use procedural scaffolding when useful, but curate every final structure.
 
-Every guideable structure gets its hidden marker.
 
 ## Primary tools
 

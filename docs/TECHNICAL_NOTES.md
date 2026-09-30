@@ -677,7 +677,9 @@ default simulation distance of 4 chunks whatever the player's setting, owner's w
 ground from the top (`groundFeet`), depth level >= 1; farthest ring wins, deepest spot within it. Dynamic properties on the deer:
 `lothlorien:gift_spot` (JSON, kept until the gift is laid, so a broken guidance resumes with another acorn) and `lothlorien:gifted`.
 On arrival `giveGift` spawns the nut (lore set by script: JSON items have no lore) with totem particles. `ARRIVE_DIST` 3 (the spot is
-standable; `pickWaypoint`'s final ring now starts at radius 0). The marker blocks stay in the flet giants, unused.
+standable; `pickWaypoint`'s final ring now starts at radius 0). The marker block (`lothlorien:structure_marker`) and its search were removed
+the same day (owner): gone from the flet giants (rebuilt; plain giants byte-identical), the block file, lang and tests. Worlds generated
+before keep one buried block per flet giant, 4 below the ground inside the trunk, which now loads as an unknown block.
 The nut (`items/great_mallorn_nut.json`, `blocks/great_mallorn_sprout.json`, `scripts/great_mallorn.js` + `great_mallorn_rules.js`, art
 `tools/make_great_nut.py`): the sprout copies the sapling's states, soil filter and geometry; random tick stage 0 -> 1 -> grow. Growing
 reads the structure's filled cells once per session (`Structure.getBlockPermutation` over 40x54x40 in job steps), checks each against the
@@ -690,12 +692,12 @@ History: the first build (commit `3426cec`) made the white deer a coat variant o
 Western Corn grain, and walked it by script teleport steps. The owner rejected teleport-walking and asked for a separate
 animal offered a Mallorn acorn; this section describes the rebuild. Second owner round (2026-09-30, built the same day, static checks
 only): leashable with "a lead always wins", always an antlered hart with a sure antler drop, a kill costs 2 Disharmony points, natural
-spawns thinned by depth, markers only in Mallorns with a chest; ordinary deer eat only Western Corn grain.
+spawns thinned by depth, markers only in Mallorns with a chest (markers later removed, see Gift); ordinary deer eat only Western Corn grain.
 
 Files: BP `entities/white_deer.json`, `spawn_rules/white_deer.json`, `loot_tables/entities/white_deer.json`, `entities/guide_beacon.json`,
-`blocks/structure_marker.json`, `scripts/white_deer.js` (game wiring), `scripts/white_deer_rules.js` (pure numbers, waypoints, leash rule, depth
+`scripts/white_deer.js` (game wiring, gift spot and delivery), `scripts/white_deer_rules.js` (pure numbers, waypoints, leash rule, depth
 spawn table, tested), `scripts/deer.js` + `deer_rules.js` (wariness and alarm for both deer types), `scripts/disharmony.js` (kill weight),
-`scripts/main.js` (`depthAt`), `structures/lothlorien/*.mcstructure` (marker in the flet giants only since 2026-09-30). RP `entity/white_deer.entity.json`,
+`scripts/main.js` (`depthAt`), the gift files (see Gift). RP `entity/white_deer.entity.json`,
 `render_controllers/white_deer.render_controllers.json`, `entity/guide_beacon.entity.json`, `models/entity/guide_beacon.geo.json` (one zero-size
 cube: renders nothing but passes the verifier's "geometry has no cubes" check), `textures/entity/guide_beacon.png` (16x16, fully transparent),
 `textures/entity/deer/deer_white.png` (from `tools/make_deer.py`), `sounds.json`, `texts/en_US.lang`. Dev only (not shipped):
@@ -711,7 +713,7 @@ cube: renders nothing but passes the verifier's "geometry has no cubes" check), 
   `minecraft:balloonable` is an Education Edition feature, leaving it out costs nothing. Own family `lothlorien_white_deer` (+ `mob`).
 - **Lead vs guidance (rule "a lead always wins")**: `offerRefusal` and `phase` in `white_deer_rules.js`, read in `white_deer.js` through
   `getComponent("minecraft:leashable")?.isLeashed` (2.8.0 `EntityLeashableComponent.isLeashed`). A leashed white deer refuses the acorn
-  (acorn kept; checked again when the marker search finishes); leashing it while it guides ends the guidance on the next 5-tick check
+  (acorn kept; checked again when the gift spot search finishes); leashing it while it guides ends the guidance on the next 5-tick check
   (beacon removed, `guide_end` back to its wariness). Picked over "unleash it when guidance starts" (takes the player's lead away) and
   "ignore the lead" (the follow goal and the lead would tug against each other).
 - **Always antlered (white hart)**: no `lothlorien:sex` property, no doe/buck groups or events; the client entity has one geometry,
@@ -753,26 +755,12 @@ cube: renders nothing but passes the verifier's "geometry has no cubes" check), 
 **The offer**: right-click an adult white deer holding a **Mallorn acorn** (`lothlorien:mallorn_acorn`) while your Disharmony is 0 (Friend
 included; level I and up: "shies from your restless spirit"). The entity has a `minecraft:interact` entry for a hand holding the acorn
 (`use_item false`, text "Offer Acorn"): the 2.8.0 declarations say `playerInteractWithEntity` fires after a *successful* interaction, so
-without an interaction on the entity the script might never hear of it (**unverified** which is needed). The script then searches for the
-nearest marker; the acorn is consumed (survival) **only when guidance starts** (marker found, first waypoint found, beacon spawned).
+without an interaction on the entity the script might never hear of it (**unverified** which is needed). The script then picks the gift spot
+(see Gift); the acorn is consumed (survival) **only when guidance starts** (spot found, first waypoint found, beacon spawned).
 Corn grain does nothing to the white deer (it is the ordinary deer's food).
 
-- **Marker** `lothlorien:structure_marker`: unbreakable, full cube with the Mallorn log side texture, no item, not in the creative menu
-  (the verifier warns about the missing `menu_category`: intended). At trunk cell (2, -4, 2), about 4 blocks under the ground inside the
-  buried part of the trunk, **only in a Mallorn that holds a chest** (owner, 2026-09-30: the deer leads to a Mallorn with a chest).
-  `tools/build_structures.mjs` places it when the tree has a `minecraft:chest` (`hasChest`); the chest is the flet's loot chest
-  (`loot_tables/chests/mallorn_flet.json`) on the platform, so the deer brings you to the foot of the tree and the ladder goes up to it.
-  **What exists today**: of the 6 worldgen giants only `mallorn_woven_05` and `mallorn_woven_07` (the flet trees, pool weight 4 of 16, about
-  1 giant in 4, roughly one per 144 chunks) have a chest and a marker; the 4 plain giants lost their marker (structures regenerated
-  2026-09-30, otherwise byte-identical; the woven files did not change). **Missing**: no other structure with a chest exists; the Phase 16
-  plan (simple flet, root shrine, pool/garden) says "every guideable structure gets its hidden marker" but plans no chests, so a Phase 16
-  structure is guided to only if it gets a chest (or the rule is widened then). Hand-place one for testing:
-  `/setblock <x> <y> <z> lothlorien:structure_marker` (the search does not look for the chest; the marker stands for it).
-- **Search radius** kept at **80 blocks**: with markers only in flet giants, a random spot has one in reach about 4 times in 10
-  (0.55 expected in the 80-block circle). A larger radius (e.g. 128: about 3 in 4) costs one job step per 16x16 column (about 2.5 times the
-  steps) and reaches chunks that may not be loaded at simulation distance 4 (64 blocks); it is one constant, `SEARCH_RADIUS`, if the owner wants it.
-- **Finding the marker** (unchanged): `dimension.getBlocks(BlockVolume, {includeTypes: [marker]}, true)` over chunk-sized columns, nearest
-  first, in a `system.runJob` (one column per step), radius **80 blocks**, y from 40 below to 16 above the deer, loaded chunks only.
+- **Target**: the gift spot (see Gift at the top of this section). Until 2026-09-30 it was the nearest hidden marker block in a flet giant
+  within 80 blocks (loaded chunks, `getBlocks` over chunk columns in a job); removed with the markers.
 
 **Walking = engine pathfinding towards a moving helper (design from "Pathfinding options / decision" below):**
 
@@ -789,20 +777,19 @@ Corn grain does nothing to the white deer (it is the ordinary deer's food).
 - Script, every **5 ticks** (`GUIDE_TICKS`): deer within 3 blocks of the waypoint -> next waypoint (`pickWaypoint`: 14 blocks ahead, shorter
   down to 8, headings 0, +-30, +-60, +-90 degrees, last-turned side first); **no progress towards the waypoint for 5 s** -> skip that heading and
   pick another (all failed: start the round again); **player lags** (more than 12 blocks) -> the beacon moves to the deer's feet, so it stands
-  and waits, and goes back to the waypoint when the player catches up; **final hop** = a standable column within 5 blocks of the marker
-  (the marker itself is inside a trunk), reached = arrived. A lost beacon (unloaded, `/kill`) is respawned.
+  and waits, and goes back to the waypoint when the player catches up; **final hop** = the spot itself or the nearest standable column
+  within 5 blocks of it, reached = arrived. A lost beacon (unloaded, `/kill`) is respawned.
 - Standable column (`stand()` in `white_deer.js`): a downward ray from 6 above to 6 below the deer's feet; leaves are looked through (canopy
   over the forest floor), liquid and any `*log*`/`*_wood` block reject the column, passable plants are ignored (ray default), and an upward
   ray needs 1.9 blocks of headroom. The deer itself is **never teleported**.
 - **Session end** (arrived, gave up, player gone, hurt): the beacon is removed, `guide_end` restores the stored wariness via `alarm_over`.
-  Endings as before: player beyond 48 blocks, player gains Disharmony, 30 s without getting a block closer to the marker (counts as arrived
-  within 14 blocks), 5 minutes, arrived within 7 blocks (horizontal) of the marker or at the final waypoint.
+  Endings: player beyond 48 blocks, player gains Disharmony, 30 s without getting a block closer to the spot (counts as arrived
+  within 14 blocks), 5 minutes, arrived within 3 blocks (horizontal) of the spot or at the final waypoint. Arrived = the nut is laid.
 - **Stray beacons**: sessions are not saved, so on world load and then every 100 ticks every `guide_beacon` without a live session is removed
   (all three dimensions, loaded chunks). Exception for the experiment: a beacon **named or tagged `guide_beacon`** is left alone (its own timer
   removes it). A white deer still in `state_guiding` after a reload is released by `deer.js` within 2 s of a player being near.
 - Two white deer guiding close together may follow each other's beacon: accepted by the owner (no per-area limit).
-- **Not done**: guidance to a specific structure type, remembering markers, sound or particles; Phase 16 structures get the marker only if
-  they hold a chest (see Marker).
+- **Not done**: sounds on the way and at arrival (totem particles only).
 
 **Unverified assumptions (the experiment settles the first three):** (1) that `follow_target_leader` accepts a non-mob helper entity (no
 movement, no AI) as leader at all; the docs only say "entities passing `leader_filters`"; (2) whether its leader search range is `within_radius`
@@ -810,7 +797,7 @@ movement, no AI) as leader at all; the docs only say "entities passing `leader_f
 `follow_distance 1` makes it stop near a beacon at its feet (the "wait") rather than fidget; (4) that the beacon is truly invisible: zero-size cube
 and transparent texture, but it may still cast a small shadow or show a hit box outline; (5) whether `playerInteractWithEntity` needs the
 `minecraft:interact` entry, and whether the acorn (a block placer item) places a sapling instead when you miss the deer; (6) all the old items:
-`getBlocks` cost, probe rays under custom ground cover, the marker surviving worldgen, placeholder white texture; (7) second round: that the
+probe rays under custom ground cover, placeholder white texture; (7) second round: that the
 spawn rule's herd `event` reaches a herd of one (skip count 0) and the flag is set one tick later, that `entitySpawn` does not report a
 natural spawn as `Loaded`, that `isLeashed` turns true as soon as a lead attaches, and that the `follow_target_leader` goal does not fight a lead
 in the 5 ticks before the guidance ends.
@@ -837,16 +824,15 @@ The owner rejected teleport-walking (jerky, fights `random_stroll`, animation do
 names and the experiment: `.claude/skills/bedrock-mobs/references/pathfinding.md`.
 
 - **Dolphins do not help**: `behavior.find_underwater_treasure` is hard-wired to vanilla underwater ruins/shipwrecks
-  (with `minecraft:bribeable` for the feeding); it cannot target our marker. Script API 2.8.0 has no way to set a navigation target;
+  (with `minecraft:bribeable` for the feeding); it cannot target a custom spot. Script API 2.8.0 has no way to set a navigation target;
   `home`/`go_home` (spawn point), POI/dweller/village goals cannot be pointed at a custom spot.
 - **Chosen design: waypoint beacon** (built 2026-09-30, see above). Fallbacks in order: `follow_mob` with the same filter, then
   `nearest_attackable_target` + `move_towards_target`, ready in `tools/dev_scripts/guide_goal/`.
 
-### White deer test plan (nothing here has been run in game; natural spawns and the marker in trees need a NEW world)
+### White deer test plan (nothing here has been run in game; natural spawns need a NEW world)
 
 Leave and re-enter the world to load the entity and script changes. `/summon` works in an old world: steps 1, 3, 3b and 4-7 (and the
-`spawn_natural` filter check in step 2) do not need a new world; step 2's natural spawns (fresh chunks) and step 8 (markers inside generated
-trees; the 2026-09-30 structures put markers only in flet giants, trees generated before still have the old marker in every giant) do.
+`spawn_natural` filter check in step 2) do not need a new world; step 2's natural spawns (fresh chunks) do.
 
 1. `/summon lothlorien:white_deer` a few times: white coat, pale pink ears, nose and hooves; **every one has antlers**; never a fawn. Spawn egg
    "White Deer Spawn Egg" in the creative menu; using an egg on a white deer does nothing special. Content log clean (watch for
@@ -860,23 +846,24 @@ trees; the 2026-09-30 structures put markers only in flet giants, trees generate
    Ordinary deer: only Western Corn grain lures them (acorn, apple and seeds do not); two deer fed corn grain breed.
 3b. Kill a white deer (survival, inside the biome, Disharmony 0): always one deer antler plus leather 0-2 and venison 1-3; chat says
    "Disharmony II" (2 points). A white deer killed by `/kill` or a wolf also drops the antler.
-4. No marker: right-click an adult white deer with the acorn far from any giant Mallorn (old world, no markers): "has nowhere to lead you",
+4. No spot: right-click an adult white deer with the acorn outside Lothlorien, far from its edge: "has nowhere to lead you from here",
    acorn NOT consumed. The hover text says "Offer Acorn".
-5. Manual marker: `/setblock ~30 ~-4 ~ lothlorien:structure_marker`, then offer the acorn: "takes the acorn ... Follow it", acorn consumed
-   (survival only). **Watch the walk**: real walk animation, jumps up blocks, goes round trees and pits, avoids water, no sliding or teleporting;
-   it moves in hops towards the marker, stops and waits when you are more than 12 blocks behind, carries on when you catch up, and stops near
-   the marker with "A great tree stands near". No visible beacon, no shadow travelling ahead of it.
+5. Gift walk, inside the biome: offer the acorn: "takes the acorn ... Follow it", acorn consumed (survival only). **Watch the walk**: real
+   walk animation, jumps up blocks, goes round trees and pits, avoids water, no sliding or teleporting; it moves in hops, stops and waits
+   when you are more than 12 blocks behind, carries on when you catch up, and after about 36-56 blocks stops with "bows its head ... a Great
+   Mallorn nut"; the nut lies there with totem particles, glint and lore. No visible beacon, no shadow travelling ahead of it. Offer another
+   acorn: "has given its gift already", acorn kept. Break a walk off (walk away) and offer again: it resumes towards the same spot.
 6. Refusals and endings: `/scriptevent lothlorien:disharmony 1`, offer: "shies from your restless spirit". Start a guidance, then
    `/scriptevent lothlorien:disharmony 3` or hit the deer: it stops (hit: deer nearby bolt). Walk 50 blocks away: it gives up. Put a lead on
    it mid-guidance: "is held on a lead and stops leading you", it stays on the lead. After each ending
    `/testfor @e[type=lothlorien:guide_beacon]` should find nothing within about 5 s.
 7. Save and reload mid-guidance: the deer returns to normal wariness within about 2 s of you being near; no beacon left
    (`/testfor @e[type=lothlorien:guide_beacon]`).
-8. NEW world: find a giant Mallorn **with a flet** (platform, ladder, chest), dig down beside the trunk base: in survival the marker cannot be
-   mined (looks like log bark); in creative `/testforblock` at trunk cell (2, -4, 2) relative to the trunk's north-west corner at ground level
-   should say `lothlorien:structure_marker`; the same cell of a plain giant (no flet) is a log. Summon a white deer within 80 blocks of a flet
-   giant and offer an acorn: it leads to that tree (not to a nearer plain giant), over hills and round trunks; with only plain giants in reach:
-   "nowhere to lead you", acorn kept.
+8. Great Mallorn nut (any world; `/give @s lothlorien:great_mallorn_nut` or creative Nature tab): planting on grass shows the space
+   warning; bone meal: "will not be hurried", no bone meal used. Next to a small build (planks within 20 blocks): chat names the block in
+   the way (at most every 5 min). In the open, `/gamerule randomtickspeed 100` for a moment: a flet giant (platform, ladder, loot chest)
+   grows with the trunk on the sprout at ground level; no jigsaw block left at the bottom of the trunk. Break a sprout: the nut drops.
+   A creeper blast next to a sprout leaves it standing.
 9. Two players: only the offering player is followed; a second player at Disharmony 3 nearby does not change the guidance. Two white deer
    guiding close together may swap beacons (accepted).
-10. Performance: the marker search must not spike a tick (job-sliced); try with a high render distance.
+10. Performance: the gift spot search and the tree's space check must not spike a tick (job-sliced).

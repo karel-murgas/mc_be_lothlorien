@@ -46,7 +46,7 @@ const NATURAL = new RegExp(
     "mangrove_log", "mangrove_roots", "muddy_mangrove_roots", "cherry_log", "pale_oak_log",
   ].join("|") + ")$|^lothlorien:(" + [
     "mallorn_leaves", "mallorn_log", "mallorn_wood", "mallorn_leaf_carpet", "mallorn_blossom", "mallorn_sapling", "athelas", "elanor",
-    "niphredil", "golden_fern", "deer_antler", "structure_marker", "great_mallorn_sprout",
+    "niphredil", "golden_fern", "deer_antler", "great_mallorn_sprout",
   ].join("|") + ")$"
 );
 export const isNatural = (typeId) => NATURAL.test(typeId) && !typeId.includes("stripped");

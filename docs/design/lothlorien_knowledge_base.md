@@ -363,17 +363,12 @@ Behavior:
 
 Proposed mechanic:
 
-- offer the white deer Western Corn while the player has Disharmony 0 / Friend status,
-- it attempts to lead the player toward the closest nearby Lothlórien structure.
+- offer the white deer a Mallorn acorn while the player has Disharmony 0 / Friend status,
+- once in its life it leads the player to a spot inside Lothlórien and leaves its gift there: a Great Mallorn nut that grows into a
+  giant Mallorn with a flet.
 
-Implementation idea:
-
-- every generated Lothlórien structure contains a hidden marker block,
-- white deer searches for the nearest marker in a practical loaded radius,
-- it pathfinds / moves toward that direction,
-- if no marker is found, no guidance occurs.
-
-This should be treated as a feature prototype because arbitrary worldgen structure lookup is not as simple as vanilla dolphin treasure behavior for custom structures.
+(Leading to the nearest structure through hidden marker blocks was built and dropped on 2026-09-30: a script can only search loaded
+chunks, so it found trees already in sight, and placed custom structures cannot be located from script.)
 
 ### Songbird
 

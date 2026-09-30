@@ -1,8 +1,8 @@
 # White deer (`lothlorien:white_deer`) - design sheet
 
 Archetype: rare, shy loner and guide (Phase 12), always an antlered **white hart**. Built 2026-09-30 from the deer (`docs/mobs/deer.md`);
-owner decisions of 2026-09-30 (second round: leash, always antlered, sure antler, double Disharmony, depth-dependent spawns, markers only
-in Mallorns with a chest) built the same day. **Static checks only - nothing below is tested in game** ("Tested" = `no` until a game run
+owner decisions of 2026-09-30 (second round: leash, always antlered, sure antler, double Disharmony, depth-dependent spawns; third round: the Great Mallorn nut gift
+replaces leading to flet giants, markers removed) built the same day. **Static checks only - nothing below is tested in game** ("Tested" = `no` until a game run
 says otherwise). Guidance design, unverified assumptions and the test plan:
 `docs/TECHNICAL_NOTES.md` (White deer guidance). Files: BP `entities/white_deer.json`, `spawn_rules/white_deer.json`,
 `entities/guide_beacon.json` (helper), `scripts/white_deer.js` + `white_deer_rules.js`, wariness in `scripts/deer.js`; RP

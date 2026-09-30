@@ -10,10 +10,6 @@
 export const WHITE_DEER_ID = "lothlorien:white_deer";
 export const BEACON_ID = "lothlorien:guide_beacon";
 export const ACORN_ID = "lothlorien:mallorn_acorn";
-export const MARKER_ID = "lothlorien:structure_marker";
-
-// The hidden structure markers in the flet giants (tools/build_structures.mjs) are no longer searched: leading to them
-// was dropped on 2026-09-30 (owner: an 80-block search only finds trees already in sight). The block stays in the trees.
 
 export const GUIDE_TICKS = 5; // the session is checked this often
 export const WAIT_DIST = 12; // the deer waits while the player is farther than this

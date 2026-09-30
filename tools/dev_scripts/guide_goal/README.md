@@ -64,5 +64,5 @@ Then commit `white_deer.json` in `mods/lothlorien/` and note the result in `docs
    .\mods deploy lothlorien
    ```
    Record in `docs/TECHNICAL_NOTES.md`: game version, which variant followed the armor stand, the pig and the real beacon,
-   and how the walk looked. Then run the full white deer test plan there (acorn offer with a marker).
+   and how the walk looked. Then run the full white deer test plan there (the acorn offer and the gift walk).
 
