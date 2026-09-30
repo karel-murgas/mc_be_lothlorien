@@ -490,3 +490,14 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
 - Effects come from script because item-JSON food effects are not available in format 1.26.50 (not verified; scripts are the working pattern here).
 - **Test list:** items appear in the creative menu and recipe book (salve unlocks on picking up Athelas, Miruvor on getting a salve); drink
   animation and can-drink at full hunger; effects apply; numbers feel expensive but not silly (Phase 20 balance pass).
+
+## Disharmony core (Phase 9, 2026-09-30, not yet tested in game)
+
+- Rules in `scripts/disharmony.js` (pure, tested), wiring in `scripts/disharmony_game.js`; state per player in dynamic
+  property `lothlorien:disharmony` (`{points, calm, friend}`). `/scriptevent lothlorien:disharmony [points]` shows or sets it.
+- Decided with the user: a point decays after **3 min inside** the biome, **6 min outside** (KB said "inside only"; changed).
+  Status text is shown on the actionbar only inside the biome. A kill restarts the decay timer; **player death resets
+  points and all timers**. Friend = 10 minutes at 0 points inside; progress is paused outside (neither gained nor lost) and Friend lasts
+  outside (status just hidden); only a kill or a death loses it.
+- A kill counts when a player is `damageSource.damagingEntity` (projectile shooters included) and the victim stood in the biome.
+- Later phases read the state with `disharmonyOf(player)` + `levelFor` / `isFriend`.

@@ -5,6 +5,7 @@ import { BONEMEAL_TABLE, SPREAD_TRIES, COVERS, pickWeighted } from "../lothlorie
 import { readFileSync } from "node:fs";
 import { MAX_GROWTH, growChance, bonemealSteps, advanceGrowth } from "../lothlorien_bp/scripts/crop_rules.js";
 import { estimateDepth, probeCount, ringOffsets, DEPTH_RADII } from "../lothlorien_bp/scripts/depth.js";
+import * as D from "../lothlorien_bp/scripts/disharmony.js";
 import { makeRandom } from "../lothlorien_bp/scripts/mallorn_tree.js";
 import { buildFletMallorn, LADDER, LEAF_KEEP, ROOT_DEPTH, B } from "../tools/flet_mallorn.mjs";
 import { SIZE, SIZE_Y, TRUNK_AT, CHOSEN, TRUNK_ANCHOR } from "../tools/build_structures.mjs";
@@ -211,6 +212,35 @@ test("giants: the jigsaw pool matches CHOSEN, every piece ships, the structure s
   for (const name of GIANT_TREES) {
     assert.ok(existsSync(new URL(`../lothlorien_bp/structures/lothlorien/${name}.mcstructure`, import.meta.url)), name);
   }
+});
+
+test("disharmony: levels", () => {
+  assert.deepEqual([0, 1, 2, 3, 4, 9].map(D.levelFor), [0, 1, 2, 2, 3, 3]);
+});
+test("disharmony: a point decays after 3 min inside, 6 min outside", () => {
+  const a = D.newState(); D.recordKill(a); D.tick(a, true, 179); assert.equal(a.points, 1); D.tick(a, true, 1); assert.equal(a.points, 0);
+  const b = D.newState(); D.recordKill(b); D.tick(b, false, 359); assert.equal(b.points, 1); D.tick(b, false, 1); assert.equal(b.points, 0);
+});
+test("disharmony: a new kill restarts the decay timer", () => {
+  const s = D.newState(); D.recordKill(s); D.tick(s, true, 170); D.recordKill(s); D.tick(s, true, 170);
+  assert.equal(s.points, 2); D.tick(s, true, 10); assert.equal(s.points, 1);
+});
+test("disharmony: death resets points and timers", () => {
+  const s = D.newState(); D.recordKill(s); D.recordKill(s); D.tick(s, true, 100); D.recordDeath(s);
+  assert.deepEqual(s, D.newState());
+});
+test("disharmony: Friend after 10 calm minutes inside; outside pauses progress; kill or death loses it", () => {
+  const s = D.newState(); D.tick(s, true, 300); D.tick(s, false, 1000); assert.equal(s.friend, 300);
+  D.tick(s, true, 299); assert.ok(!D.isFriend(s)); D.tick(s, true, 1); assert.ok(D.isFriend(s));
+  D.tick(s, false, 1000); assert.ok(D.isFriend(s));
+  D.recordKill(s); assert.ok(!D.isFriend(s));
+  D.tick(s, true, 600); D.recordDeath(s); assert.ok(!D.isFriend(s));
+});
+test("disharmony: status hidden outside, saved state round-trips, junk is tolerated", () => {
+  const s = D.newState(); D.recordKill(s);
+  assert.equal(D.statusText(s, false), undefined); assert.equal(D.statusText(s, true), "Disharmony I");
+  assert.deepEqual(D.parse(D.serialize(s)), s);
+  assert.deepEqual(D.parse(undefined), D.newState()); assert.deepEqual(D.parse("{oops"), D.newState());
 });
 
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }

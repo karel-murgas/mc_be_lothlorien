@@ -8,6 +8,7 @@ import "./athelas.js";
 import { handleTreeScriptEvent } from "./trees.js";
 import { handleShowcaseEvent } from "./showcase.js";
 import { leafUndersideY } from "./leaf_fall.js";
+import { handleDisharmonyEvent, startDisharmony } from "./disharmony_game.js";
 import { DEPTH_NAMES, estimateDepth, probeCount } from "./depth.js";
 
 const BIOME_ID = "lothlorien:lothlorien";
@@ -168,6 +169,7 @@ function onScriptEvent(event) {
   if (!player || player.typeId !== "minecraft:player") return;
   if (handleTreeScriptEvent(event, player)) return;
   if (handleShowcaseEvent(event, player)) return;
+  if (handleDisharmonyEvent(event, player)) return;
   if (event.id === "lothlorien:survey") {
     survey(player);
     return;
@@ -228,5 +230,6 @@ world.afterEvents.worldLoad.subscribe(() => {
   system.runInterval(showDebug, DEBUG_INTERVAL_TICKS);
   system.runInterval(updateDepth, DEPTH_INTERVAL_TICKS);
   system.runInterval(fallLeaves, LEAF_INTERVAL_TICKS);
+  startDisharmony((dimension, location) => biomeAt(dimension, location) === BIOME_ID, DEBUG_TAG);
   reportBiomeRegistration();
 });
