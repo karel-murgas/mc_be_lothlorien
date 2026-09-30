@@ -77,7 +77,8 @@ reacts to a Disharmony III player also scares it.
 
 | Question | Decision | Tested |
 | --- | --- | --- |
-| Luring | **Western Corn grain only** (`lothlorien:western_corn_grain`, the harvested crop; not the seeds, since 2026-09-30 owner decision; before: Mallorn acorn or apple), `can_get_scared` (fast movement scares it); off from Disharmony I and while alarmed | no |
+| Luring | **Western Corn grain only** (`lothlorien:western_corn_grain`, the harvested crop; not the seeds, since 2026-09-30 owner decision; before: Mallorn acorn or apple), calm and Friend: a player holding the grain is not fled from (avoid filter `has_equipment` hand !=), `can_get_scared` false (playtest 2026-09-30: lured deer came close, then fled even from a standing player); off from Disharmony I and while alarmed | no |
+| Tame | feeding corn (breeding or a fawn) sets property `lothlorien:tame`: in calm/Friend the deer takes `state_tame` (lure, flees only wolves and monsters, never players). A player hurting it clears tame; Disharmony I-III, panic and the alarm still make it flee. Not persistent (can still despawn) | no |
 | Leading | leashable | no |
 | Breeding | corn grain only (`breed_items`), `require_tame false`, any doe/buck pair, fawn follows parent, grows up in 20 min (corn grain speeds it up, `ageable.feed_items`) | no |
 | Babies | fawn model with spots; spawn egg on an adult makes a fawn | no |

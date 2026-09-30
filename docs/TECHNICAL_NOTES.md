@@ -554,6 +554,12 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
 - **Goal priorities matter**: breed 2, tempt 3, avoid 4. Tempt must outrank avoid or a deer lured with corn would run away
   the moment the player comes within flight distance (edge oscillation). Breeding must outrank both or it never completes
   with the player standing next to the pair.
+- **Priority alone does not keep a lured deer (playtest 2026-09-30)**: deer walked up to a player holding corn, then fled even when
+  the player stood still. Tempt stops once the deer has arrived, and avoid (flight 10 blocks) takes over. Fix: in calm and Friend, the
+  player entries of `avoid_mob_type` also need `has_equipment` (subject other, domain hand, operator !=, the lure item), and
+  `can_get_scared` is false. Fed deer get `lothlorien:tame` -> `state_tame` (no flight from players): `set_calm`/`set_friend` are
+  sequences (reset, then add `state_calm`/`state_friend` or `state_tame` by the property); every state event removes `state_tame`.
+  `deer.js` tames on corn interaction and untames the one a player hurts; `white_deer.js` tames at guide start.
 - Sex and antlers: enum property `lothlorien:sex` (client synced) picked by `minecraft:entity_spawned` / `entity_born`; the render
   controller shows bones `antler_*` only for `buck` adults (`part_visibility`). Loot differs by sex through two adult groups
   (`adult_doe`, `adult_buck`), because loot-table conditions cannot test a custom property; babies have no loot group.
@@ -714,7 +720,7 @@ cube: renders nothing but passes the verifier's "geometry has no cubes" check), 
   deer exists for one tick at 24-44 blocks (not normally seen). Assumptions: that the herd event replaces or runs along with
   `minecraft:entity_spawned` (both paths end in `set_calm`, so either works), and that the flag is readable one tick after the spawn event.
 - **Wariness**: the same state groups and flight distances as the deer (`calm` 10 / 5 sneaking ... `l3` 30, alarmed 36 for 20 s), driven by
-  `deer.js` (`DEER_TYPES` in `deer_rules.js`). Only the **Mallorn acorn** lures it (calm and Friend only, `can_get_scared`); apples do not.
+  `deer.js` (`DEER_TYPES` in `deer_rules.js`). Only the **Mallorn acorn** lures it (calm and Friend only; the held acorn stops its flight, see "Priority alone does not keep a lured deer"); apples do not.
   Hurting or killing it alarms deer within 20 blocks, and hurting a deer nearby alarms it too (it is shy, not deaf); an alarm ends a guidance.
 - **Ordinary deer**: back to its pre-`3426cec` entity, client entity and render controller (no coat, no guiding state); since 2026-09-30 its
   only food is Western Corn grain (see Deer).

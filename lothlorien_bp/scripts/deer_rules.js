@@ -16,6 +16,10 @@ export const WARINESS = ["calm", "l1", "l2", "l3", "friend"];
 export const WATCH_RADIUS = 40;
 // A player hurting a deer alarms every deer this close to it.
 export const ALARM_RADIUS = 20;
+// Holding the lure stops a calm or Friend deer fleeing from that player (entity filter has_equipment), so a lured deer
+// walks all the way up. Feeding it sets lothlorien:tame: while calm or Friend it then takes the state_tame group
+// (lure, no flight from players). A player hurting it clears tame. Disharmony I-III and the alarm still make it flee.
+export const CORN_ID = "lothlorien:western_corn_grain";
 
 // Disharmony level 0-3 and Friend status -> wariness. Friend only counts at level 0 (a kill
 // already resets Friend in disharmony.js; this keeps the rule safe on its own).

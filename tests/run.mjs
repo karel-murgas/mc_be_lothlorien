@@ -500,10 +500,12 @@ test("white deer: a separate loner entity, not tamable, not breedable, no babies
 });
 test("white deer: same wariness states and flight distances as the deer; only the acorn lures it", () => {
   const e = whiteEntity(), d = deerEntity();
-  for (const w of [...R.WARINESS, "alarmed"]) {
-    assert.deepEqual(e.component_groups[`lothlorien:state_${w}`]["minecraft:behavior.avoid_mob_type"],
+  // same flight, except the lure item that switches flight from its holder off
+  const sameLure = (avoid) => JSON.parse(JSON.stringify(avoid).replaceAll(W.ACORN_ID, R.CORN_ID));
+  for (const w of [...R.WARINESS, "alarmed", "tame"]) {
+    assert.deepEqual(sameLure(e.component_groups[`lothlorien:state_${w}`]["minecraft:behavior.avoid_mob_type"]),
       d.component_groups[`lothlorien:state_${w}`]["minecraft:behavior.avoid_mob_type"], w);
-    assert.ok(e.events[R.setEventFor(w)] || w === "alarmed", w);
+    assert.ok(e.events[R.setEventFor(w)] || w === "alarmed" || w === "tame", w);
   }
   const lured = (w) => e.component_groups[`lothlorien:state_${w}`]["minecraft:behavior.tempt"]?.items;
   assert.deepEqual(["calm", "friend"].map(lured), [[W.ACORN_ID], [W.ACORN_ID]]);
@@ -515,15 +517,47 @@ test("white deer: same wariness states and flight distances as the deer; only th
   }
   assert.ok(R.DEER_TYPES.includes(W.WHITE_DEER_ID), "deer.js drives its wariness and alarm");
 });
+test("both deer: a held lure beats flight, a fed (tame) deer does not flee from players, attack still wins", () => {
+  for (const [e, lure] of [[deerEntity(), R.CORN_ID], [whiteEntity(), W.ACORN_ID]]) {
+    const g = e.component_groups;
+    const playerEntries = (grp) => grp["minecraft:behavior.avoid_mob_type"].entity_types
+      .filter((t) => JSON.stringify(t.filters).includes('"value":"player"'));
+    const exempts = (t) => t.filters.all_of?.some((f) => f.test === "has_equipment" && f.subject === "other" && f.operator === "!=" && f.value === lure);
+    for (const w of ["calm", "friend"]) {
+      assert.ok(playerEntries(g[`lothlorien:state_${w}`]).every(exempts), `${w}: holding ${lure} stops the flight`);
+      assert.equal(g[`lothlorien:state_${w}`]["minecraft:behavior.tempt"].can_get_scared, false, `${w}: the lure is not broken by movement`);
+    }
+    for (const w of ["l1", "l2", "l3", "alarmed"]) assert.ok(!playerEntries(g[`lothlorien:state_${w}`]).some(exempts), `${w}: the lure does not help`);
+    assert.equal(playerEntries(g["lothlorien:state_tame"]).length, 0, "tame: no flight from players");
+    assert.deepEqual(g["lothlorien:state_tame"]["minecraft:behavior.tempt"].items, [lure]);
+    assert.equal(e.description.properties["lothlorien:tame"].default, false);
+    for (const [name, ev] of Object.entries(e.events)) {
+      const removes = [ev, ...(ev.sequence ?? [])].flatMap((s) => s.remove?.component_groups ?? []);
+      if (removes.includes("lothlorien:state_calm")) assert.ok(removes.includes("lothlorien:state_tame"), `${name} removes state_tame`);
+    }
+    for (const w of ["calm", "friend"]) {
+      const seq = e.events[R.setEventFor(w)].sequence;
+      const addFor = (tame) => seq.find((s) => s.filters?.domain === "lothlorien:tame" && s.filters.value === tame).add.component_groups;
+      assert.deepEqual([addFor(false), addFor(true)], [[`lothlorien:state_${w}`], ["lothlorien:state_tame"]]);
+    }
+    for (const w of ["l1", "l2", "l3"]) assert.deepEqual(e.events[R.setEventFor(w)].add.component_groups, [`lothlorien:state_${w}`], w);
+    assert.equal(e.components["minecraft:behavior.panic"].priority, 1, "panic outranks the lure (3)");
+  }
+  const src = (f) => readFileSync(new URL(`../lothlorien_bp/scripts/${f}`, import.meta.url), "utf8");
+  assert.ok(/setProperty\("lothlorien:tame", false\)/.test(src("deer.js")), "a player hurting a deer untames it");
+  assert.ok(/tame\(target\)/.test(src("deer.js")), "feeding corn tames a deer");
+  assert.ok(/setProperty\("lothlorien:tame", true\)/.test(src("white_deer.js")), "a white deer taking the acorn is tamed");
+});
 test("white deer: guiding state follows the beacon (one goal, below panic, above avoid) and only guide_start adds it", () => {
   const e = whiteEntity();
   const g = "lothlorien:state_guiding";
   for (const [name, ev] of Object.entries(e.events)) {
     if (name.startsWith("lothlorien:set_") || name === "lothlorien:alarm") {
-      assert.ok(ev.remove.component_groups.includes(g), name);
-      assert.equal(ev.set_property["lothlorien:guiding"], false, name);
+      const first = ev.sequence?.[0] ?? ev; // set_calm/set_friend: reset first, then the tame-dependent add
+      assert.ok(first.remove.component_groups.includes(g), name);
+      assert.equal(first.set_property["lothlorien:guiding"], false, name);
     }
-    if (name !== "lothlorien:guide_start") assert.ok(!ev.add?.component_groups?.includes(g), name);
+    if (name !== "lothlorien:guide_start") assert.ok(![ev, ...(ev.sequence ?? [])].some((s) => s.add?.component_groups?.includes(g)), name);
   }
   assert.deepEqual(e.events["lothlorien:guide_start"].add.component_groups, [g]);
   assert.equal(e.events["lothlorien:guide_start"].set_property["lothlorien:guiding"], true);

@@ -32,6 +32,11 @@
           "type": "bool",
           "default": false,
           "client_sync": false
+        },
+        "lothlorien:tame": {
+          "type": "bool",
+          "default": false,
+          "client_sync": false
         }
       }
     },
@@ -52,6 +57,13 @@
                     "test": "is_sneaking",
                     "subject": "other",
                     "value": false
+                  },
+                  {
+                    "test": "has_equipment",
+                    "subject": "other",
+                    "domain": "hand",
+                    "operator": "!=",
+                    "value": "lothlorien:western_corn_grain"
                   }
                 ]
               },
@@ -71,6 +83,13 @@
                     "test": "is_sneaking",
                     "subject": "other",
                     "value": true
+                  },
+                  {
+                    "test": "has_equipment",
+                    "subject": "other",
+                    "domain": "hand",
+                    "operator": "!=",
+                    "value": "lothlorien:western_corn_grain"
                   }
                 ]
               },
@@ -106,7 +125,7 @@
           "items": [
             "lothlorien:western_corn_grain"
           ],
-          "can_get_scared": true
+          "can_get_scared": false
         }
       },
       "lothlorien:state_l1": {
@@ -320,6 +339,13 @@
                     "test": "is_sneaking",
                     "subject": "other",
                     "value": false
+                  },
+                  {
+                    "test": "has_equipment",
+                    "subject": "other",
+                    "domain": "hand",
+                    "operator": "!=",
+                    "value": "lothlorien:western_corn_grain"
                   }
                 ]
               },
@@ -339,6 +365,13 @@
                     "test": "is_sneaking",
                     "subject": "other",
                     "value": true
+                  },
+                  {
+                    "test": "has_equipment",
+                    "subject": "other",
+                    "domain": "hand",
+                    "operator": "!=",
+                    "value": "lothlorien:western_corn_grain"
                   }
                 ]
               },
@@ -374,7 +407,42 @@
           "items": [
             "lothlorien:western_corn_grain"
           ],
-          "can_get_scared": true
+          "can_get_scared": false
+        }
+      },
+      "lothlorien:state_tame": {
+        "minecraft:behavior.avoid_mob_type": {
+          "priority": 4,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "wolf"
+              },
+              "max_dist": 12,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.8
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "monster"
+              },
+              "max_dist": 8,
+              "walk_speed_multiplier": 1.4,
+              "sprint_speed_multiplier": 1.8
+            }
+          ]
+        },
+        "minecraft:behavior.tempt": {
+          "priority": 3,
+          "speed_multiplier": 1.0,
+          "items": [
+            "lothlorien:western_corn_grain"
+          ],
+          "can_get_scared": false
         }
       },
       "lothlorien:state_alarmed": {
@@ -600,25 +668,49 @@
     },
     "events": {
       "lothlorien:set_calm": {
-        "set_property": {
-          "lothlorien:wariness": "calm",
-          "lothlorien:alarmed": false
-        },
-        "remove": {
-          "component_groups": [
-            "lothlorien:state_calm",
-            "lothlorien:state_l1",
-            "lothlorien:state_l2",
-            "lothlorien:state_l3",
-            "lothlorien:state_friend",
-            "lothlorien:state_alarmed"
-          ]
-        },
-        "add": {
-          "component_groups": [
-            "lothlorien:state_calm"
-          ]
-        }
+        "sequence": [
+          {
+            "set_property": {
+              "lothlorien:wariness": "calm",
+              "lothlorien:alarmed": false
+            },
+            "remove": {
+              "component_groups": [
+                "lothlorien:state_calm",
+                "lothlorien:state_l1",
+                "lothlorien:state_l2",
+                "lothlorien:state_l3",
+                "lothlorien:state_friend",
+                "lothlorien:state_tame",
+                "lothlorien:state_alarmed"
+              ]
+            }
+          },
+          {
+            "filters": {
+              "test": "bool_property",
+              "domain": "lothlorien:tame",
+              "value": false
+            },
+            "add": {
+              "component_groups": [
+                "lothlorien:state_calm"
+              ]
+            }
+          },
+          {
+            "filters": {
+              "test": "bool_property",
+              "domain": "lothlorien:tame",
+              "value": true
+            },
+            "add": {
+              "component_groups": [
+                "lothlorien:state_tame"
+              ]
+            }
+          }
+        ]
       },
       "lothlorien:set_l1": {
         "set_property": {
@@ -632,6 +724,7 @@
             "lothlorien:state_l2",
             "lothlorien:state_l3",
             "lothlorien:state_friend",
+            "lothlorien:state_tame",
             "lothlorien:state_alarmed"
           ]
         },
@@ -653,6 +746,7 @@
             "lothlorien:state_l2",
             "lothlorien:state_l3",
             "lothlorien:state_friend",
+            "lothlorien:state_tame",
             "lothlorien:state_alarmed"
           ]
         },
@@ -674,6 +768,7 @@
             "lothlorien:state_l2",
             "lothlorien:state_l3",
             "lothlorien:state_friend",
+            "lothlorien:state_tame",
             "lothlorien:state_alarmed"
           ]
         },
@@ -684,25 +779,49 @@
         }
       },
       "lothlorien:set_friend": {
-        "set_property": {
-          "lothlorien:wariness": "friend",
-          "lothlorien:alarmed": false
-        },
-        "remove": {
-          "component_groups": [
-            "lothlorien:state_calm",
-            "lothlorien:state_l1",
-            "lothlorien:state_l2",
-            "lothlorien:state_l3",
-            "lothlorien:state_friend",
-            "lothlorien:state_alarmed"
-          ]
-        },
-        "add": {
-          "component_groups": [
-            "lothlorien:state_friend"
-          ]
-        }
+        "sequence": [
+          {
+            "set_property": {
+              "lothlorien:wariness": "friend",
+              "lothlorien:alarmed": false
+            },
+            "remove": {
+              "component_groups": [
+                "lothlorien:state_calm",
+                "lothlorien:state_l1",
+                "lothlorien:state_l2",
+                "lothlorien:state_l3",
+                "lothlorien:state_friend",
+                "lothlorien:state_tame",
+                "lothlorien:state_alarmed"
+              ]
+            }
+          },
+          {
+            "filters": {
+              "test": "bool_property",
+              "domain": "lothlorien:tame",
+              "value": false
+            },
+            "add": {
+              "component_groups": [
+                "lothlorien:state_friend"
+              ]
+            }
+          },
+          {
+            "filters": {
+              "test": "bool_property",
+              "domain": "lothlorien:tame",
+              "value": true
+            },
+            "add": {
+              "component_groups": [
+                "lothlorien:state_tame"
+              ]
+            }
+          }
+        ]
       },
       "lothlorien:alarm": {
         "set_property": {
@@ -715,6 +834,7 @@
             "lothlorien:state_l2",
             "lothlorien:state_l3",
             "lothlorien:state_friend",
+            "lothlorien:state_tame",
             "lothlorien:state_alarmed"
           ]
         },
