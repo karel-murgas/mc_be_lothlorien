@@ -1,24 +1,30 @@
 // White deer guidance in the running game (Phase 12; rules in white_deer_rules.js). Offer a Mallorn acorn to a white
-// deer (lothlorien:white_deer) while your Disharmony is 0: it finds the nearest hidden structure marker (a block in the
-// buried trunk of each giant Mallorn that holds a chest) in the loaded chunks and walks towards it, waiting for the player
-// to keep up. A leashed white deer does not lead (white_deer_rules.js, offerRefusal). Natural spawns are thinned by depth.
+// deer (lothlorien:white_deer) while your Disharmony is 0: once in its life it leads you to its gift, a Great Mallorn nut
+// (great_mallorn.js), at a spot inside Lothlorien 36-56 blocks away, waiting for the player to keep up, and lays the nut
+// there on arrival. The spot is kept on the deer (dynamic property) until the gift is given, so a broken-off guidance
+// can be taken up again with another acorn. A leashed white deer does not lead (white_deer_rules.js, offerRefusal).
+// Natural spawns are thinned by depth.
 //
 // The deer is never moved by script. While it guides, it sits in the component group `lothlorien:state_guiding`
 // (entities/white_deer.json), whose follow goal makes the engine's navigator walk it to the nearest guide beacon: an
 // invisible helper entity (entities/guide_beacon.json), one per session, that this script spawns and moves ahead in
 // hops of 8-14 blocks. Several guiding deer close together may follow each other's beacon (accepted by the owner).
-import { BlockVolume, EntityInitializationCause, EquipmentSlot, GameMode, system, world } from "@minecraft/server";
+import { EntityInitializationCause, EquipmentSlot, GameMode, ItemStack, system, world } from "@minecraft/server";
 import { disharmonyOf } from "./disharmony_game.js";
 import { levelFor } from "./disharmony.js";
 import { repeatedUse } from "./use_guard.js";
 import {
-  ACORN_ID, BEACON_ID, GUIDE_TICKS, MARKER_ID, SEARCH_RADIUS, WHITE_DEER_ID, canBeGuided, hopStatus, horizontal, keepNaturalSpawn,
-  newHop, offerRefusal, phase, pickWaypoint, searchSpan, sliceOrigins, trackProgress,
+  ACORN_ID, BEACON_ID, GUIDE_TICKS, WHITE_DEER_ID, canBeGuided, hopStatus, horizontal, keepNaturalSpawn,
+  newHop, offerRefusal, phase, pickWaypoint, trackProgress,
 } from "./white_deer_rules.js";
+import { NUT_ID, bestInRing, giftCandidates } from "./great_mallorn_rules.js";
 
 // session: { playerId, beaconId, target, bestDist, stuck, born, phase, hop, skip, bias, waiting }
 const sessions = new Map(); // deer id -> session
-const searching = new Set(); // deer ids with a marker search in progress
+const searching = new Set(); // deer ids with a gift spot search in progress
+const GIFT_SPOT = "lothlorien:gift_spot"; // dynamic property on the deer: JSON {x, y, z, dim} until the gift is given
+const GIFTED = "lothlorien:gifted"; // dynamic property on the deer: true once the nut was laid
+let depthAt; // (dimension, location) -> { level }, from main.js
 const SWEEP_TICKS = 100; // stray beacons (no session: world reloaded, chunk came back) are removed this often
 const DIMENSIONS = ["overworld", "nether", "the_end"];
 const DOWN = { x: 0, y: -1, z: 0 };
@@ -39,31 +45,69 @@ const say = (player, text) => {
   }
 };
 
-// Nearest marker around `origin`, found column by column (one chunk-sized volume per job step) so no single tick pays
-// for the whole search. Calls done({x, y, z, dist}) or done(undefined).
-function findMarker(dimension, origin, done) {
+// Feet height at column (x, z) found from the top: the first ground under air, plants, leaves and logs (a crown over
+// the forest floor is not ground), with two blocks of headroom; undefined for water, an unloaded chunk or no ground.
+function groundFeet(dimension, x, z) {
+  try {
+    let b = dimension.getTopmostBlock({ x, z });
+    while (b && (b.isAir || /leaves|_log$|_wood$|grass|fern|flower|sapling|carpet|bush|petals|litter|athelas|elanor|niphredil|vine/.test(b.typeId))) {
+      b = b.below();
+    }
+    if (!b || b.isLiquid) return undefined;
+    const feet = b.y + 1;
+    const head = dimension.getBlock({ x, y: feet + 1, z });
+    return head && (head.isAir || !head.isSolid) ? feet : undefined;
+  } catch {
+    return undefined; // unloaded chunk
+  }
+}
+
+// The gift spot for a deer at `origin`: farthest ring first (great_mallorn_rules.js, giftCandidates), one ring per job
+// step. Calls done({x, y, z}) or done(undefined).
+function findGiftSpot(dimension, origin, done) {
   system.runJob(
     (function* () {
-      let best;
-      const range = dimension.heightRange;
-      const span = searchSpan(origin.y, range.min, range.max);
-      for (const slice of sliceOrigins(origin.x, origin.z, SEARCH_RADIUS)) {
-        if (best && slice.dist > best.dist) break; // nearest first: nothing farther can win
-        try {
-          const volume = new BlockVolume({ x: slice.x, y: span.from, z: slice.z }, { x: slice.x + 15, y: span.to, z: slice.z + 15 });
-          const found = dimension.getBlocks(volume, { includeTypes: [MARKER_ID] }, true);
-          for (const at of found.getBlockLocationIterator()) {
-            const dist = horizontal(origin, { x: at.x + 0.5, z: at.z + 0.5 });
-            if (!best || dist < best.dist) best = { x: at.x, y: at.y, z: at.z, dist };
-          }
-        } catch {
-          // dimension or chunk went away mid-search
+      for (const ring of giftCandidates(origin.x, origin.z, Math.random() * 2 * Math.PI)) {
+        for (const c of ring) {
+          c.y = groundFeet(dimension, c.x, c.z);
+          c.level = c.y === undefined ? 0 : depthAt(dimension, { x: c.x, y: c.y, z: c.z }).level;
+        }
+        const best = bestInRing(ring);
+        if (best) {
+          done({ x: best.x, y: best.y, z: best.z });
+          return;
         }
         yield;
       }
-      done(best);
+      done(undefined);
     })()
   );
+}
+
+function storedSpot(deer) {
+  try {
+    const raw = deer.getDynamicProperty(GIFT_SPOT);
+    const spot = typeof raw === "string" ? JSON.parse(raw) : undefined;
+    return spot?.dim === deer.dimension.id ? spot : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+// Lay the nut at the spot (or at the deer's feet if the spot went missing) and mark the deer as done.
+function giveGift(deer, s) {
+  const spot = s.spot;
+  const at = { x: spot.x + 0.5, y: spot.y + 0.2, z: spot.z + 0.5 };
+  const nut = new ItemStack(NUT_ID, 1);
+  nut.setLore(["§7Grows into a giant Mallorn with a flet.", "§7Needs a space about 40 wide and 50 high.", "§7Plant it on grass or dirt."]);
+  try {
+    deer.dimension.spawnItem(nut, at);
+    deer.dimension.spawnParticle("minecraft:totem_particle", at);
+  } catch {
+    deer.dimension.spawnItem(nut, deer.location); // the spot's chunk is not loaded after all
+  }
+  deer.setDynamicProperty(GIFTED, true);
+  deer.setDynamicProperty(GIFT_SPOT, undefined);
 }
 
 // Feet height of a deer standing in column (x, z) near feet height y, or undefined: ground within PROBE_UP above to
@@ -121,51 +165,71 @@ function offer(player, deer) {
     say(player, "§7The white deer shies from your restless spirit.");
     return;
   }
+  if (deer.getDynamicProperty(GIFTED)) {
+    say(player, "§7The white deer nuzzles the acorn and lets it be. It has given its gift already.");
+    return;
+  }
+  const kept = storedSpot(deer);
+  if (kept) {
+    lead(player, deer, kept);
+    return;
+  }
   searching.add(deer.id);
-  const dimension = deer.dimension;
-  findMarker(dimension, deer.location, (marker) => {
+  findGiftSpot(deer.dimension, deer.location, (spot) => {
     searching.delete(deer.id);
-    let beaconId;
     try {
       if (!deer.isValid || !player.isValid) return;
-      if (isLeashed(deer)) {
-        say(player, "§7The white deer will not lead while it is held on a lead.");
+      if (!spot) {
+        say(player, "§7The white deer sniffs the acorn, looks around, and stays. It has nowhere to lead you from here.");
         return;
       }
-      if (!marker) {
-        say(player, "§7The white deer sniffs the acorn, looks at you, and stays. It has nowhere to lead you.");
-        return;
-      }
-      const target = { x: marker.x + 0.5, z: marker.z + 0.5 };
-      const wp = pickWaypoint(deer.location, target, standIn(dimension));
-      if (!wp) {
-        say(player, "§7The white deer looks around, but finds no way from here.");
-        return;
-      }
-      const beacon = dimension.spawnEntity(BEACON_ID, { x: wp.x, y: wp.y, z: wp.z });
-      beaconId = beacon.id;
-      deer.triggerEvent("lothlorien:become_tame"); // fed: persistent, and after guiding it comes back as state_tame
-      deer.triggerEvent("lothlorien:guide_start");
-      consumeAcorn(player); // only now: guidance really starts
-      sessions.set(deer.id, {
-        playerId: player.id,
-        beaconId,
-        target,
-        bestDist: marker.dist,
-        stuck: 0,
-        born: system.currentTick,
-        phase: "walk",
-        hop: newHop(wp, deer.location),
-        skip: new Set(),
-        bias: wp.turn || 1,
-        waiting: false,
-      });
-      say(player, "§fThe white deer takes the acorn, lifts its head and turns. Follow it.");
+      deer.setDynamicProperty(GIFT_SPOT, JSON.stringify({ ...spot, dim: deer.dimension.id }));
+      lead(player, deer, spot);
     } catch {
-      sessions.delete(deer.id);
-      removeBeacon(beaconId);
+      // deer or player gone
     }
   });
+}
+
+// Start a guidance session to `spot` ({x, y, z}).
+function lead(player, deer, spot) {
+  let beaconId;
+  try {
+    if (isLeashed(deer)) {
+      say(player, "§7The white deer will not lead while it is held on a lead.");
+      return;
+    }
+    const dimension = deer.dimension;
+    const target = { x: spot.x + 0.5, z: spot.z + 0.5 };
+    const wp = pickWaypoint(deer.location, target, standIn(dimension));
+    if (!wp) {
+      say(player, "§7The white deer looks around, but finds no way from here.");
+      return;
+    }
+    const beacon = dimension.spawnEntity(BEACON_ID, { x: wp.x, y: wp.y, z: wp.z });
+    beaconId = beacon.id;
+    deer.triggerEvent("lothlorien:become_tame"); // fed: persistent, and after guiding it comes back as state_tame
+    deer.triggerEvent("lothlorien:guide_start");
+    consumeAcorn(player); // only now: guidance really starts
+    sessions.set(deer.id, {
+      playerId: player.id,
+      beaconId,
+      target,
+      spot,
+      bestDist: horizontal(deer.location, target),
+      stuck: 0,
+      born: system.currentTick,
+      phase: "walk",
+      hop: newHop(wp, deer.location),
+      skip: new Set(),
+      bias: wp.turn || 1,
+      waiting: false,
+    });
+    say(player, "§fThe white deer takes the acorn, lifts its head and turns. Follow it.");
+  } catch {
+    sessions.delete(deer.id);
+    removeBeacon(beaconId);
+  }
 }
 
 function end(deerId, deer, player, text) {
@@ -178,6 +242,11 @@ function end(deerId, deer, player, text) {
     // deer unloaded
   }
   if (player && text) say(player, text);
+}
+
+function arrive(deerId, deer, player, s) {
+  giveGift(deer, s);
+  end(deerId, deer, player, "§fThe white deer stops and bows its head. Something glints in the moss: a Great Mallorn nut.");
 }
 
 const moveBeacon = (beacon, to) => beacon.teleport({ x: to.x, y: to.y, z: to.z });
@@ -196,7 +265,7 @@ function walk(s, deer, beacon) {
   const status = hopStatus(s.hop, deer.location, GUIDE_TICKS);
   if (status === "go") return "go";
   if (status === "next") {
-    if (s.hop.wp.final) return "arrived"; // stood at the last waypoint beside the marker
+    if (s.hop.wp.final) return "arrived"; // stood at the last waypoint at the spot
     s.skip.clear();
   } else s.skip.add(s.hop.wp.deg);
   let wp = pickWaypoint(deer.location, s.target, standIn(deer.dimension), { bias: s.bias, skip: s.skip });
@@ -231,8 +300,8 @@ function tickSession(deerId, s) {
     leashed: isLeashed(deer),
   });
   if (s.phase === "leashed") return end(deerId, deer, player, "§7The white deer is held on a lead and stops leading you.");
-  if (s.phase === "arrived") return end(deerId, deer, player, "§fThe white deer stops and looks ahead. A great tree stands near.");
-  if (s.phase === "abort") return end(deerId, deer, player, "§7The white deer loses the way and lets you go.");
+  if (s.phase === "arrived") return arrive(deerId, deer, player, s);
+  if (s.phase === "abort") return end(deerId, deer, player, "§7The white deer loses the way and lets you go. Another acorn may set it on its way again.");
   const beacon = beaconOf(s, deer.dimension, s.waiting ? deer.location : s.hop.wp);
   if (s.phase === "wait") {
     // the player lags: the beacon comes to the deer's feet, so the deer stands and waits
@@ -246,7 +315,7 @@ function tickSession(deerId, s) {
     s.hop = newHop(s.hop.wp, deer.location);
     return;
   }
-  if (walk(s, deer, beacon) === "arrived") end(deerId, deer, player, "§fThe white deer stops and looks ahead. A great tree stands near.");
+  if (walk(s, deer, beacon) === "arrived") arrive(deerId, deer, player, s);
 }
 
 // Beacons with no session: left over from a reload (sessions are not saved) or a chunk that unloaded and came back.
@@ -293,8 +362,9 @@ function judgeNaturalSpawn(deer, depthAt) {
   }
 }
 
-// depthAt(dimension, location) -> { level } from scripts/depth.js (main.js supplies the in-game sampler).
-export function startWhiteDeer(depthAt) {
+// depth(dimension, location) -> { level } from scripts/depth.js (main.js supplies the in-game sampler).
+export function startWhiteDeer(depth) {
+  depthAt = depth;
   sweepBeacons(); // world load: no session survives a reload, so every beacon found is a stray
   system.runInterval(tickSessions, GUIDE_TICKS);
   world.afterEvents.entitySpawn.subscribe(({ entity, cause }) => {

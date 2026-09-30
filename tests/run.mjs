@@ -374,13 +374,74 @@ test("white deer: only Disharmony 0 is guided", () => {
   assert.equal(W.canBeGuided(0), true);
   assert.deepEqual([1, 2, 3].map(W.canBeGuided), [false, false, false]);
 });
-test("white deer: search columns are chunk-aligned, nearest first, and stay inside the radius", () => {
-  const cols = W.sliceOrigins(5, 5, 40);
-  assert.deepEqual([cols[0].x, cols[0].z, cols[0].dist], [0, 0, 0]);
-  assert.ok(cols.every((c, i) => c.x % 16 === 0 && c.z % 16 === 0 && c.dist <= 40 && (i === 0 || cols[i - 1].dist <= c.dist)));
-  assert.ok(cols.some((c) => c.x === -48) && !cols.some((c) => c.x === -64));
-  assert.deepEqual(W.searchSpan(64, -64, 320), { from: 24, to: 80 });
-  assert.deepEqual(W.searchSpan(-60, -64, 320), { from: -64, to: -44 }); // clamped to the world floor
+// Phase 12 gift: the white deer leads to a spot where it lays a Great Mallorn nut; the nut grows a flet giant.
+import * as N from "../lothlorien_bp/scripts/great_mallorn_rules.js";
+import { ANCHOR_AT } from "../tools/build_structures.mjs";
+test("gift spot: rings inside the default simulation distance, farthest first, every heading", () => {
+  const rings = N.giftCandidates(100, -40);
+  assert.deepEqual(rings.map((r) => r[0].ring), [...N.GIFT_RINGS].sort((a, b) => b - a));
+  assert.ok(N.GIFT_RINGS.every((r) => r <= 56 && r >= 32), "loaded at simulation distance 4 (64 blocks) from any spot in the player's chunk");
+  for (const ring of rings) {
+    assert.equal(ring.length, N.GIFT_HEADINGS);
+    for (const c of ring) assert.ok(Math.abs(Math.hypot(c.x - 100, c.z + 40) - c.ring) < 1.5);
+  }
+});
+test("gift spot: only standable ground inside Lothlorien; the deepest spot of a ring wins", () => {
+  const c = (level, y = 70) => ({ x: level, z: 0, ring: 56, level, y });
+  assert.equal(N.bestInRing([c(0), { ...c(1), y: undefined }, c(0)]), undefined);
+  assert.equal(N.bestInRing([c(1), c(3), c(2)]).level, 3);
+});
+test("great nut: tree box and anchor match the structure builder; the sprout sits in the trunk at ground level", () => {
+  assert.deepEqual([N.SIZE, N.SIZE_Y, N.TRUNK_AT, N.ROOT_DEPTH], [SIZE, SIZE_Y, TRUNK_AT, ROOT_DEPTH]);
+  assert.deepEqual(N.ANCHOR, { x: TRUNK_AT + ANCHOR_AT.x, y: ROOT_DEPTH + ANCHOR_AT.y, z: TRUNK_AT + ANCHOR_AT.z });
+  const at = { x: 100, y: 64, z: -20 }, o = N.treeOrigin(at);
+  const cell = { x: at.x - o.x, y: at.y - o.y, z: at.z - o.z };
+  assert.ok(cell.x >= TRUNK_AT && cell.x <= TRUNK_AT + 3 && cell.z >= TRUNK_AT && cell.z <= TRUNK_AT + 3, "inside the 4x4 trunk");
+  assert.equal(cell.y, ROOT_DEPTH, "first cell above the ground");
+});
+test("great nut: grows only flet giants that ship in the pack and in worldgen", () => {
+  const woven = CHOSEN.filter(([v]) => v === "woven").map(([v, n]) => `lothlorien:mallorn_${v}_${String(n).padStart(2, "0")}`);
+  assert.deepEqual([...N.FLET_TREES].sort(), woven.sort());
+  for (const id of N.FLET_TREES) assert.ok(existsSync(new URL(`../lothlorien_bp/structures/${id.replace(":", "/")}.mcstructure`, import.meta.url)), id);
+});
+test("great nut: terrain, plants, leaves and logs give way; anything built stops the tree", () => {
+  for (const id of ["minecraft:air", "minecraft:grass_block", "minecraft:stone", "minecraft:iron_ore", "minecraft:oak_leaves", "minecraft:oak_log",
+    "minecraft:short_grass", "minecraft:red_tulip", "minecraft:water", "lothlorien:mallorn_leaves", "lothlorien:mallorn_log", "lothlorien:elanor",
+    N.SPROUT_ID]) assert.ok(N.isNatural(id), id);
+  for (const id of ["minecraft:oak_planks", "minecraft:stripped_oak_log", "minecraft:cobblestone", "minecraft:stone_bricks", "minecraft:glass",
+    "minecraft:chest", "minecraft:torch", "minecraft:farmland", "minecraft:oak_door", "lothlorien:mallorn_planks", "lothlorien:mallorn_stripped_log",
+    "minecraft:stone_slab", "minecraft:sandstone"]) assert.ok(!N.isNatural(id), id);
+});
+test("great nut: unique rare item that plants the sprout; sprout grows like a sapling, survives blasts, gives the nut back", () => {
+  const item = readJson("../lothlorien_bp/items/great_mallorn_nut.json")["minecraft:item"];
+  assert.equal(item.description.identifier, N.NUT_ID);
+  assert.equal(item.components["minecraft:block_placer"].block, N.SPROUT_ID);
+  assert.equal(item.components["minecraft:glint"], true);
+  assert.equal(item.components["minecraft:compostable"], undefined, "the one gift is never composted by accident");
+  const block = readJson("../lothlorien_bp/blocks/great_mallorn_sprout.json")["minecraft:block"];
+  const sapling = readJson("../lothlorien_bp/blocks/mallorn_sapling.json")["minecraft:block"];
+  assert.equal(block.description.identifier, N.SPROUT_ID);
+  assert.deepEqual(block.description.states, sapling.description.states);
+  assert.deepEqual(block.components["minecraft:placement_filter"], sapling.components["minecraft:placement_filter"], "same soil as the sapling");
+  assert.ok(block.components["lothlorien:great_sprout"]);
+  assert.ok(block.components["minecraft:destructible_by_explosion"].explosion_resistance >= 1200);
+  assert.ok(!block.components["minecraft:flammable"]);
+  const loot = readJson("../lothlorien_bp/loot_tables/blocks/great_mallorn_sprout.json");
+  assert.deepEqual(loot.pools.flatMap((p) => p.entries.map((e) => e.name)), [N.NUT_ID]);
+  for (const f of ["loot_tables/chests/mallorn_flet.json"]) assert.ok(!readFileSync(new URL(`../lothlorien_bp/${f}`, import.meta.url), "utf8").includes(N.NUT_ID), "not in loot");
+  const src = readFileSync(new URL("../lothlorien_bp/scripts/great_mallorn.js", import.meta.url), "utf8");
+  assert.ok(src.includes("event.cancel = true") && src.includes("repeatedUse"), "bone meal refused once per use");
+  assert.ok(/playerPlaceBlock[\s\S]*40 blocks wide/.test(src), "planting warns about the space");
+  assert.ok(readFileSync(new URL("../lothlorien_bp/scripts/main.js", import.meta.url), "utf8").includes('import "./great_mallorn.js"'));
+});
+test("white deer: the gift is given once per deer, the spot is kept until then, the acorn only goes when it leads", () => {
+  const src = readFileSync(new URL("../lothlorien_bp/scripts/white_deer.js", import.meta.url), "utf8");
+  assert.ok(!/findMarker|getBlocks\(/.test(src), "no marker search left");
+  assert.ok(/getDynamicProperty\(GIFTED\)[\s\S]*return;/.test(src), "a gifted deer refuses (acorn kept)");
+  assert.ok(src.includes("setDynamicProperty(GIFTED, true)") && src.includes("setDynamicProperty(GIFT_SPOT, undefined)"));
+  assert.ok(/function arrive[\s\S]*giveGift/.test(src), "arrival lays the nut");
+  const lead = src.slice(src.indexOf("function lead("), src.indexOf("function end("));
+  assert.ok(lead.indexOf("consumeAcorn") > lead.indexOf("guide_start"), "acorn used only when guidance starts");
 });
 const flat = () => 64; // every column standable at y 64
 const at0 = { x: 0, y: 64, z: 0 };

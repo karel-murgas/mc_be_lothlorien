@@ -34,6 +34,9 @@
     "lothlorien:mallorn_sapling": {
       "textures": "textures/blocks/mallorn_sapling"
     },
+    "lothlorien:great_mallorn_sprout": {
+      "textures": "textures/blocks/great_mallorn_sprout"
+    },
     "lothlorien:elanor": {
       "textures": "textures/blocks/elanor"
     },

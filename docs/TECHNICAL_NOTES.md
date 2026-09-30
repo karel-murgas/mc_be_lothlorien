@@ -667,6 +667,25 @@ for worldgen carpet; already-turned dirt does not turn back by itself, it regrow
 
 ## White deer guidance (Phase 12, 2026-09-30, rebuilt with engine pathfinding; static checks only, NOTHING tested in game)
 
+**Gift (owner, 2026-09-30, replaces leading to flet giants; static checks only):** leading to the nearest flet marker was no better
+than wandering (the 80-block, loaded-chunk search only found trees already in sight). Finding farther trees is not possible from
+script: the placed jigsaw instances live in the world save with no API; `/locate structure` finds them but `runCommand` returns only
+`successCount`; Script API 2.8.0 has no world seed (random_spread positions need it); `getBiome`/`getBlock` throw in unloaded
+chunks; and random_spread cannot be made a fixed grid (separation must be under half the spacing). So the deer now chooses the
+destination itself: `findGiftSpot` (white_deer.js) tries rings 56..36 blocks (`GIFT_RINGS`, great_mallorn_rules.js; inside the
+default simulation distance of 4 chunks whatever the player's setting, owner's wish), 16 headings from a random start, standable
+ground from the top (`groundFeet`), depth level >= 1; farthest ring wins, deepest spot within it. Dynamic properties on the deer:
+`lothlorien:gift_spot` (JSON, kept until the gift is laid, so a broken guidance resumes with another acorn) and `lothlorien:gifted`.
+On arrival `giveGift` spawns the nut (lore set by script: JSON items have no lore) with totem particles. `ARRIVE_DIST` 3 (the spot is
+standable; `pickWaypoint`'s final ring now starts at radius 0). The marker blocks stay in the flet giants, unused.
+The nut (`items/great_mallorn_nut.json`, `blocks/great_mallorn_sprout.json`, `scripts/great_mallorn.js` + `great_mallorn_rules.js`, art
+`tools/make_great_nut.py`): the sprout copies the sapling's states, soil filter and geometry; random tick stage 0 -> 1 -> grow. Growing
+reads the structure's filled cells once per session (`Structure.getBlockPermutation` over 40x54x40 in job steps), checks each against the
+world with `isNatural` (terrain, plants, leaves, unstripped logs, water; anything else = built = wait and tell players within 32 blocks,
+at most every 5 min), then `structureManager.place` with the sprout in trunk cell TRUNK_AT+1 at ground level (`treeOrigin`). The
+jigsaw anchor block in the bottom trunk cell is replaced by `mallorn_wood` after placing (script placement keeps jigsaw blocks). Any
+part of the space unloaded = try again on a later tick. Untested: growth time, the obstruction message, rotation (none: always north).
+
 History: the first build (commit `3426cec`) made the white deer a coat variant of `lothlorien:deer`, lured and offered with
 Western Corn grain, and walked it by script teleport steps. The owner rejected teleport-walking and asked for a separate
 animal offered a Mallorn acorn; this section describes the rebuild. Second owner round (2026-09-30, built the same day, static checks

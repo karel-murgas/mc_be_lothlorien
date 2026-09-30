@@ -5,6 +5,9 @@
     "lothlorien:mallorn_door": {
       "textures": "textures/items/mallorn_door"
     },
+    "lothlorien:great_mallorn_nut": {
+      "textures": "textures/items/great_mallorn_nut"
+    },
     "lothlorien:mallorn_acorn": {
       "textures": "textures/items/mallorn_acorn"
     },

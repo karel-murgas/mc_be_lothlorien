@@ -7,6 +7,7 @@ import "./lembas.js";
 import { startAntlerSupport } from "./antler.js";
 import "./athelas.js";
 import "./trees.js";
+import "./great_mallorn.js";
 import { leafUndersideY } from "./leaf_fall.js";
 import { handleDisharmonyEvent, startDisharmony } from "./disharmony_game.js";
 import { startDeer } from "./deer.js";
