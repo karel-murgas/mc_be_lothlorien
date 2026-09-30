@@ -1,0 +1,23 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:block": {
+    "description": {
+      "identifier": "lothlorien:structure_marker"
+    },
+    "components": {
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:redstone_conductivity": {
+        "redstone_conductor": true
+      },
+      "minecraft:map_color": "#8a7a5a",
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "lothlorien:mallorn_log_side",
+          "render_method": "opaque"
+        }
+      }
+    }
+  }
+}

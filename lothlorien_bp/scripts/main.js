@@ -10,6 +10,7 @@ import "./trees.js";
 import { leafUndersideY } from "./leaf_fall.js";
 import { handleDisharmonyEvent, startDisharmony } from "./disharmony_game.js";
 import { startDeer } from "./deer.js";
+import { startWhiteDeer } from "./white_deer.js";
 import { DEPTH_NAMES, estimateDepth, probeCount } from "./depth.js";
 
 const BIOME_ID = "lothlorien:lothlorien";
@@ -169,5 +170,6 @@ world.afterEvents.worldLoad.subscribe(() => {
   system.runInterval(fallLeaves, LEAF_INTERVAL_TICKS);
   startDisharmony(inBiome, DEBUG_TAG);
   startDeer();
+  startWhiteDeer();
   startAntlerSupport();
 });

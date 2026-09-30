@@ -365,5 +365,97 @@ test("antler: bucks' item is a block placer and flet chests can hold exactly one
   assert.equal(e.functions[0].count, 1);
 });
 
+// Phase 12: white deer guidance.
+import * as W from "../lothlorien_bp/scripts/white_deer_rules.js";
+import { MARKER_AT, MARKER_BLOCK } from "../tools/build_structures.mjs";
+
+test("white deer: only Disharmony 0 is guided", () => {
+  assert.equal(W.canBeGuided(0), true);
+  assert.deepEqual([1, 2, 3].map(W.canBeGuided), [false, false, false]);
+});
+test("white deer: search columns are chunk-aligned, nearest first, and stay inside the radius", () => {
+  const cols = W.sliceOrigins(5, 5, 40);
+  assert.deepEqual([cols[0].x, cols[0].z, cols[0].dist], [0, 0, 0]);
+  assert.ok(cols.every((c, i) => c.x % 16 === 0 && c.z % 16 === 0 && c.dist <= 40 && (i === 0 || cols[i - 1].dist <= c.dist)));
+  assert.ok(cols.some((c) => c.x === -48) && !cols.some((c) => c.x === -64));
+  assert.deepEqual(W.searchSpan(64, -64, 320), { from: 24, to: 80 });
+  assert.deepEqual(W.searchSpan(-60, -64, 320), { from: -64, to: -44 }); // clamped to the world floor
+});
+test("white deer: a step heads straight for the target, turns round an obstacle, gives up when boxed in", () => {
+  const from = { x: 0, y: 64, z: 0 }, target = { x: 10, z: 0 };
+  const free = W.pickStep(from, target, (x, z, y) => y);
+  assert.ok(Math.abs(free.x - W.STEP) < 1e-9 && Math.abs(free.z) < 1e-9 && free.turn === 0);
+  const wall = (x, z, y) => (x > 0.1 && Math.abs(z) < 0.1 ? undefined : y); // blocked dead ahead only
+  const round = W.pickStep(from, target, wall, 1);
+  assert.ok(round.turn !== 0 && round.x > 0);
+  assert.equal(W.pickStep(from, target, () => undefined), undefined);
+  assert.equal(W.pickStep(from, target, (x, z, y) => y + 1).y, 65); // the probe decides the standing height
+});
+test("white deer: progress resets the stuck timer, standing still does not", () => {
+  const s = { bestDist: 50, stuck: 0 };
+  W.trackProgress(s, 49.5, true, 2);
+  assert.equal(s.stuck, 2);
+  W.trackProgress(s, 48, true, 2);
+  assert.deepEqual([s.bestDist, s.stuck], [48, 0]);
+  W.trackProgress(s, 48, false, 2); // waiting for the player is not stuck
+  assert.equal(s.stuck, 0);
+});
+test("white deer: phases (arrive, wait for the player, give up)", () => {
+  const base = { toTarget: 40, toPlayer: 5, stuck: 0, age: 0, playerCalm: true };
+  const ph = (o) => W.phase({ ...base, ...o });
+  assert.equal(ph({}), "walk");
+  assert.equal(ph({ toPlayer: W.WAIT_DIST + 1 }), "wait");
+  assert.equal(ph({ toPlayer: W.ABORT_DIST + 1 }), "abort");
+  assert.equal(ph({ playerCalm: false }), "abort");
+  assert.equal(ph({ toTarget: W.ARRIVE_DIST }), "arrived");
+  assert.equal(ph({ stuck: W.STUCK_TICKS }), "abort");
+  assert.equal(ph({ stuck: W.STUCK_TICKS, toTarget: W.STUCK_ARRIVE_DIST }), "arrived");
+  assert.equal(ph({ age: W.MAX_TICKS + 1 }), "abort");
+});
+test("white deer: the entity has a white coat, a guiding state and the events the script fires", () => {
+  const e = deerEntity();
+  assert.deepEqual(e.description.properties["lothlorien:coat"].values, ["tawny", "white"]);
+  assert.equal(e.description.properties["lothlorien:coat"].client_sync, true);
+  assert.equal(e.description.properties["lothlorien:guiding"].type, "bool");
+  for (const ev of ["lothlorien:coat_white", "lothlorien:guide_start", "lothlorien:guide_end"]) assert.ok(e.events[ev], ev);
+  // the guiding state is one of the mutually exclusive state groups: every switch removes it, only guide_start adds it
+  const g = "lothlorien:state_guiding";
+  for (const [name, ev] of Object.entries(e.events)) {
+    if (name.startsWith("lothlorien:set_") || name === "lothlorien:alarm") assert.ok(ev.remove.component_groups.includes(g), name);
+    if (name.startsWith("lothlorien:set_") || name === "lothlorien:alarm") assert.equal(ev.set_property["lothlorien:guiding"], false, name);
+  }
+  assert.deepEqual(e.events["lothlorien:guide_start"].add.component_groups, [g]);
+  assert.equal(e.events["lothlorien:guide_end"].trigger, "lothlorien:alarm_over");
+  // guided deer flee only wolves and monsters, never the player, and are not lured
+  const guiding = e.component_groups[g];
+  assert.ok(!guiding["minecraft:behavior.tempt"]);
+  assert.deepEqual(guiding["minecraft:behavior.avoid_mob_type"].entity_types.map((t) => t.filters.value).sort(), ["monster", "wolf"]);
+  // about 1 in 25 natural spawns is white, born fawns never
+  const nat = e.events["minecraft:entity_spawned"].sequence.find((s) => s.randomize?.some((r) => r.trigger === "lothlorien:coat_white"));
+  assert.ok(nat && nat.randomize.reduce((a, r) => a + r.weight, 0) === 25);
+  assert.ok(!JSON.stringify(e.events["minecraft:entity_born"]).includes("coat_white"));
+  // corn lures deer in the calm states (needed to get within reach of a white deer)
+  for (const w of ["calm", "friend"]) assert.ok(e.component_groups[`lothlorien:state_${w}`]["minecraft:behavior.tempt"].items.includes(W.CORN_ID), w);
+  assert.ok(existsSync(new URL(`../lothlorien_bp/items/${W.CORN_ID.split(":")[1]}.json`, import.meta.url)), "corn item exists");
+});
+test("white deer: client entity has both white textures on disk and the render controller picks them", () => {
+  const tex = readJson("../lothlorien_rp/entity/deer.entity.json")["minecraft:client_entity"].description.textures;
+  for (const k of ["white", "white_baby"]) assert.ok(existsSync(new URL(`../lothlorien_rp/${tex[k]}.png`, import.meta.url)), k);
+  const rc = readJson("../lothlorien_rp/render_controllers/deer.render_controllers.json").render_controllers["controller.render.lothlorien.deer"];
+  assert.ok(rc.textures[0].includes("Texture.white") && rc.textures[0].includes("Texture.white_baby"));
+});
+test("structure marker: unbreakable hidden block, one buried in the trunk of every chosen giant", () => {
+  const b = readJson("../lothlorien_bp/blocks/structure_marker.json")["minecraft:block"];
+  assert.equal(b.description.identifier, W.MARKER_ID);
+  assert.equal(b.description.identifier, MARKER_BLOCK);
+  assert.equal(b.components["minecraft:destructible_by_mining"], false);
+  assert.ok(!b.description.menu_category, "not in the creative menu");
+  assert.ok(MARKER_AT.y < 0 && MARKER_AT.x >= 0 && MARKER_AT.x <= 3 && MARKER_AT.z >= 0 && MARKER_AT.z <= 3, "inside the buried trunk");
+  for (const [v, n] of CHOSEN) {
+    const file = new URL(`../lothlorien_bp/structures/lothlorien/mallorn_${v}_${String(n).padStart(2, "0")}.mcstructure`, import.meta.url);
+    assert.ok(readFileSync(file).includes(Buffer.from(MARKER_BLOCK)), `${v} ${n} has the marker (run node tools/build_structures.mjs)`);
+  }
+});
+
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }
 console.log("all tests passed");

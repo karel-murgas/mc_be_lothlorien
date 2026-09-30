@@ -3,6 +3,7 @@
 import { world, system } from "@minecraft/server";
 import { disharmonyOf } from "./disharmony_game.js";
 import { isFriend, levelFor } from "./disharmony.js";
+import { isGuiding } from "./white_deer.js";
 import { ALARM_RADIUS, DEER_ID, WATCH_RADIUS, pickWariness, setEventFor, warinessFor } from "./deer_rules.js";
 
 const INTERVAL_TICKS = 40;
@@ -23,6 +24,11 @@ function updateWariness() {
   for (const { deer, candidates } of seen.values()) {
     try {
       if (deer.getProperty("lothlorien:alarmed")) continue; // the alarm timer hands back to the state
+      if (deer.getProperty("lothlorien:guiding")) {
+        // a white deer being guided keeps its guiding state; one with no session (world reloaded mid-guidance) is released
+        if (!isGuiding(deer.id)) deer.triggerEvent("lothlorien:guide_end");
+        continue;
+      }
       const wariness = pickWariness(candidates);
       if (wariness && deer.getProperty("lothlorien:wariness") !== wariness) deer.triggerEvent(setEventFor(wariness));
     } catch {

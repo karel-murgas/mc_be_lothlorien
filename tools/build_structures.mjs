@@ -119,6 +119,11 @@ export const CHOSEN = [["woven", 5, 2], ["woven", 7, 2], ["plain", 2, 3], ["plai
 export const TRUNK_ANCHOR = "lothlorien:giant_trunk";
 export const ANCHOR_AT = { x: 1, y: -ROOT_DEPTH, z: 1 };
 
+// Hidden structure marker (Phase 12, white-deer guidance): one unbreakable block inside the buried part of the trunk,
+// next to the anchor, 4 blocks under the ground. Every guideable structure gets one (lothlorien:structure_marker).
+export const MARKER_AT = { x: 2, y: -ROOT_DEPTH + 1, z: 2 };
+export const MARKER_BLOCK = "lothlorien:structure_marker";
+
 const treeName = (variant, n) => `mallorn_${variant}_${String(n).padStart(2, "0")}`;
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
@@ -136,6 +141,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     tree.blocks.set(`${ANCHOR_AT.x},${ANCHOR_AT.y},${ANCHOR_AT.z}`, {
       name: "minecraft:jigsaw", states: { facing_direction: 0, rotation: 0 }, jigsaw: TRUNK_ANCHOR, finalState: "lothlorien:mallorn_log",
     });
+    tree.blocks.set(`${MARKER_AT.x},${MARKER_AT.y},${MARKER_AT.z}`, { name: MARKER_BLOCK, states: {} });
     const { buffer, clipped } = toMcstructure(tree.blocks);
     const name = treeName(variant, n);
     writeFileSync(join(out, `${name}.mcstructure`), buffer);

@@ -8,7 +8,9 @@
       },
       "textures": {
         "default": "textures/entity/deer/deer",
-        "baby": "textures/entity/deer/deer_baby"
+        "baby": "textures/entity/deer/deer_baby",
+        "white": "textures/entity/deer/deer_white",
+        "white_baby": "textures/entity/deer/deer_white_baby"
       },
       "geometry": {
         "default": "geometry.lothlorien.deer",
