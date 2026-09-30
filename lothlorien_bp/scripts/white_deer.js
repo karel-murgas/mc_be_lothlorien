@@ -144,7 +144,7 @@ function offer(player, deer) {
       }
       const beacon = dimension.spawnEntity(BEACON_ID, { x: wp.x, y: wp.y, z: wp.z });
       beaconId = beacon.id;
-      deer.setProperty("lothlorien:tame", true); // fed: after guiding it comes back as state_tame
+      deer.triggerEvent("lothlorien:become_tame"); // fed: persistent, and after guiding it comes back as state_tame
       deer.triggerEvent("lothlorien:guide_start");
       consumeAcorn(player); // only now: guidance really starts
       sessions.set(deer.id, {

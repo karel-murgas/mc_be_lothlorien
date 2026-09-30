@@ -19,11 +19,11 @@ BP `loot_tables/entities/white_deer.json`.
 | Spawn by depth | natural spawns only: kept with chance **outside 0 / edge 0.15 / inner 0.5 / heart 1** by `scripts/depth.js` at the spawn spot, the rest removed by `white_deer.js` right after spawning. Table and weight: `SPAWN_KEEP_BY_DEPTH`, `SPAWN_WEIGHT` in `white_deer_rules.js`. `/summon` and the egg are never filtered | no |
 | Despawn | standard `despawn_from_distance`; a name tag keeps it | no |
 | Group life | **loner**: no herd, no following, no breeding, no babies, no fawn texture, spawn egg on it does nothing | no |
-| Taming, leash, riding | not tamable, no riding; **leashable** (`minecraft:leashable {}` like the vanilla cow; not a leash anchor itself); no balloon (`minecraft:balloonable` is an Education Edition feature: leaving it out costs nothing) | no |
+| Taming, leash, riding | not tamable, no riding; **leashable** (`minecraft:leashable` with only `on_leash`/`on_unleash` events for persistence; not a leash anchor itself); no balloon (`minecraft:balloonable` is an Education Edition feature: leaving it out costs nothing) | no |
 | Lead vs guidance | **a lead always wins**: a leashed white deer refuses the acorn ("will not lead while it is held on a lead", acorn kept); leashing it during a guidance ends the guidance at once (beacon removed, back to its wariness state) | no |
 | Wariness | same states and flight distances as the deer (`calm` 10 ... `l3` 30, alarmed 36 for 20 s), set by `deer.js` | no |
 | Luring | **Mallorn acorn only**, in calm and Friend states; holding the acorn stops its flight from that player, `can_get_scared` false | no |
-| Tame | a white deer that accepts the acorn (guidance starts) is tamed like the deer (`lothlorien:tame` -> `state_tame` after guiding); hurting clears it | no |
+| Tame | a white deer that accepts the acorn (guidance starts) is tamed like the deer (`lothlorien:tame` -> `state_tame` after guiding); hurting clears it. Tame or leashed = persistent (`lothlorien:kept`, same events as the deer) | no |
 | Guidance | right-click with a Mallorn acorn at Disharmony 0: leads to the nearest structure marker within 80 blocks; **markers sit only in Mallorns that hold a chest** (today the two flet giants); none in reach: "nowhere to lead you", acorn kept; acorn used only when guidance starts | no |
 | Guiding goals | `state_guiding`: `follow_target_leader` towards `lothlorien:guide_beacon` (priority 2), avoid wolves/monsters (4); panic 1 stays above | no |
 | Panic, alarm | panics when hurt; a player hurting it or a deer within 20 blocks alarms it (guidance ends) | no |

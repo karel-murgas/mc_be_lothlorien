@@ -40,13 +40,21 @@ function updateWariness() {
   }
 }
 
-// Fed = tame. Re-applying the current state event swaps state_calm/state_friend for state_tame at once.
-export function tame(deer) {
+// Fed = tame. lothlorien:become_tame sets the property and makes the deer persistent (like a vanilla tamed animal).
+// Re-applying the current state event then swaps state_calm/state_friend for state_tame. One tick later: a property
+// change is not visible (to getProperty or to event filters) before the next tick.
+function tame(deer) {
   if (deer.getProperty("lothlorien:tame")) return;
-  deer.setProperty("lothlorien:tame", true);
-  if (!deer.getProperty("lothlorien:alarmed") && !deer.getProperty("lothlorien:guiding")) {
-    deer.triggerEvent(setEventFor(deer.getProperty("lothlorien:wariness")));
-  }
+  deer.triggerEvent("lothlorien:become_tame");
+  system.runTimeout(() => {
+    try {
+      if (!deer.getProperty("lothlorien:alarmed") && !deer.getProperty("lothlorien:guiding")) {
+        deer.triggerEvent(setEventFor(deer.getProperty("lothlorien:wariness")));
+      }
+    } catch {
+      // deer unloaded meanwhile
+    }
+  }, 1);
 }
 
 function alarmAround(dimension, location) {
@@ -64,7 +72,8 @@ export function startDeer() {
   world.afterEvents.entityHurt.subscribe(({ hurtEntity, damageSource }) => {
     if (!DEER_TYPES.includes(hurtEntity.typeId) || damageSource.damagingEntity?.typeId !== PLAYER_ID) return;
     try {
-      hurtEntity.setProperty("lothlorien:tame", false); // the alarm below rebuilds its state without state_tame
+      // untame (no longer persistent unless leashed); the alarm below rebuilds its state without state_tame 20 s later
+      hurtEntity.triggerEvent("lothlorien:untame");
     } catch {
       // deer died of the hit
     }

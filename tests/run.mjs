@@ -491,7 +491,7 @@ test("white deer: a separate loner entity, not tamable, not breedable, no babies
     "minecraft:behavior.follow_mob", "minecraft:behavior.follow_owner"]) {
     assert.ok(!keys.has(bad), bad);
   }
-  assert.deepEqual(e.components["minecraft:leashable"], {}, "a lead works on it (the owner's wish)");
+  assert.ok(e.components["minecraft:leashable"], "a lead works on it (the owner's wish)");
   assert.ok(!e.events["minecraft:entity_born"] && !e.events["minecraft:ageable_grow_up"]);
   assert.ok(!e.description.properties["lothlorien:coat"]);
   assert.deepEqual(e.components["minecraft:despawn"], { despawn_from_distance: {} });
@@ -544,9 +544,30 @@ test("both deer: a held lure beats flight, a fed (tame) deer does not flee from 
     assert.equal(e.components["minecraft:behavior.panic"].priority, 1, "panic outranks the lure (3)");
   }
   const src = (f) => readFileSync(new URL(`../lothlorien_bp/scripts/${f}`, import.meta.url), "utf8");
-  assert.ok(/setProperty\("lothlorien:tame", false\)/.test(src("deer.js")), "a player hurting a deer untames it");
+  assert.ok(src("deer.js").includes('triggerEvent("lothlorien:untame")'), "a player hurting a deer untames it");
   assert.ok(/tame\(target\)/.test(src("deer.js")), "feeding corn tames a deer");
-  assert.ok(/setProperty\("lothlorien:tame", true\)/.test(src("white_deer.js")), "a white deer taking the acorn is tamed");
+  assert.ok(src("white_deer.js").includes('triggerEvent("lothlorien:become_tame")'), "a white deer taking the acorn is tamed");
+  // a property set by script is not visible before the next tick, so tame state goes through entity events
+  for (const f of ["deer.js", "white_deer.js"]) assert.ok(!/setProperty\("lothlorien:tame"/.test(src(f)), f);
+});
+test("both deer: tame or leashed = persistent, like vanilla tamed animals; either one alone keeps it", () => {
+  for (const e of [deerEntity(), whiteEntity()]) {
+    const K = "lothlorien:kept", ev = e.events;
+    assert.deepEqual(e.component_groups[K], { "minecraft:persistent": {} });
+    assert.ok(e.components["minecraft:despawn"], "wild deer still despawn");
+    const l = e.components["minecraft:leashable"];
+    assert.deepEqual([l.on_leash.event, l.on_unleash.event], ["lothlorien:leashed", "lothlorien:unleashed"]);
+    assert.deepEqual(ev["lothlorien:leashed"].add.component_groups, [K]);
+    assert.deepEqual(ev["lothlorien:become_tame"], { set_property: { "lothlorien:tame": true }, add: { component_groups: [K] } });
+    const unleash = ev["lothlorien:unleashed"].sequence[0];
+    assert.deepEqual([unleash.filters.domain, unleash.filters.value, unleash.remove.component_groups], ["lothlorien:tame", false, [K]]);
+    const [untameSet, untameRemove] = ev["lothlorien:untame"].sequence;
+    assert.equal(untameSet.set_property["lothlorien:tame"], false);
+    assert.deepEqual([untameRemove.filters.test, untameRemove.filters.value, untameRemove.remove.component_groups], ["is_leashed", false, [K]]);
+    for (const [name, x] of Object.entries(ev)) {
+      if (!name.includes("tame") && !name.includes("leash")) assert.ok(!JSON.stringify(x).includes(K), `${name} leaves ${K} alone`);
+    }
+  }
 });
 test("white deer: guiding state follows the beacon (one goal, below panic, above avoid) and only guide_start adds it", () => {
   const e = whiteEntity();

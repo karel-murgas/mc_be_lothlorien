@@ -560,6 +560,12 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
   `can_get_scared` is false. Fed deer get `lothlorien:tame` -> `state_tame` (no flight from players): `set_calm`/`set_friend` are
   sequences (reset, then add `state_calm`/`state_friend` or `state_tame` by the property); every state event removes `state_tame`.
   `deer.js` tames on corn interaction and untames the one a player hurts; `white_deer.js` tames at guide start.
+  Tame and untame are entity events (`become_tame`, `untame`), not `setProperty`: a property set by script is invisible to
+  getProperty and event filters until the next tick, so `set_calm` in the same tick would still add `state_calm` (bug in the
+  first version, caught before a playtest). The state event is re-applied one tick later.
+- **Tame or leashed deer are kept** (owner, 2026-09-30: "mimic tamed animals"): group `lothlorien:kept` = `minecraft:persistent`.
+  The engine exempts vanilla tamed mobs (`minecraft:is_tamed`), not our property, so persistence is explicit. `untame` removes it
+  only when `is_leashed` is false; `unleashed` only when `lothlorien:tame` is false.
 - Sex and antlers: enum property `lothlorien:sex` (client synced) picked by `minecraft:entity_spawned` / `entity_born`; the render
   controller shows bones `antler_*` only for `buck` adults (`part_visibility`). Loot differs by sex through two adult groups
   (`adult_doe`, `adult_buck`), because loot-table conditions cannot test a custom property; babies have no loot group.

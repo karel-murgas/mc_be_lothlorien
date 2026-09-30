@@ -573,6 +573,9 @@
         "minecraft:loot": {
           "table": "loot_tables/entities/deer_buck.json"
         }
+      },
+      "lothlorien:kept": {
+        "minecraft:persistent": {}
       }
     },
     "components": {
@@ -620,7 +623,16 @@
         ]
       },
       "minecraft:nameable": {},
-      "minecraft:leashable": {},
+      "minecraft:leashable": {
+        "on_leash": {
+          "event": "lothlorien:leashed",
+          "target": "self"
+        },
+        "on_unleash": {
+          "event": "lothlorien:unleashed",
+          "target": "self"
+        }
+      },
       "minecraft:balloonable": {
         "mass": 1.0
       },
@@ -1011,6 +1023,59 @@
             "add": {
               "component_groups": [
                 "lothlorien:adult_doe"
+              ]
+            }
+          }
+        ]
+      },
+      "lothlorien:become_tame": {
+        "set_property": {
+          "lothlorien:tame": true
+        },
+        "add": {
+          "component_groups": [
+            "lothlorien:kept"
+          ]
+        }
+      },
+      "lothlorien:untame": {
+        "sequence": [
+          {
+            "set_property": {
+              "lothlorien:tame": false
+            }
+          },
+          {
+            "filters": {
+              "test": "is_leashed",
+              "value": false
+            },
+            "remove": {
+              "component_groups": [
+                "lothlorien:kept"
+              ]
+            }
+          }
+        ]
+      },
+      "lothlorien:leashed": {
+        "add": {
+          "component_groups": [
+            "lothlorien:kept"
+          ]
+        }
+      },
+      "lothlorien:unleashed": {
+        "sequence": [
+          {
+            "filters": {
+              "test": "bool_property",
+              "domain": "lothlorien:tame",
+              "value": false
+            },
+            "remove": {
+              "component_groups": [
+                "lothlorien:kept"
               ]
             }
           }
