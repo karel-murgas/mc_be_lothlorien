@@ -150,6 +150,13 @@ def pack(cubes):
     return out
 
 
+# The engine keeps ONE armor_offset.default_neck locator per entity, apparently derived per geometry (from the body) when the
+# geometry does not declare it. The baby's lower body gave a different value, so every other geometry of the entity
+# logged "model already has a locator armor_offset.default_neck that doesn't exactly match" (game 1.26.52).
+# Declaring the same value in every geometry keeps them identical. Deer wear no armour, so the position is cosmetic.
+NECK_LOCATOR = {"armor_offset.default_neck": [0, 13, 0]}
+
+
 def geometry(ident, bones, cubes, uvs):
     bone_list = []
     for bname, (parent, pivot, rot) in bones.items():
@@ -158,6 +165,8 @@ def geometry(ident, bones, cubes, uvs):
             b["parent"] = parent
         if rot:
             b["rotation"] = rot
+        if bname == "body":
+            b["locators"] = dict(NECK_LOCATOR)
         bone_list.append(b)
     for name, bone, origin, size, _role in cubes:
         entry = next(b for b in bone_list if b["name"] == bone)
@@ -468,8 +477,7 @@ def check_painted(cubes, uvs, img):
 
 def build(ident, baby, out_geo, out_tex):
     """Returns ([geometry dicts], texture). The adult gives two geometries on ONE texture layout: `ident` (no antlers,
-    for does) and `ident_buck` (with antlers). Antlers are separate geometries, not hidden bones: hiding bones with
-    part_visibility made the engine log a conflicting armor_offset.default_neck locator for the adult (game 1.26.52)."""
+    for does) and `ident_buck` (with antlers), so the render controller picks a geometry instead of hiding bones."""
     bones, cubes = (cubes_baby() if baby else cubes_adult())
     uvs = pack(cubes)
     img = paint_model(baby, cubes, uvs)
