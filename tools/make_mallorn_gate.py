@@ -1,6 +1,6 @@
 """Mallorn fence gate geometry, matching the carved fence (2026-10-01): the vanilla gate (two 2x2 end posts, two rails,
 a centre piece) with the fence's ideas: rails bent at 22.5 deg, the fence post texture (grain, knots, painted leaves),
-small diamond caps. Variants (the owner picks from temp/mallorn_wood/gate/gate_variants.png):
+small diamond caps. Variants (sheet: docs/art/gate/gate_variants.png; the owner picked C):
 
   A  both rails as an inverted V peaking at the middle (the gate reads as one fence span), short centre upright,
      diamond caps on the end posts;
