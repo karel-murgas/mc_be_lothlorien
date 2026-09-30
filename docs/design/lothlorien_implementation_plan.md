@@ -550,10 +550,14 @@ Blockbench + graphics + Claude.
 
 # Phase 12 — White deer guidance
 
-_Status 2026-09-30: built and deployed as an **optional prototype**, static checks only, **nothing tested in game**. White deer is a
-coat variant of `lothlorien:deer` (property `lothlorien:coat`), the marker is the block `lothlorien:structure_marker` buried in every giant
-Mallorn (worldgen change: **new world needed** to get markers into trees). Design, assumptions and the in-game test plan:
-`TECHNICAL_NOTES.md` (White deer guidance). Only the giant Mallorns exist as structures so far; Phase 16 structures must add the marker._
+_Status 2026-09-30: rebuilt and deployed as an **optional prototype**, static checks only, **nothing tested in game**. The white deer is
+its own entity `lothlorien:white_deer` (a rare loner: no herd, no breeding, no babies, not tamable); offering it a **Mallorn acorn** at
+Disharmony 0 starts guidance (the knowledge base said Western Corn; the owner changed it to the acorn). It walks by the engine's own
+pathfinding, following an invisible helper `lothlorien:guide_beacon` that script moves ahead in 8-14 block hops (goal
+`follow_target_leader`; fallbacks prepared in `tools/dev_scripts/guide_goal/`, to be decided by an in-game experiment). The marker is the
+block `lothlorien:structure_marker` buried in every giant Mallorn (worldgen change: **new world needed** to get markers into trees).
+Design, assumptions, the goal experiment and the in-game test plan: `TECHNICAL_NOTES.md` (White deer guidance). Only the giant Mallorns
+exist as structures so far; Phase 16 structures must add the marker._
 
 Add variant / separate entity.
 
