@@ -71,13 +71,13 @@ Next: the fence gate to match (posts + V rails), then door and trapdoor.
 `tools/make_mallorn_gate.py` (constant `VARIANT`, or `python -B tools/make_mallorn_gate.py A|B|C`); comparison sheet
 `temp/mallorn_wood/gate/gate_variants.png` (closed/open between two fence posts, icon pose, front; silver and heartwood;
 made by `temp/mallorn_wood/gate/design_gate.py`):
-- **A (in the pack):** vanilla gate, both 2x2 rails bent into an inverted V peaking at the middle (the fence's own rail
+- A: vanilla gate, both 2x2 rails bent into an inverted V peaking at the middle (the fence's own rail
   at 22.5 deg: the gate reads as one fence span), a short 2-wide centre upright, the small diamond cap on both end posts;
 - B: straight top rail + inverted-V lower rail, same upright and caps;
-- C: the fence line runs through: the fence's rails (low at a 4-wide centre post carrying the painted leaf, peak at the
+- **C (owner's pick 2026-10-01, in the pack):** the fence line runs through: the fence's rails (low at a 4-wide centre post carrying the painted leaf, peak at the
   block edge, meeting the neighbours' rails), no caps. Most continuous with the fence, but reads less as a gate.
 All wear `mallorn_fence_post` (end posts: leaf-free columns 12-13; rails/upright: the rails' strip), so A and B have no
-gold of their own (the fence posts beside them carry the leaves); C has one leaf. Owner picks; switching is one re-run.
+gold of their own (the fence posts beside them carry the leaves); C has one leaf (split in half when open). Owner chose C from the sheet; switching is one re-run.
 Check in game: both sets, open/close in all four directions, next to the fence, icon.
 
 Design intent (from `design/lothlorien.md`): silver-grey bark, gold leaves; planks ideally with

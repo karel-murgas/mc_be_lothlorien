@@ -176,7 +176,7 @@ columns); the rails and cap read a leaf-free strip of it (columns 5-6), grain tu
 display transform, which the game only accepts from 1.26.40 and otherwise drops the whole file (icons vanished, 2026-10-01).
 Selection and collision boxes are unchanged. The test "fence: every material instance ..." checks both sets.
 
-**Carved fence gate (2026-10-01, deployed, not yet seen in game).** `tools/make_mallorn_gate.py` writes
+**Carved fence gate (2026-10-01, variant C chosen by the owner, deployed, not yet seen in game).** `tools/make_mallorn_gate.py` (`VARIANT = "C"`) writes
 `mallorn_fence_gate_closed.geo.json` (bones `posts`, `rails`; its `item_display_transforms` are read back, icon pose
 `[30,135,0]` kept) and `_open.geo.json` (bones `posts`, `leaves`), sharing `seg()`/`turn()`/`geometry()` with the fence
 generator. The +x half is built along z, turned onto +x; the -x half is it turned 180 deg. Open = each half turned a quarter

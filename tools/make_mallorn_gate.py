@@ -26,7 +26,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import make_mallorn_fence as fence  # noqa: E402
 
-VARIANT = "A"
+VARIANT = "C"
 MODELS = fence.MODELS
 T22 = fence.T22
 POST_H = (5, 16)  # vanilla gate posts: y 5..16
