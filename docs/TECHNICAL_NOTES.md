@@ -698,39 +698,25 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
   separate geometry `geometry.lothlorien.deer_buck` (adult + antlers) next to `deer` (no antlers) and `deer_baby`, all on the same texture layout; the render
   controller picks by `query.property('lothlorien:sex')`. **If the error is still there, report it again.**
 
-### Grass under leaf carpet turned to dirt (2026-09-30)
+### Grass under plants and covers (DONE, owner verified in game 1.26.52, 2026-10-01)
 
-User report: grass under the golden leaf carpet on the forest floor turned to dirt. Cause: no block set
-`minecraft:light_dampening`, which defaults to 15, so every carpet, petal, flower and the shed antler blocked all light
-to the grass below (the leaves already had 1). Nothing in script or worldgen replaces grass. Added
-`"minecraft:light_dampening": 0` to leaf carpet, blossom, Athelas, Elanor, Niphredil, golden fern, western corn,
-sapling, deer antler, pressure plate and button. **In game to check:** grass under fresh carpet stays green (new world
-for worldgen carpet; already-turned dirt does not turn back by itself, it regrows only by grass spreading).
+All plants, covers and thin blocks have `"minecraft:light_dampening": 0` (the default 15 casts a full shadow).
+That is not enough under the canopy: Bedrock bug **MCPE-184249** (https://bugs-legacy.mojang.com/browse/MCPE-184249)
+turns grass under custom plants into dirt in low light anyway; vanilla plants are exempt. Background and failed
+attempts: `.claude/skills/bedrock-blocks/references/blocks.md` ("WORKAROUND: grass under custom plants").
 
-**Still dying (owner test 2026-10-01, 1.26.52):** with dampening 0, grass still dies under the carpet, blossoms,
-Elanor and Athelas where the canopy keeps it dark, but not under vanilla leaf litter, short grass or vanilla
-flowers. Bedrock bug **MCPE-184249** (https://bugs-legacy.mojang.com/browse/MCPE-184249); background and the
-failed attempts are in `.claude/skills/bedrock-blocks/references/blocks.md` ("WORKAROUND: grass under custom
-plants"). A 15-30 s tick script (`afc6019`) was rejected by the owner (no regularly running scripts). A test of
-`precipitation_interactions none` / `replaceable` (`506c5da`) failed: every variant degraded.
+**WORKAROUND (owner's idea; remove when Mojang fixes the bug):** the grass may die, the plant hides it. Elanor,
+Niphredil, Athelas, golden fern, leaf carpet and blossoms have state `lothlorien:on_grass`; when true they draw a
+biome-tinted grass top 0.1 px above the ground (`*_grass` geometry twins, material `grass_overlay` = vanilla
+`grass_top`, `tint_method: grass`). The flowers use `geometry.lothlorien.plant_cross` (a copy of the built-in cross).
+Applied by `.claude/skills/bedrock-block-families/scripts/add_grass_overlay.py` (re-run after `gen_ground_cover.py`).
+`scripts/grass_overlay.js` sets the state on player placement when the block below is grass; worldgen features
+place it true; bone meal calls `markOnGrass`. Breaking a plant with the state turns the dirt below back into grass.
+Only place/break events, no timers (owner: no regularly running scripts). Deer and white deer also spawn on `dirt`.
 
-**WORKAROUND in use (owner's idea, 2026-10-01; remove when Mojang fixes MCPE-184249):** the grass is allowed to
-die, but the plant hides it. Elanor, Niphredil, Athelas, golden fern, leaf carpet and blossoms have state
-`lothlorien:on_grass`; when true they draw a biome-tinted grass top 0.1 px above the ground (`*_grass` geometry
-twins, material `grass_overlay` = vanilla `grass_top` with `tint_method: grass`). The four flowers now use
-`geometry.lothlorien.plant_cross` (a copy of the built-in cross) so the overlay can be added. Applied by
-`.claude/skills/bedrock-block-families/scripts/add_grass_overlay.py` (re-run after `gen_ground_cover.py`).
-The state is set by `scripts/grass_overlay.js` (`beforeOnPlayerPlace`: block below is grass), by worldgen (the
-single-block features place it true) and by bone meal (`markOnGrass`). Breaking a plant with the state turns the
-dirt below back into grass. Only place/break events, no timers. Deer and white deer may also spawn on `dirt`.
-
-- Not covered: removal without a player (explosion, water, piston, fire: the carpet burns) leaves dirt; on
-  slope edges the dirt's sides show. Plants placed earlier have no state and show the dirt (new world for
-  worldgen). Cover rotation turns the overlay texture with it.
-- **In game to check:** (1) a plant placed on grass shows grass under it, coloured like the grass around it,
-  with no shading seam or flicker; on dirt it shows dirt; (2) after the grass below has died it still looks
-  like grass; (3) breaking it leaves grass; (4) bone-meal spread plants and fresh worldgen have the overlay;
-  (5) the flowers look the same as before (own cross geometry instead of the built-in one).
+- Not covered: removal without a player (explosion, water, piston, fire) leaves dirt; slope edges show dirt sides.
+- Rejected on the way (owner, 2026-10-01): a 15-30 s tick restoring the grass (`afc6019`); test components
+  `precipitation_interactions none` / `replaceable` (`506c5da`) did not help.
 - **To switch off:** revert `defae73`, then remove `add_grass_overlay.py` and its notes in the skills.
 
 ## White deer guidance (Phase 12, 2026-09-30, rebuilt with engine pathfinding; DONE: owner playtest 1.26.52 - guidance, gift and nut growth work)
