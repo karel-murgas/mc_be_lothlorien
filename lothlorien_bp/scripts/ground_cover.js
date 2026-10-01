@@ -22,7 +22,15 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
     if (target?.typeId !== itemStack.typeId) return;
   }
   const amount = target.permutation.getState(AMOUNT);
-  if (typeof amount !== "number" || amount >= MAX_AMOUNT) return;
+  if (typeof amount !== "number") return;
+  const onTop = target === block && blockFace === "Up";
+  if (amount >= MAX_AMOUNT) {
+    if (onTop) event.cancel = true; // a full cover takes no more; do not let the engine stack one on it
+    return;
+  }
+  // Clicking the top of a cover is placed natively (the engine puts the item on top of it, the block's own
+  // placement filter allows that) so the arm swings like for any block; playerPlaceBlock below merges it.
+  if (onTop) return;
   event.cancel = true;
   if (repeatedUse(player, "merge")) return;
   system.run(() => {
@@ -33,6 +41,22 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
     if (!slot?.hasItem()) return;
     if (slot.amount > 1) slot.amount -= 1;
     else slot.setItem(undefined);
+  });
+});
+
+world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
+  if (!COVERS.has(block.typeId)) return;
+  const below = block.below();
+  if (below?.typeId !== block.typeId) return;
+  const amount = below.permutation.getState(AMOUNT);
+  system.run(() => {
+    block.setType("minecraft:air");
+    if (typeof amount === "number" && amount < MAX_AMOUNT) {
+      below.setPermutation(below.permutation.withState(AMOUNT, amount + 1));
+      below.dimension.playSound("dig.grass", below.center());
+    } else if (player.getGameMode() !== GameMode.Creative) {
+      player.dimension.spawnItem(new ItemStack(block.typeId, 1), player.location); // full: give the item back
+    }
   });
 });
 

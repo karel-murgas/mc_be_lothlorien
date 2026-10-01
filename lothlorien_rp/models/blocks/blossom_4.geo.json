@@ -1,0 +1,120 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.lothlorien.blossom_4",
+        "texture_width": 16,
+        "texture_height": 16
+      },
+      "bones": [
+        {
+          "name": "cover",
+          "pivot": [
+            0,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -8,
+                0.2,
+                -8
+              ],
+              "size": [
+                8,
+                0,
+                8
+              ],
+              "uv": {
+                "up": {
+                  "uv": [
+                    0,
+                    0
+                  ],
+                  "uv_size": [
+                    8,
+                    8
+                  ]
+                }
+              }
+            },
+            {
+              "origin": [
+                0,
+                0.2,
+                -8
+              ],
+              "size": [
+                8,
+                0,
+                8
+              ],
+              "uv": {
+                "up": {
+                  "uv": [
+                    8,
+                    0
+                  ],
+                  "uv_size": [
+                    8,
+                    8
+                  ]
+                }
+              }
+            },
+            {
+              "origin": [
+                0,
+                0.2,
+                0
+              ],
+              "size": [
+                8,
+                0,
+                8
+              ],
+              "uv": {
+                "up": {
+                  "uv": [
+                    8,
+                    8
+                  ],
+                  "uv_size": [
+                    8,
+                    8
+                  ]
+                }
+              }
+            },
+            {
+              "origin": [
+                -8,
+                0.2,
+                0
+              ],
+              "size": [
+                8,
+                0,
+                8
+              ],
+              "uv": {
+                "up": {
+                  "uv": [
+                    0,
+                    8
+                  ],
+                  "uv_size": [
+                    8,
+                    8
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

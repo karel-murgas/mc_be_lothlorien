@@ -1,0 +1,28 @@
+{
+  "format_version": "1.20.30",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "lothlorien:mallorn_leaf_litter_from_golden_leaves"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      "G"
+    ],
+    "key": {
+      "G": {
+        "item": "lothlorien:mallorn_golden_leaves"
+      }
+    },
+    "unlock": [
+      {
+        "item": "lothlorien:mallorn_golden_leaves"
+      }
+    ],
+    "result": {
+      "item": "lothlorien:mallorn_leaf_carpet",
+      "count": 1
+    }
+  }
+}

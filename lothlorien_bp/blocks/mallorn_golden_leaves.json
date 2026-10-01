@@ -1,0 +1,47 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:block": {
+    "description": {
+      "identifier": "lothlorien:mallorn_golden_leaves",
+      "menu_category": {
+        "category": "nature",
+        "group": "minecraft:itemGroup.name.leaves"
+      }
+    },
+    "components": {
+      "minecraft:tags": [
+        "minecraft:is_hoe_item_destructible",
+        "leaves",
+        "minecraft:leaves"
+      ],
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 0.2
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 0.2
+      },
+      "minecraft:flammable": {
+        "catch_chance_modifier": 30,
+        "destroy_chance_modifier": 60,
+        "lava_flammable": "always"
+      },
+      "minecraft:light_dampening": 1,
+      "minecraft:redstone_conductivity": {
+        "redstone_conductor": false
+      },
+      "minecraft:map_color": "#e0a830",
+      "minecraft:loot": "loot_tables/blocks/mallorn_golden_leaves.json",
+      "minecraft:sound": {
+        "sound": "grass"
+      },
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "lothlorien:mallorn_golden_leaves",
+          "render_method": "alpha_test",
+          "ambient_occlusion": 0.0
+        }
+      }
+    }
+  }
+}

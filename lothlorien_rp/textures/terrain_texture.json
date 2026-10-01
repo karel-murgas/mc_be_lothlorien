@@ -31,8 +31,14 @@
     "lothlorien:mallorn_trapdoor": {
       "textures": "textures/blocks/mallorn_trapdoor"
     },
-    "lothlorien:mallorn_leaves": {
-      "textures": "textures/blocks/mallorn_leaves"
+    "lothlorien:mallorn_leaves_side": {
+      "textures": "textures/blocks/mallorn_leaves_side"
+    },
+    "lothlorien:mallorn_leaves_top": {
+      "textures": "textures/blocks/mallorn_leaves_top"
+    },
+    "lothlorien:mallorn_leaves_bottom": {
+      "textures": "textures/blocks/mallorn_leaves_bottom"
     },
     "lothlorien:mallorn_sapling": {
       "textures": "textures/blocks/mallorn_sapling"
@@ -54,6 +60,9 @@
     },
     "lothlorien:mallorn_blossom": {
       "textures": "textures/blocks/mallorn_blossom"
+    },
+    "lothlorien:mallorn_golden_leaves": {
+      "textures": "textures/blocks/mallorn_golden_leaves"
     },
     "lothlorien:mallorn_leaf_carpet": {
       "textures": "textures/blocks/mallorn_leaf_carpet"

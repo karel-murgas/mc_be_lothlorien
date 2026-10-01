@@ -16,6 +16,35 @@
     "enforce_placement_rules": true,
     "may_replace": [
       "minecraft:air"
-    ]
+    ],
+    "may_attach_to": {
+      "min_sides_must_attach": 1,
+      "bottom": [
+        {
+          "name": "minecraft:grass_block"
+        },
+        {
+          "name": "minecraft:dirt"
+        },
+        {
+          "name": "minecraft:coarse_dirt"
+        },
+        {
+          "name": "minecraft:podzol"
+        },
+        {
+          "name": "minecraft:dirt_with_roots"
+        },
+        {
+          "name": "minecraft:moss_block"
+        },
+        {
+          "name": "minecraft:mud"
+        },
+        {
+          "name": "minecraft:farmland"
+        }
+      ]
+    }
   }
 }

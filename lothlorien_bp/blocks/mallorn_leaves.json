@@ -35,16 +35,27 @@
       "minecraft:redstone_conductivity": {
         "redstone_conductor": false
       },
-      "minecraft:map_color": "#e0b43a",
+      "minecraft:map_color": "#6fb43c",
       "minecraft:loot": "loot_tables/blocks/mallorn_leaves.json",
       "minecraft:sound": {
         "sound": "grass"
       },
       "minecraft:geometry": "minecraft:geometry.full_block",
       "minecraft:material_instances": {
+        "up": {
+          "texture": "lothlorien:mallorn_leaves_top",
+          "render_method": "alpha_test",
+          "ambient_occlusion": 0.0
+        },
+        "down": {
+          "texture": "lothlorien:mallorn_leaves_bottom",
+          "render_method": "alpha_test",
+          "ambient_occlusion": 0.0
+        },
         "*": {
-          "texture": "lothlorien:mallorn_leaves",
-          "render_method": "alpha_test"
+          "texture": "lothlorien:mallorn_leaves_side",
+          "render_method": "alpha_test",
+          "ambient_occlusion": 0.0
         }
       },
       "lothlorien:leaves": {}

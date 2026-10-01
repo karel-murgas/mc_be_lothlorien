@@ -1,0 +1,107 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.lothlorien.blossom_2_grass",
+        "texture_width": 16,
+        "texture_height": 16
+      },
+      "bones": [
+        {
+          "name": "cover",
+          "pivot": [
+            0,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -8,
+                0.2,
+                -8
+              ],
+              "size": [
+                8,
+                0,
+                8
+              ],
+              "uv": {
+                "up": {
+                  "uv": [
+                    0,
+                    0
+                  ],
+                  "uv_size": [
+                    8,
+                    8
+                  ]
+                }
+              }
+            },
+            {
+              "origin": [
+                0,
+                0.2,
+                -8
+              ],
+              "size": [
+                8,
+                0,
+                8
+              ],
+              "uv": {
+                "up": {
+                  "uv": [
+                    8,
+                    0
+                  ],
+                  "uv_size": [
+                    8,
+                    8
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "grass_overlay",
+          "pivot": [
+            0,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -8,
+                0.1,
+                -8
+              ],
+              "size": [
+                16,
+                0,
+                16
+              ],
+              "uv": {
+                "up": {
+                  "uv": [
+                    0,
+                    0
+                  ],
+                  "uv_size": [
+                    16,
+                    16
+                  ],
+                  "material_instance": "grass_overlay"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
