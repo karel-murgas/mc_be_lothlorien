@@ -707,14 +707,23 @@ to the grass below (the leaves already had 1). Nothing in script or worldgen rep
 sapling, deer antler, pressure plate and button. **In game to check:** grass under fresh carpet stays green (new world
 for worldgen carpet; already-turned dirt does not turn back by itself, it regrows only by grass spreading).
 
-**Not enough (user test 2026-10-01, 1.26.52):** with dampening 0 deployed, about half the grass under the
-carpet still died. Bedrock bug MCPE-184249: in low light grass dies under partial blocks whatever their
-dampening, and the canopy keeps the floor dark. Fix: carpet and blossom have `minecraft:tick` (300-600
-ticks, looping) and `lothlorien:keep_grass` (`ground_cover.js`): plain dirt under the cover turns back
-into grass if a grass block touches it (8 neighbours, y -1..+1), so dirt shows for at most ~30 s and old
-dirt patches heal from their edges inward. Covers on dirt away from grass stay on dirt. The random tick
-also runs it. **In game to check:** grass under carpet stays green (old world is fine, dirt heals);
-whether grass under the custom flowers dies too (if not, the covers' `support: fence` is the suspect).
+**Still dying (owner test 2026-10-01, 1.26.52):** with dampening 0, grass still dies under the carpet, blossoms,
+Elanor and Athelas where the canopy keeps it dark, but not under vanilla leaf litter, short grass or vanilla
+flowers (vanilla plants have the internal material `plant`, which add-ons cannot set; MCPE-184249 covers the
+same death under vanilla partial blocks). A script that restored the grass every 15-30 s (`afc6019`) was
+reverted: the owner does not want regularly running scripts. **Test in progress**, two components that
+Mojang's `red_shrub` plant sample carries:
+
+| Block | Added |
+|---|---|
+| Elanor | `precipitation_interactions` `none` |
+| Athelas | `replaceable` |
+| Niphredil, leaf carpet, blossoms | both |
+| Golden fern | nothing (control) |
+
+Test: put all of them on grass in a dark spot under the canopy; wait until the grass under the golden fern
+has died; see which grass is still green. Side effect of `replaceable`: placing a block into that space
+replaces the plant/cover, as with short grass. Keep only what works and drop the rest.
 
 ## White deer guidance (Phase 12, 2026-09-30, rebuilt with engine pathfinding; DONE: owner playtest 1.26.52 - guidance, gift and nut growth work)
 

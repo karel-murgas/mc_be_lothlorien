@@ -7,6 +7,10 @@
     "components": {
       "minecraft:collision_box": false,
       "minecraft:light_dampening": 0,
+      "minecraft:precipitation_interactions": {
+        "precipitation_behavior": "none"
+      },
+      "minecraft:replaceable": {},
       "minecraft:selection_box": {
         "origin": [
           -6,

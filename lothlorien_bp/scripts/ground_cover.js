@@ -36,34 +36,6 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   });
 });
 
-// Bedrock kills grass under any custom partial block in low light, whatever its light_dampening
-// (MCPE-184249); under the Mallorn canopy it is always dark enough. The cover therefore turns plain
-// dirt below it back into grass, but only next to grass (as if spread), so a dirt floor someone
-// covered on purpose stays dirt. `minecraft:tick` (15-30 s) bounds how long dirt shows;
-// random ticks alone run at the decay rate and would leave about half of it dirt.
-const KEEP_GRASS_NEIGHBOURS = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
-
-function keepGrass({ block, dimension }) {
-  try {
-    const below = block.below();
-    if (below?.typeId !== "minecraft:dirt") return;
-    const { x, y, z } = below.location;
-    for (const dy of [0, -1, 1]) {
-      for (const [dx, dz] of KEEP_GRASS_NEIGHBOURS) {
-        if (dimension.getBlock({ x: x + dx, y: y + dy, z: z + dz })?.typeId !== "minecraft:grass_block") continue;
-        below.setType("minecraft:grass_block");
-        return;
-      }
-    }
-  } catch {
-    // neighbour in an unloaded chunk or outside the world: try again next tick
-  }
-}
-
-system.beforeEvents.startup.subscribe(({ blockComponentRegistry }) => {
-  blockComponentRegistry.registerCustomComponent("lothlorien:keep_grass", { onTick: keepGrass, onRandomTick: keepGrass });
-});
-
 world.afterEvents.playerBreakBlock.subscribe(({ player, dimension, block, brokenBlockPermutation }) => {
   if (!COVERS.has(brokenBlockPermutation.type.id) || player.getGameMode() === GameMode.Creative) return;
   const amount = brokenBlockPermutation.getState(AMOUNT);
