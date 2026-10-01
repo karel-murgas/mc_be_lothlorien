@@ -12,11 +12,16 @@
       "geometry": {
         "default": "geometry.lothlorien.mallorn_boat"
       },
-      "animations": {
-        "turn": "animation.lothlorien.mallorn_boat.turn"
-      },
       "scripts": {
-        "animate": ["turn"]
+        "pre_animation": [
+          "variable.row = math.lerp(variable.row ?? 0, (query.has_rider && query.ground_speed > 0.3) ? 1 : 0, math.min(1, query.delta_time * 4));",
+          "variable.paddle = (variable.paddle ?? 0) + query.delta_time * variable.row * 330;"
+        ],
+        "animate": ["turn", "row"]
+      },
+      "animations": {
+        "turn": "animation.lothlorien.mallorn_boat.turn",
+        "row": "animation.lothlorien.mallorn_boat.row"
       },
       "render_controllers": [
         "controller.render.default"

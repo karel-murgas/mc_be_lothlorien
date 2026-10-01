@@ -19,12 +19,19 @@ clear front, no sail, carving optional. `tools/make_mallorn_boat.py` builds it f
 it in the mallorn palette: silver strakes, gold gunwale, three gold leaves on each bow flank. `BOW` in the
 script picks the bow end.
 
-## Placeholder round results (owner, 2026-10-01)
-Worked: placing, riding, steering, leashing ("the rest seems alright"; drop on breaking not reported separately). Found: model did not rotate, no visible front, leash
-knot high above the boat -> fixed in model v1 (rotation animation, `lead` locator), to confirm.
+## Round results (owner, 2026-10-01)
+- Placeholder: placing, riding, steering, leashing work. Model did not rotate, no visible front, leash knot high.
+- Model v1: "awesome"; turns; the neck was at the back (BOW flipped to +1); lead knot moved 2 lower and 2 towards
+  the tip, onto the neck; paddles asked for (added: leaf-bladed, rowing while ridden and moving); icon redrawn in the
+  vanilla boat icon's projection (inventory pose [30, 225, 0]).
+- Lead cannot be removed by right-click (right-click enters the boat; vanilla boat has the same setup). To test:
+  shears; compare with an oak boat. Option if needed: sneak + use unleashes (script).
+- Owner asked whether the model follows the style guide. It does not on two model rules (element count, curves as
+  stairs). Kept as the "stepped" model (`tools/make_mallorn_boat.py`, deployed); a vanilla-style draft with 22 rotated
+  elements is `tools/make_mallorn_boat_planks.py` (writes the same files). Owner to choose.
 
-## In-game check for model v1
-- [ ] Hull turns with the boat; bow (tall gold-tipped neck) points the way you paddle.
-- [ ] Rider sits inside at a sensible height; second passenger seat.
-- [ ] Leash knot on the bow.
-- [ ] Looks: shape, texture next to mallorn planks / fence / door; icon.
+## In-game check (round 3)
+- [ ] Neck at the front; lead knot on the neck.
+- [ ] Paddles rest dipped; row while you paddle, stop when you stop; look right on both sides.
+- [ ] Icon.
+- [ ] Shears remove the lead.

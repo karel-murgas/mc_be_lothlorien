@@ -8,6 +8,17 @@
           "rotation": [0, "query.body_y_rotation - query.target_y_rotation", 0]
         }
       }
+    },
+    "animation.lothlorien.mallorn_boat.row": {
+      "loop": true,
+      "bones": {
+        "paddle_left": {
+          "rotation": ["12 * math.cos(variable.paddle) * variable.row", "30 * math.sin(variable.paddle) * variable.row", 0]
+        },
+        "paddle_right": {
+          "rotation": ["-12 * math.cos(variable.paddle) * variable.row", "-30 * math.sin(variable.paddle) * variable.row", 0]
+        }
+      }
     }
   }
 }

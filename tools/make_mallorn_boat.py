@@ -10,8 +10,10 @@ Shape: the hull is cut into 1-unit slices along X; a profile gives each slice it
 gunwale height, and identical neighbours are merged. A slice is a keel strip, a two-high bottom and two thin walls
 (stepped cross-section: keel W-3, bottom W-1, walls W), or one solid block where the ends are too narrow to be open
 (covered bow and stern decks). The length runs along X because the vanilla boat seats sit at x 0.2 / -0.6; BOW
-picks the bow end (flip it if the boat sails backwards). The client entity turns the `hull` bone by the actor yaw
-(a runtime boat's model does not turn by itself), and the `lead` locator puts the leash knot on the bow.
+picks the bow end (+X, verified in game). The client entity turns the `hull` bone by the actor yaw
+(a runtime boat's model does not turn by itself), and the `lead` locator puts the leash knot on the bow neck.
+Paddles: two child bones with a leaf-shaped gold blade, resting on the gunwale; the animation rows them while the boat
+carries a rider and moves (pre_animation variables in the client entity).
 
 Texture: box UV, packed automatically; every texel is painted by its WORLD position (the strakes follow the keel line
 and their butt joints and the gold trim line up across cubes). --debug paints a coordinate test pattern instead.
@@ -31,7 +33,7 @@ from make_mallorn_wood import BARK, GOLD  # noqa: E402
 MOD = os.path.dirname(HERE)
 RP = os.path.join(MOD, "lothlorien_rp")
 
-BOW = -1         # bow direction along X: the vanilla front seat sits at local +X, which renders at geometry -X
+BOW = 1          # bow at geometry +X (verified in game 2026-10-01: -1 put the neck at the back)
 L = 20           # hull from -L to +L (units)
 WMAX = 8         # half-width amidships
 GUNWALE = 8      # gunwale height amidships
@@ -96,6 +98,37 @@ def posts():
     st = -L - 1 if BOW > 0 else L
     stern = [("post", [st, syb + 1, -1], [1, syt - syb + 1, 2]), ("post", [st - BOW, syt - 1, -1], [1, 2, 2])]
     return bow + stern
+
+
+# paddles: (x, y) of the oarlock on the gunwale, shaft inboard / outboard length, blade length
+PADDLE_X, PADDLE_Y = 2, GUNWALE + 1
+SHAFT_IN, SHAFT_OUT, BLADE = 5, 10, 8
+PADDLE_REST = (-24, -20)  # rest pose (dip about X, sweep back about Y) for the +z paddle; mirrored for -z
+
+
+def paddle_cubes(side, pz=None):
+    """(kind, origin, size) of one paddle: shaft along z (outward), blade = a midrib plus two wings in y.
+    pz: gunwale half-width at the oarlock (default: from the profile)."""
+    pz = pz or profile(PADDLE_X + 0.5)[0]
+
+    def span(a, b):  # z range a..b outward from the gunwale, as (origin z, size)
+        return (pz + a, b - a) if side > 0 else (-pz - b, b - a)
+
+    z, d = span(-SHAFT_IN, SHAFT_OUT)
+    out = [("shaft", [PADDLE_X, PADDLE_Y, z], [1, 1, d])]
+    z, d = span(SHAFT_OUT, SHAFT_OUT + BLADE)
+    out.append(("rib", [PADDLE_X, PADDLE_Y, z], [1, 1, d]))
+    z, d = span(SHAFT_OUT + 1, SHAFT_OUT + BLADE - 1)
+    for y in (PADDLE_Y - 1, PADDLE_Y + 1):
+        out.append(("blade", [PADDLE_X, y, z], [1, 1, d]))
+    return out
+
+
+def paddle_bone(side, pz=None):
+    pz = pz or profile(PADDLE_X + 0.5)[0]
+    dip, sweep = PADDLE_REST
+    return {"name": "paddle_left" if side > 0 else "paddle_right", "parent": "hull",
+            "pivot": [PADDLE_X + 0.5, PADDLE_Y + 0.5, side * pz], "rotation": [side * dip, side * sweep, 0]}
 
 
 # ---------------------------------------------------------------- UV packing (box UV)
@@ -207,6 +240,14 @@ def deck(x, z):
 
 def paint(kind, face, p):
     x, y, z = p
+    if kind == "shaft":
+        return {"up": BARK[5], "down": BARK[2]}.get(face, BARK[4] if math.floor(z) % 5 else BARK[3])
+    if kind == "rib":
+        return {"up": GOLD[2], "down": GOLD[0]}.get(face, GOLD[0] if face in ("east", "west") else GOLD[1])
+    if kind == "blade":
+        if face in ("east", "west"):
+            return GOLD[2] if math.floor(z) % 3 else GOLD[3]
+        return GOLD[1] if face != "down" else GOLD[0]
     if kind == "finial":
         return {"up": GOLD[3], "down": GOLD[0]}.get(face, GOLD[2] if y % 2 > 1 else GOLD[1])
     if kind == "post":
@@ -247,7 +288,8 @@ def debug_paint(kind, face, p):
 
 # ---------------------------------------------------------------- outputs
 def build(debug=False):
-    cubes = hull_cubes()
+    bones = [("hull", c) for c in hull_cubes()] + [(paddle_bone(s)["name"], c) for s in (1, -1) for c in paddle_cubes(s)]
+    cubes = [c for _, c in bones]
     uvs, tex_h = pack(cubes)
     img = Image.new("RGBA", (TEX_W, tex_h), CLEAR)
     px = img.load()
@@ -261,7 +303,7 @@ def build(debug=False):
             assert px[tx, ty][3] == 255, (kind, face, tx, ty)
     xs = [o[0] for _, o, _ in cubes] + [o[0] + s[0] for _, o, s in cubes]
     ys = [o[1] + s[1] for _, o, s in cubes]
-    lead_x = BOW * (L - 2)
+    lead = [BOW * L, profile(BOW * (L - 2))[2] - 2, 0]  # on the bow neck (owner: 2 lower, 2 towards the tip)
     geo = {
         "format_version": "1.12.0",
         "minecraft:geometry": [{
@@ -273,45 +315,51 @@ def build(debug=False):
                 "visible_bounds_height": math.ceil(max(ys) / 16) + 1,
                 "visible_bounds_offset": [0, 0.5, 0],
             },
-            "bones": [{
-                "name": "hull",
-                "pivot": [0, 0, 0],
-                "locators": {"lead": [lead_x, profile(lead_x)[2], 0]},
-                "cubes": [{"origin": o, "size": s, "uv": list(uv)} for (_, o, s), uv in zip(cubes, uvs)],
-            }],
+            "bones": [{"name": "hull", "pivot": [0, 0, 0], "locators": {"lead": lead}}]
+            + [paddle_bone(s) for s in (1, -1)],
         }],
     }
+    for b in geo["minecraft:geometry"][0]["bones"]:
+        b["cubes"] = [{"origin": o, "size": sz, "uv": list(uv)}
+                      for (bn, (_, o, sz)), uv in zip(bones, uvs) if bn == b["name"]]
     return geo, img, len(cubes)
 
 
+# icon, in the vanilla boat icon's projection (inventory pose [30, 225, 0]: one end towards the viewer at the lower
+# left, the inside visible, a paddle crossing to the lower right); traced by hand from a Blockbench render of the model
+ICON_RIM = [(1, 9), (2, 9), (3, 8), (4, 8), (5, 8), (6, 7), (7, 7), (8, 7), (9, 6), (10, 6), (11, 6), (12, 5)]
+ICON_DEPTH = {1: 3, 2: 4, 3: 4, 4: 4, 5: 4, 6: 4, 7: 4, 8: 3, 9: 3, 10: 3, 11: 2, 12: 2}   # outer hull rows below the rim
+ICON_INSIDE = {2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2, 8: 2, 9: 1, 10: 1, 11: 1}               # inside rows above the rim
+ICON_NECK = [(13, 4, BARK[3]), (13, 3, BARK[4]), (13, 2, BARK[4]), (13, 1, GOLD[1]), (13, 0, GOLD[2]),
+             (14, 0, GOLD[3]), (14, 1, GOLD[0]), (12, 4, BARK[4])]
+ICON_STERN = [(0, 8, BARK[4]), (0, 7, GOLD[2])]
+ICON_PADDLE = [(10, 9, BARK[5]), (11, 10, BARK[5]), (12, 11, BARK[4]), (13, 12, GOLD[1]), (14, 12, GOLD[2]),
+               (13, 13, GOLD[0]), (14, 13, GOLD[1]), (15, 13, GOLD[2]), (14, 14, GOLD[0]), (9, 8, BARK[4])]
+
+
 def icon():
-    """Side view from slightly above: far gold rim, dark inside, near gold rim, silver strakes; bow (right) rises into
-    the gold-tipped neck, the stern (left) into a short point. Dark outline below and at the ends."""
     px = {}
-    for x in range(1, 15):
-        t = abs(x - 7.5) / 7.0
-        near = 8 - round(4 * t ** 2.2) - (1 if x >= 13 else 0)
-        far = near - 2
-        bot = 13 - round(3 * t ** 2.5)
-        if t < 0.8:
-            px[(x, far)] = GOLD[1]
-            for y in range(far + 1, near):
-                px[(x, y)] = BARK[1] if y == far + 1 else BARK[2]
-        px[(x, near)] = GOLD[2] if x % 4 else GOLD[3]
-        for y in range(near + 1, bot + 1):
-            r = y - near
-            px[(x, y)] = BARK[1] if y == bot else SEAM if r % 3 == 0 else BARK[4] if r % 3 == 1 else BARK[3]
-    for x, y, c in [(14, 3, BARK[4]), (14, 2, BARK[3]), (15, 1, BARK[3]), (14, 0, GOLD[2]), (15, 0, GOLD[1]),
-                    (13, 0, GOLD[2]), (13, 1, GOLD[0]), (0, 4, GOLD[1]), (1, 4, GOLD[2])]:
+    for x, y in ICON_RIM:
+        px[(x, y)] = GOLD[3] if x in (4, 9) else GOLD[2]
+        for r in range(1, ICON_INSIDE.get(x, 0) + 1):  # inside: shadow under the far rim
+            px[(x, y - r)] = BARK[1] if r == ICON_INSIDE[x] else BARK[2]
+        if x in ICON_INSIDE:
+            px[(x, y - ICON_INSIDE[x] - 1)] = GOLD[1]  # far rim
+        depth = ICON_DEPTH[x]
+        for r in range(1, depth + 1):  # outer strakes, lighter towards the top-left
+            k = 4 if r == 1 else 3 if r < depth else 2
+            if r == 2 and x % 4 == 1:
+                k = 2  # a butt joint
+            px[(x, y + r)] = BARK[k - (1 if x > 9 and k > 2 else 0)]
+    for x, y, c in ICON_NECK + ICON_STERN + ICON_PADDLE:
         px[(x, y)] = c
     img = Image.new("RGBA", (16, 16), CLEAR)
-    outline = (78, 84, 101, 255)
     for (x, y), c in px.items():
         img.putpixel((x, y), (*c, 255))
-    for (x, y) in list(px):
-        for nx, ny in ((x, y + 1), (x + 1, y), (x - 1, y)):
-            if (nx, ny) not in px and 0 <= nx < 16 and 0 <= ny < 16 and ny > 6:
-                img.putpixel((nx, ny), outline)
+    for (x, y) in list(px):  # dark outline all round
+        for nx, ny in ((x, y + 1), (x + 1, y), (x - 1, y), (x, y - 1)):
+            if (nx, ny) not in px and 0 <= nx < 16 and 0 <= ny < 16:
+                img.putpixel((nx, ny), (*BARK[0], 255))
     return img
 
 
