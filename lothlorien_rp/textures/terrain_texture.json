@@ -99,6 +99,9 @@
     },
     "lothlorien:mallorn_heartwood_fence_post": {
       "textures": "textures/blocks/mallorn_heartwood_fence_post"
+    },
+    "lothlorien:grass_overlay": {
+      "textures": "textures/blocks/grass_top"
     }
   }
 }

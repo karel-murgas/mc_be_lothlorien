@@ -5,7 +5,10 @@
       "identifier": "lothlorien:athelas_feature"
     },
     "places_block": {
-      "name": "lothlorien:athelas"
+      "name": "lothlorien:athelas",
+      "states": {
+        "lothlorien:on_grass": true
+      }
     },
     "enforce_survivability_rules": true,
     "enforce_placement_rules": true,

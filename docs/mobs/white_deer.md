@@ -15,7 +15,7 @@ BP `loot_tables/entities/white_deer.json`.
 | Families | `lothlorien_white_deer`, `mob` (not `lothlorien_deer`) | no |
 | Body | as the deer: collision 0.9 x 1.4, 14 hp, movement 0.24, walks, floats, avoids water and damage blocks, lava damage | no |
 | Sex | none: **always an antlered hart** (deer buck geometry `geometry.lothlorien.deer_buck` only; no `lothlorien:sex` property, no doe groups or events) | no |
-| Spawning | biome tag `lothlorien`, surface grass, light 7-15, **weight 3 (deer 10), herd 1, density_limit.surface 1**, distance 24-44, pool `animal`; herd event `lothlorien:spawn_natural` flags natural spawns | no |
+| Spawning | biome tag `lothlorien`, surface grass or dirt, light 7-15, **weight 3 (deer 10), herd 1, density_limit.surface 1**, distance 24-44, pool `animal`; herd event `lothlorien:spawn_natural` flags natural spawns | no |
 | Spawn by depth | natural spawns only: kept with chance **outside 0 / edge 0.15 / inner 0.5 / heart 1** by `scripts/depth.js` at the spawn spot, the rest removed by `white_deer.js` right after spawning. Table and weight: `SPAWN_KEEP_BY_DEPTH`, `SPAWN_WEIGHT` in `white_deer_rules.js`. `/summon` and the egg are never filtered | no |
 | Despawn | standard `despawn_from_distance`; a name tag keeps it | no |
 | Group life | **loner**: no herd, no following, no breeding, no babies, no fawn texture, spawn egg on it does nothing | no |

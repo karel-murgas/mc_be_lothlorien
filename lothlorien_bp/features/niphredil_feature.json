@@ -5,7 +5,10 @@
       "identifier": "lothlorien:niphredil_feature"
     },
     "places_block": {
-      "name": "lothlorien:niphredil"
+      "name": "lothlorien:niphredil",
+      "states": {
+        "lothlorien:on_grass": true
+      }
     },
     "enforce_survivability_rules": true,
     "enforce_placement_rules": true,

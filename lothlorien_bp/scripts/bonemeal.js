@@ -2,6 +2,7 @@ import { world, system, EquipmentSlot, GameMode, ItemStack } from "@minecraft/se
 import { BONEMEAL_TABLE, COVERS, MAX_AMOUNT, SPREAD_TRIES, pickWeighted } from "./flora_table.js";
 import { CROP, growCrop, isMature } from "./crop.js";
 import { repeatedUse } from "./use_guard.js";
+import { markOnGrass } from "./grass_overlay.js";
 
 // Bone meal in Lothlorien (the vanilla action is cancelled and replaced):
 //  - on a grass block inside the biome: a scatter of ~12 tries within 3 blocks (grass, our flora), not vanilla flowers;
@@ -31,6 +32,7 @@ function scatter(center, tries, pick, after) {
       const above = dimension.getBlock({ x, y: center.y + dy + 1, z });
       if (soil?.typeId !== "minecraft:grass_block" || above?.typeId !== "minecraft:air") continue;
       above.setType(pick());
+      markOnGrass(above);
       after?.(above);
       break;
     }

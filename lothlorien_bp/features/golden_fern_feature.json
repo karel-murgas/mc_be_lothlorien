@@ -5,7 +5,10 @@
       "identifier": "lothlorien:golden_fern_feature"
     },
     "places_block": {
-      "name": "lothlorien:golden_fern"
+      "name": "lothlorien:golden_fern",
+      "states": {
+        "lothlorien:on_grass": true
+      }
     },
     "enforce_survivability_rules": true,
     "enforce_placement_rules": true,

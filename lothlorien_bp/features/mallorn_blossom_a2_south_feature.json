@@ -8,7 +8,8 @@
       "name": "lothlorien:mallorn_blossom",
       "states": {
         "lothlorien:amount": 2,
-        "minecraft:cardinal_direction": "south"
+        "minecraft:cardinal_direction": "south",
+        "lothlorien:on_grass": true
       }
     },
     "enforce_survivability_rules": true,

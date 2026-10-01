@@ -8,7 +8,8 @@
       "name": "lothlorien:mallorn_leaf_carpet",
       "states": {
         "lothlorien:amount": 4,
-        "minecraft:cardinal_direction": "east"
+        "minecraft:cardinal_direction": "east",
+        "lothlorien:on_grass": true
       }
     },
     "enforce_survivability_rules": true,

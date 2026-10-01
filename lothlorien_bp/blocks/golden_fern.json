@@ -2,7 +2,13 @@
   "format_version": "1.26.50",
   "minecraft:block": {
     "description": {
-      "identifier": "lothlorien:golden_fern"
+      "identifier": "lothlorien:golden_fern",
+      "states": {
+        "lothlorien:on_grass": [
+          false,
+          true
+        ]
+      }
     },
     "components": {
       "minecraft:collision_box": false,
@@ -33,14 +39,18 @@
         "sound": "grass"
       },
       "minecraft:map_color": "#e0b43a",
-      "minecraft:geometry": {
-        "identifier": "minecraft:geometry.cross"
-      },
+      "minecraft:geometry": "geometry.lothlorien.plant_cross",
       "minecraft:material_instances": {
         "*": {
           "texture": "lothlorien:golden_fern",
           "render_method": "alpha_test",
           "ambient_occlusion": 0.0
+        },
+        "grass_overlay": {
+          "texture": "lothlorien:grass_overlay",
+          "render_method": "alpha_test",
+          "tint_method": "grass",
+          "ambient_occlusion": 1.0
         }
       },
       "minecraft:placement_filter": {
@@ -62,7 +72,16 @@
           }
         ]
       },
-      "minecraft:flower_pottable": {}
-    }
+      "minecraft:flower_pottable": {},
+      "lothlorien:grass_overlay": {}
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('lothlorien:on_grass')",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.plant_cross_grass"
+        }
+      }
+    ]
   }
 }

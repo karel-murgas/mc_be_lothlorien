@@ -1,6 +1,7 @@
 import { world, system } from "@minecraft/server";
 import "./blocks.js";
 import "./ground_cover.js";
+import "./grass_overlay.js";
 import "./bonemeal.js";
 import "./crop.js";
 import "./lembas.js";

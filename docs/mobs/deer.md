@@ -24,7 +24,7 @@ Files: BP `entities/deer.json` (generated once from a throw-away script, now edi
 
 | Question | Decision | Tested |
 | --- | --- | --- |
-| Biomes, surface | surface, on `grass_block`, biome tag `lothlorien` only | no |
+| Biomes, surface | surface, on `grass_block` or `dirt` (dirt: grass under our plants dies, MCPE-184249), biome tag `lothlorien` only | no |
 | Light, time | light 7-15 (day and moonlit clearings; no time filter) | no |
 | Group | herd 2-4, weight 10, `density_limit.surface 8`, `distance_filter` 12-44; 10 % of spawns are fawns | no |
 | Pool | `population_control: animal` (shared with cows and sheep; engine pools are fixed) | no |

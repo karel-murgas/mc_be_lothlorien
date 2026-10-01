@@ -709,21 +709,29 @@ for worldgen carpet; already-turned dirt does not turn back by itself, it regrow
 
 **Still dying (owner test 2026-10-01, 1.26.52):** with dampening 0, grass still dies under the carpet, blossoms,
 Elanor and Athelas where the canopy keeps it dark, but not under vanilla leaf litter, short grass or vanilla
-flowers (vanilla plants have the internal material `plant`, which add-ons cannot set; MCPE-184249 covers the
-same death under vanilla partial blocks). A script that restored the grass every 15-30 s (`afc6019`) was
-reverted: the owner does not want regularly running scripts. **Test in progress**, two components that
-Mojang's `red_shrub` plant sample carries:
+flowers. Bedrock bug **MCPE-184249** (https://bugs-legacy.mojang.com/browse/MCPE-184249); background and the
+failed attempts are in `.claude/skills/bedrock-blocks/references/blocks.md` ("WORKAROUND: grass under custom
+plants"). A 15-30 s tick script (`afc6019`) was rejected by the owner (no regularly running scripts). A test of
+`precipitation_interactions none` / `replaceable` (`506c5da`) failed: every variant degraded.
 
-| Block | Added |
-|---|---|
-| Elanor | `precipitation_interactions` `none` |
-| Athelas | `replaceable` |
-| Niphredil, leaf carpet, blossoms | both |
-| Golden fern | nothing (control) |
+**WORKAROUND in use (owner's idea, 2026-10-01; remove when Mojang fixes MCPE-184249):** the grass is allowed to
+die, but the plant hides it. Elanor, Niphredil, Athelas, golden fern, leaf carpet and blossoms have state
+`lothlorien:on_grass`; when true they draw a biome-tinted grass top 0.1 px above the ground (`*_grass` geometry
+twins, material `grass_overlay` = vanilla `grass_top` with `tint_method: grass`). The four flowers now use
+`geometry.lothlorien.plant_cross` (a copy of the built-in cross) so the overlay can be added. Applied by
+`.claude/skills/bedrock-block-families/scripts/add_grass_overlay.py` (re-run after `gen_ground_cover.py`).
+The state is set by `scripts/grass_overlay.js` (`beforeOnPlayerPlace`: block below is grass), by worldgen (the
+single-block features place it true) and by bone meal (`markOnGrass`). Breaking a plant with the state turns the
+dirt below back into grass. Only place/break events, no timers. Deer and white deer may also spawn on `dirt`.
 
-Test: put all of them on grass in a dark spot under the canopy; wait until the grass under the golden fern
-has died; see which grass is still green. Side effect of `replaceable`: placing a block into that space
-replaces the plant/cover, as with short grass. Keep only what works and drop the rest.
+- Not covered: removal without a player (explosion, water, piston, fire: the carpet burns) leaves dirt; on
+  slope edges the dirt's sides show. Plants placed earlier have no state and show the dirt (new world for
+  worldgen). Cover rotation turns the overlay texture with it.
+- **In game to check:** (1) a plant placed on grass shows grass under it, coloured like the grass around it,
+  with no shading seam or flicker; on dirt it shows dirt; (2) after the grass below has died it still looks
+  like grass; (3) breaking it leaves grass; (4) bone-meal spread plants and fresh worldgen have the overlay;
+  (5) the flowers look the same as before (own cross geometry instead of the built-in one).
+- **To switch off:** revert this commit, then remove `add_grass_overlay.py` and its notes in the skills.
 
 ## White deer guidance (Phase 12, 2026-09-30, rebuilt with engine pathfinding; DONE: owner playtest 1.26.52 - guidance, gift and nut growth work)
 
