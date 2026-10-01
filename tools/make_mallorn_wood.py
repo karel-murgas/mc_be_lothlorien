@@ -333,7 +333,7 @@ def main():
     files["blocks/mallorn_heartwood_fence_post.png"] = recolour(silver_post)
     for name, im in files.items():
         assert im.size == (N, N) and all(p[3] == 255 for p in im.get_flattened_data()), name
-    # golden twins of silver art that is not generated here (door, trapdoor: placeholders for now)
+    # golden twins of silver art that is not generated here (door: make_mallorn_door.py writes the same twins; trapdoor: placeholder)
     for src, dst in [
         ("blocks/mallorn_door_bottom.png", "blocks/mallorn_heartwood_door_bottom.png"),
         ("blocks/mallorn_door_top.png", "blocks/mallorn_heartwood_door_top.png"),

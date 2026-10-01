@@ -54,3 +54,24 @@ Status of each asset: `GRAPHICS_TASKS.md` step 1. How the blocks are built: `TEC
 - Gate (2026-10-01): 2x2 gate posts cannot carry the 4x5 leaf; they read leaf-free columns of the post texture. A leaf on
   the gate needs a 4-wide face (variant C's centre post), which splits in half when the gate opens.
 - Refer to the owner with neutral pronouns in notes.
+
+## Door (round 1, 2026-10-01)
+
+- `tools/make_mallorn_door.py` draws the door as one 16x32 picture from hand-drawn pixel rows (kinds: rail, stile, panel,
+  relief, leaf, gold, hole) and shades by rule (lit top-left edges, dark lower-right, one-texel cast shadow). Hand-drawn rows
+  beat procedural shapes at this size: procedural branches came out as 1-texel stair-step rays, shaded "lobes" as clouds.
+- Small carved details (leaves, midrib, gold) get fixed tones; the edge rule darkened most of their texels and greyed them out.
+- Round 2 tried real depth (frame cubes, recessed panel, knob); the owner wants the vanilla door: flat, frame by colour
+  (1-2 texels). Round 3 is back to one cube. Don't propose door depth again unless asked.
+- Door accepted design (A4, 2026-10-01): half a mallorn per door (trunk at the free edge, no frame there), a loose
+  arc of gold leaves over silver branches cut out against the sky, boards with roots below, 2-texel painted frame
+  (outline + line) on the hinge, top and bottom edges. The owner liked the gold contrast and more cut-through.
+- Painted relief reads as geometry: a field one shading height below its frame gets a lit line + cast shadow along
+  the frame, which the owner saw as a 3-texel recess. Keep fields level with the frame on vanilla-flat blocks; relief
+  only for small carved details (roots, mouldings, leaves).
+- The owner tests in game and reports precisely (round 1 hinge side was right; round 2 mirrored the inside): trust
+  that over a derivation. See `GRAPHICS_TASKS.md` "Door, round 3" and the shared note "Doors with cutouts".
+- The owner reads a door by its frame, hinges and handle; plain silver on silver planks blended into the wall.
+- A tree reads at 16 texels as a solid dome on a trunk; open branch-work and sky-specked leaf crowns read as rays,
+  candelabras or hedges. A regular leaf grid reads as fish scales: nudge the leaves by a fixed pattern.
+- Status and sheets: `GRAPHICS_TASKS.md` "Door, sketch round 1".
