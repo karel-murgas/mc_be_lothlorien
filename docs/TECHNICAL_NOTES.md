@@ -290,7 +290,7 @@ The history below is kept because it records the traps.
   - `woven`: the support branches run at floor level through the platform, planks fill the gaps, and their leafy
     ends reach past the rim. `lush`: 1-2 whorls of leafy level branches on the bare trunk plus longer leafy low branches.
   - The older square-trunk variants (`flet`, `woven`, `plain`, shipped until 2026-10-01) were dropped; the options
-    still exist in `buildFletMallorn`, so they can be recreated (git before the round-trunk commit).
+    still exist in `buildFletMallorn`, so they can be recreated (git before the round-trunk commit `d09188f`).
   - To experiment, add an entry to `VARIANTS` and the name to `VARIANTS` in `tools/dev_scripts/showcase.js`, then run
     `node tools/build_structures.mjs <variant>`.
 - **Round trunk** (owner, 2026-10-01, seen in game in a flat world; accepted). Built from scratch after a first try
