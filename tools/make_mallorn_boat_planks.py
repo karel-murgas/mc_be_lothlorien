@@ -30,29 +30,31 @@ TIP = 20         # the planks meet at x = +-TIP (before the tilt)
 SIDE_H = 7       # side plank height (on a 2-high bottom)
 TILT = 14        # sheer: degrees each end section is tilted up (Bedrock: -z rotation lifts +x)
 TILT_Y = 5       # the end sections tilt about this height, so the joint opens little at the top and bottom
-PLANK_LEN = round(math.hypot(TIP - MID, HALF_W))
-TURN = round(math.degrees(math.atan2(HALF_W, TIP - MID)))
 STRIP_W = 4      # bottom strips under the turned planks (perpendicular width)
 STEM_LEN = 5     # stem post at each tip: covers the plank ends
 
 
-def end_section(e):
-    """Cubes of the bow (e = +1) or stern (e = -1) bone: (kind, origin, size, rotation, pivot).
+def end_section(e, mid=MID):
+    """Cubes of the bow (e = +1) or stern (e = -1) bone: (kind, origin, size, rotation, pivot). The section runs from
+    x = e * mid to the tip; a larger stern `mid` gives a longer straight midship and a shorter, steeper stern taper.
 
     Watertight bottom (owner, 2026-10-01: "the floor should have no leaks"): a strip under each turned plank, turned with
     it, plus an unturned keel down the middle; tiny y offsets keep the overlapping top faces from z-fighting."""
     cubes = []
-    strip_len = PLANK_LEN - 4
+    plank_len = round(math.hypot(TIP - mid, HALF_W))
+    turn = round(math.degrees(math.atan2(HALF_W, TIP - mid)))
+    strip_len = plank_len - 4
     for side in (1, -1):
-        rot, piv = [0, e * side * TURN, 0], [e * MID, 0, side * HALF_W]
-        x0 = MID if e > 0 else -MID - PLANK_LEN
+        rot, piv = [0, e * side * turn, 0], [e * mid, 0, side * HALF_W]
+        x0 = mid if e > 0 else -mid - plank_len
         z0 = HALF_W - 1 if side > 0 else -HALF_W
-        cubes.append(("side_end", [x0, 2, z0], [PLANK_LEN, SIDE_H, 1], rot, [e * MID, 2, side * HALF_W]))
-        sx0 = MID if e > 0 else -MID - strip_len
+        cubes.append(("side_end", [x0, 2, z0], [plank_len, SIDE_H, 1], rot, [e * mid, 2, side * HALF_W]))
+        sx0 = mid if e > 0 else -mid - strip_len
         sz0 = HALF_W - STRIP_W if side > 0 else -HALF_W
         cubes.append(("bottom", [sx0, -0.01 if side < 0 else 0, sz0], [strip_len, 2, STRIP_W], rot, piv))
     stem0 = TIP - STEM_LEN + 1  # stem from x = 16 to 21 (bow)
-    for x_a, x_b, hw in ((MID - 1, MID + 6, 3), (MID + 6, stem0, 2)):  # keel: wide near the joint, narrow to the stem
+    wide_end = mid + (TIP - mid) // 2  # keel: wide near the joint, narrow to the stem
+    for x_a, x_b, hw in ((mid - 1, wide_end, 3), (wide_end, stem0, 2)):
         x0 = x_a if e > 0 else -x_b
         cubes.append(("bottom", [x0, -0.02, -hw], [x_b - x_a, 2, 2 * hw], None, None))
     cubes.append(("stem", [stem0 if e > 0 else -TIP - 1, 0, -1], [STEM_LEN, SIDE_H + 2, 2], None, None))
@@ -63,11 +65,12 @@ def end_section(e):
     return cubes
 
 
-def mid_section():
-    """Straight midship; the side planks run one unit into each end section to close the tilt joint."""
-    return [("bottom", [-MID, 0, -HALF_W], [2 * MID, 2, 2 * HALF_W], None, None),
-            ("side", [-MID - 1, 2, HALF_W - 1], [2 * MID + 2, SIDE_H, 1], None, None),
-            ("side", [-MID - 1, 2, -HALF_W], [2 * MID + 2, SIDE_H, 1], None, None)]
+def mid_section(stern_mid=MID):
+    """Straight midship from -stern_mid to +MID; the side planks run one unit into each end section to close the joint."""
+    n = MID + stern_mid
+    return [("bottom", [-stern_mid, 0, -HALF_W], [n, 2, 2 * HALF_W], None, None),
+            ("side", [-stern_mid - 1, 2, HALF_W - 1], [n + 2, SIDE_H, 1], None, None),
+            ("side", [-stern_mid - 1, 2, -HALF_W], [n + 2, SIDE_H, 1], None, None)]
 
 
 # ---------------------------------------------------------------- painting (local coordinates)
@@ -143,9 +146,11 @@ def paint(kind, face, l, size, cube):
 
 
 # ---------------------------------------------------------------- outputs
-def build():
-    bones = [("hull", c) for c in mid_section()]
-    bones += [("bow", c) for c in end_section(1)] + [("stern", c) for c in end_section(-1)]
+def build(stern_mid=MID, ident="geometry.lothlorien.mallorn_boat"):
+    """stern_mid > MID: the chest-boat hull, its straight midship 2 longer towards the stern so the chest sits further
+    back (owner's choice, 2026-10-01)."""
+    bones = [("hull", c) for c in mid_section(stern_mid)]
+    bones += [("bow", c) for c in end_section(1)] + [("stern", c) for c in end_section(-1, stern_mid)]
     for s in (1, -1):
         bones += [(stepped.paddle_bone(s, HALF_W)["name"], (*c, None, None)) for c in stepped.paddle_cubes(s, HALF_W)]
     cubes = [c for _, c in bones]
@@ -158,10 +163,9 @@ def build():
             local = (p[0] - o[0], p[1] - o[1], p[2] - o[2])
             px[tx, ty] = (*paint(kind, face, local, s, cube)[:3], 255)
     geo_bones = [
-        {"name": "hull", "pivot": [0, 0, 0]},
-        {"name": "bow", "parent": "hull", "pivot": [MID, TILT_Y, 0], "rotation": [0, 0, -TILT],
-         "locators": {"lead": [TIP, SIDE_H, 0]}},
-        {"name": "stern", "parent": "hull", "pivot": [-MID, TILT_Y, 0], "rotation": [0, 0, TILT]},
+        {"name": "hull", "pivot": [0, 0, 0], "locators": {"lead": stepped.LEAD}},  # shared with the other model
+        {"name": "bow", "parent": "hull", "pivot": [MID, TILT_Y, 0], "rotation": [0, 0, -TILT]},
+        {"name": "stern", "parent": "hull", "pivot": [-stern_mid, TILT_Y, 0], "rotation": [0, 0, TILT]},
         stepped.paddle_bone(1, HALF_W), stepped.paddle_bone(-1, HALF_W),
     ]
     for b in geo_bones:
@@ -176,7 +180,7 @@ def build():
         "format_version": "1.12.0",
         "minecraft:geometry": [{
             "description": {
-                "identifier": "geometry.lothlorien.mallorn_boat",
+                "identifier": ident,
                 "texture_width": TEX_W, "texture_height": tex_h,
                 "visible_bounds_width": 4, "visible_bounds_height": 2, "visible_bounds_offset": [0, 0.5, 0],
             },

@@ -1,52 +1,35 @@
 # Mallorn boats
 
-Family (2026-10-01): `lothlorien:mallorn_boat`, `mallorn_chest_boat`, `mallorn_heartwood_boat`,
-`mallorn_heartwood_chest_boat`. **One command regenerates everything**: `python -B tools/make_mallorn_boat_family.py`
-(runs both model generators; heartwood art = recolour of the silver art; chest geometry; icons; BP entities, items,
-recipes, loot; RP client entities; lang and item_texture entries). Do not hand-edit the generated files.
-- Chest boat: vanilla `chest_boat` copy, runtime `minecraft:chest_boat`, seat moved to x 0.45 (vanilla 0.2) to clear
-  the chest at x -8..4; paddles moved to x 5 on all boats. Chest = vanilla chest (owner: "classical minecraft chest
-  texture") via a second render controller and the vanilla path `textures/entity/boat/chest_boat_oak`.
-- Recipes: boat = 5 planks in a U (silver or heartwood planks); chest boat = chest over the boat (shaped only rule).
+**Final (owner, 2026-10-01).** Verified in game, except the last round (chest 2 back, seat 0.35, shared `lead`
+locator at (20, 11, 0) fixing a content-log error), which was approved from renders. History: git log of this file
+and `tools/make_mallorn_boat*.py`.
 
-Status (2026-10-01): boat entity **works in game** (placeholder round). Elven model v1 deployed, **in-game check pending**.
+Four boats: `lothlorien:mallorn_boat`, `mallorn_chest_boat`, `mallorn_heartwood_boat`, `mallorn_heartwood_chest_boat`.
+**One command regenerates every file**: `python -B tools/make_mallorn_boat_family.py` (runs both model generators;
+heartwood art = recolour of the silver art; chest geometry; icons; BP entities, items, recipes, loot; RP client
+entities; lang and item_texture entries). Do not hand-edit the generated files.
 
-## Approach
-- BP `entities/mallorn_boat.json`: the vanilla 1.26.30 boat copied, with
-  `"runtime_identifier": "minecraft:boat"` so the engine's hard-coded boat class (paddle steering,
-  boat UI) drives it. Bamboo-raft seat group dropped. Loot drops `lothlorien:mallorn_boat`.
-- Item `items/mallorn_boat.json`: `minecraft:entity_placer` + `minecraft:liquid_clipped`, stack 1.
-  Recipe: 5 mallorn planks in a U (vanilla boat shape).
-- RP: own client entity; `animations/mallorn_boat.animation.json` turns the `hull` bone by the actor
-  yaw (the runtime boat does not turn a custom model by itself). `lead` locator on the bow gunwale.
-  No paddles (vanilla paddles are hard-coded). Engine notes: `.claude/skills/bedrock-mobs/references/boats.md`.
+## Engine side
+- BP entities are copies of vanilla `boat` / `chest_boat` (1.26.30) with `runtime_identifier` `minecraft:boat` /
+  `minecraft:chest_boat`: the hard-coded boat class does placing, steering, the boat UI and the 27-slot chest.
+  Bamboo-raft seat group dropped; own loot tables. Chest boat seat at x 0.35 (vanilla 0.2 would sit in the chest).
+- Items: `entity_placer` + `liquid_clipped`, stack 1, creative group `itemGroup.name.boat`.
+- Recipes: boat = 5 planks in a U (silver or heartwood planks); chest boat = chest over the boat (shaped only).
+- Client: the `hull` bone is turned by the actor yaw (a runtime boat does not turn a custom model); one `lead`
+  locator, identical in every geometry (they share locators), on the bow neck; paddles row while ridden and moving;
+  the chest is the vanilla chest drawn by a second render controller from `textures/entity/boat/chest_boat_oak`
+  (nothing of Mojang's copied).
+- Lead: right-click enters the boat, as with vanilla boats; shears cut it.
 
-## Models (owner's brief 2026-10-01)
-Elven boat: long and slender, pointed at both ends, ends higher than the middle, clear front, no sail, carving
-optional; mallorn palette (silver planks, gold gunwale and leaves). Bow = geometry +X. Two models, same paddles:
-- **Default** (owner's choice after the style-guide question): `tools/make_mallorn_boat_planks.py`, 28 elements:
-  straight midship, bow and stern bones tilted up 14 deg, turned side planks meeting at a stem post, watertight
-  bottom (strips under the turned planks + a keel), swan neck of three elements with a level head.
-- **"Prettier boats"** (opt-in): `tools/make_mallorn_boat.py`, the stepped 158-cube model (also writes the icon).
-- Switch: RP pack setting `lothlorien:pretty_boats` (manifest v3 `settings`, per player, gear icon in the resource
-  pack list) read by `controller.render.lothlorien.mallorn_boat`.
-
-## Round results (owner, 2026-10-01)
-- Placeholder: placing, riding, steering, leashing work. Model did not rotate, no visible front, leash knot high.
-- Model v1: "awesome"; turns; the neck was at the back (BOW flipped to +1); lead knot moved 2 lower and 2 towards
-  the tip, onto the neck; paddles asked for (added: leaf-bladed, rowing while ridden and moving); icon redrawn in the
-  vanilla boat icon's projection (inventory pose [30, 225, 0]).
-- Lead cannot be removed by right-click (right-click enters the boat; vanilla boat has the same setup). To test:
-  shears; compare with an oak boat. Option if needed: sneak + use unleashes (script).
-- Owner asked whether the model follows the style guide. It does not on two model rules (element count, curves as
-  stairs). Kept as the "stepped" model (`tools/make_mallorn_boat.py`, deployed); a vanilla-style draft with 22 rotated
-  elements is `tools/make_mallorn_boat_planks.py` (writes the same files). Owner to choose.
-
-## Round 4 results (owner, 2026-10-01)
-Simple model "beautiful", toggle "works perfectly" (RP pack settings verified in game).
-
-## In-game check (round 5)
-- [ ] Chest boats: chest sits behind the rider, turns with the boat, opens a 27-slot chest; contents drop when broken.
-- [ ] Rider position in the chest boat (seat moved forward); paddles at the new position on all boats.
-- [ ] Heartwood boats: look, recipes from heartwood planks; all four icons.
-- [ ] Both toggle models for all four boats.
+## Models (owner's brief and decisions)
+Elven boat: long and slender, pointed at both ends, ends higher than the middle, clear front (swan neck at the bow,
+geometry +X), no sail. Mallorn palette: silver planks, gold gunwale and leaves; heartwood = golden wood, silver trim.
+- **Default** (owner chose it after asking whether the art follows the Minecraft style guide):
+  `tools/make_mallorn_boat_planks.py`, 28 elements: straight midship, bow and stern tilted up, turned side planks
+  meeting at stem posts, watertight bottom, swan neck with a level head. Chest boats use the same hull with the
+  straight midship 2 longer at the stern so the chest sits further back (x -10..2).
+- **"Prettier boats"** (opt-in, per player): `tools/make_mallorn_boat.py`, the stepped 158-cube model (also draws the
+  icon); breaks the style guide on element count and stair curves, hence opt-in. Chest at x -10..2 fits as it is.
+- Switch: RP pack setting `lothlorien:pretty_boats` (manifest v3 `settings`; Resource Packs -> Lothlorien RP -> gear
+  icon), read by the boat and chest render controllers. Verified in game.
+- Icon: vanilla boat-icon projection (inventory pose [30, 225, 0]), chest boats with the vanilla chest drawn in.

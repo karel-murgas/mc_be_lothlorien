@@ -7,12 +7,12 @@
         "default": "entity"
       },
       "textures": {
-        "default": "textures/entity/mallorn_boat",
+        "default": "textures/entity/mallorn_chest_boat",
         "pretty": "textures/entity/mallorn_boat_pretty",
         "chest": "textures/entity/boat/chest_boat_oak"
       },
       "geometry": {
-        "default": "geometry.lothlorien.mallorn_boat",
+        "default": "geometry.lothlorien.mallorn_chest_boat",
         "pretty": "geometry.lothlorien.mallorn_boat_pretty",
         "chest": "geometry.lothlorien.mallorn_boat_chest",
         "chest_pretty": "geometry.lothlorien.mallorn_boat_chest_pretty"

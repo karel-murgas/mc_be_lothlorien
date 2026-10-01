@@ -38,8 +38,9 @@ WOODS = [  # (id prefix, planks item, display name)
     ("mallorn", "lothlorien:mallorn_planks", "Mallorn"),
     ("mallorn_heartwood", "lothlorien:mallorn_heartwood_planks", "Mallorn Heartwood"),
 ]
-CHEST_X = (-8, 4)          # chest footprint along the boat (behind the rider)
-CHEST_SEAT_X = 0.45        # the chest boat's single seat, moved forward clear of the chest (vanilla 0.2)
+CHEST_X = (-10, 2)         # chest footprint along the boat (behind the rider; owner: as far back as it fits)
+CHEST_STERN_MID = 10       # simple chest-boat hull: straight midship to x -10 (plain boats: -8), so the chest fits
+CHEST_SEAT_X = 0.35        # the chest boat's single seat, forward of the chest (vanilla 0.2 would sit in it)
 FLOOR_Y = {"default": 2, "pretty": 3}
 
 # vanilla chest colours for the icon (sampled from the chest-boat texture's chest)
@@ -96,6 +97,8 @@ def chest_icon(boat_icon):
 
 def build_art():
     geo_d, tex_d, _ = planks.build()
+    geo_c, tex_c, _ = planks.build(CHEST_STERN_MID, "geometry.lothlorien.mallorn_chest_boat")
+    write_json(os.path.join(RP, "models", "entity", "mallorn_chest_boat.geo.json"), geo_c)
     geo_p, tex_p, _ = stepped.build()
     write_json(os.path.join(RP, "models", "entity", "mallorn_boat.geo.json"), geo_d)
     write_json(os.path.join(RP, "models", "entity", "mallorn_boat_pretty.geo.json"), geo_p)
@@ -106,6 +109,7 @@ def build_art():
         f = recolour if gold else (lambda im: im)
         tex = os.path.join(RP, "textures", "entity")
         f(tex_d).save(os.path.join(tex, f"{prefix}_boat.png"))
+        f(tex_c).save(os.path.join(tex, f"{prefix}_chest_boat.png"))
         f(tex_p).save(os.path.join(tex, f"{prefix}_boat_pretty.png"))
         boat_icon = f(icon)
         items = os.path.join(RP, "textures", "items")
@@ -175,7 +179,9 @@ def client_entity(ident, prefix, chest):
         "animations": {"turn": "animation.lothlorien.mallorn_boat.turn", "row": "animation.lothlorien.mallorn_boat.row"},
         "render_controllers": ["controller.render.lothlorien.mallorn_boat"],
     }
-    if chest:
+    if chest:  # simple model: the chest-boat hull; the prettier hull has room as it is
+        d["textures"]["default"] = f"textures/entity/{prefix}_chest_boat"
+        d["geometry"]["default"] = "geometry.lothlorien.mallorn_chest_boat"
         d["textures"]["chest"] = CHEST_TEXTURE
         d["geometry"]["chest"] = "geometry.lothlorien.mallorn_boat_chest"
         d["geometry"]["chest_pretty"] = "geometry.lothlorien.mallorn_boat_chest_pretty"

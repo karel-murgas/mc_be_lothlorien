@@ -104,6 +104,11 @@ def posts():
     return bow + stern
 
 
+# Leash knot on the bow neck. ONE value for every boat geometry: all geometries of a client entity share their
+# locators, and a second, different `lead` is skipped with a content-log error (seen 2026-10-01). On the hull bone,
+# on the neck/stem of both models (owner placed it on the stepped neck: 2 lower, 2 towards the tip).
+LEAD = [BOW * L, 11, 0]
+
 # paddles: (x, y) of the oarlock on the gunwale, shaft inboard / outboard length, blade length
 PADDLE_X, PADDLE_Y = 5, GUNWALE + 1  # x 5: clear of the chest (x -8..4) on chest boats
 SHAFT_IN, SHAFT_OUT, BLADE = 5, 10, 8
@@ -307,7 +312,6 @@ def build(debug=False):
             assert px[tx, ty][3] == 255, (kind, face, tx, ty)
     xs = [o[0] for _, o, _ in cubes] + [o[0] + s[0] for _, o, s in cubes]
     ys = [o[1] + s[1] for _, o, s in cubes]
-    lead = [BOW * L, profile(BOW * (L - 2))[2] - 2, 0]  # on the bow neck (owner: 2 lower, 2 towards the tip)
     geo = {
         "format_version": "1.12.0",
         "minecraft:geometry": [{
@@ -319,7 +323,7 @@ def build(debug=False):
                 "visible_bounds_height": math.ceil(max(ys) / 16) + 1,
                 "visible_bounds_offset": [0, 0.5, 0],
             },
-            "bones": [{"name": "hull", "pivot": [0, 0, 0], "locators": {"lead": lead}}]
+            "bones": [{"name": "hull", "pivot": [0, 0, 0], "locators": {"lead": LEAD}}]
             + [paddle_bone(s) for s in (1, -1)],
         }],
     }

@@ -164,7 +164,7 @@
             "min_rider_count": 0,
             "max_rider_count": 1,
             "position": [
-              0.45,
+              0.35,
               -0.2,
               0.0
             ],
@@ -227,7 +227,7 @@
               "min_rider_count": 0,
               "lock_rider_rotation": 90,
               "position": [
-                0.45,
+                0.35,
                 -0.2,
                 0.0
               ],
