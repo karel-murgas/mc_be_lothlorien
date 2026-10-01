@@ -707,6 +707,15 @@ to the grass below (the leaves already had 1). Nothing in script or worldgen rep
 sapling, deer antler, pressure plate and button. **In game to check:** grass under fresh carpet stays green (new world
 for worldgen carpet; already-turned dirt does not turn back by itself, it regrows only by grass spreading).
 
+**Not enough (user test 2026-10-01, 1.26.52):** with dampening 0 deployed, about half the grass under the
+carpet still died. Bedrock bug MCPE-184249: in low light grass dies under partial blocks whatever their
+dampening, and the canopy keeps the floor dark. Fix: carpet and blossom have `minecraft:tick` (300-600
+ticks, looping) and `lothlorien:keep_grass` (`ground_cover.js`): plain dirt under the cover turns back
+into grass if a grass block touches it (8 neighbours, y -1..+1), so dirt shows for at most ~30 s and old
+dirt patches heal from their edges inward. Covers on dirt away from grass stay on dirt. The random tick
+also runs it. **In game to check:** grass under carpet stays green (old world is fine, dirt heals);
+whether grass under the custom flowers dies too (if not, the covers' `support: fence` is the suspect).
+
 ## White deer guidance (Phase 12, 2026-09-30, rebuilt with engine pathfinding; DONE: owner playtest 1.26.52 - guidance, gift and nut growth work)
 
 **Gift (owner, 2026-09-30, replaces leading to flet giants; static checks only):** leading to the nearest flet marker was no better
