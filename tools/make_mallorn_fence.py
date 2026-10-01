@@ -9,7 +9,7 @@ cap read a leaf-free strip of it. Both sets share this geometry.
 
 World coordinates below: block centred on x/z in [-8, 8], north = -z, east = +x. Geometry x is mirrored
 (geo_x = -world_x), handled in cube(). Rotations are multiples of 22.5 degrees (per-cube x rotation for the slopes,
-the four sides by turning the north rails). Checked in Blockbench (design renders, docs/art/fence_v1 and temp v3).
+the four sides by turning the north rails). Checked in Blockbench during design.
 
   python -B tools/make_mallorn_fence.py
 """

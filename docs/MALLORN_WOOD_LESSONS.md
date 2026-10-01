@@ -26,7 +26,7 @@ Status of each asset: `GRAPHICS_TASKS.md` step 1. How the blocks are built: `TEC
 - **Show options side by side on one sheet**; the owner picks from pictures, not descriptions (bark: 3 sweeps before a pick).
 - **Quick sketches, then the game.** Blockbench renders are good for shape; texture detail and cutouts are judged in game.
   The owner steers fast in small rounds ("I like the leaves, but ..."); keep each round small and re-render only what changed.
-- AI concept art (`E:\AI`, Z-Image, pencil + watercolour prompts) gave ideas, but the owner's own idea won. Offer it, do not lead with it.
+- AI concept art (`E:\AI`, Z-Image, pencil + watercolour prompts) gave fence ideas, but the owner's own idea won. Offer it, do not lead with it.
 - Iteration sheets and scripts live in `temp/<feature>/` while working; when the feature is accepted, delete them and
   condense the notes to the final design and the owner's decisions (git keeps the rounds). Owner's rule, 2026-10-01.
 - The owner checks in game quickly and reports errors from the content log: always deploy, and bump geometry format versions

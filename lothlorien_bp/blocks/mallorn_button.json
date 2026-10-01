@@ -214,23 +214,36 @@
               0,
               90
             ]
+          },
+          "minecraft:geometry": "geometry.lothlorien.mallorn_button_ew",
+          "minecraft:selection_box": {
+            "origin": [
+              -2,
+              0,
+              -3
+            ],
+            "size": [
+              4,
+              2,
+              6
+            ]
           }
         }
       },
       {
         "condition": "q.block_state('minecraft:block_face') == 'west' && q.block_state('lothlorien:powered')",
         "components": {
-          "minecraft:geometry": "geometry.lothlorien.mallorn_button_pressed",
+          "minecraft:geometry": "geometry.lothlorien.mallorn_button_ew_pressed",
           "minecraft:selection_box": {
             "origin": [
-              -3,
+              -2,
               0,
-              -2
+              -3
             ],
             "size": [
-              6,
+              4,
               1,
-              4
+              6
             ]
           },
           "minecraft:redstone_producer": {
@@ -248,23 +261,36 @@
               0,
               -90
             ]
+          },
+          "minecraft:geometry": "geometry.lothlorien.mallorn_button_ew",
+          "minecraft:selection_box": {
+            "origin": [
+              -2,
+              0,
+              -3
+            ],
+            "size": [
+              4,
+              2,
+              6
+            ]
           }
         }
       },
       {
         "condition": "q.block_state('minecraft:block_face') == 'east' && q.block_state('lothlorien:powered')",
         "components": {
-          "minecraft:geometry": "geometry.lothlorien.mallorn_button_pressed",
+          "minecraft:geometry": "geometry.lothlorien.mallorn_button_ew_pressed",
           "minecraft:selection_box": {
             "origin": [
-              -3,
+              -2,
               0,
-              -2
+              -3
             ],
             "size": [
-              6,
+              4,
               1,
-              4
+              6
             ]
           },
           "minecraft:redstone_producer": {

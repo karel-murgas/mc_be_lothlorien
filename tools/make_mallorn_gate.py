@@ -1,12 +1,8 @@
 """Mallorn fence gate geometry, matching the carved fence (2026-10-01): the vanilla gate (two 2x2 end posts, two rails,
 a centre piece) with the fence's ideas: rails bent at 22.5 deg, the fence post texture (grain, knots, painted leaves),
-small diamond caps. Variants (sheet: docs/art/gate/gate_variants.png; the owner picked C):
-
-  A  both rails as an inverted V peaking at the middle (the gate reads as one fence span), short centre upright,
-     diamond caps on the end posts;
-  B  straight top rail + inverted-V lower rail, short centre upright, diamond caps on the end posts;
-  C  the fence line runs through: the rails are the fence's own (low at a centre post, peak at the block edge, so they
-     meet the neighbouring fence rails), the centre piece is a 4-wide post with the painted leaf, no caps.
+no caps. Owner's pick (2026-10-01, over two capped variants with a centre upright, in git history): the fence line
+runs through: the rails are the fence's own (low at a centre post, peak at the block edge, so they meet the
+neighbouring fence rails), the centre piece is a 4-wide post with the painted leaf.
 
 Writes lothlorien_rp/models/blocks/mallorn_fence_gate_closed.geo.json (bones posts, rails; keeps its
 item_display_transforms: the icon pose [30,135,0] is confirmed in game) and mallorn_fence_gate_open.geo.json
@@ -16,7 +12,7 @@ Geometry coordinates throughout (x mirrored against the world, see make_mallorn_
 along x at z -1..1, end posts at x +-7. Opening turns each half a quarter about its post so it points to -z (north
 in the unrotated block), where the old open model and the open selection box (z -8..0) are.
 
-  python -B tools/make_mallorn_gate.py [A|B|C]      (default: VARIANT below)
+  python -B tools/make_mallorn_gate.py
 """
 import json
 import os
@@ -26,11 +22,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import make_mallorn_fence as fence  # noqa: E402
 
-VARIANT = "C"
 MODELS = fence.MODELS
 T22 = fence.T22
 POST_H = (5, 16)  # vanilla gate posts: y 5..16
-STRIP = [5, 1]    # leaf-free strip of the post texture (rails, uprights, tops), as the fence rails use
+STRIP = [5, 1]    # leaf-free strip of the post texture (rails, tops), as the fence rails use
 
 
 def box(origin, size, uv, rot=None, pivot=None):
@@ -40,25 +35,14 @@ def box(origin, size, uv, rot=None, pivot=None):
     return c
 
 
-def strip_faces(sx, sy, sz):
-    """Every face a piece of the leaf-free strip, 1 texel = 1 unit."""
-    return {"north": {"uv": STRIP, "uv_size": [sx, sy]}, "south": {"uv": STRIP, "uv_size": [sx, sy]},
-            "east": {"uv": STRIP, "uv_size": [sz, sy]}, "west": {"uv": STRIP, "uv_size": [sz, sy]},
-            "up": {"uv": STRIP, "uv_size": [sx, sz]}, "down": {"uv": STRIP, "uv_size": [sx, sz]}}
-
-
-def end_post(x, caps):
+def end_post(x):
     """2x2 post at geo x (centre), y 5..16. Its long faces read columns 12-13 of the post texture (rows 0-10 hold no
-    leaf or knot there); with caps, the fence's small diamond cap sits on top."""
+    leaf or knot there)."""
     h = POST_H[1] - POST_H[0]
     side = {"uv": [12, 0], "uv_size": [2, h]}
     uv = {"north": dict(side), "south": dict(side), "east": dict(side), "west": dict(side),
           "up": {"uv": STRIP, "uv_size": [2, 2]}, "down": {"uv": STRIP, "uv_size": [2, 2]}}
-    cs = [box([x - 1, POST_H[0], -1], [2, h, 2], uv)]
-    if caps:
-        cap = fence.faces_for((2, 1, 2), "cap")
-        cs.append(box([x - 1, 16, -1], [2, 1, 2], cap, rot=[0, 45, 0], pivot=[x, 16, 0]))
-    return cs
+    return [box([x - 1, POST_H[0], -1], [2, h, 2], uv)]
 
 
 def half_rails(pairs):
@@ -72,14 +56,8 @@ def mirror_half(cubes):
     return [fence.turn(c, 2) for c in cubes]
 
 
-def upright(y0, y1):
-    """Short centre piece between the rails (vanilla's middle), 2 wide, split into the two halves' 1-wide parts."""
-    return ([box([0, y0, -1], [1, y1 - y0, 2], strip_faces(1, y1 - y0, 2))],
-            [box([-1, y0, -1], [1, y1 - y0, 2], strip_faces(1, y1 - y0, 2))])
-
-
 def centre_post():
-    """Variant C: a 4-wide, 2-deep post in the middle wearing the fence post's leaf sides (north: side 0 with its leaf at
+    """A 4-wide, 2-deep post in the middle wearing the fence post's leaf sides (north: side 0 with its leaf at
     rows 3-7; south: side 2, leaf rows 5-9 and a knot), split into the two halves' 2-wide parts so each opens with
     its half of the picture. Seen from the north, geo +x is on the left, so the +x part takes the left columns."""
     h = POST_H[1] - POST_H[0]
@@ -92,21 +70,12 @@ def centre_post():
     return parts
 
 
-def build(variant):
-    """-> (posts, plus_half, minus_half): cubes in geo space for the closed gate."""
-    if variant == "A":  # both rails ^ from the end posts (inner face u 6) to a peak at the centre
-        plus = half_rails([(6, 7, 0, 7 + 6 * T22), (6, 12.5, 0, 12.5 + 6 * T22)])
-        up_p, up_m = upright(10, 14)
-        return end_post(7, True) + end_post(-7, True), plus + up_p, mirror_half(plus) + up_m
-    if variant == "B":  # straight top rail, ^ lower rail
-        plus = half_rails([(6, 7, 0, 7 + 6 * T22), (6, 14, 0, 14)])
-        up_p, up_m = upright(10, 13)
-        return end_post(7, True) + end_post(-7, True), plus + up_p, mirror_half(plus) + up_m
-    if variant == "C":  # the fence's rails: low at the centre post's face (u 2), peak at the block edge (u 8)
-        plus = half_rails([(2, y + 1, 8, y + 1 + 6 * T22) for y in fence.RAIL_Y])
-        cp_p, cp_m = centre_post()
-        return end_post(7, False) + end_post(-7, False), plus + cp_p, mirror_half(plus) + cp_m
-    raise SystemExit(f"unknown variant {variant}")
+def build():
+    """-> (posts, plus_half, minus_half): cubes in geo space for the closed gate. The fence's rails: low at the centre
+    post's face (u 2), peak at the block edge (u 8)."""
+    plus = half_rails([(2, y + 1, 8, y + 1 + 6 * T22) for y in fence.RAIL_Y])
+    cp_p, cp_m = centre_post()
+    return end_post(7) + end_post(-7), plus + cp_p, mirror_half(plus) + cp_m
 
 
 def about(c, k, px, pz):
@@ -131,8 +100,8 @@ def opened(plus, minus):
     return [about(c, 1, 7, 0) for c in plus] + [about(c, 3, -7, 0) for c in minus]
 
 
-def geometries(variant, transforms=None):
-    posts, plus, minus = build(variant)
+def geometries(transforms=None):
+    posts, plus, minus = build()
     closed = fence.geometry("geometry.lothlorien.mallorn_fence_gate_closed",
                             [{"name": "posts", "pivot": [0, 0, 0], "cubes": posts},
                              {"name": "rails", "pivot": [0, 0, 0], "cubes": plus + minus}], transforms)
@@ -147,16 +116,15 @@ def geometries(variant, transforms=None):
 
 
 def main():
-    variant = sys.argv[1] if len(sys.argv) > 1 else VARIANT
     closed_path = os.path.join(MODELS, "mallorn_fence_gate_closed.geo.json")
     with open(closed_path, encoding="utf8") as f:
         transforms = json.load(f)["minecraft:geometry"][0].get("item_display_transforms")
     assert transforms and transforms["gui"]["rotation"] == [30, 135, 0], "icon pose lost"
-    closed, opn = geometries(variant, transforms)
+    closed, opn = geometries(transforms)
     for path, data in [(closed_path, closed), (os.path.join(MODELS, "mallorn_fence_gate_open.geo.json"), opn)]:
         with open(path, "w", encoding="utf8", newline="\n") as f:
             f.write(json.dumps(data, indent=2) + "\n")
-    print(f"wrote mallorn_fence_gate_closed/open.geo.json (variant {variant})")
+    print("wrote mallorn_fence_gate_closed/open.geo.json")
 
 
 if __name__ == "__main__":
