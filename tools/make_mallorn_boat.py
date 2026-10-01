@@ -1,4 +1,8 @@
-"""Mallorn boat: entity geometry, entity texture and item icon.
+"""Mallorn boat, "prettier boats" model (stepped, detailed): entity geometry and texture, plus the item icon.
+
+The default model is the simpler rotated-plank one (make_mallorn_boat_planks.py); players switch to this one with the
+resource pack setting "Prettier boats" (owner's choice, 2026-10-01). This model breaks two style-guide rules (many
+elements, curves as stairs), which is why it is opt-in.
 
   python -B tools/make_mallorn_boat.py [--out DIR] [--debug]
 
@@ -308,7 +312,7 @@ def build(debug=False):
         "format_version": "1.12.0",
         "minecraft:geometry": [{
             "description": {
-                "identifier": "geometry.lothlorien.mallorn_boat",
+                "identifier": "geometry.lothlorien.mallorn_boat_pretty",
                 "texture_width": TEX_W,
                 "texture_height": tex_h,
                 "visible_bounds_width": math.ceil((max(xs) - min(xs)) / 16) + 1,
@@ -371,10 +375,11 @@ def main():
     geo, tex, n = build(a.debug)
     if a.out:
         os.makedirs(a.out, exist_ok=True)
-        paths = [os.path.join(a.out, f) for f in ("mallorn_boat.geo.json", "mallorn_boat.png", "mallorn_boat_icon.png")]
+        paths = [os.path.join(a.out, f) for f in ("mallorn_boat_pretty.geo.json", "mallorn_boat_pretty.png",
+                                                  "mallorn_boat_icon.png")]
     else:
-        paths = [os.path.join(RP, "models", "entity", "mallorn_boat.geo.json"),
-                 os.path.join(RP, "textures", "entity", "mallorn_boat.png"),
+        paths = [os.path.join(RP, "models", "entity", "mallorn_boat_pretty.geo.json"),
+                 os.path.join(RP, "textures", "entity", "mallorn_boat_pretty.png"),
                  os.path.join(RP, "textures", "items", "mallorn_boat.png")]
     with open(paths[0], "w", encoding="utf-8", newline="\n") as f:
         json.dump(geo, f, indent=1)

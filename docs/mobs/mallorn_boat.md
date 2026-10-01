@@ -12,12 +12,15 @@ Status (2026-10-01): boat entity **works in game** (placeholder round). Elven mo
   yaw (the runtime boat does not turn a custom model by itself). `lead` locator on the bow gunwale.
   No paddles (vanilla paddles are hard-coded). Engine notes: `.claude/skills/bedrock-mobs/references/boats.md`.
 
-## Model (owner's brief 2026-10-01)
-Elven boat: long and slender (40 long, 16 wide), pointed at both ends, ends higher than the middle,
-clear front, no sail, carving optional. `tools/make_mallorn_boat.py` builds it from a length profile
-(stepped hull, covered bow and stern decks, swan-neck bow with a gold tip, short stern point) and paints
-it in the mallorn palette: silver strakes, gold gunwale, three gold leaves on each bow flank. `BOW` in the
-script picks the bow end.
+## Models (owner's brief 2026-10-01)
+Elven boat: long and slender, pointed at both ends, ends higher than the middle, clear front, no sail, carving
+optional; mallorn palette (silver planks, gold gunwale and leaves). Bow = geometry +X. Two models, same paddles:
+- **Default** (owner's choice after the style-guide question): `tools/make_mallorn_boat_planks.py`, 28 elements:
+  straight midship, bow and stern bones tilted up 14 deg, turned side planks meeting at a stem post, watertight
+  bottom (strips under the turned planks + a keel), swan neck of three elements with a level head.
+- **"Prettier boats"** (opt-in): `tools/make_mallorn_boat.py`, the stepped 158-cube model (also writes the icon).
+- Switch: RP pack setting `lothlorien:pretty_boats` (manifest v3 `settings`, per player, gear icon in the resource
+  pack list) read by `controller.render.lothlorien.mallorn_boat`.
 
 ## Round results (owner, 2026-10-01)
 - Placeholder: placing, riding, steering, leashing work. Model did not rotate, no visible front, leash knot high.
@@ -30,8 +33,8 @@ script picks the bow end.
   stairs). Kept as the "stepped" model (`tools/make_mallorn_boat.py`, deployed); a vanilla-style draft with 22 rotated
   elements is `tools/make_mallorn_boat_planks.py` (writes the same files). Owner to choose.
 
-## In-game check (round 3)
-- [ ] Neck at the front; lead knot on the neck.
-- [ ] Paddles rest dipped; row while you paddle, stop when you stop; look right on both sides.
-- [ ] Icon.
+## In-game check (round 4)
+- [ ] Default model: shape, joints, no water showing through the floor, swan head, lead knot.
+- [ ] Settings: Resource Packs -> Lothlorien RP -> gear icon shows "Prettier boats"; toggling switches the model.
+- [ ] Paddles row on both models; icon.
 - [ ] Shears remove the lead.

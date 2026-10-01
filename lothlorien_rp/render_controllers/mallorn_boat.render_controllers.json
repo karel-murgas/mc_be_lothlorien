@@ -1,0 +1,16 @@
+{
+  "format_version": "1.8.0",
+  "render_controllers": {
+    "controller.render.lothlorien.mallorn_boat": {
+      "geometry": "query.is_pack_setting_enabled('lothlorien:pretty_boats') ? Geometry.pretty : Geometry.default",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "query.is_pack_setting_enabled('lothlorien:pretty_boats') ? Texture.pretty : Texture.default"
+      ]
+    }
+  }
+}

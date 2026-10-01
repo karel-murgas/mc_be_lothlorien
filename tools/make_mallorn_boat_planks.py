@@ -1,4 +1,4 @@
-"""Mallorn boat, vanilla-style variant: few elements, the pointed ends made of ROTATED planks (no stairs).
+"""Mallorn boat, DEFAULT model: few elements, the pointed ends made of ROTATED planks (no stairs).
 
   python -B tools/make_mallorn_boat_planks.py [--out DIR]
 
@@ -8,7 +8,8 @@ element count as low as possible, and depict slants and curves by rotating eleme
 midship (bottom + two side planks), and a bow and a stern section, each a child bone tilted up (the sheer), made of
 two side planks turned in to meet at a stem post, a bottom turned 45 degrees, and at the bow a swan neck of three
 elements. Same palette, same paddles, same box-UV packer as the stepped model; painted in each cube's LOCAL
-coordinates (the cubes are rotated). Writes the same output files as make_mallorn_boat.py.
+coordinates (the cubes are rotated). The owner chose this as the default (2026-10-01); the stepped model is the
+opt-in "Prettier boats" pack setting (render controller `controller.render.lothlorien.mallorn_boat`).
 """
 import argparse
 import json
@@ -27,34 +28,46 @@ MID = 8          # midship from -MID to +MID
 HALF_W = 7       # outer half-width amidships
 TIP = 20         # the planks meet at x = +-TIP (before the tilt)
 SIDE_H = 7       # side plank height (on a 2-high bottom)
-TILT = 16        # sheer: degrees each end section is tilted up (Bedrock: -z rotation lifts +x)
+TILT = 14        # sheer: degrees each end section is tilted up (Bedrock: -z rotation lifts +x)
+TILT_Y = 5       # the end sections tilt about this height, so the joint opens little at the top and bottom
 PLANK_LEN = round(math.hypot(TIP - MID, HALF_W))
 TURN = round(math.degrees(math.atan2(HALF_W, TIP - MID)))
+STRIP_W = 4      # bottom strips under the turned planks (perpendicular width)
+STEM_LEN = 5     # stem post at each tip: covers the plank ends
 
 
 def end_section(e):
-    """Cubes of the bow (e = +1) or stern (e = -1) bone: (kind, origin, size, rotation, pivot)."""
+    """Cubes of the bow (e = +1) or stern (e = -1) bone: (kind, origin, size, rotation, pivot).
+
+    Watertight bottom (owner, 2026-10-01: "the floor should have no leaks"): a strip under each turned plank, turned with
+    it, plus an unturned keel down the middle; tiny y offsets keep the overlapping top faces from z-fighting."""
     cubes = []
+    strip_len = PLANK_LEN - 4
     for side in (1, -1):
+        rot, piv = [0, e * side * TURN, 0], [e * MID, 0, side * HALF_W]
         x0 = MID if e > 0 else -MID - PLANK_LEN
         z0 = HALF_W - 1 if side > 0 else -HALF_W
-        cubes.append(("side_end", [x0, 2, z0], [PLANK_LEN, SIDE_H, 1], [0, e * side * TURN, 0],
-                      [e * MID, 2, side * HALF_W]))
-    a = 10  # bottom: a square turned 45 degrees, its far corner near the stem
-    cubes.append(("bottom", [e * MID - a / 2, -0.01, -a / 2], [a, 2, a], [0, 45, 0], [e * MID, 0, 0]))
-    stem_x = TIP - 3 if e > 0 else -TIP - 1
-    cubes.append(("stem", [stem_x, 0, -1], [4, SIDE_H + 2 + (1 if e < 0 else 0), 2], None, None))
-    if e > 0:  # swan neck: a post leaning forward, a head bending back, a hanging gold tip
-        cubes.append(("neck", [TIP - 1, SIDE_H + 1, -1], [2, 7, 2], [0, 0, 15], [TIP, SIDE_H + 1, 0]))
-        cubes.append(("head", [TIP - 4, SIDE_H + 7, -1], [5, 2, 2], [0, 0, -10], [TIP + 1, SIDE_H + 8, 0]))
-        cubes.append(("finial", [TIP - 4, SIDE_H + 5, -1], [2, 2, 2], [0, 0, -10], [TIP + 1, SIDE_H + 8, 0]))
+        cubes.append(("side_end", [x0, 2, z0], [PLANK_LEN, SIDE_H, 1], rot, [e * MID, 2, side * HALF_W]))
+        sx0 = MID if e > 0 else -MID - strip_len
+        sz0 = HALF_W - STRIP_W if side > 0 else -HALF_W
+        cubes.append(("bottom", [sx0, -0.01 if side < 0 else 0, sz0], [strip_len, 2, STRIP_W], rot, piv))
+    stem0 = TIP - STEM_LEN + 1  # stem from x = 16 to 21 (bow)
+    for x_a, x_b, hw in ((MID - 1, MID + 6, 3), (MID + 6, stem0, 2)):  # keel: wide near the joint, narrow to the stem
+        x0 = x_a if e > 0 else -x_b
+        cubes.append(("bottom", [x0, -0.02, -hw], [x_b - x_a, 2, 2 * hw], None, None))
+    cubes.append(("stem", [stem0 if e > 0 else -TIP - 1, 0, -1], [STEM_LEN, SIDE_H + 2, 2], None, None))
+    if e > 0:  # swan neck: a post leaning forward a little, a level head reaching back, a hanging gold tip
+        cubes.append(("neck", [TIP - 1, SIDE_H + 2, -1], [2, 6, 2], [0, 0, 6], [TIP, SIDE_H + 2, 0]))
+        cubes.append(("head", [TIP - 4, SIDE_H + 8, -1], [5, 2, 2], None, None))
+        cubes.append(("finial", [TIP - 4, SIDE_H + 6, -1], [2, 2, 2], None, None))
     return cubes
 
 
 def mid_section():
+    """Straight midship; the side planks run one unit into each end section to close the tilt joint."""
     return [("bottom", [-MID, 0, -HALF_W], [2 * MID, 2, 2 * HALF_W], None, None),
-            ("side", [-MID, 2, HALF_W - 1], [2 * MID, SIDE_H, 1], None, None),
-            ("side", [-MID, 2, -HALF_W], [2 * MID, SIDE_H, 1], None, None)]
+            ("side", [-MID - 1, 2, HALF_W - 1], [2 * MID + 2, SIDE_H, 1], None, None),
+            ("side", [-MID - 1, 2, -HALF_W], [2 * MID + 2, SIDE_H, 1], None, None)]
 
 
 # ---------------------------------------------------------------- painting (local coordinates)
@@ -146,9 +159,9 @@ def build():
             px[tx, ty] = (*paint(kind, face, local, s, cube)[:3], 255)
     geo_bones = [
         {"name": "hull", "pivot": [0, 0, 0]},
-        {"name": "bow", "parent": "hull", "pivot": [MID, 0, 0], "rotation": [0, 0, -TILT],
+        {"name": "bow", "parent": "hull", "pivot": [MID, TILT_Y, 0], "rotation": [0, 0, -TILT],
          "locators": {"lead": [TIP, SIDE_H, 0]}},
-        {"name": "stern", "parent": "hull", "pivot": [-MID, 0, 0], "rotation": [0, 0, TILT]},
+        {"name": "stern", "parent": "hull", "pivot": [-MID, TILT_Y, 0], "rotation": [0, 0, TILT]},
         stepped.paddle_bone(1, HALF_W), stepped.paddle_bone(-1, HALF_W),
     ]
     for b in geo_bones:

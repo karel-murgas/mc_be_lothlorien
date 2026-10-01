@@ -28,7 +28,7 @@ in place (same name) so no JSON changes are needed.
 | Trapdoor | silver + heartwood | **final** (star window, owner loves it, 2026-10-01) |
 | Button, pressure plate | silver + heartwood | **final** (planks); east/west wall buttons fixed to lie flat (2026-10-01, check in game) |
 | Leaves (`mallorn_leaves.png`) | - | placeholder (yellow poplar), not started |
-| Boat: model, entity texture, icon (`tools/make_mallorn_boat.py`) | silver only | **v1 to check in game** (elven boat, 2026-10-01; `docs/mobs/mallorn_boat.md`) |
+| Boat: default model (`tools/make_mallorn_boat_planks.py`), "Prettier boats" model + icon (`tools/make_mallorn_boat.py`) | silver only | default: **to check in game**; pretty: liked ("awesome", 2026-10-01); icon to check (`docs/mobs/mallorn_boat.md`) |
 
 All plank-family pieces are final; only the leaves texture is still a placeholder. Every Mallorn texture and model is
 generated: edit the `tools/make_mallorn_*.py` scripts, not the PNG/JSON. Design rounds were deleted after acceptance
