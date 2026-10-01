@@ -731,7 +731,7 @@ dirt below back into grass. Only place/break events, no timers. Deer and white d
   with no shading seam or flicker; on dirt it shows dirt; (2) after the grass below has died it still looks
   like grass; (3) breaking it leaves grass; (4) bone-meal spread plants and fresh worldgen have the overlay;
   (5) the flowers look the same as before (own cross geometry instead of the built-in one).
-- **To switch off:** revert this commit, then remove `add_grass_overlay.py` and its notes in the skills.
+- **To switch off:** revert `defae73`, then remove `add_grass_overlay.py` and its notes in the skills.
 
 ## White deer guidance (Phase 12, 2026-09-30, rebuilt with engine pathfinding; DONE: owner playtest 1.26.52 - guidance, gift and nut growth work)
 
