@@ -1,0 +1,13 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.lothlorien.mallorn_boat.turn": {
+      "loop": true,
+      "bones": {
+        "hull": {
+          "rotation": [0, "query.body_y_rotation - query.target_y_rotation", 0]
+        }
+      }
+    }
+  }
+}

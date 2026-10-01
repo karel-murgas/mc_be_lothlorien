@@ -61,6 +61,9 @@
     },
     "lothlorien:mallorn_heartwood_door": {
       "textures": "textures/items/mallorn_heartwood_door"
+    },
+    "lothlorien:mallorn_boat": {
+      "textures": "textures/items/mallorn_boat"
     }
   }
 }

@@ -1,0 +1,26 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "lothlorien:mallorn_boat",
+      "materials": {
+        "default": "entity"
+      },
+      "textures": {
+        "default": "textures/entity/mallorn_boat"
+      },
+      "geometry": {
+        "default": "geometry.lothlorien.mallorn_boat"
+      },
+      "animations": {
+        "turn": "animation.lothlorien.mallorn_boat.turn"
+      },
+      "scripts": {
+        "animate": ["turn"]
+      },
+      "render_controllers": [
+        "controller.render.default"
+      ]
+    }
+  }
+}
