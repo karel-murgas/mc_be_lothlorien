@@ -7,9 +7,9 @@
 
 export const NUT_ID = "lothlorien:great_mallorn_nut";
 export const SPROUT_ID = "lothlorien:great_mallorn_sprout";
-// The flet giants (tools/build_structures.mjs, CHOSEN woven trees with a chest). Structure ids follow the file path
+// The flet giants (tools/build_structures.mjs, CHOSEN round trees with a chest). Structure ids follow the file path
 // structures/lothlorien/<name>.mcstructure.
-export const FLET_TREES = ["lothlorien:mallorn_woven_05", "lothlorien:mallorn_woven_07"];
+export const FLET_TREES = ["lothlorien:mallorn_round_05", "lothlorien:mallorn_round_07"];
 
 // Structure box (keep in step with tools/build_structures.mjs SIZE / SIZE_Y / TRUNK_AT and tools/flet_mallorn.mjs
 // ROOT_DEPTH; a test compares them). The trunk fills cells TRUNK_AT..TRUNK_AT+3; the first cell above the ground is y ROOT_DEPTH.

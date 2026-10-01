@@ -7,7 +7,7 @@ import { MAX_GROWTH, growChance, bonemealSteps, advanceGrowth } from "../lothlor
 import { estimateDepth, probeCount, ringOffsets, DEPTH_NAMES, DEPTH_RADII } from "../lothlorien_bp/scripts/depth.js";
 import * as D from "../lothlorien_bp/scripts/disharmony.js";
 import { makeRandom } from "../lothlorien_bp/scripts/mallorn_tree.js";
-import { buildFletMallorn, LADDER, LEAF_KEEP, ROOT_DEPTH, B } from "../tools/flet_mallorn.mjs";
+import { buildFletMallorn, LADDER, ROUND_LADDER, LEAF_KEEP, ROOT_DEPTH, B } from "../tools/flet_mallorn.mjs";
 import { SIZE, SIZE_Y, TRUNK_AT, CHOSEN, TRUNK_ANCHOR } from "../tools/build_structures.mjs";
 import { existsSync, readdirSync } from "node:fs";
 
@@ -193,6 +193,55 @@ test("plain giant: no platform, fence, ladder or chest", () => {
   for (const t of plains) {
     for (const v of t.blocks.values()) assert.ok(![B.ladder, B.chest, B.fence, B.planks].includes(v.name), v.name);
   }
+});
+
+// Round-trunk variants (corner cells cut): the same checks, with the ladder at x 1.
+const rounds = [{ woven: true, lush: true, round: true }, { woven: true, lush: true, flet: false, round: true }].map((opts) =>
+  Array.from({ length: 30 }, (_, i) => buildFletMallorn(makeRandom(i * 7919 + 1), opts)));
+const roundFlets = rounds[0], roundPlains = rounds[1];
+test("round trunk: 12 cells (corners cut above the roots) up to the top of the 4x4 part; ladder, chest and floor still work", () => {
+  for (const t of [...roundFlets, ...roundPlains]) {
+    for (let y = -ROOT_DEPTH; y < t.floorY; y++) {
+      for (const [x, z] of [[0, 0], [3, 0], [0, 3], [3, 3]]) if (y > 3) assert.ok(![B.log, B.wood].includes(at(t, x, y, z)), `corner log above the foot at ${x},${y},${z}`);
+      for (let x = 0; x < 4; x++) for (let z = 0; z < 4; z++) {
+        if (![0, 3].includes(x) || ![0, 3].includes(z)) assert.equal([B.log, B.wood, B.ladder].includes(at(t, x, y, z)), true, `hole in trunk ${x},${y},${z}`);
+      }
+    }
+  }
+  for (const t of roundFlets) {
+    for (let y = 0; y <= t.floorY; y++) assert.equal(at(t, ROUND_LADDER.x, y, ROUND_LADDER.z), B.ladder, `ladder gap at y ${y}`);
+    for (let y = -ROOT_DEPTH; y <= t.floorY; y++) assert.ok([B.log, B.wood].includes(at(t, ROUND_LADDER.x, y, ROUND_LADDER.z + 1)), `nothing behind the ladder at y ${y}`);
+    for (let y = 0; y <= t.floorY + 2; y++) assert.ok(![B.leaves, B.log, B.wood].includes(at(t, ROUND_LADDER.x, y, ROUND_LADDER.z - 1)), "ladder front blocked");
+    for (let y = t.floorY + 1; y <= t.floorY + 3; y++) assert.equal(at(t, ROUND_LADDER.x, y, ROUND_LADDER.z), undefined, "headroom over the hole");
+    const [k] = [...t.blocks].find(([, v]) => v.name === B.chest);
+    const [x, y, z] = k.split(",").map(Number);
+    assert.ok([B.log, B.wood].includes(at(t, x - 1, y, z)), "chest against a trunk cell");
+    assert.equal(y, t.floorY + 1);
+  }
+});
+test("round trunk: every log joins the trunk through face or edge contact (nothing hangs by a corner only)", () => {
+  for (const t of [...roundFlets, ...roundPlains]) {
+    const logs = new Set([...t.blocks].filter(([, v]) => v.name === B.log || v.name === B.wood).map(([k]) => k));
+    const seen = new Set(["1,0,1"]), queue = ["1,0,1"];
+    for (let i = 0; i < queue.length; i++) {
+      const [x, y, z] = queue[i].split(",").map(Number);
+      for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) for (let dz = -1; dz <= 1; dz++) {
+        const n = `${x + dx},${y + dy},${z + dz}`; // rising branches step up and sideways at once: edges count
+        if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) <= 2 && logs.has(n) && !seen.has(n)) { seen.add(n); queue.push(n); }
+      }
+    }
+    assert.equal(seen.size, logs.size, `${logs.size - seen.size} logs not joined to the trunk`);
+  }
+});
+test("round trunk: fits the box and keeps leaves in reach of a log", () => {
+  for (const t of [...roundFlets, ...roundPlains]) {
+    for (const k of t.blocks.keys()) {
+      const [x, y, z] = k.split(",").map(Number);
+      assert.ok(x + TRUNK_AT >= 0 && x + TRUNK_AT < SIZE && z + TRUNK_AT >= 0 && z + TRUNK_AT < SIZE && y + ROOT_DEPTH >= 0 && y + ROOT_DEPTH < SIZE_Y, `outside ${k}`);
+    }
+    assert.ok(t.trimmed < 60);
+  }
+  for (const t of roundPlains) for (const v of t.blocks.values()) assert.ok(![B.ladder, B.chest, B.fence, B.planks].includes(v.name), v.name);
 });
 
 test("giants: the jigsaw pool matches CHOSEN, every piece ships, the structure set uses it", () => {
@@ -412,8 +461,8 @@ test("great nut: tree box and anchor match the structure builder; the sprout sit
   assert.equal(cell.y, ROOT_DEPTH, "first cell above the ground");
 });
 test("great nut: grows only flet giants that ship in the pack and in worldgen", () => {
-  const woven = CHOSEN.filter(([v]) => v === "woven").map(([v, n]) => `lothlorien:mallorn_${v}_${String(n).padStart(2, "0")}`);
-  assert.deepEqual([...N.FLET_TREES].sort(), woven.sort());
+  const flets = CHOSEN.filter(([v]) => v === "round").map(([v, n]) => `lothlorien:mallorn_${v}_${String(n).padStart(2, "0")}`);
+  assert.deepEqual([...N.FLET_TREES].sort(), flets.sort());
   for (const id of N.FLET_TREES) assert.ok(existsSync(new URL(`../lothlorien_bp/structures/${id.replace(":", "/")}.mcstructure`, import.meta.url)), id);
 });
 test("great nut: terrain, plants, leaves and logs give way; anything built stops the tree", () => {

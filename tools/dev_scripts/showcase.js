@@ -4,8 +4,8 @@ import { world, system, BlockPermutation, StructureRotation } from "@minecraft/s
 // structures (lothlorien:mallorn_<variant>_NN, made by tools/build_structures.mjs; no variant = all of
 // them, one block of rows per variant) on a grid of 4 columns east and south of the player, with a sign
 // in front of each ladder. Trees in unloaded chunks are retried every 2 s for 3 minutes, so fly along the
-// grid and they appear. `/scriptevent lothlorien:showcase woven 3` places only woven 3, next to the player
-// (a bare number means flet). A third word 90, 180 or 270 rotates it, to check how rotation treats the
+// grid and they appear. `/scriptevent lothlorien:showcase round 3` places only woven 3, next to the player
+// (a bare number means round). A third word 90, 180 or 270 rotates it, to check how rotation treats the
 // custom log and fence states (jigsaw worldgen may rotate pieces).
 // Structure layout (keep in step with tools/build_structures.mjs): trunk NW cell at x/z TRUNK_AT, the
 // first block above the ground at y ROOT_DEPTH.
@@ -16,7 +16,7 @@ const RETRY_TICKS = 40;
 const GIVE_UP_TICKS = 3600;
 const PASSABLE = /leaves|_log$|_wood$|grass$|fern|flower|sapling|carpet|bush|lilac|peony|rose|athelas|elanor|niphredil|corn/;
 // keep in step with VARIANTS in tools/build_structures.mjs
-const VARIANTS = ["flet", "woven", "plain"];
+const VARIANTS = ["round", "roundplain"];
 
 const structureId = (v, n) => `lothlorien:mallorn_${v}_${String(n).padStart(2, "0")}`;
 
@@ -51,7 +51,7 @@ export function handleShowcaseEvent(event, player) {
   const only = parseInt(words[0], 10);
   const rotation = { 90: StructureRotation.Rotate90, 180: StructureRotation.Rotate180, 270: StructureRotation.Rotate270 }[words[1]] ?? StructureRotation.None;
   if (only) {
-    const v = named ?? "flet";
+    const v = named ?? "round";
     const ok = world.structureManager.get(structureId(v, only)) && placeTree(dimension, v, only, px + 24, pz + 24, rotation);
     player.sendMessage(`[lothlorien] showcase: ${v} ${only} ${rotation} ${ok ? "placed 24 blocks SE" : "not placed (missing or unloaded)"}`);
     return true;

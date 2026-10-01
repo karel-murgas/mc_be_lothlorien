@@ -8,7 +8,7 @@
 //    and worldgen/template_pools/giant_mallorn.json (the CHOSEN trees) for the jigsaw structure
 //    lothlorien:giant_mallorn (worldgen/structures + structure_sets, hand-written). A plain structure
 //    feature was cut at chunk borders; jigsaw structures may span chunks.
-// Tree NN of every variant uses the same seed, so flet_07 and woven_07 share their trunk and height.
+// Tree NN of every variant uses the same seed, so round_07 and roundplain_07 share their trunk and height.
 // Each file is SIZE x SIZE_Y x SIZE with the trunk centred horizontally (cells TRUNK_AT..TRUNK_AT+3) and the
 // first block above the ground at y ROOT_DEPTH; cells the tree does not fill are structure void, so the
 // terrain and plants around it survive. Keep TRUNK_AT / ROOT_DEPTH in step with tools/dev_scripts/showcase.js and
@@ -104,14 +104,13 @@ export function toMcstructure(blocks, [SX, SY, SZ] = [SIZE, SIZE_Y, SIZE], [OX, 
 
 // Variants: options for buildFletMallorn. Add one here to experiment without touching the others.
 export const VARIANTS = {
-  flet: {},
-  woven: { woven: true, lush: true },
-  plain: { woven: true, lush: true, flet: false },
+  round: { woven: true, lush: true, round: true }, // lookout tree: round trunk, platform, ladder, chest
+  roundplain: { woven: true, lush: true, flet: false, round: true }, // plain giant
 };
 
-// Trees placed by world generation: variant + number (the number is the seed). Picked in game 2026-09-29.
-// The third value is the pool weight: flet trees (woven) are 2 x 2 = 4 of 16, so about 1 giant in 4 has a flet.
-export const CHOSEN = [["woven", 5, 2], ["woven", 7, 2], ["plain", 2, 3], ["plain", 3, 3], ["plain", 6, 3], ["plain", 8, 3]];
+// Trees placed by world generation: variant + number (the number is the seed) + pool weight. Seeds picked in game 2026-09-29;
+// the round trunk (2026-10-01) replaced the square one on the same seeds. Flet trees (round) are 2 x 2 = 4 of 16, so about 1 giant in 4 has a flet.
+export const CHOSEN = [["round", 5, 2], ["round", 7, 2], ["roundplain", 2, 3], ["roundplain", 3, 3], ["roundplain", 6, 3], ["roundplain", 8, 3]];
 
 // Jigsaw anchor: the bottom trunk cell holds a jigsaw block with this name, and the jigsaw structure's
 // start_jigsaw_name puts that block on the structure start. So the trunk stays on the start point however

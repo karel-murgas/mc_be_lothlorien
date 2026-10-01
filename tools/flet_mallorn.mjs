@@ -5,10 +5,11 @@
 //
 // Coordinates are relative to the north-west trunk cell at ground level: the trunk fills x,z 0..3,
 // y 0 is the first block above the ground, roots go down to y -ROOT_DEPTH.
-import { makeBuilder, DIRS8 } from "../lothlorien_bp/scripts/mallorn_tree.js";
+import { makeBuilder, makeRandom, DIRS8 } from "../lothlorien_bp/scripts/mallorn_tree.js";
 
 export const ROOT_DEPTH = 5;
 export const LADDER = { x: 0, z: -1 }; // ladder column: north face of the trunk, facing north
+export const ROUND_LADDER = { x: 1, z: -1 }; // round trunk: the corner cell (0,0) is gone, so the ladder moves to the first face cell
 // Leaf decay (trees.js) breaks a leaf more than 10 steps through leaves from Mallorn wood. Generated
 // leaves farther than this are dropped, keeping a margin, so no crown thins out after generation.
 export const LEAF_KEEP = 8;
@@ -16,6 +17,7 @@ export const LEAF_KEEP = 8;
 const NS = "lothlorien";
 export const B = {
   log: `${NS}:mallorn_log`,
+  wood: `${NS}:mallorn_wood`, // bark on every face: the round trunk's foot above ground
   leaves: `${NS}:mallorn_leaves`,
   planks: `${NS}:mallorn_planks`,
   fence: `${NS}:mallorn_fence`,
@@ -25,9 +27,8 @@ export const B = {
 export const FLET_LOOT = "loot_tables/chests/mallorn_flet.json";
 
 const key = (x, y, z) => `${x},${y},${z}`;
-const TRUNK = [];
-for (let x = 0; x < 4; x++) for (let z = 0; z < 4; z++) TRUNK.push([x, z]);
-const isTrunk = (x, z) => x >= 0 && x <= 3 && z >= 0 && z <= 3;
+// The trunk's four corner cells; a round trunk leaves them out (12 cells instead of 16).
+const isCorner = (x, z) => (x === 0 || x === 3) && (z === 0 || z === 3);
 const fromCentre = (x, z) => Math.hypot(x + 0.5 - 2, z + 0.5 - 2);
 // A branch leaves the trunk edge cell nearest its direction; straight N/S/E/W branches start from one of
 // the two middle cells, so no branch runs up the ladder column (x 0 on the north face).
@@ -37,11 +38,28 @@ const startCell = (d, random) => (d > 0 ? 3 : d < 0 ? 0 : 1 + (random() < 0.5 ? 
 //   woven  the support branches run at floor level, through the platform, and the planks fill the gaps
 //          between them; the branch ends still reach past the rim and carry the leaves
 //   flet   false = a plain giant: the same tree without platform, ladder and chest (default true)
+//   round  a rounder 4x4 trunk: the four corner cells are left out (12 cells). Branches start on the face cells
+//          next to the missing corner, the ladder moves to x 1 (the corner x 0 has no trunk behind it), and the
+//          the foot is rebuilt as a flare (roundFoot). Same seed = same height, floor, radius and branch directions.
 //   lush   more foliage below the platform: longer low branches that always carry leaves, plus one or two
 //          whorls of leafy level branches on the bare trunk
 // Returns { height, floorY, blocks: Map<"x,y,z", { name, states, loot? }>, trimmed }.
-export function buildFletMallorn(random, { woven = false, lush = false, flet = true } = {}) {
+export function buildFletMallorn(random, { woven = false, lush = false, flet = true, round = false } = {}) {
   const b = makeBuilder(random);
+  const ladder = round ? ROUND_LADDER : LADDER;
+  const TRUNK = [];
+  for (let x = 0; x < 4; x++) for (let z = 0; z < 4; z++) if (!(round && isCorner(x, z))) TRUNK.push([x, z]);
+  const isTrunk = (x, z) => x >= 0 && x <= 3 && z >= 0 && z <= 3 && !(round && isCorner(x, z));
+  // Where a branch towards (dx, dz) leaves the trunk: [x, z] of the trunk cell it grows from (its first step is
+  // along x). Round: a diagonal branch cannot start at the missing corner, so it starts on the face cell beside
+  // it; a straight north branch keeps off the ladder column.
+  const start = (dx, dz) => {
+    const sx = startCell(dx, random);
+    const sz = startCell(dz, random);
+    if (!round) return [sx, sz];
+    if (dx !== 0 && dz !== 0) return [sx, sz - dz];
+    return dx === 0 && dz < 0 && sx === ladder.x ? [ladder.x + 1, sz] : [sx, sz];
+  };
   const height = b.between([30, 38]);
   const floorY = height - b.between([9, 12]);
   const radius = 5.5 + random() * 1.5;
@@ -51,7 +69,8 @@ export function buildFletMallorn(random, { woven = false, lush = false, flet = t
   const top = 3 + Math.floor(random() * 3);
   for (let y = height; y < height + top; y++) for (const [x, z] of [[1, 1], [2, 1], [1, 2], [2, 2]]) b.addLog(x, y, z, "up");
 
-  // buttress roots around the base
+  // buttress roots around the base. The round trunk has its own foot (roundFoot); the square one's slots are still
+  // drawn, unused, so the rest of the tree stays the same for a seed.
   for (let i = 0; i < 4; i++) {
     const [ox, oz] = [[-1, 0], [4, 0], [0, -1], [0, 4]][i];
     for (let j = 0; j < 4; j++) {
@@ -59,10 +78,11 @@ export function buildFletMallorn(random, { woven = false, lush = false, flet = t
       if (x === LADDER.x && z === LADDER.z) continue;
       if (random() < 0.55) {
         const h = b.between([-1, 3]);
-        for (let y = -ROOT_DEPTH; y <= h; y++) b.addLog(x, y, z, "up");
+        if (!round) for (let y = -ROOT_DEPTH; y <= h; y++) b.addLog(x, y, z, "up");
       }
     }
   }
+  if (round) roundFoot(b, makeRandom(Math.round(radius * 1e6) + height), flet ? ladder : undefined);
 
   // platform support: level branches just under the floor (woven: in it), poking out past its edge, leaves
   // hanging below
@@ -70,10 +90,10 @@ export function buildFletMallorn(random, { woven = false, lush = false, flet = t
   const branchY = woven ? floorY : floorY - 1;
   if (!flet) {
     b.shuffled().slice(0, 3 + Math.floor(random() * 4)).forEach(([dx, dz]) =>
-      bentBranch(b, random, startCell(dx, random), startCell(dz, random), dx, dz, floorY + b.between([-4, 3]),
+      bentBranch(b, random, ...start(dx, dz), dx, dz, floorY + b.between([-4, 3]),
         Math.round(radius) - 1 + b.between([1, 3]), 0.2 + random() * 0.35, 2.4 + random() * 0.8));
   } else b.shuffled().slice(0, 6 + Math.floor(random() * 3)).forEach(([dx, dz]) => {
-    let x = startCell(dx, random), z = startCell(dz, random);
+    let [x, z] = start(dx, dz);
     const len = Math.round(radius) - 1 + b.between([1, 3]);
     for (let i = 1; i <= len; i++) {
       const stepX = dx !== 0 && (dz === 0 || i % 2 === 1);
@@ -87,7 +107,7 @@ export function buildFletMallorn(random, { woven = false, lush = false, flet = t
   const low = 3 + Math.floor(random() * 3);
   for (let i = 0; i < low && floorY > 14; i++) {
     const [dx, dz] = DIRS8[Math.floor(random() * 8)];
-    b.branch(startCell(dx, random), startCell(dz, random), dx, dz, b.between([6, floorY - 8]), b.between([3, 6]), 0.3,
+    b.branch(...start(dx, dz), dx, dz, b.between([6, floorY - 8]), b.between([3, 6]), 0.3,
       random() < 0.5 ? 1.8 : 0);
   }
 
@@ -97,11 +117,11 @@ export function buildFletMallorn(random, { woven = false, lush = false, flet = t
     for (let w = 0; w < whorls; w++) {
       const y = Math.round(6 + ((floorY - 10) * (w + 1)) / (whorls + 1)) + b.between([-1, 1]);
       b.shuffled().slice(0, 3 + Math.floor(random() * 3)).forEach(([dx, dz]) =>
-        b.branch(startCell(dx, random), startCell(dz, random), dx, dz, y, b.between([3, 6]), flet ? 0.2 : 0.35, 2.0 + random() * 0.8));
+        b.branch(...start(dx, dz), dx, dz, y, b.between([3, 6]), flet ? 0.2 : 0.35, 2.0 + random() * 0.8));
     }
     for (let i = 0, n = b.between([3, 5]); i < n; i++) {
       const [dx, dz] = DIRS8[Math.floor(random() * 8)];
-      b.branch(startCell(dx, random), startCell(dz, random), dx, dz, b.between([5, floorY - 6]), b.between([4, 7]), 0.35,
+      b.branch(...start(dx, dz), dx, dz, b.between([5, floorY - 6]), b.between([4, 7]), 0.35,
         1.8 + random() * 0.7);
     }
   }
@@ -111,7 +131,7 @@ export function buildFletMallorn(random, { woven = false, lush = false, flet = t
   const dirs = b.shuffled();
   for (let i = 0; i < rising; i++) {
     const [dx, dz] = dirs[i % 8];
-    b.branch(startCell(dx, random), startCell(dz, random), dx, dz, b.between([floorY + (flet ? 4 : 1), height - 3]), b.between([5, 9]), 0.45,
+    b.branch(...start(dx, dz), dx, dz, b.between([floorY + (flet ? 4 : 1), height - 3]), b.between([5, 9]), 0.45,
       2.6 + random());
   }
   b.blob(2, height - 1, 2, 5.5, 3.5, floorY + 5, 1.0);
@@ -120,7 +140,9 @@ export function buildFletMallorn(random, { woven = false, lush = false, flet = t
   const tree = b.result(height + top);
   const blocks = new Map();
   for (const c of tree.leaves) blocks.set(key(c.x, c.y, c.z), { name: B.leaves, states: { [`${NS}:persistent`]: false } });
-  for (const c of tree.logs) blocks.set(key(c.x, c.y, c.z), { name: B.log, states: { "minecraft:block_face": c.face } });
+  for (const c of tree.logs) {
+    blocks.set(key(c.x, c.y, c.z), c.face === "wood" ? { name: B.wood, states: {} } : { name: B.log, states: { "minecraft:block_face": c.face } });
+  }
 
   // the flet: platform, rim, ladder and chest (a plain giant has none of them)
   if (flet) {
@@ -155,10 +177,10 @@ export function buildFletMallorn(random, { woven = false, lush = false, flet = t
 
     // ladder from the ground through a hole in the floor; its column and the space in front stay clear
     for (let y = 0; y <= floorY + 3; y++) {
-      const front = key(LADDER.x, y, LADDER.z - 1);
-      if ([B.leaves, B.log].includes(blocks.get(front)?.name)) blocks.delete(front);
-      blocks.delete(key(LADDER.x, y, LADDER.z));
-      if (y <= floorY) blocks.set(key(LADDER.x, y, LADDER.z), { name: B.ladder, states: { facing_direction: 2 } });
+      const front = key(ladder.x, y, ladder.z - 1);
+      if ([B.leaves, B.log, B.wood].includes(blocks.get(front)?.name)) blocks.delete(front);
+      blocks.delete(key(ladder.x, y, ladder.z));
+      if (y <= floorY) blocks.set(key(ladder.x, y, ladder.z), { name: B.ladder, states: { facing_direction: 2 } });
     }
 
     // loot chest against the east face of the trunk, opening away from it
@@ -166,6 +188,54 @@ export function buildFletMallorn(random, { woven = false, lush = false, flet = t
   }
 
   return { height: height + top, floorY, radius, blocks, trimmed: trimFarLeaves(blocks) };
+}
+
+// The foot of a round trunk (cells 0..3, centre 1.5, 1.5): the trunk is every cell within 1.9 of the centre (the 12-cell
+// shape). Round it off with a flare, the way a real trunk meets the ground:
+// Above ground it is mallorn_wood (bark on every face); below ground, logs.
+//  - a skirt hugging the trunk, 2 high, widest at ground level, uneven round the trunk (it fills the cut corners
+//    where it is wide), and
+//  - 5-7 buttress ridges fanning out in jittered directions, 1-3 cells beyond the trunk and up to 4 high at the
+//    trunk. A ridge narrows and drops with every step out, so it leaves the ground as a tapering spur, not a column.
+// Below ground the ground-level footprint goes down ROOT_DEPTH as anchor. `ladder` (flet trees) keeps its column
+// and the cell in front of it free. rng is private to the foot, so it cannot disturb the tree's own sequence.
+function roundFoot(b, rng, ladder) {
+  const R0 = 1.9, C = 1.5;
+  const lobes = [];
+  const n = 5 + Math.floor(rng() * 3);
+  for (let i = 0; i < n; i++) {
+    const reach = 1 + rng() * 2;
+    lobes.push({
+      angle: ((i + (rng() - 0.5) * 0.7) * 2 * Math.PI) / n,
+      reach, // cells beyond the trunk at ground level
+      high: reach > 2.2 ? 2 + Math.floor(rng() * 2) : 3 + Math.floor(rng() * 2), // longer ridges stay lower
+      wide: 0.5 + rng() * 0.4, // half-width at the trunk
+    });
+  }
+  const skirt = 0.5 + rng() * 0.4, skirtPhase = rng() * 2 * Math.PI;
+  const inFoot = (x, z, y) => {
+    const dx = x - C, dz = z - C, d = Math.hypot(dx, dz), th = Math.atan2(dz, dx);
+    if (d <= R0) return true;
+    if (y < 2 && d <= R0 + skirt * (0.55 + 0.45 * Math.sin(3 * th + skirtPhase)) * (1 - y / 2) + 0.15) return true;
+    for (const l of lobes) {
+      const along = d * Math.cos(th - l.angle), across = Math.abs(d * Math.sin(th - l.angle));
+      if (along <= 0 || y >= l.high) continue;
+      const reachY = l.reach * (1 - y / l.high); // shorter with height
+      const t = Math.max(0, (along - R0) / reachY);
+      if (t <= 1 && across <= l.wide * (1 - 0.6 * t) + 0.1) return true;
+    }
+    return false;
+  };
+  for (let x = -7; x <= 10; x++) {
+    for (let z = -7; z <= 10; z++) {
+      if (ladder && x === ladder.x && z <= ladder.z && z >= ladder.z - 1) { // ladder column and the cell in front
+        for (let y = -ROOT_DEPTH; y < 0; y++) if (inFoot(x, z, 0)) b.addLog(x, y, z, "up");
+        continue;
+      }
+      for (let y = 0; y < 4; y++) if (inFoot(x, z, y)) b.addLog(x, y, z, "wood"); // bark on top too, not log rings
+      if (inFoot(x, z, 0)) for (let y = -ROOT_DEPTH; y < 0; y++) b.addLog(x, y, z, "up");
+    }
+  }
 }
 
 // A branch that rises with chance `rise` per step and may turn 45 degrees once or twice on the way (never
@@ -195,7 +265,7 @@ function bentBranch(b, random, sx, sz, dx, dz, y0, len, rise, blobR) {
 function trimFarLeaves(blocks) {
   const dist = new Map();
   let frontier = [];
-  for (const [k, v] of blocks) if (v.name === B.log) { dist.set(k, 0); frontier.push(k); }
+  for (const [k, v] of blocks) if (v.name === B.log || v.name === B.wood) { dist.set(k, 0); frontier.push(k); }
   for (let d = 1; d <= LEAF_KEEP && frontier.length; d++) {
     const next = [];
     for (const k of frontier) {

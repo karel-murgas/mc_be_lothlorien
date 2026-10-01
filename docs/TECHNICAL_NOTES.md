@@ -269,30 +269,42 @@ Density check (helper removed from the pack, now `tools/dev_scripts/tree_debug.j
 
 ## Phase 5 - giant Mallorns (DONE 2026-09-30, accepted in game by the user)
 
-Shipped: two lookout trees (woven 5 and 7: flet, ladder, loot chest) and four plain giants (plain 2, 3, 6 and
+Shipped: two lookout trees (round 5 and 7: flet, ladder, loot chest) and four plain giants (roundplain 2, 3, 6 and
 8), generated as one jigsaw structure (`lothlorien:giant_mallorn`) in the biome, about 1 in 4 with a flet.
 Accepted in game but not measured separately: whether the trunk anchor keeps trunks at least 48 apart, and
 whether any jigsaw block is left at a trunk base. Recheck these if two giants ever look too close.
 The history below is kept because it records the traps.
 
-- **What:** 4x4 trunk 30-38 high (tip narrows to 2x2), sunk 5 blocks into the ground with buttress roots.
+- **What:** round trunk (owner's design, 2026-10-01: the 4x4 with its four corner cells cut, 12 cells), 30-38 high (tip
+  narrows to 2x2), sunk 5 blocks into the ground. Its foot is a flare of `mallorn_wood` (see **Round trunk** below).
   A plank platform (radius 5.5-7, fence rim) sits on 6-8 level branches 9-12 below the top. A vanilla
-  ladder runs up the north face of the trunk (column x 0, z -1) through a hole in the floor. A chest
+  ladder runs up the north face of the trunk (column x 1, z -1) through a hole in the floor. A chest
   against the east face uses `loot_tables/chests/mallorn_flet.json`. There are no leaves from the floor
   to 3 above it within radius+4, so the view is open.
 - **Leaves** are normal worldgen leaves (`persistent` false). Any leaf more than 8 steps through leaves
   from a log is dropped at generation time (decay reach is 10), so nothing thins out later. There are
   about 5-10 such leaves per tree.
 - **Variants** (`VARIANTS` in `tools/build_structures.mjs`, options of `buildFletMallorn`). Tree NN of every
-  variant uses the same seed.
-  - `flet`: the original design, with branches under the floor. The defaults must keep producing the same
-    trees, because flet 7 is the reference.
-  - `woven` (woven + lush, added 2026-09-29, not yet seen in game): the support branches run at floor level
-    through the platform, with planks filling the gaps, and their leafy ends reach past the rim. Lush adds
-    1-2 whorls of leafy level branches on the bare trunk plus longer leafy low branches.
-  - To experiment, add an entry to `VARIANTS` and the name to `VARIANTS` in `scripts/showcase.js`, then run
+  variant uses the same seed. Two ship: `round` (lookout tree) and `roundplain` (`flet: false`: no platform, ladder
+  or chest). Both use `woven` + `lush` + `round`.
+  - `woven`: the support branches run at floor level through the platform, planks fill the gaps, and their leafy
+    ends reach past the rim. `lush`: 1-2 whorls of leafy level branches on the bare trunk plus longer leafy low branches.
+  - The older square-trunk variants (`flet`, `woven`, `plain`, shipped until 2026-10-01) were dropped; the options
+    still exist in `buildFletMallorn`, so they can be recreated (git before the round-trunk commit).
+  - To experiment, add an entry to `VARIANTS` and the name to `VARIANTS` in `tools/dev_scripts/showcase.js`, then run
     `node tools/build_structures.mjs <variant>`.
-- **Chosen for worldgen (2026-09-29): woven 5 and woven 7** (`CHOSEN` in `tools/build_structures.mjs`). Only
+- **Round trunk** (owner, 2026-10-01, seen in game in a flat world; accepted). Built from scratch after a first try
+  (square roots plus corner patches) looked blocky:
+  - The trunk is the 4x4 without its corner cells. Diagonal branches start on the face cell beside the missing
+    corner (their first step is along x), a straight north branch never starts on the ladder column, and the ladder
+    moved to x 1.
+  - `roundFoot`: a skirt 2 high round the trunk plus 5-7 buttress ridges (reach 1-3 cells, up to 4 high at the
+    trunk, narrowing and dropping outwards), uneven by design, filling the cut corners where wide. Above ground it
+    is `mallorn_wood` (bark on top too), below ground logs down to -5. It has its own random generator, so the rest
+    of a tree is the same for a seed. The ladder column and the cell in front stay free.
+  - Trap: a root beside a cut corner touches the trunk only diagonally, and per-slot roots looked like columns.
+    A radial flare does not have either problem.
+- **Chosen for worldgen (seeds 2026-09-29, round trunk 2026-10-01): round 5 and round 7** (`CHOSEN` in `tools/build_structures.mjs`). Only
   these ship in the pack. `node tools/build_structures.mjs` rebuilds exactly that set, and
   `node tools/build_structures.mjs <variant|all>` adds curation candidates for the showcase. They never enter
   worldgen; run the plain command again before committing.
@@ -322,8 +334,8 @@ The history below is kept because it records the traps.
     trunks only about 28 blocks apart. The piece is rotated around its corner, so a trunk can move by
     about the piece width. Spacing 13 / separation 6 was tried next; the user asked for about 11.
   - **Now (2026-09-30, not yet seen in game): one set for all giants, with the trunk anchored.**
-    - The pool (`CHOSEN`, with weights) holds the flet trees woven 5 and 7 at weight 2 each and the plain
-      giants 2, 3, 6 and 8 at weight 3 each, so about 1 giant in 4 has a flet.
+    - The pool (`CHOSEN`, with weights) holds the flet trees round 5 and 7 at weight 2 each and the plain
+      giants (roundplain) 2, 3, 6 and 8 at weight 3 each, so about 1 giant in 4 has a flet.
     - The set is spacing 6 / separation 2. About 5 giants per medium patch, about 1-2 of them flets, which
       is roughly what a separate flet grid of spacing 12 would give.
     - One set means two giants never compete for space. Structure sets cannot exclude each other; Java's
@@ -333,7 +345,7 @@ The history below is kept because it records the traps.
       `lothlorien:mallorn_log`), and the structure's `start_jigsaw_name` is that name. The trunk should
       then sit on the start point however the piece is rotated, so trunks are at least 3 chunks (48
       blocks) apart.
-    - Plain giants are variant `plain` (`flet: false`): woven branches and lush foliage, no platform, ladder
+    - Plain giants are variant `roundplain` (`flet: false`; `plain` before 2026-10-01): woven branches and lush foliage, no platform, ladder
       or chest. `showcase` (now `tools/dev_scripts/showcase.js`, removed from the pack) showed them.
     - The user found their crowns too flat (2026-09-30). Plain giants now get 3-6 ring branches instead of
       6-8, each starting 4 below to 3 above the old floor level. They tilt up 20-55% per step, may bend 45
@@ -347,12 +359,12 @@ The history below is kept because it records the traps.
 - **Written 2026-09-30, not yet seen in game.** Open questions:
   - Is the trunk base exactly at ground level? The surface heightmap may be off by one.
   - Jigsaw may rotate the piece. Do custom `minecraft:block_face` logs and fence connections rotate
-    correctly? Test with the dev-only `showcase woven 7 90` (`tools/dev_scripts/showcase.js`). If branch logs point the wrong way,
+    correctly? Test with the dev-only `showcase round 7 90` (`tools/dev_scripts/showcase.js`). If branch logs point the wrong way,
     use `mallorn_wood` (the same on every side) for branches.
 - **Curation** (helper moved out of the pack 2026-09-30 to `tools/dev_scripts/showcase.js`; git `dc1182e`): `/scriptevent lothlorien:showcase [variant]` lays out candidates on a grid (4 per row, 48
-  apart, variants in separate rows) south-east of the player, with a sign such as "woven 3" in front of
-  each ladder. Trees in unloaded chunks are retried for 3 minutes. `/scriptevent lothlorien:showcase woven 3`
-  places one tree next to you (a bare number means flet).
+  apart, variants in separate rows) south-east of the player, with a sign such as "round 3" in front of
+  each ladder. Trees in unloaded chunks are retried for 3 minutes. `/scriptevent lothlorien:showcase round 3`
+  places one tree next to you (a bare number means round).
 - **Chest loot is verified in game** (2026-09-29): the chest `LootTable` field in the structure fills the
   chest when it is opened. Still unchecked: do the fence connections hold? Does the ladder face the right way
   (`facing_direction` 2)? Do normal Mallorns grow into the platform?

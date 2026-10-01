@@ -8,42 +8,42 @@
       {
         "element": {
           "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/mallorn_woven_05"
+          "location": "lothlorien/mallorn_round_05"
         },
         "weight": 2
       },
       {
         "element": {
           "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/mallorn_woven_07"
+          "location": "lothlorien/mallorn_round_07"
         },
         "weight": 2
       },
       {
         "element": {
           "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/mallorn_plain_02"
+          "location": "lothlorien/mallorn_roundplain_02"
         },
         "weight": 3
       },
       {
         "element": {
           "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/mallorn_plain_03"
+          "location": "lothlorien/mallorn_roundplain_03"
         },
         "weight": 3
       },
       {
         "element": {
           "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/mallorn_plain_06"
+          "location": "lothlorien/mallorn_roundplain_06"
         },
         "weight": 3
       },
       {
         "element": {
           "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/mallorn_plain_08"
+          "location": "lothlorien/mallorn_roundplain_08"
         },
         "weight": 3
       }
