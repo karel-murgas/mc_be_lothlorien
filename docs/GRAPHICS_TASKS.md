@@ -63,7 +63,8 @@ caps; the leaf splits in half when the gate opens. `tools/make_mallorn_gate.py`.
 
 **Button, pressure plate:** they wear the planks (owner: fine as they are). Wall buttons on east/west walls stood upright
 (the 6x4 floor box tilted about z); fixed 2026-10-01 with their own 4x6 geometry (`mallorn_button_ew`, `_ew_pressed`), so
-every wall button lies flat like vanilla (6 wide, 4 high). In-game check pending.
+every wall button lies flat like vanilla (6 wide, 4 high); the turned box also turns its texture back (`uv_rotation` 90)
+so the grain stays horizontal. Plates now need a block below (`placement_filter` up only). In-game check pending.
 
 **Door final (2026-10-01): the tree door, owner loves it.** `tools/make_mallorn_door.py` (no arguments) writes silver +
 heartwood textures, the hand-drawn icon and the four geometries. Half a mallorn per door: the trunk stands at the free
