@@ -1,4 +1,13 @@
-# Mallorn boat
+# Mallorn boats
+
+Family (2026-10-01): `lothlorien:mallorn_boat`, `mallorn_chest_boat`, `mallorn_heartwood_boat`,
+`mallorn_heartwood_chest_boat`. **One command regenerates everything**: `python -B tools/make_mallorn_boat_family.py`
+(runs both model generators; heartwood art = recolour of the silver art; chest geometry; icons; BP entities, items,
+recipes, loot; RP client entities; lang and item_texture entries). Do not hand-edit the generated files.
+- Chest boat: vanilla `chest_boat` copy, runtime `minecraft:chest_boat`, seat moved to x 0.45 (vanilla 0.2) to clear
+  the chest at x -8..4; paddles moved to x 5 on all boats. Chest = vanilla chest (owner: "classical minecraft chest
+  texture") via a second render controller and the vanilla path `textures/entity/boat/chest_boat_oak`.
+- Recipes: boat = 5 planks in a U (silver or heartwood planks); chest boat = chest over the boat (shaped only rule).
 
 Status (2026-10-01): boat entity **works in game** (placeholder round). Elven model v1 deployed, **in-game check pending**.
 
@@ -33,8 +42,11 @@ optional; mallorn palette (silver planks, gold gunwale and leaves). Bow = geomet
   stairs). Kept as the "stepped" model (`tools/make_mallorn_boat.py`, deployed); a vanilla-style draft with 22 rotated
   elements is `tools/make_mallorn_boat_planks.py` (writes the same files). Owner to choose.
 
-## In-game check (round 4)
-- [ ] Default model: shape, joints, no water showing through the floor, swan head, lead knot.
-- [ ] Settings: Resource Packs -> Lothlorien RP -> gear icon shows "Prettier boats"; toggling switches the model.
-- [ ] Paddles row on both models; icon.
-- [ ] Shears remove the lead.
+## Round 4 results (owner, 2026-10-01)
+Simple model "beautiful", toggle "works perfectly" (RP pack settings verified in game).
+
+## In-game check (round 5)
+- [ ] Chest boats: chest sits behind the rider, turns with the boat, opens a 27-slot chest; contents drop when broken.
+- [ ] Rider position in the chest boat (seat moved forward); paddles at the new position on all boats.
+- [ ] Heartwood boats: look, recipes from heartwood planks; all four icons.
+- [ ] Both toggle models for all four boats.

@@ -64,6 +64,15 @@
     },
     "lothlorien:mallorn_boat": {
       "textures": "textures/items/mallorn_boat"
+    },
+    "lothlorien:mallorn_chest_boat": {
+      "textures": "textures/items/mallorn_chest_boat"
+    },
+    "lothlorien:mallorn_heartwood_boat": {
+      "textures": "textures/items/mallorn_heartwood_boat"
+    },
+    "lothlorien:mallorn_heartwood_chest_boat": {
+      "textures": "textures/items/mallorn_heartwood_chest_boat"
     }
   }
 }

@@ -1,0 +1,14 @@
+{
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "lothlorien:mallorn_heartwood_chest_boat",
+          "weight": 1
+        }
+      ]
+    }
+  ]
+}

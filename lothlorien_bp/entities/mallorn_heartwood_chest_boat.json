@@ -2,8 +2,8 @@
   "format_version": "1.26.50",
   "minecraft:entity": {
     "description": {
-      "identifier": "lothlorien:mallorn_boat",
-      "runtime_identifier": "minecraft:boat",
+      "identifier": "lothlorien:mallorn_heartwood_chest_boat",
+      "runtime_identifier": "minecraft:chest_boat",
       "is_summonable": true,
       "is_spawnable": false
     },
@@ -92,6 +92,11 @@
           }
         ]
       },
+      "minecraft:inventory": {
+        "can_be_siphoned_from": true,
+        "inventory_size": 27,
+        "container_type": "chest_boat"
+      },
       "minecraft:is_collidable": {},
       "minecraft:is_stackable": {},
       "minecraft:leashable": {
@@ -113,9 +118,6 @@
         ]
       },
       "minecraft:leashable_to": {},
-      "minecraft:loot": {
-        "table": "loot_tables/entities/mallorn_boat.json"
-      },
       "minecraft:physics": {},
       "minecraft:pushable_by_entity": {
         "presets": [
@@ -162,43 +164,24 @@
             "min_rider_count": 0,
             "max_rider_count": 1,
             "position": [
-              0.0,
+              0.45,
               -0.2,
               0.0
             ],
-            "rotate_rider_by": -90
-          },
-          {
-            "lock_rider_rotation": 90,
-            "min_rider_count": 2,
-            "max_rider_count": 2,
-            "position": [
-              0.2,
-              -0.2,
-              0.0
-            ],
-            "rotate_rider_by": "query.has_any_family('blaze', 'creeper', 'enderman', 'illager', 'magmacube', 'piglin', 'player', 'skeleton', 'slime', 'villager', 'wandering_trader', 'witch', 'zombie', 'zombie_pigman', 'happy_ghast') ? -90 : 0"
-          },
-          {
-            "lock_rider_rotation": 90,
-            "min_rider_count": 2,
-            "max_rider_count": 2,
-            "position": [
-              -0.6,
-              -0.2,
-              0.0
-            ],
-            "rotate_rider_by": "query.has_any_family('blaze', 'creeper', 'enderman', 'illager', 'magmacube', 'piglin', 'player', 'skeleton', 'slime', 'villager', 'wandering_trader', 'witch', 'zombie', 'zombie_pigman', 'happy_ghast') ? -90 : 0"
+            "rotate_rider_by": "query.has_any_family('blaze', 'creeper', 'enderman', 'illager', 'magmacube', 'piglin', 'player', 'skeleton', 'slime', 'villager', 'wandering_trader', 'witch', 'zombie', 'zombie_pigman') ? -90 : 0"
           }
         ],
         "pull_in_entities": true,
-        "seat_count": 2
+        "seat_count": 1
       },
       "minecraft:type_family": {
         "family": [
           "boat",
           "inanimate"
         ]
+      },
+      "minecraft:loot": {
+        "table": "loot_tables/entities/mallorn_heartwood_chest_boat.json"
       }
     },
     "component_groups": {
@@ -244,39 +227,17 @@
               "min_rider_count": 0,
               "lock_rider_rotation": 90,
               "position": [
-                0.0,
+                0.45,
                 -0.2,
                 0.0
               ],
               "max_rider_count": 1,
-              "rotate_rider_by": -90
-            },
-            {
-              "min_rider_count": 2,
-              "lock_rider_rotation": 90,
-              "position": [
-                0.2,
-                -0.2,
-                0.0
-              ],
-              "max_rider_count": 2,
-              "rotate_rider_by": "query.has_any_family('blaze', 'creeper', 'enderman', 'illager', 'magmacube', 'piglin', 'player', 'skeleton', 'slime', 'villager', 'wandering_trader', 'witch', 'zombie', 'zombie_pigman', 'happy_ghast') ? -90 : 0"
-            },
-            {
-              "min_rider_count": 2,
-              "lock_rider_rotation": 90,
-              "position": [
-                -0.6,
-                -0.2,
-                0.0
-              ],
-              "max_rider_count": 2,
-              "rotate_rider_by": "query.has_any_family('blaze', 'creeper', 'enderman', 'illager', 'magmacube', 'piglin', 'player', 'skeleton', 'slime', 'villager', 'wandering_trader', 'witch', 'zombie', 'zombie_pigman', 'happy_ghast') ? -90 : 0"
+              "rotate_rider_by": "query.has_any_family('blaze', 'creeper', 'enderman', 'illager', 'magmacube', 'piglin', 'player', 'skeleton', 'slime', 'villager', 'wandering_trader', 'witch', 'zombie', 'zombie_pigman') ? -90 : 0"
             }
           ],
           "passenger_max_width": 1.375,
           "pull_in_entities": true,
-          "seat_count": 2
+          "seat_count": 1
         }
       },
       "minecraft:floating": {

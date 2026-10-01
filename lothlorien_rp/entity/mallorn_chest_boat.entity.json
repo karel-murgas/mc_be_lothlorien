@@ -2,17 +2,20 @@
   "format_version": "1.10.0",
   "minecraft:client_entity": {
     "description": {
-      "identifier": "lothlorien:mallorn_boat",
+      "identifier": "lothlorien:mallorn_chest_boat",
       "materials": {
         "default": "entity"
       },
       "textures": {
         "default": "textures/entity/mallorn_boat",
-        "pretty": "textures/entity/mallorn_boat_pretty"
+        "pretty": "textures/entity/mallorn_boat_pretty",
+        "chest": "textures/entity/boat/chest_boat_oak"
       },
       "geometry": {
         "default": "geometry.lothlorien.mallorn_boat",
-        "pretty": "geometry.lothlorien.mallorn_boat_pretty"
+        "pretty": "geometry.lothlorien.mallorn_boat_pretty",
+        "chest": "geometry.lothlorien.mallorn_boat_chest",
+        "chest_pretty": "geometry.lothlorien.mallorn_boat_chest_pretty"
       },
       "scripts": {
         "pre_animation": [
@@ -29,7 +32,8 @@
         "row": "animation.lothlorien.mallorn_boat.row"
       },
       "render_controllers": [
-        "controller.render.lothlorien.mallorn_boat"
+        "controller.render.lothlorien.mallorn_boat",
+        "controller.render.lothlorien.mallorn_boat_chest"
       ]
     }
   }

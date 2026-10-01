@@ -105,7 +105,7 @@ def posts():
 
 
 # paddles: (x, y) of the oarlock on the gunwale, shaft inboard / outboard length, blade length
-PADDLE_X, PADDLE_Y = 2, GUNWALE + 1
+PADDLE_X, PADDLE_Y = 5, GUNWALE + 1  # x 5: clear of the chest (x -8..4) on chest boats
 SHAFT_IN, SHAFT_OUT, BLADE = 5, 10, 8
 PADDLE_REST = (-24, -20)  # rest pose (dip about X, sweep back about Y) for the +z paddle; mirrored for -z
 

@@ -1,0 +1,213 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.lothlorien.mallorn_boat_chest",
+        "texture_width": 128,
+        "texture_height": 128,
+        "visible_bounds_width": 4,
+        "visible_bounds_height": 2,
+        "visible_bounds_offset": [
+          0,
+          0.5,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "hull",
+          "pivot": [
+            0,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -8,
+                2,
+                -6
+              ],
+              "size": [
+                12,
+                8,
+                12
+              ],
+              "uv": [
+                0,
+                76
+              ],
+              "rotation": [
+                0,
+                -90,
+                0
+              ],
+              "pivot": [
+                -2.0,
+                2,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -8,
+                10,
+                -6
+              ],
+              "size": [
+                12,
+                4,
+                12
+              ],
+              "uv": [
+                0,
+                59
+              ],
+              "rotation": [
+                0,
+                -90,
+                0
+              ],
+              "pivot": [
+                -2.0,
+                2,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -3.0,
+                8,
+                -7
+              ],
+              "size": [
+                2,
+                4,
+                1
+              ],
+              "uv": [
+                0,
+                59
+              ],
+              "rotation": [
+                0,
+                -90,
+                0
+              ],
+              "pivot": [
+                -2.0,
+                2,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": {
+        "identifier": "geometry.lothlorien.mallorn_boat_chest_pretty",
+        "texture_width": 128,
+        "texture_height": 128,
+        "visible_bounds_width": 4,
+        "visible_bounds_height": 2,
+        "visible_bounds_offset": [
+          0,
+          0.5,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "hull",
+          "pivot": [
+            0,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -8,
+                3,
+                -6
+              ],
+              "size": [
+                12,
+                8,
+                12
+              ],
+              "uv": [
+                0,
+                76
+              ],
+              "rotation": [
+                0,
+                -90,
+                0
+              ],
+              "pivot": [
+                -2.0,
+                3,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -8,
+                11,
+                -6
+              ],
+              "size": [
+                12,
+                4,
+                12
+              ],
+              "uv": [
+                0,
+                59
+              ],
+              "rotation": [
+                0,
+                -90,
+                0
+              ],
+              "pivot": [
+                -2.0,
+                3,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -3.0,
+                9,
+                -7
+              ],
+              "size": [
+                2,
+                4,
+                1
+              ],
+              "uv": [
+                0,
+                59
+              ],
+              "rotation": [
+                0,
+                -90,
+                0
+              ],
+              "pivot": [
+                -2.0,
+                3,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

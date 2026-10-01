@@ -1,0 +1,32 @@
+{
+  "format_version": "1.20.30",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "lothlorien:mallorn_heartwood_chest_boat"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "group": "boat",
+    "pattern": [
+      "C",
+      "B"
+    ],
+    "key": {
+      "C": {
+        "item": "minecraft:chest"
+      },
+      "B": {
+        "item": "lothlorien:mallorn_heartwood_boat"
+      }
+    },
+    "unlock": [
+      {
+        "item": "lothlorien:mallorn_heartwood_boat"
+      }
+    ],
+    "result": {
+      "item": "lothlorien:mallorn_heartwood_chest_boat"
+    }
+  }
+}

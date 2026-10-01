@@ -2,13 +2,13 @@
   "format_version": "1.10.0",
   "minecraft:client_entity": {
     "description": {
-      "identifier": "lothlorien:mallorn_boat",
+      "identifier": "lothlorien:mallorn_heartwood_boat",
       "materials": {
         "default": "entity"
       },
       "textures": {
-        "default": "textures/entity/mallorn_boat",
-        "pretty": "textures/entity/mallorn_boat_pretty"
+        "default": "textures/entity/mallorn_heartwood_boat",
+        "pretty": "textures/entity/mallorn_heartwood_boat_pretty"
       },
       "geometry": {
         "default": "geometry.lothlorien.mallorn_boat",

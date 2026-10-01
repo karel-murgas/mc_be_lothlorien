@@ -2,7 +2,7 @@
   "format_version": "1.26.50",
   "minecraft:entity": {
     "description": {
-      "identifier": "lothlorien:mallorn_boat",
+      "identifier": "lothlorien:mallorn_heartwood_boat",
       "runtime_identifier": "minecraft:boat",
       "is_summonable": true,
       "is_spawnable": false
@@ -114,7 +114,7 @@
       },
       "minecraft:leashable_to": {},
       "minecraft:loot": {
-        "table": "loot_tables/entities/mallorn_boat.json"
+        "table": "loot_tables/entities/mallorn_heartwood_boat.json"
       },
       "minecraft:physics": {},
       "minecraft:pushable_by_entity": {
