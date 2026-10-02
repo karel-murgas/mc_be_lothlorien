@@ -85,6 +85,6 @@ Spawn the bees right next to the flowers: the flower search reaches only 6 block
 ### Round 4 test
 
 Both variants: our flowers + poppy/dandelion, vanilla filter back. Mallorn Bee (A, `minecraft:has_nectar`) near
-dandelions and a nest, several trips (`/time add` speeds nothing up; just wait a few minutes). Honey in the nest
+dandelions and a nest, several trips (give it a few minutes). Honey in the nest
 (honey drips/texture at level 5, bottle works) = the hive reads the property: vanilla hives stay (plan A). No honey =
 the hive only counts real `minecraft:bee`: own hive (plan B).
