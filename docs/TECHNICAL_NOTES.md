@@ -678,11 +678,15 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
   `may_attach_to: { bottom: [grass, dirt, coarse dirt, podzol, dirt with roots, moss, mud, stone], min_sides_must_attach: 1 }` and
   `may_replace: [air]`. Leaf carpet or a blossom in the target cell blocks the placement (cell not air), and a cell above litter has litter
   below (not in the list), so an antler can never float on litter. The price is that about a third of the floor is excluded, so the real
-  frequency is lower than the 1/64 per chunk on paper. (An earlier version replaced the litter; the user did not want antlers to look like they float.)
-- **Natural drop**: rule `deer_antler_drop_feature_rules` (after surface pass, biome tag, `scatter_chance` 1/64 per chunk) -> scatter of 3
-  tries within about 3 blocks -> weighted pick of four facings, all `up`. Giants are one structure per ~36 chunks (about 1 in 4 a lookout tree =
-  ~1/144 per chunk), so 1/64 sits between them; a test pins that. Real frequency will be lower (tries on leaves, water or off-biome fail): tune
+  frequency is lower than the 1/16 per chunk on paper. (An earlier version replaced the litter; the user did not want antlers to look like they float.)
+- **Natural drop**: rule `deer_antler_drop_feature_rules` (after surface pass, biome tag, `scatter_chance` 1/16 per chunk) -> scatter of 3
+  tries within about 3 blocks -> weighted pick of four facings, all `up`. Was 1/64 (between giants, ~1/36, and lookout trees,
+  ~1/144); raised to 1/16 on 2026-10-02, see below; a test pins it. Real frequency will be lower (tries on leaves, water or off-biome fail): tune
   the denominator after walking around.
+- **Worldgen verified in a save (2026-10-02, 1.26.5x, `tools/world_scan.py`)**: world "T" had 97 Lothlorien chunks saved and antlers in
+  2 of them (4 antlers: one at -97 106 -159, three at 10..11 98 -181..-184), all `up` on grass. So the feature works and the rate is
+  about 1/50 chunks as planned; the owner roamed several Lothloriens without seeing one, so on the floor under the canopy that is too rare to find.
+  **Owner decision: raised to 1/16 per chunk** (about one site per ~12 chunks); not yet seen in game.
 - **Chest**: `loot_tables/chests/mallorn_flet.json` pool 2 has the antler, `set_count 1`, weight 2 (of 19).
 - Verifier: a block that also mounts on walls is no longer classed as a "plant" (no composter / flower pot / bone-meal demands).
 - Selection boxes: floor 16x4.5x16, wall 16x16x4.5 against the back, ceiling 16x4.5x16 at the top.

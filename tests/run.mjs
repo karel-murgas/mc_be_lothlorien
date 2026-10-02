@@ -394,16 +394,16 @@ test("antler drop: only on ground blocks, never on litter", () => {
     assert.ok(!bottom.some((n) => n.includes("carpet") || n.includes("blossom")), "no litter as support");
   }
 });
-test("antler drop: every feature it names exists; rarity sits between plain giants and lookout trees", () => {
+test("antler drop: every feature it names exists; about 1 in 16 chunks, findable on a walk", () => {
   const f = (n) => readJson(`../lothlorien_bp/features/${n}.json`);
   const rule = readJson("../lothlorien_bp/feature_rules/deer_antler_drop_feature_rules.json")["minecraft:feature_rules"];
   assert.equal(rule.description.places_feature, "lothlorien:deer_antler_drop_feature");
   const scatter = f("deer_antler_drop_feature")["minecraft:scatter_feature"];
   const weighted = f(scatter.places_feature.split(":")[1])["minecraft:weighted_random_feature"];
   for (const [name] of weighted.features) assert.ok(f(name.split(":")[1])["minecraft:single_block_feature"], name);
-  // giants: one structure per ~6x6 chunks, about 1 in 4 a lookout tree (flet) => 1/36 and 1/144 per chunk
+  // 1/64 was too rare to find (owner, 2026-10-02: none seen in several forests; the save had one site per ~50 chunks)
   const perChunk = rule.distribution.scatter_chance.numerator / rule.distribution.scatter_chance.denominator;
-  assert.ok(perChunk < 1 / 36 && perChunk > 1 / 144, `per chunk ${perChunk}`);
+  assert.ok(perChunk >= 1 / 20 && perChunk <= 1 / 12, `per chunk ${perChunk}`);
 });
 test("antler: bucks' item is a block placer and flet chests can hold exactly one", () => {
   const item = readJson("../lothlorien_bp/items/deer_antler.json")["minecraft:item"].components;
