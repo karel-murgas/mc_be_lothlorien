@@ -557,7 +557,7 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
 - **Miruvor (Skin):** a reusable skin, not a stack. `minecraft:durability` 4 = 4 sips, stack 1, 30 s cooldown between sips
   (`minecraft:cooldown`, category `lothlorien_miruvor`), drink 2.0 s. Not food: `use_modifiers` + `use_animation: drink`, and the effects and
   the durability loss run in `onCompleteUse` (`athelas.js`); the last sip removes the item. Per sip: instant health I (4 HP), Regeneration II 8 s
-  (about 6 HP), Speed I 30 s, lifts Poison. Recipe (3x3): `ENE / SHS / NSL` = 2 Elanor, 2 Niphredil, 3 salves (6 Athelas), 1 honey bottle, 1 leather.
+  (about 6 HP), Speed I 30 s, lifts Poison. Recipe (3x3): `ENE / SHS / NSL` = 2 Elanor, 2 Niphredil, 3 salves (6 Athelas), 1 honey bottle, 1 leather. (Phase 14b will swap the honey bottle for Mallorn nectar.)
   Balance: one sip is a Healing II potion plus a run, so the skin is paid up front (about 10 items, 3 glass bottles' worth) and throttled by the cooldown.
   **Verified in game (was unverified):** `onCompleteUse` firing for a non-food item with `use_modifiers`, cooldown starting on use, durability bar showing, `durability.damage`
   write-back via the mainhand slot. If `onCompleteUse` does not fire, fall back to `onUse` + a manual timer.

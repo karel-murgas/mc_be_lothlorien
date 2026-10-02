@@ -135,7 +135,7 @@ Professions should be readable without looking like bright vanilla villager unif
 Buys:
 - ordinary flowers,
 - seeds,
-- honey/bone meal if useful,
+- bone meal if useful,
 - selected natural materials.
 
 Sells:
@@ -155,7 +155,7 @@ Friend-only candidates:
 
 Buys:
 - Athelas,
-- honey,
+- Mallorn nectar (replaces honey, decided 2026-10-02; who sells and buys it: to be worked out),
 - bottles,
 - selected potion ingredients.
 
@@ -454,7 +454,7 @@ Do not automatically make emeralds the universal currency.
 Possible valued materials:
 
 - amethyst,
-- honey,
+- Mallorn nectar,
 - glass,
 - books,
 - feathers,

@@ -630,103 +630,62 @@ Graphics/Blockbench + Claude.
 
 ---
 
-# Phase 14b — Lothlórien bees
+# Phase 14b — Mallorn nectar (replaces the bees)
 
-A second kind of bee, `lothlorien:mallorn_bee`, that lives on Mallorns and works only with
-Lothlórien flora. Chosen over overriding `minecraft:bee` (adding our flowers to vanilla bees): an
-override conflicts with any other add-on that touches the bee and must be re-synced by hand with
-every vanilla change. Vanilla bees stay untouched and ignore our flowers.
+Decided 2026-10-02 (owner). Nectar replaces honey: **Miruvor takes Mallorn nectar instead of a honey bottle**, and the
+settlement traders drop honey (supply and demand to be worked out with the settlements). Nectar is an ingredient
+only, not drinkable. Two sources, both tied to the Mallorn, both refill at about **one bottle per source per in-game
+day**, and the player can take both home by growing a Mallorn from an acorn.
 
-## Decided (2026-09-29)
+## Source 1: Nectar bloom
 
-- **Behaviour = vanilla bee.** Built from vanilla `bee.json` (newest copy: `vanilla_1.26.30`):
-  hover, pollinate, go home at night and in rain, sting like vanilla (poison by difficulty, the
-  bee dies after stinging, the swarm gets angry when its hive is broken or hit).
-- **Flowers** (pollination targets, lure, breeding, baby feeding): Elanor, Niphredil, Athelas, and
-  Mallorn blossom. Vanilla puts `cherry_leaves` and `pink_petals` in all four bee lists, and
-  Mallorn blossom (our pink-petals analogue) gets the same treatment. `mallorn_leaves` do **not**
-  count (decided, unlike vanilla `cherry_leaves`).
-- **Honey**: plain vanilla honeycomb and honey bottles.
-- **Western corn**: bees carrying nectar speed it up. Vanilla `minecraft:grows_crop` only knows
-  vanilla crops, so a script (`crop.js`) advances `lothlorien:growth` for corn under a bee that has
-  nectar, at a similar rate (vanilla: `chance 0.03`, 10 charges).
-- **Texture**: a recolour of the vanilla bee texture (pale gold / silver), reusing the vanilla bee
-  geometry and animations in the client entity file. No new model.
-- **Hives**: natural (worldgen on Mallorns, sometimes on sapling-grown trees) and craftable.
+A small hanging cluster of golden Mallorn flowers under Mallorn leaves (vanilla analogue: spore blossom).
 
-## Research so far (documented, not verified in game)
+- State `lothlorien:nectar` 0-3 (dry, budding, open, full), each stage visible; at 3 a golden drop hangs below.
+- Fills by random tick, **only while Mallorn leaves (green or golden) are directly above it**; elsewhere it stays dry
+  and is just decoration. Tune so 0 -> 3 takes about one in-game day.
+- Glass bottle on a full bloom: one Mallorn nectar, bloom back to 0.
+- Shears take it as an item; by hand it breaks and drops nothing (vanilla vines). Hangs only under a full block face
+  (leaves) like the spore blossom.
+- Found on natural Mallorns (worldgen, a few per tree under the crown), and a sapling-grown Mallorn sometimes gets one.
 
-- Bee flower handling is not engine-hardcoded: vanilla `bee.json` lists block and item ids in
-  `move_to_block.target_blocks` (pollination), `tempt`, `breedable` and `ageable`. There is no
-  flower tag, so a custom entity just lists our block ids.
-- Entering a hive is data-driven on the bee side: `move_to_block` / `go_home` fire the event
-  `minecraft:bee_returned_to_hive` on the target block. The hive side is engine code.
-- The Bedrock hive block entity stores its occupants generically: `Occupants[]` with
-  `ActorIdentifier`, `SaveData`, `TicksLeftToStay`, `ShouldSpawnBees` (minecraft.wiki, Bedrock block
-  entity format). NBT-editor tricks storing `minecraft:npc` in a beehive exist, which suggests
-  a hive can hold and release any entity, not just `minecraft:bee`. The Java-only rule "a non-bee
-  never leaves the hive" does not apply to Bedrock.
-- Honey level rises by 1 (1% chance: 2) when a bee that has nectar leaves the hive. How Bedrock
-  decides "had nectar" is unknown: it may read `minecraft:is_charged` (the `has_nectar` group), the
-  `minecraft:has_nectar` entity property, or check for `minecraft:bee`.
-- Worldgen nests from a `single_block_feature` probably rely on `ShouldSpawnBees`, which spawns
-  **vanilla** bees. Our natural nests need our bees instead (see below).
-- The Script API (2.8.0) has no hive or occupant API: script can neither read nor fill a hive.
+## Source 2: Morning dew on the blossom carpet
 
-## Spike first, in game (about an hour): can our bee use vanilla hives?
+The fallen-blossom carpet (`lothlorien:mallorn_blossom`) gathers dew towards dawn and loses it during the day.
 
-**Spike built 2026-10-02** (two nectar-property variants, test steps in `docs/mobs/mallorn_bee.md`); waiting for the in-game test.
+- New bool state `lothlorien:dew`; a dewy carpet shows droplet glints (texture variant).
+- Random tick, in the last part of the night: may set dew, only with Mallorn leaves somewhere above (search a few
+  blocks up). During the day: each tick may clear it, so dew is gone by about midday. Tune so most carpets under a
+  tree are dewy at sunrise.
+- Glass bottle on a dewy carpet: one Mallorn nectar, dew cleared. Proposed: only a full carpet (4 petals) yields, to
+  keep big natural blossom fields from being a flood.
+- Taking it home is already possible: the carpet is placeable.
 
-Minimal `lothlorien:mallorn_bee` (vanilla copy, recoloured texture, spawn egg), an empty
-`minecraft:beehive`, and a patch of Elanor. Check, in order:
+## Build
 
-1. The bee pollinates Elanor (proves `target_blocks` works with custom blocks).
-2. It enters the hive at night and comes out again as `lothlorien:mallorn_bee`.
-3. Honey level rises after nectar trips. If not, try adding the `minecraft:has_nectar` property
-   (copying the vanilla property may be refused for a custom entity).
-4. Breaking the hive angers it; shears or a bottle at level 5 work (they are hive behaviour, so they
-   should).
-5. A vanilla bee and ours share one hive without problems.
+1. Item `lothlorien:mallorn_nectar` (bottle icon, golden), Miruvor recipe change.
+2. Nectar bloom block (4 stages, generated art), random tick + bottle in script (same kind as `crop.js`), shears drop.
+3. Dew state on the blossom carpet (doubles its permutations: check the count), dew art, random tick + bottle.
+4. Worldgen blooms on Mallorns; sapling chance in `trees.js`.
+5. Tests in `tests/run.mjs` for the pure rules (fill chance, dew time window, "leaves above" check).
 
-**If 1-4 pass (plan A):**
-- Crafted hive = vanilla `minecraft:beehive`. Known problem (2026-09-29): Mallorn planks do not work
-  in vanilla plank recipes yet; that is being fixed separately, and the beehive recipe follows from it.
-  Optional extra: a Mallorn-styled hive recipe.
-- Natural nest = vanilla `minecraft:bee_nest` holding **our** bees. Two ways, try in order:
-  (a) a `.mcstructure` of a nest whose `Occupants` are `lothlorien:mallorn_bee` (written with a
-  Python NBT tool or saved in game with a structure block), placed by a `structure_template_feature`
-  next to the trunk; (b) a plain nest with no occupants plus a script that spawns 2-3 of our bees
-  beside new nests. Homeless vanilla-style bees look for the nearest hive (`find_hive` group) and
-  move in.
-
-**If 2 or 3 fail (plan B): our own hive block** `lothlorien:mallorn_hive` (natural and crafted
-variants), driven by script: the bee's `on_reach` fires a custom event and the script removes the
-bee and counts it, plus its nectar, in block states (occupants 0-3, `honey_level` 0-5); it releases
-them at dawn and when rain stops, spills them out angry when the hive is broken, and handles shears
-(3 honeycomb) and a glass bottle (a honey bottle). A campfire below calms the bees, like vanilla.
-More work, but all of it is under our control.
-
-## Build (after the spike)
-
-1. Bee entity + client entity + recoloured texture + spawn egg + names (`en_US`, `cs_CZ`).
-2. Hive route from the spike (plan A or B).
-3. Worldgen: aggregate `[select_mallorn_tree_feature, optional nest]` with our own copy of
-   `beehive_feature` (vanilla `may_attach_to` names only oak/birch logs and leaves). The search must
-   cover taller Mallorn trunks than the vanilla 0-6 blocks, or put the nest under a branch. Chance:
-   start at 1 tree in 20.
-4. Sapling growth (`trees.js`): a small chance of a nest when flowers are within 2 blocks, like vanilla.
-5. Corn pollination script.
-6. Tests in `tests/run.mjs` for the pure parts (corn growth chance, nest placement rules).
+Engine note to verify: Bedrock random tick speed 1 gives each block a random tick only every few minutes on average
+(a few per in-game day); measure in game before tuning the chances.
 
 ## Success criterion
 
-In a new world, some Mallorns have nests with golden bees that work Elanor, Niphredil, Athelas and
-blossom carpets, fill with honey that harvests like vanilla, speed up nearby corn, and sting like
-vanilla bees. Vanilla bees and vanilla flowers behave as before.
+In a new world, golden blooms hang under Mallorn crowns and fill over a day; blossom carpets glitter with dew at
+sunrise and dry by noon; a bottle gives nectar from either; a bloom cut with shears and hung under a home-grown
+Mallorn keeps working; Miruvor is crafted with nectar.
 
-## Primary tools
+## Bee spike (2026-10-02, 1.26.52, removed in favour of the above)
 
-Claude (entity, features, script), image pipeline or a scripted hue shift for the texture.
+A custom bee (`lothlorien:mallorn_bee`, vanilla `bee.json` copy) was built and tested in four rounds. In game: it
+enters vanilla beehives and bee nests at night and leaves at sunrise; **`move_to_block.target_blocks` never targets
+custom blocks** (bare ids, exact-state descriptors, with or without the waterlogged filter), while vanilla poppy and
+dandelion work; with its own `lothlorien:has_nectar` property it brings nectar into a nest but **adds no honey**.
+Pollinating our flowers would have needed script-guided flying (owner: no). Details in
+`.claude/skills/bedrock-mobs/references/behaviour.md`; files in commit `8a9220b`.
 
 ---
 
