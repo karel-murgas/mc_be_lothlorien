@@ -675,6 +675,8 @@ every vanilla change. Vanilla bees stay untouched and ignore our flowers.
 
 ## Spike first, in game (about an hour): can our bee use vanilla hives?
 
+**Spike built 2026-10-02** (two nectar-property variants, test steps in `docs/mobs/mallorn_bee.md`); waiting for the in-game test.
+
 Minimal `lothlorien:mallorn_bee` (vanilla copy, recoloured texture, spawn egg), an empty
 `minecraft:beehive`, and a patch of Elanor. Check, in order:
 
