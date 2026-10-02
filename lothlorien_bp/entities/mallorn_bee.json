@@ -203,10 +203,298 @@
             "value": false
           },
           "target_blocks": [
-            "lothlorien:elanor",
-            "lothlorien:niphredil",
-            "lothlorien:athelas",
-            "lothlorien:mallorn_blossom"
+            {
+              "name": "lothlorien:elanor",
+              "states": {
+                "lothlorien:on_grass": false
+              }
+            },
+            {
+              "name": "lothlorien:elanor",
+              "states": {
+                "lothlorien:on_grass": true
+              }
+            },
+            {
+              "name": "lothlorien:niphredil",
+              "states": {
+                "lothlorien:on_grass": false
+              }
+            },
+            {
+              "name": "lothlorien:niphredil",
+              "states": {
+                "lothlorien:on_grass": true
+              }
+            },
+            {
+              "name": "lothlorien:athelas",
+              "states": {
+                "lothlorien:on_grass": false
+              }
+            },
+            {
+              "name": "lothlorien:athelas",
+              "states": {
+                "lothlorien:on_grass": true
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": false,
+                "lothlorien:amount": 1,
+                "minecraft:cardinal_direction": "north"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": false,
+                "lothlorien:amount": 1,
+                "minecraft:cardinal_direction": "south"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": false,
+                "lothlorien:amount": 1,
+                "minecraft:cardinal_direction": "west"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": false,
+                "lothlorien:amount": 1,
+                "minecraft:cardinal_direction": "east"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": false,
+                "lothlorien:amount": 2,
+                "minecraft:cardinal_direction": "north"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": false,
+                "lothlorien:amount": 2,
+                "minecraft:cardinal_direction": "south"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": false,
+                "lothlorien:amount": 2,
+                "minecraft:cardinal_direction": "west"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": false,
+                "lothlorien:amount": 2,
+                "minecraft:cardinal_direction": "east"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": false,
+                "lothlorien:amount": 3,
+                "minecraft:cardinal_direction": "north"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": false,
+                "lothlorien:amount": 3,
+                "minecraft:cardinal_direction": "south"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": false,
+                "lothlorien:amount": 3,
+                "minecraft:cardinal_direction": "west"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": false,
+                "lothlorien:amount": 3,
+                "minecraft:cardinal_direction": "east"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": false,
+                "lothlorien:amount": 4,
+                "minecraft:cardinal_direction": "north"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": false,
+                "lothlorien:amount": 4,
+                "minecraft:cardinal_direction": "south"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": false,
+                "lothlorien:amount": 4,
+                "minecraft:cardinal_direction": "west"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": false,
+                "lothlorien:amount": 4,
+                "minecraft:cardinal_direction": "east"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": true,
+                "lothlorien:amount": 1,
+                "minecraft:cardinal_direction": "north"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": true,
+                "lothlorien:amount": 1,
+                "minecraft:cardinal_direction": "south"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": true,
+                "lothlorien:amount": 1,
+                "minecraft:cardinal_direction": "west"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": true,
+                "lothlorien:amount": 1,
+                "minecraft:cardinal_direction": "east"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": true,
+                "lothlorien:amount": 2,
+                "minecraft:cardinal_direction": "north"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": true,
+                "lothlorien:amount": 2,
+                "minecraft:cardinal_direction": "south"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": true,
+                "lothlorien:amount": 2,
+                "minecraft:cardinal_direction": "west"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": true,
+                "lothlorien:amount": 2,
+                "minecraft:cardinal_direction": "east"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": true,
+                "lothlorien:amount": 3,
+                "minecraft:cardinal_direction": "north"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": true,
+                "lothlorien:amount": 3,
+                "minecraft:cardinal_direction": "south"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": true,
+                "lothlorien:amount": 3,
+                "minecraft:cardinal_direction": "west"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": true,
+                "lothlorien:amount": 3,
+                "minecraft:cardinal_direction": "east"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": true,
+                "lothlorien:amount": 4,
+                "minecraft:cardinal_direction": "north"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": true,
+                "lothlorien:amount": 4,
+                "minecraft:cardinal_direction": "south"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": true,
+                "lothlorien:amount": 4,
+                "minecraft:cardinal_direction": "west"
+              }
+            },
+            {
+              "name": "lothlorien:mallorn_blossom",
+              "states": {
+                "lothlorien:on_grass": true,
+                "lothlorien:amount": 4,
+                "minecraft:cardinal_direction": "east"
+              }
+            }
           ],
           "on_stay_completed": [
             {
