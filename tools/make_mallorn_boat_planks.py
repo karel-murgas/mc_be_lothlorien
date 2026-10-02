@@ -58,10 +58,10 @@ def end_section(e, mid=MID):
         x0 = x_a if e > 0 else -x_b
         cubes.append(("bottom", [x0, -0.02, -hw], [x_b - x_a, 2, 2 * hw], None, None))
     cubes.append(("stem", [stem0 if e > 0 else -TIP - 1, 0, -1], [STEM_LEN, SIDE_H + 2, 2], None, None))
-    if e > 0:  # swan neck: a post leaning forward a little, a level head reaching back, a hanging gold tip
-        cubes.append(("neck", [TIP - 1, SIDE_H + 2, -1], [2, 6, 2], [0, 0, 6], [TIP, SIDE_H + 2, 0]))
-        cubes.append(("head", [TIP - 4, SIDE_H + 8, -1], [5, 2, 2], None, None))
-        cubes.append(("finial", [TIP - 4, SIDE_H + 6, -1], [2, 2, 2], None, None))
+    if e > 0:  # swan neck: a post leaning forward a little, a level head reaching forward, a hanging gold tip
+        cubes.append(("neck", [TIP - 1, SIDE_H + 2, -1], [2, 6, 2], [0, 0, -6], [TIP, SIDE_H + 2, 0]))
+        cubes.append(("head", [TIP - 1, SIDE_H + 8, -1], [5, 2, 2], None, None))
+        cubes.append(("finial", [TIP + 2, SIDE_H + 6, -1], [2, 2, 2], None, None))
     return cubes
 
 

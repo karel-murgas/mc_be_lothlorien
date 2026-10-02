@@ -97,8 +97,8 @@ def posts():
         x0 = tip + dx if BOW > 0 else tip - dx
         return (kind, [x0, y0, -1], [1, h, 2])
 
-    bow = [at(0, byb + 1, byt - byb + 2), at(1, byt - 1, 5), at(2, byt + 2, 5), at(1, byt + 6, 2, "finial"),
-           at(0, byt + 6, 2, "finial"), at(-1, byt + 5, 2, "finial")]
+    bow = [at(0, byb + 1, byt - byb + 2), at(1, byt - 1, 5), at(2, byt + 2, 5), at(3, byt + 6, 2, "finial"),
+           at(4, byt + 6, 2, "finial"), at(5, byt + 5, 2, "finial")]
     st = -L - 1 if BOW > 0 else L
     stern = [("post", [st, syb + 1, -1], [1, syt - syb + 1, 2]), ("post", [st - BOW, syt - 1, -1], [1, 2, 2])]
     return bow + stern

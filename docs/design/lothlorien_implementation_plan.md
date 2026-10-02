@@ -676,8 +676,16 @@ A small hanging cluster of golden Mallorn flowers under Mallorn leaves (vanilla 
   10. **8 drops per bottle** (owner); leaf litter dewy with chance 1/4 (about 8-9 drops per tree), blossom always.
 - **Blossom worldgen fix:** the tree's aggregate places 90 leaf-litter tries before the 5 blossom tries, so litter
   takes the spots. Place blossoms first, same 5 tries (owner).
-- **Uses** (owner): a light-emitting starlit "sky ceiling" block (being built, name open), Elven rope (Phase 17b), and
-  maybe a dew lantern (Phase 17 idea). Not a held lamp, not Athelas/healing (Miruvor's role).
+- **Uses** (owner): the Star canopy block (below), Elven rope (Phase 17b), and maybe a dew lantern (Phase 17 idea).
+  Not a held lamp, not Athelas/healing (Miruvor's role).
+
+## Star canopy (owner, 2026-10-02; planned, not built)
+
+`lothlorien:star_canopy`: a "sky ceiling" block for Elven halls and the undersides of talans. Deep night blue with silver
+stars that slowly twinkle (animated block texture: check flipbook support for custom blocks), **light level 6** (soft: a
+ceiling of it lights a hall dimly, like a starry night). Glow under Vibrant Visuals through an emissive MERS texture set,
+as on the firefly. Ingredients: Bottle of morning dew, Mallorn leaves, deepslate tiles. Amount: being decided (8 per
+bottle judged too generous; proposal 3 bottles + 3 Mallorn leaves + 3 deepslate tiles -> 9 blocks).
 
 ## Build
 
@@ -686,7 +694,7 @@ A small hanging cluster of golden Mallorn flowers under Mallorn leaves (vanilla 
    worldgen full on Mallorns, sapling chance in `trees.js`.
 3. Dew states on leaf litter and blossoms, dew art, morning random tick, Dew bottle filling + Bottle of morning dew.
 4. Blossom worldgen order (blossoms before litter).
-5. Starlit sky-ceiling block (dew recipe).
+5. Star canopy block.
 6. Tests in `tests/run.mjs` for the pure rules (fill chance, dew time window, "leaves above", bottle filling).
 
 Measure the random tick rate in game (a few blooms, a timer) before final tuning.
