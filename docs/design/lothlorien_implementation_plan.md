@@ -630,63 +630,73 @@ Graphics/Blockbench + Claude.
 
 ---
 
-# Phase 14b — Mallorn nectar (replaces the bees)
+# Phase 14b — Mallorn nectar and morning dew (replaces the bees)
 
 Decided 2026-10-02 (owner). Nectar replaces honey: **Miruvor takes Mallorn nectar instead of a honey bottle**, and the
 settlement traders drop honey (supply and demand to be worked out with the settlements). Nectar is an ingredient
-only, not drinkable. Source: the **nectar bloom**, refilling at about **one bottle per bloom per in-game day**. A second
-Mallorn mechanic, **morning dew**, gives a different resource with its own use (being decided). The player can take both
-home by growing a Mallorn from an acorn. No speed-up from nearby flowers (owner).
+only, not drinkable. A second Mallorn mechanic, **morning dew**, gives its own resource for decorative blocks. The
+player can take both home by growing a Mallorn from an acorn. No speed-up from nearby flowers.
 
-**Pace and simulation distance.** Random ticks (like vanilla crops and saplings) only happen inside the simulation
-distance around a player, so a bloom fills only while someone is near. Accepted, vanilla-like. Comparison (our notes say
-a block gets a random tick about once a minute: documented, not measured): Mallorn sapling 2 stages at 1/7 per tick,
-about 15 min; Western Corn 7 stages at 1/3 (wet) or 1/5, 20-35 min. Bloom: 3 stages at 1/7 per tick, about 20 min = one
-in-game day of being nearby.
+**Pace and simulation distance.** Random ticks only happen inside the simulation distance around a player, like vanilla
+crops. Vanilla comparison (Minecraft wiki, Java averages; Bedrock assumed close, not measured): oak sapling about 15 min,
+sugar cane about 18 min per block, sweet berry bush about 10-12 min from picked to ripe, wheat about 30 min; one in-game
+day = 20 min. Ours (our notes: about one random tick per block per minute, documented, not measured): Mallorn sapling
+about 15 min, Western Corn 20-35 min.
 
-## Source 1: Nectar bloom
+## Nectar bloom
 
 A small hanging cluster of golden Mallorn flowers under Mallorn leaves (vanilla analogue: spore blossom).
 
 - State `lothlorien:nectar` 0-3 (dry, budding, open, full), each stage visible; at 3 a golden drop hangs below.
-- Fills by random tick (1/7 per stage), **only while Mallorn leaves (green or golden) are directly above it**; elsewhere
-  it stays dry and is just decoration.
+- Fills by random tick, 1/7 per stage: **about 20 min (one in-game day) from empty to full** (owner). Only while Mallorn
+  leaves (green or golden) are directly above it; elsewhere it stays dry and is just decoration.
 - Glass bottle on a full bloom: one Mallorn nectar, bloom back to 0.
-- Shears take it as an item; by hand it breaks and drops nothing (vanilla vines). Hangs only under a full block face
-  (leaves) like the spore blossom.
-- Found on natural Mallorns (worldgen, a few per tree under the crown), and a sapling-grown Mallorn sometimes gets one.
+- Shears take it as an item; by hand it breaks and drops nothing (vanilla vines). Hangs only under a full block face.
+- **Worldgen places blooms full** (owner): a few per natural Mallorn, under the crown. A sapling-grown Mallorn sometimes
+  gets one.
+- Proposed, not decided: catch-up for home blooms. Emptying a bloom stores the in-game day (world dynamic property keyed
+  by position); a later random tick on a bloom whose day has passed sets it full at once. Home blooms then refill daily
+  while the player is away, never more than one bottle each.
 
-## Morning dew on the blossom carpet (resource and use being decided)
+## Morning dew (owner, 2026-10-02)
 
-The fallen-blossom carpet (`lothlorien:mallorn_blossom`) gathers dew towards dawn and loses it during the day. It gives
-**not nectar but its own resource** (owner, 2026-10-02); candidates in the 2026-10-02 discussion: Phial-like starlight
-water (Eärendil is the Morning Star), Disharmony cleansing, an Elven growth aid, a brewing ingredient.
-
-- New bool state `lothlorien:dew`; a dewy carpet shows droplet glints (texture variant).
-- Random tick, in the last part of the night: may set dew, only with Mallorn leaves somewhere above (search a few
-  blocks up). During the day: each tick may clear it, so dew is gone by about midday. Tune so most carpets under a
-  tree are dewy at sunrise (the last third of the night is only about 3 random ticks per block).
-- Glass bottle on a dewy carpet: the dew resource, dew cleared. Worldgen makes few full carpets (5 scatter tries per
-  tree, weights 24/12/4/4 for 1-4 petals: about one full carpet per two trees), so a "full carpets only" rule would
-  make natural dew rare; decide with the resource.
-- Taking it home is already possible: the carpet is placeable.
+- **Where:** every Mallorn ground cover, blossom carpet and leaf litter, under Mallorn leaves. Most players meet it simply
+  by being in Lórien at sunrise.
+- **When:** dew appears from the start of the morning (so sleeping through the night still gives dew on waking: a
+  random tick in the morning window sets it, not a tick at night) and is gone by mid-morning. Simulation distance is the
+  intended limit: dew forms only around a player who is there.
+- **States:** `lothlorien:dew` 0 dry, 1 dewy (droplet glints in the texture), 2 picked today. Morning random tick: 0 ->
+  1 with the cover's chance; any tick outside the window: 1 or 2 -> 0. Doubles the litter and blossom permutations
+  (check the count).
+- **Collecting: a Dew bottle that fills up**, like Miruvor in reverse (owner: "like the bundle, but you can't empty it
+  early"). Using a glass bottle on dewy cover turns it into a Dew bottle with one drop; each further drop fills it. Shown
+  with the durability bar (Miruvor's mechanism, verified in game): damage counts the missing drops. At full it becomes a
+  **Bottle of morning dew** (stackable). No way to pour it out.
+- **Yield: about one bottle per tree per morning** (owner). World "T" scan (2026-10-02, `tools/world_scan.py`, ~713
+  trees): about 34 leaf-litter carpets and 1.3 blossom carpets per tree, a full blossom carpet on fewer than 1 tree in
+  10. Proposal: 8 drops per bottle; leaf litter dewy with chance 1/4 (about 8-9 drops per tree), blossom always.
+- **Blossom worldgen fix:** the tree's aggregate places 90 leaf-litter tries before the 5 blossom tries, so litter
+  takes the spots. Place blossoms first and give them a few more tries.
+- **Use: decorative blocks** (owner), possibly light-emitting; also a material for Elven rope later. Not a held lamp, not
+  Athelas/healing (Miruvor's role). Candidates: a starlit "sky ceiling" block, a placed dew lamp.
 
 ## Build
 
-1. Item `lothlorien:mallorn_nectar` (bottle icon, golden), Miruvor recipe change. Dew item once its use is decided.
-2. Nectar bloom block (4 stages, generated art), random tick + bottle in script (same kind as `crop.js`), shears drop.
-3. Dew state on the blossom carpet (doubles its permutations: check the count), dew art, random tick + bottle.
-4. Worldgen blooms on Mallorns; sapling chance in `trees.js`.
-5. Tests in `tests/run.mjs` for the pure rules (fill chance, dew time window, "leaves above" check).
+1. Item `lothlorien:mallorn_nectar` (golden bottle icon), Miruvor recipe change.
+2. Nectar bloom block (4 stages, generated art), random tick + bottle in script (same kind as `crop.js`), shears drop,
+   worldgen full on Mallorns, sapling chance in `trees.js`.
+3. Dew states on leaf litter and blossoms, dew art, morning random tick, Dew bottle filling + Bottle of morning dew.
+4. Blossom worldgen order and tries.
+5. Dew-using decorative blocks (once chosen).
+6. Tests in `tests/run.mjs` for the pure rules (fill chance, dew time window, "leaves above", bottle filling).
 
-Engine note to verify: the random tick rate per block (our notes: about once a minute at the default
-`randomtickspeed`); measure in game (a few blooms, a timer) before final tuning.
+Measure the random tick rate in game (a few blooms, a timer) before final tuning.
 
 ## Success criterion
 
-In a new world, golden blooms hang under Mallorn crowns and fill over a day; blossom carpets glitter with dew at
-sunrise and dry by noon; a bottle gives nectar from a bloom and the dew resource from a carpet; a bloom cut with shears and hung under a home-grown
-Mallorn keeps working; Miruvor is crafted with nectar.
+In a new world, full golden blooms hang under Mallorn crowns and refill in about a day; at sunrise the ground under
+Mallorns glitters with dew and a bottle filled from one tree's dew becomes a Bottle of morning dew; a bloom cut with
+shears and hung under a home-grown Mallorn keeps working; Miruvor is crafted with nectar.
 
 ## Phase 14c — Butterflies (owner, 2026-10-02)
 
