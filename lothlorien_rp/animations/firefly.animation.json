@@ -1,0 +1,31 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.lothlorien.firefly.flutter": {
+      "loop": true,
+      "bones": {
+        "wing_l": {
+          "rotation": [
+            0,
+            0,
+            "math.sin(query.life_time * 2400.0) * 35.0"
+          ]
+        },
+        "wing_r": {
+          "rotation": [
+            0,
+            0,
+            "-math.sin(query.life_time * 2400.0) * 35.0"
+          ]
+        },
+        "body": {
+          "position": [
+            0,
+            "math.sin(query.life_time * 120.0) * 0.4",
+            0
+          ]
+        }
+      }
+    }
+  }
+}

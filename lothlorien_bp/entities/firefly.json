@@ -1,0 +1,140 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "lothlorien:firefly",
+      "spawn_category": "creature",
+      "is_spawnable": true,
+      "is_summonable": true
+    },
+    "component_groups": {
+      "caught": {
+        "minecraft:instant_despawn": {}
+      }
+    },
+    "components": {
+      "minecraft:type_family": {
+        "family": [
+          "lothlorien_firefly",
+          "mob"
+        ]
+      },
+      "minecraft:collision_box": {
+        "width": 0.2,
+        "height": 0.2
+      },
+      "minecraft:health": {
+        "value": 2,
+        "max": 2
+      },
+      "minecraft:movement": {
+        "value": 0.08
+      },
+      "minecraft:flying_speed": {
+        "value": 0.06
+      },
+      "minecraft:movement.hover": {},
+      "minecraft:can_fly": {},
+      "minecraft:navigation.hover": {
+        "can_path_over_water": true,
+        "can_sink": false,
+        "can_pass_doors": false,
+        "can_path_from_air": true,
+        "avoid_water": true,
+        "avoid_damage_blocks": true,
+        "avoid_sun": false
+      },
+      "minecraft:jump.static": {},
+      "minecraft:physics": {},
+      "minecraft:nameable": {},
+      "minecraft:is_hidden_when_invisible": {},
+      "minecraft:conditional_bandwidth_optimization": {},
+      "minecraft:despawn": {
+        "despawn_from_distance": {}
+      },
+      "minecraft:breathable": {
+        "total_supply": 15,
+        "suffocate_time": 0
+      },
+      "minecraft:damage_sensor": {
+        "triggers": {
+          "cause": "fall",
+          "deals_damage": "no"
+        }
+      },
+      "minecraft:hurt_on_condition": {
+        "damage_conditions": [
+          {
+            "filters": {
+              "test": "in_lava",
+              "subject": "self"
+            },
+            "cause": "lava",
+            "damage_per_tick": 4
+          }
+        ]
+      },
+      "minecraft:interact": {
+        "interactions": [
+          {
+            "on_interact": {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  },
+                  {
+                    "test": "has_equipment",
+                    "domain": "hand",
+                    "subject": "other",
+                    "value": "minecraft:glass_bottle"
+                  }
+                ]
+              },
+              "event": "lothlorien:caught",
+              "target": "self"
+            },
+            "use_item": true,
+            "transform_to_item": "lothlorien:bottle_of_fireflies",
+            "swing": true,
+            "interact_text": "action.interact.collect"
+          }
+        ]
+      },
+      "minecraft:behavior.float": {
+        "priority": 0
+      },
+      "minecraft:behavior.panic": {
+        "priority": 1,
+        "speed_multiplier": 1.5
+      },
+      "minecraft:behavior.random_hover": {
+        "priority": 4,
+        "xz_dist": 6,
+        "y_dist": 3,
+        "y_offset": 0,
+        "interval": 2,
+        "hover_height": {
+          "min": 1,
+          "max": 3
+        }
+      },
+      "minecraft:behavior.random_look_around": {
+        "priority": 6
+      },
+      "minecraft:pushable_by_entity": {},
+      "minecraft:pushable_by_block": {}
+    },
+    "events": {
+      "lothlorien:caught": {
+        "add": {
+          "component_groups": [
+            "caught"
+          ]
+        }
+      }
+    }
+  }
+}

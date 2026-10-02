@@ -1,0 +1,32 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "lothlorien:firefly",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/firefly"
+      },
+      "geometry": {
+        "default": "geometry.lothlorien.firefly"
+      },
+      "animations": {
+        "flutter": "animation.lothlorien.firefly.flutter"
+      },
+      "scripts": {
+        "animate": [
+          "flutter"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.lothlorien.firefly"
+      ],
+      "spawn_egg": {
+        "base_color": "#3a2e24",
+        "overlay_color": "#e2f66e"
+      }
+    }
+  }
+}

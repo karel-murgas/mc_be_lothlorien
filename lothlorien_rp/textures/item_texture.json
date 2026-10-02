@@ -2,6 +2,9 @@
   "resource_pack_name": "lothlorien_rp",
   "texture_name": "atlas.items",
   "texture_data": {
+    "lothlorien:bottle_of_fireflies": {
+      "textures": "textures/items/bottle_of_fireflies"
+    },
     "lothlorien:mallorn_door": {
       "textures": "textures/items/mallorn_door"
     },
