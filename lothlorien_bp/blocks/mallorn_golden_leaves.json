@@ -38,8 +38,20 @@
       "minecraft:material_instances": {
         "*": {
           "texture": "lothlorien:mallorn_golden_leaves",
-          "render_method": "alpha_test",
+          "render_method": "alpha_test_to_opaque",
           "ambient_occlusion": 0.0
+        },
+        "up": {
+          "texture": "lothlorien:mallorn_golden_leaves",
+          "render_method": "alpha_test_to_opaque",
+          "ambient_occlusion": 0.0,
+          "isotropic": true
+        },
+        "down": {
+          "texture": "lothlorien:mallorn_golden_leaves",
+          "render_method": "alpha_test_to_opaque",
+          "ambient_occlusion": 0.0,
+          "isotropic": true
         }
       }
     }

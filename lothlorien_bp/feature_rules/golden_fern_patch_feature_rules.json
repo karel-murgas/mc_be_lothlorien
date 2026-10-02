@@ -15,7 +15,7 @@
       ]
     },
     "distribution": {
-      "iterations": 2,
+      "iterations": 1,
       "scatter_chance": {
         "numerator": 1,
         "denominator": 2

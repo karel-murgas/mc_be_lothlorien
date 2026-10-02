@@ -49,7 +49,7 @@
       },
       "minecraft:map_color": "#d8b23a",
       "minecraft:geometry": {
-        "identifier": "minecraft:geometry.cross"
+        "identifier": "geometry.lothlorien.plant_cross"
       },
       "minecraft:material_instances": {
         "*": {

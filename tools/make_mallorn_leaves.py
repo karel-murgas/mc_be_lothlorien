@@ -179,20 +179,44 @@ def paint(img, ox, oy, sprite, x, y, fx, fy, k=1):
                         img.putpixel((ox + x + dx * k + kx, oy + y + dy * k + ky), LITTER_GOLD[int(ch)] + (255,))
 
 
-def render_litter():
+def litter_tile():
+    """the 16x16 litter tile: ONE whole falling-leaf sprite per 8x8 quarter (owner, 2026-10-02: the particle leaves look much more
+    like leaves than the old two or three 3-4 px fragments per quarter). Sprites come from make_falling_leaf.py so the drifting leaf and
+    the one on the ground are the same drawing; quarter 1 = top-left, 2 = top-right, 3 = bottom-right (mirrored), 4 = bottom-left."""
+    import make_falling_leaf as fl
     img = Image.new("RGBA", (N, N), (0, 0, 0, 0))
-    for (ox, oy), leaves in LITTER.items():
-        for leaf in leaves:
-            paint(img, ox, oy, *leaf)
+    img.alpha_composite(fl.sprite(fl.LEAVES[0]), (0, 0))
+    img.alpha_composite(fl.sprite(fl.LEAVES[1]), (8, 0))
+    img.alpha_composite(fl.sprite(fl.LEAVES[2]).transpose(Image.FLIP_LEFT_RIGHT), (8, 8))
+    img.alpha_composite(fl.sprite(fl.LEAVES[3]), (0, 8))
+    return fl.pad_colour(img)
+
+
+def render_litter():
+    img = litter_tile()
     return img, sum(1 for x in range(N) for y in range(N) if img.getpixel((x, y))[3])
 
 
 def render_litter_icon():
-    """Item icon of the litter: a loose pile of the same leaves on the full 16x16."""
-    img = Image.new("RGBA", (N, N), (0, 0, 0, 0))
-    for leaf in ICON:
-        paint(img, 0, 0, *leaf, k=2)
-    return img
+    """the inventory icon is the same four leaves"""
+    return litter_tile()
+
+
+def shade_hidden(img):
+    """Colour under the see-through texels (alpha stays 0, nothing changes up close). Vanilla leaves keep a dark green there;
+    ours were pure black, which the far render (`alpha_test_to_opaque`) shows as black holes and mip filtering averages
+    into the edges, a candidate for the flicker the owner saw while moving (2026-10-02). Each hidden texel gets the
+    average of its opaque neighbours (the tile wraps) darkened to 55 %, so the holes read as shaded gaps in the leaf's own colours."""
+    out = img.copy()
+    for y in range(N):
+        for x in range(N):
+            if img.getpixel((x, y))[3]:
+                continue
+            near = [img.getpixel(((x + dx) % N, (y + dy) % N)) for dx in (-2, -1, 0, 1, 2) for dy in (-2, -1, 0, 1, 2)]
+            near = [c for c in near if c[3]]
+            if near:
+                out.putpixel((x, y), tuple(int(sum(c[k] for c in near) / len(near) * 0.55) for k in range(3)) + (0,))
+    return out
 
 
 def main():
@@ -201,8 +225,8 @@ def main():
     os.makedirs(out, exist_ok=True)
     shade = build_shade()
     for kind in ("side", "top", "bottom"):
-        render(shade, kind).save(os.path.join(out, f"mallorn_leaves_{kind}.png"))
-    render_gold(shade).save(os.path.join(out, "mallorn_golden_leaves.png"))
+        shade_hidden(render(shade, kind)).save(os.path.join(out, f"mallorn_leaves_{kind}.png"))
+    shade_hidden(render_gold(shade)).save(os.path.join(out, "mallorn_golden_leaves.png"))
     litter, n = render_litter()
     litter.save(os.path.join(out, "mallorn_leaf_carpet.png"))
     items = os.path.join(out, "..", "items")

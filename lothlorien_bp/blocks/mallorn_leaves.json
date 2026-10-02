@@ -44,17 +44,19 @@
       "minecraft:material_instances": {
         "up": {
           "texture": "lothlorien:mallorn_leaves_top",
-          "render_method": "alpha_test",
-          "ambient_occlusion": 0.0
+          "render_method": "alpha_test_to_opaque",
+          "ambient_occlusion": 0.0,
+          "isotropic": true
         },
         "down": {
           "texture": "lothlorien:mallorn_leaves_bottom",
-          "render_method": "alpha_test",
-          "ambient_occlusion": 0.0
+          "render_method": "alpha_test_to_opaque",
+          "ambient_occlusion": 0.0,
+          "isotropic": true
         },
         "*": {
           "texture": "lothlorien:mallorn_leaves_side",
-          "render_method": "alpha_test",
+          "render_method": "alpha_test_to_opaque",
           "ambient_occlusion": 0.0
         }
       },

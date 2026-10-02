@@ -406,7 +406,7 @@ Worldgen (all native JSON, no script):
 Falling leaves: `rp/particles/falling_leaf.json` (`lothlorien:falling_leaf`, slow drifting fall, expires on
 contact) spawned by `fallLeaves` in `main.js` every 12 ticks per player inside the biome: a random column within
 14 blocks, topmost block must be a Mallorn leaf, `leaf_fall.js` (pure, tested) walks down to the first leaf with
-open air below. One particle per player per 12 ticks, so it is sparse by design.
+open air below. One particle per player per 12 ticks, so it is sparse by design. Since 2026-10-02 the texture is a 40x8 sheet (4 leaf shapes + 1 blossom, `tools/make_falling_leaf.py`) and the particle picks a frame with molang in `uv` (`particle_random_1 < 0.14 ? 4 : floor(particle_random_2 * 4)`) and a size 0.10-0.14; to check in game.
 
 **Untested in game** (written without game access): everything above. Check first: (1) plants and carpet appear
 in the creative menu and place on grass; (2) `/place feature lothlorien:select_mallorn_tree_with_litter_feature`
@@ -422,7 +422,7 @@ ores, caves, structures, spawns), `animal`, `bee_habitat`, `lothlorien`, no `for
 (dandelion/poppy mix, 1 chunk in 32), pumpkins (1 in 300), reeds near water (1 in 6), extra mushrooms.
 Ferns, forest flowers and forest grass belong to `forest`/`taiga`/... tags and do not apply. The leftovers are rare and
 deliberately not fought: excluding them needs a tag such as `plains` or `mooshroom_island`, which also switches on
-villages or mooshroom spawns. Decorative flowers added on purpose: `wild_flower_patch_feature_rules` (one small patch in 1 chunk in 3).
+villages or mooshroom spawns. Decorative wild flowers were tried and removed (see below). **Wild flowers REMOVED 2026-10-02 (owner).** The custom two-block rose bush / peony / lilac features never showed up in game; the native route (our own rule calling `minecraft:legacy:flower_forest_flower_feature`, no biome tag, because the `flower_forest` tag also brings vanilla trees, bee and rabbit spawns and camps) produced poppies and bushes but no big flowers. All `wild_*` features and `wild_flower_patch_feature_rules` were deleted. Maybe later: Elven roses as our own plant (owner idea). The two-block placement notes in the Phase 6 tuning text above are historical.
 **Untested in game**: segment merging and break drops, the 16 permutations, `states` inside `places_block`.
 
 ### Tuning after the first in-game look (2026-09-29)
@@ -446,7 +446,7 @@ everywhere (1 chunk in 10, 4 tries, "rare but obtainable") plus zones at thresho
 
 Third tuning: golden fern cut to 1 chunk in 4 with 12 tries (was 1 in 2, 22). Added vanilla `minecraft:fern` (`plain_fern_patch_feature_rules`,
 1 chunk in 2, 14 tries) and extra `minecraft:short_grass` (`extra_grass_patch_feature_rules`, every chunk, 26 tries, on top of vanilla's
-own grass). Bone meal table: golden fern 12 -> 8, plain fern 6.
+own grass). Bone meal table: golden fern 12 -> 8, plain fern 6. **Owner 2026-10-02: too much golden fern (huge patches, the floor is already golden from litter and leaves): the rule is now 1 iteration (was 2) at 1 chunk in 2, the patch 10 tries (was 16) within a gaussian +-4 (was +-6): about 3.5x fewer ferns, in small patches.** Bone meal table unchanged.
 
 Fourth tuning (in game: only Niphredil showed among the custom flowers). Lesson: `query.noise` thresholds are very steep. 0.3 gave "many"
 Elanor, 0.5 gave none, so a zone-only rule can vanish entirely. Every flower now has a sparse baseline everywhere plus noise zones:
@@ -471,6 +471,31 @@ mallorn_blossom, mallorn_leaves, mallorn_sapling, mallorn_leaf_carpet. **Unconfi
 `alpha_test_single_sided` on the plants and note whether it happens with Vibrant Visuals off. Replacement art needs its own MERS map.
 
 Flicker follow-up: user confirmed it flickers in both Fancy and Vibrant Visuals, so the MERS maps are not the fix (kept, harmless). Open; the
+**Flicker, 2026-10-02 (owner in game):** the two saplings STOPPED flickering when their geometry changed from box-UV zero-thickness cubes (which carried degenerate top/bottom faces) to the single-face `plant_cross` model. So the cause there was the model, not the texture. The Mallorn leaves still flicker; they are `minecraft:geometry.full_block` with three textures (up/down/side) and `alpha_test`. Next test ideas, cheapest first: (1) leaves with a vanilla leaf texture on all faces (art vs block definition); (2) a custom cube inset by 0.01 so faces of neighbouring leaf blocks are not coplanar (top green / bottom silver textures fight on stacked leaves; side faces meet mirrored). **Test 1 (2026-10-02, owner in game): vanilla `leaves_oak_carried` on all faces of the Mallorn leaves STILL flickered, vanilla leaves do not**, so the cause is the block definition / texture data, not our art. Online search: Microsoft's material_instances reference lists the render method `alpha_test_to_opaque` ("used for a block like the leaves": cutout near, opaque far; vanilla leaves use it; `alpha_test_single_sided_to_opaque` is "used for a block like the sugar cane"), and the wiki says custom leaves should use `minecraft:culling_layer.leaves` (needs creator features, not used, see `bedrock-blocks` notes). **Test 2, deployed 2026-10-02:** `mallorn_leaves` uses `alpha_test_to_opaque` on all instances; `mallorn_golden_leaves` stays `alpha_test` as the control. Both leaf textures now carry a dark neighbour colour under their transparent texels (`shade_hidden` in `make_mallorn_leaves.py`; vanilla leaves keep dark green there, ours was black, which the far render shows as black holes). **Result (owner in game, 2026-10-02): the flicker is unchanged on both leaf blocks, BUT the leaves were invisible from far away before and are now visible: `alpha_test_to_opaque` (with the dark hidden colour) fixed that. KEEP IT. Both leaf blocks use it now (the golden leaves too, since the control is no longer needed).** The flicker is still open; remaining ideas: an inset cube (0.01) so neighbouring faces are not coplanar, `minecraft:culling_layer.leaves` (creator features), comparing every other component of vanilla leaves with ours (`light_dampening`, tags, `isotropic`, face dimming). **Test 3, culling (2026-10-02): it STOPPED the flicker on the Mallorn leaves (owner: only the golden leaves, still on `full_block`, flickered), but the canopy looked hollow and it needs the experimental 'upcoming creator features' toggle, so it was reverted.** Custom 16x16x16 cube + `block_culling` rules (format 1.21.80, `same_culling_layer`, six faces) + `culling_layer: minecraft:culling_layer.leaves`. Conclusion: the flicker is z-fighting between the coplanar faces of touching leaf blocks (green top vs silver bottom, mirrored sides). (The content log of that session held only Molang errors of other packs' player animations, none from lothlorien.) **Test 4, inset cube (deployed 2026-10-02):** both leaf blocks use `geometry.lothlorien.mallorn_leaf_cube` (`tools/make_leaf_cube_geo.py`, inset 0.1 model unit per side: all faces drawn, no hollow canopy, no toggle; the faces of two touching blocks are 0.2 unit apart). Material instance names `up` / `down` / `side` (golden leaves alias all three to one picture). **Result (owner, 2026-10-02): the flicker was gone at inset 0.1 (isotropic off) but the gap between leaf blocks was slightly visible; at inset 0.05 with `isotropic` on, the flicker CAME BACK. The owner turned the inset cube OFF (both leaf blocks are `minecraft:geometry.full_block` again, material instances `up`/`down`/`*`) and kept `isotropic` on up/down (the trees look better). LEAF FLICKER IS UNSOLVED.** What is known: it stops with data-driven culling (hollow canopy, experimental toggle) and with a 0.1 inset cube (visible gap); it does not depend on the texture (vanilla texture still flickers), the render method (`alpha_test_to_opaque` fixed the far-away invisibility but not the flicker) or the colour under the holes. Not known whether `isotropic` or the smaller inset brought it back at 0.05. Cheap next tests: inset 0.1 with isotropic on (separates the two causes); inset only on the faces that are up, north, east (halves the visible gap); the remaining comparison items (friction, face_dimming, `ambient_occlusion` 0.8 on the sides).
+
+### Mallorn leaves vs vanilla leaves, parameter by parameter (2026-10-02)
+
+"Disk" = read from the vanilla resource pack in `reference/vanilla/current/resource_packs/vanilla/blocks.json` (client side). Vanilla's behaviour
+values are hardcoded in the engine (no JSON on disk); those rows come from the Minecraft wiki and Microsoft's reference and are marked "docs".
+
+| Parameter | Vanilla leaves | Ours | Verdict |
+|---|---|---|---|
+| render_method | `alpha_test_to_opaque` (docs) | `alpha_test_to_opaque` | same since 2026-10-02 (fixed the invisibility from far away) |
+| faces sharing a plane | culled by `culling_layer.leaves` (docs) | plain `full_block` again (inset cube tried 2026-10-02, flicker unsolved; `make_leaf_cube_geo.py` kept, not in use) | culling stopped the flicker but made the canopy hollow and needs the experimental toggle; the 0.1 inset cube stopped it too but showed a gap |
+| ambient_occlusion | exponent 0.8 (disk) | 0.0 | deliberate: faces next to logs went black (verified in game); keep |
+| isotropic | `up` and `down` true (disk): the top and bottom texture is turned randomly per position | not set | **deployed 2026-10-02** on `up` and `down` of both leaf blocks (owner agreed, "may be good for other reasons"); to check in game: the canopy seen from above should not repeat one pattern, and the green top / silver bottom must still look right turned by 90 degrees |
+| textures | atlas entry `leaves` holds 4 textures plus 4 `_opaque` twins (disk) | one texture per face; hole texels carry a dark neighbour colour | equivalent (the opaque far render shows that colour) |
+| tint | foliage tint by biome (carried texture pre-tinted) | colours baked, never tinted | by design |
+| sound | `grass` (disk) | `grass` | same |
+| hardness / blast resistance | 0.2 / 0.2 (docs) | 0.2 / 0.2 | same |
+| flammable | 30 / 60 (docs, Java values) | 30 / 60, lava always | same |
+| light dampening | partial, 1 (docs) | 1 | same |
+| redstone conductor | no | no | same |
+| tool | hoe and shears; drops only with shears / silk touch (docs) | `is_hoe_item_destructible` only | gameplay difference, not visual |
+| states | `persistent_bit`, `update_bit` | `lothlorien:persistent` + script decay (reach 10, vanilla 4 in Bedrock) | by design (big trees) |
+| waterlogging, composting 30 % | yes (docs) | no | not done, not visual |
+| friction | engine default for leaves, not on disk | default | not compared |
+
 checklist is in `GRAPHICS_TASKS.md` ("Open problem: cutout flicker"). Suspects: thin cutout silhouettes plus mipmaps, transparent-pixel
 colour bleed, `alpha_test` mode.
 
@@ -739,7 +764,7 @@ standable; `pickWaypoint`'s final ring now starts at radius 0). The marker block
 the same day (owner): gone from the flet giants (rebuilt; plain giants byte-identical), the block file, lang and tests. Worlds generated
 before keep one buried block per flet giant, 4 below the ground inside the trunk, which now loads as an unknown block.
 The nut (`items/great_mallorn_nut.json`, `blocks/great_mallorn_sprout.json`, `scripts/great_mallorn.js` + `great_mallorn_rules.js`, art
-`tools/make_great_nut.py`): the sprout copies the sapling's states, soil filter and geometry; random tick stage 0 -> 1 -> grow. Growing
+`tools/make_mallorn_seeds.py`): the sprout copies the sapling's states, soil filter and geometry; random tick stage 0 -> 1 -> grow. Growing
 reads the structure's filled cells once per session (`Structure.getBlockPermutation` over 40x54x40 in job steps), checks each against the
 world with `isNatural` (terrain, plants, leaves, unstripped logs, water; anything else = built = wait and tell players within 32 blocks,
 at most every 5 min), then `structureManager.place` with the sprout in trunk cell TRUNK_AT+1 at ground level (`treeOrigin`). The

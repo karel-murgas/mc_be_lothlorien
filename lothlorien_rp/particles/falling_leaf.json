@@ -34,12 +34,12 @@
         "expire_on_contact": true
       },
       "minecraft:particle_appearance_billboard": {
-        "size": [ 0.12, 0.12 ],
+        "size": [ "0.10 + variable.particle_random_3 * 0.04", "0.10 + variable.particle_random_3 * 0.04" ],
         "facing_camera_mode": "rotate_xyz",
         "uv": {
-          "texture_width": 8,
+          "texture_width": 40,
           "texture_height": 8,
-          "uv": [ 0, 0 ],
+          "uv": [ "(variable.particle_random_1 < 0.14 ? 4 : math.floor(variable.particle_random_2 * 4)) * 8", 0 ],
           "uv_size": [ 8, 8 ]
         }
       }

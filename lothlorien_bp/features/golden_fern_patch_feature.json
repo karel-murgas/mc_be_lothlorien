@@ -4,12 +4,12 @@
     "description": {
       "identifier": "lothlorien:golden_fern_patch_feature"
     },
-    "iterations": 16,
+    "iterations": 10,
     "x": {
       "distribution": "gaussian",
       "extent": [
-        -6,
-        6
+        -4,
+        4
       ]
     },
     "y": {
@@ -22,8 +22,8 @@
     "z": {
       "distribution": "gaussian",
       "extent": [
-        -6,
-        6
+        -4,
+        4
       ]
     },
     "coordinate_eval_order": "zyx",
