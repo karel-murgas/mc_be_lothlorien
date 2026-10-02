@@ -665,7 +665,7 @@ A small hanging cluster of golden Mallorn flowers under Mallorn leaves (vanilla 
   random tick in the morning window sets it, not a tick at night) and is gone by mid-morning. Simulation distance is the
   intended limit: dew forms only around a player who is there.
 - **State:** bool `lothlorien:dew` (droplet glints in the texture). **Chance per random tick** (owner, 2026-10-02): in the
-  morning window a dry cover turns dewy with its chance, **leaf litter 1/16, blossom 1/2**; outside the window any dew
+  morning window a dry cover turns dewy with its chance, **leaf litter 1/8, blossom 1/2** (owner: 1/8 rewards active collecting); outside the window any dew
   dries. A picked cover can turn dewy again in the same morning: staying in the grove pays. Doubles the litter and
   blossom permutations (check the count).
 - **Collecting: a Dew bottle that fills up**, like Miruvor in reverse (owner: "like the bundle, but you can't empty it
@@ -675,9 +675,9 @@ A small hanging cluster of golden Mallorn flowers under Mallorn leaves (vanilla 
 - **Yield: about one bottle per tree per morning** (owner). World "T" scan (2026-10-02, `tools/world_scan.py`, ~713
   trees): about 34 leaf-litter carpets and 1.3 blossom carpets per tree, a full blossom carpet on fewer than 1 tree in
   10. **8 drops per bottle** (owner). Expected, with about 4 random ticks per cover in the window (rate not measured): one
-  late pass collects 1-(15/16)^4 = 23% of litter (~8 drops) + ~94% of blossoms (~1): **about a bottle per tree**;
-  picking repeatedly gives about 4/16 per litter + ~2 per blossom, ~11 drops. Tune both chances and the window after
-  measuring the tick rate.
+  late pass collects 1-(7/8)^4 = 41% of litter (~14 drops) + ~94% of blossoms (~1): **about 2 bottles per tree**;
+  picking repeatedly gives about 4/8 per litter + ~2 per blossom, ~20 drops (2.5 bottles). Above the earlier "one bottle
+  per tree" on purpose (owner chose 1/8). Tune the chances and the window after measuring the tick rate.
 - **Blossom worldgen fix:** the tree's aggregate places 90 leaf-litter tries before the 5 blossom tries, so litter
   takes the spots. Place blossoms first, same 5 tries (owner).
 - **Uses** (owner): the Star canopy block (below), Elven rope (Phase 17b), and maybe a dew lantern (Phase 17 idea).
@@ -688,8 +688,8 @@ A small hanging cluster of golden Mallorn flowers under Mallorn leaves (vanilla 
 `lothlorien:star_canopy`: a "sky ceiling" block for Elven halls and the undersides of talans. Deep night blue with silver
 stars that slowly twinkle (animated block texture: check flipbook support for custom blocks), **light level 6** (soft: a
 ceiling of it lights a hall dimly, like a starry night). Glow under Vibrant Visuals through an emissive MERS texture set,
-as on the firefly. Ingredients: Bottle of morning dew, Mallorn leaves, deepslate tiles. Amount: being decided (8 per
-bottle judged too generous; proposal 3 bottles + 3 Mallorn leaves + 3 deepslate tiles -> 9 blocks).
+as on the firefly. **Recipe (owner): 3 Bottles of morning dew + 3 Mallorn leaves + 3 deepslate tiles -> 9 Star canopy** (leaves on top,
+dew in the middle, stone below; 8 per bottle was judged too generous). Crafting probably uses up the glass bottles.
 
 ## Build
 
