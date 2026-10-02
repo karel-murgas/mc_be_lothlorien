@@ -664,16 +664,20 @@ A small hanging cluster of golden Mallorn flowers under Mallorn leaves (vanilla 
 - **When:** dew appears from the start of the morning (so sleeping through the night still gives dew on waking: a
   random tick in the morning window sets it, not a tick at night) and is gone by mid-morning. Simulation distance is the
   intended limit: dew forms only around a player who is there.
-- **States:** `lothlorien:dew` 0 dry, 1 dewy (droplet glints in the texture), 2 picked today. Morning random tick: 0 ->
-  1 with the cover's chance; any tick outside the window: 1 or 2 -> 0. Doubles the litter and blossom permutations
-  (check the count).
+- **State:** bool `lothlorien:dew` (droplet glints in the texture). **Chance per random tick** (owner, 2026-10-02): in the
+  morning window a dry cover turns dewy with its chance, **leaf litter 1/16, blossom 1/2**; outside the window any dew
+  dries. A picked cover can turn dewy again in the same morning: staying in the grove pays. Doubles the litter and
+  blossom permutations (check the count).
 - **Collecting: a Dew bottle that fills up**, like Miruvor in reverse (owner: "like the bundle, but you can't empty it
   early"). Using a glass bottle on dewy cover turns it into a Dew bottle with one drop; each further drop fills it. Shown
   with the durability bar (Miruvor's mechanism, verified in game): damage counts the missing drops. At full it becomes a
   **Bottle of morning dew** (stackable). No way to pour it out.
 - **Yield: about one bottle per tree per morning** (owner). World "T" scan (2026-10-02, `tools/world_scan.py`, ~713
   trees): about 34 leaf-litter carpets and 1.3 blossom carpets per tree, a full blossom carpet on fewer than 1 tree in
-  10. **8 drops per bottle** (owner); leaf litter dewy with chance 1/4 (about 8-9 drops per tree), blossom always.
+  10. **8 drops per bottle** (owner). Expected, with about 4 random ticks per cover in the window (rate not measured): one
+  late pass collects 1-(15/16)^4 = 23% of litter (~8 drops) + ~94% of blossoms (~1): **about a bottle per tree**;
+  picking repeatedly gives about 4/16 per litter + ~2 per blossom, ~11 drops. Tune both chances and the window after
+  measuring the tick rate.
 - **Blossom worldgen fix:** the tree's aggregate places 90 leaf-litter tries before the 5 blossom tries, so litter
   takes the spots. Place blossoms first, same 5 tries (owner).
 - **Uses** (owner): the Star canopy block (below), Elven rope (Phase 17b), and maybe a dew lantern (Phase 17 idea).
