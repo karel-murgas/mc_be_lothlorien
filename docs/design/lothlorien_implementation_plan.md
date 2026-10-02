@@ -602,7 +602,7 @@ Blockbench + graphics + sound model + Claude.
 
 # Phase 14 — Firefly
 
-_Status: built 2026-10-02 (catch with glass bottle -> Bottle of Fireflies; release and jar still open; glow and icon accepted in game, spawn and catch untested). Design sheet: `docs/mobs/firefly.md`._
+_Status: built 2026-10-02 (catch with glass bottle -> Bottle of Fireflies; release and jar still open; glow, icon, spawning and catching work in game). Design sheet: `docs/mobs/firefly.md`._
 
 Implement carefully because many tiny entities can be expensive.
 
