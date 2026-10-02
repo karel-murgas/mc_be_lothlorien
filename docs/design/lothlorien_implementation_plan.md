@@ -648,15 +648,14 @@ about 15 min, Western Corn 20-35 min.
 A small hanging cluster of golden Mallorn flowers under Mallorn leaves (vanilla analogue: spore blossom).
 
 - State `lothlorien:nectar` 0-3 (dry, budding, open, full), each stage visible; at 3 a golden drop hangs below.
-- Fills by random tick, 1/7 per stage: **about 20 min (one in-game day) from empty to full** (owner). Only while Mallorn
-  leaves (green or golden) are directly above it; elsewhere it stays dry and is just decoration.
+- Fills by random tick, 1/7 per stage: **about 20 min (one in-game day) from empty to full on average**, randomised by
+  the ticking itself (owner). Only while Mallorn leaves (green or golden) are directly above it; elsewhere it stays dry
+  and is just decoration. **Standard simulation-distance mechanics only** (owner): no catch-up, a bloom fills only while
+  a player is near, like vanilla crops.
 - Glass bottle on a full bloom: one Mallorn nectar, bloom back to 0.
 - Shears take it as an item; by hand it breaks and drops nothing (vanilla vines). Hangs only under a full block face.
 - **Worldgen places blooms full** (owner): a few per natural Mallorn, under the crown. A sapling-grown Mallorn sometimes
   gets one.
-- Proposed, not decided: catch-up for home blooms. Emptying a bloom stores the in-game day (world dynamic property keyed
-  by position); a later random tick on a bloom whose day has passed sets it full at once. Home blooms then refill daily
-  while the player is away, never more than one bottle each.
 
 ## Morning dew (owner, 2026-10-02)
 
@@ -674,11 +673,11 @@ A small hanging cluster of golden Mallorn flowers under Mallorn leaves (vanilla 
   **Bottle of morning dew** (stackable). No way to pour it out.
 - **Yield: about one bottle per tree per morning** (owner). World "T" scan (2026-10-02, `tools/world_scan.py`, ~713
   trees): about 34 leaf-litter carpets and 1.3 blossom carpets per tree, a full blossom carpet on fewer than 1 tree in
-  10. Proposal: 8 drops per bottle; leaf litter dewy with chance 1/4 (about 8-9 drops per tree), blossom always.
+  10. **8 drops per bottle** (owner); leaf litter dewy with chance 1/4 (about 8-9 drops per tree), blossom always.
 - **Blossom worldgen fix:** the tree's aggregate places 90 leaf-litter tries before the 5 blossom tries, so litter
-  takes the spots. Place blossoms first and give them a few more tries.
-- **Use: decorative blocks** (owner), possibly light-emitting; also a material for Elven rope later. Not a held lamp, not
-  Athelas/healing (Miruvor's role). Candidates: a starlit "sky ceiling" block, a placed dew lamp.
+  takes the spots. Place blossoms first, same 5 tries (owner).
+- **Uses** (owner): a light-emitting starlit "sky ceiling" block (being built, name open), Elven rope (Phase 17b), and
+  maybe a dew lantern (Phase 17 idea). Not a held lamp, not Athelas/healing (Miruvor's role).
 
 ## Build
 
@@ -686,8 +685,8 @@ A small hanging cluster of golden Mallorn flowers under Mallorn leaves (vanilla 
 2. Nectar bloom block (4 stages, generated art), random tick + bottle in script (same kind as `crop.js`), shears drop,
    worldgen full on Mallorns, sapling chance in `trees.js`.
 3. Dew states on leaf litter and blossoms, dew art, morning random tick, Dew bottle filling + Bottle of morning dew.
-4. Blossom worldgen order and tries.
-5. Dew-using decorative blocks (once chosen).
+4. Blossom worldgen order (blossoms before litter).
+5. Starlit sky-ceiling block (dew recipe).
 6. Tests in `tests/run.mjs` for the pure rules (fill chance, dew time window, "leaves above", bottle filling).
 
 Measure the random tick rate in game (a few blooms, a timer) before final tuning.
@@ -771,6 +770,9 @@ Add:
 - hanging variant if practical,
 - Firefly Jar.
 
+Idea (2026-10-02, undecided): **dew lantern**, a slender silver hanging lantern with a glowing drop of morning dew
+inside, light 15, crafted with a Bottle of morning dew (Phase 14b). Placed only, never a held light.
+
 Test:
 
 - normal rendering,
@@ -781,6 +783,21 @@ Test:
 ## Primary tools
 
 Graphics + Claude.
+
+---
+
+# Phase 17b — Elven rope (hithlain)
+
+Owner, 2026-10-02. Replaces the vanilla ladders in the flet giants (`great_mallorn` trees and the structures).
+
+- Crafted with a **Bottle of morning dew** (Phase 14b) plus a fibre (to decide); stackable item.
+- **Placing:** use the rope on a block face; it unrolls straight down from there (or up, from a floor/ceiling: to decide)
+  as far as the stack in hand allows, at most 64 (a full stack), stopping at the first block in the way. Each rope block
+  uses one item.
+- Climbable like a ladder or vanilla vines/scaffolding.
+- **Breaking any piece breaks the whole rope** and gives every piece back.
+- Open: how it attaches (side of a block vs under a ceiling), look (thin silver-grey, hangs in the middle of the cell),
+  whether it can be extended by using more rope on its end.
 
 ---
 
