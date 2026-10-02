@@ -1,0 +1,32 @@
+{
+  "format_version": "1.13.0",
+  "minecraft:scatter_feature": {
+    "description": {
+      "identifier": "lothlorien:nectar_bloom_scatter_feature"
+    },
+    "iterations": 8,
+    "x": {
+      "distribution": "gaussian",
+      "extent": [
+        -4,
+        4
+      ]
+    },
+    "y": {
+      "distribution": "uniform",
+      "extent": [
+        2,
+        18
+      ]
+    },
+    "z": {
+      "distribution": "gaussian",
+      "extent": [
+        -4,
+        4
+      ]
+    },
+    "coordinate_eval_order": "zxy",
+    "places_feature": "lothlorien:nectar_bloom_full_feature"
+  }
+}

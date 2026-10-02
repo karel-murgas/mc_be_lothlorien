@@ -76,6 +76,18 @@
     },
     "lothlorien:mallorn_heartwood_chest_boat": {
       "textures": "textures/items/mallorn_heartwood_chest_boat"
+    },
+    "lothlorien:nectar_bloom": {
+      "textures": "textures/items/nectar_bloom"
+    },
+    "lothlorien:mallorn_nectar": {
+      "textures": "textures/items/mallorn_nectar"
+    },
+    "lothlorien:dew_bottle": {
+      "textures": "textures/items/dew_bottle"
+    },
+    "lothlorien:morning_dew": {
+      "textures": "textures/items/morning_dew"
     }
   }
 }

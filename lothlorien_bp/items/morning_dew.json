@@ -1,0 +1,15 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:item": {
+    "description": {
+      "identifier": "lothlorien:morning_dew",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:icon": "lothlorien:morning_dew",
+      "minecraft:max_stack_size": 16
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:item": {
+    "description": {
+      "identifier": "lothlorien:dew_bottle",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:icon": "lothlorien:dew_bottle",
+      "minecraft:max_stack_size": 1,
+      "minecraft:durability": {
+        "max_durability": 8
+      }
+    }
+  }
+}

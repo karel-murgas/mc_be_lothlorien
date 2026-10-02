@@ -3,7 +3,7 @@ import { system, EquipmentSlot } from "@minecraft/server";
 // Phase 8: Athelas salve and Miruvor. Food JSON gives the drinking (animation, duration, can always
 // be drunk); these components add the effects. First balance is deliberately conservative: the salve
 // is a modest heal-over-time (about 5 HP), Miruvor about 10 HP plus a short speed boost, and it costs
-// a salve, both rare flowers and honey. Ticks: 20 per second.
+// a salve, both rare flowers and Mallorn nectar. Ticks: 20 per second.
 // Miruvor is a skin, not a stack: 4 sips (durability), 30 s between sips (cooldown in the item JSON).
 // It is not food, so the sip comes from onCompleteUse (use_modifiers duration) and the item survives.
 const EFFECTS = {

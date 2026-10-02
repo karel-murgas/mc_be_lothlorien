@@ -1,6 +1,8 @@
 import { world, system, BlockPermutation, GameMode, EquipmentSlot } from "@minecraft/server";
 import { makeRandom, buildSmallMallorn, buildBigMallorn } from "./mallorn_tree.js";
 import { repeatedUse } from "./use_guard.js";
+import { hangBloom } from "./nectar.js";
+import { treeBloomCount } from "./nectar_rules.js";
 
 // Phase 4: Mallorn sapling growth, bone meal, leaf decay, and the tree balance instruments.
 //   lothlorien:sapling  random tick: stage 0 -> 1 -> grows a small Mallorn (needs light and room);
@@ -59,6 +61,11 @@ export function growTree(base, seed, big = false) {
       for (const c of tree.logs) {
         const b = at(c);
         if (b && replaceable(b, true)) b.setPermutation(BlockPermutation.resolve(LOG, { "minecraft:block_face": c.face }));
+      }
+      // nectar blooms hang under the crown (natural trees get full ones from worldgen, a grown tree starts dry)
+      for (let tries = 0, left = treeBloomCount(Math.random()); left > 0 && tries < 40 && tree.leaves.length; tries++) {
+        const c = tree.leaves[Math.floor(Math.random() * tree.leaves.length)];
+        if (hangBloom(at({ x: c.x, y: c.y - 1, z: c.z }))) left--;
       }
     })()
   );

@@ -4,6 +4,8 @@ import "./ground_cover.js";
 import "./grass_overlay.js";
 import "./bonemeal.js";
 import "./crop.js";
+import "./nectar.js";
+import "./dew.js";
 import "./lembas.js";
 import { startAntlerSupport } from "./antler.js";
 import "./athelas.js";

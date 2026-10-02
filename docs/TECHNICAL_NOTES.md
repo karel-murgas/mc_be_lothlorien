@@ -417,7 +417,7 @@ which case flowers only appear in the open (expected); (4) `scatter_chance` is a
 ### Vanilla plants in the biome (checked against the 1.26.50 feature rules, 2026-09-29)
 
 Vanilla places plants by biome tag, and the only removal lever is the tag. The biome has `overworld` (needed for
-ores, caves, structures, spawns), `animal`, `bee_habitat`, `lothlorien`, no `forest`. Rules that still match:
+ores, caves, structures, spawns), `bee_habitat`, `lothlorien`, no `forest`. Rules that still match:
 `scatter_tall_grass_feature` (grass and tall grass, the wanted ground cover), `scatter_overworld_flower_feature`
 (dandelion/poppy mix, 1 chunk in 32), pumpkins (1 in 300), reeds near water (1 in 6), extra mushrooms.
 Ferns, forest flowers and forest grass belong to `forest`/`taiga`/... tags and do not apply. The leftovers are rare and
@@ -557,7 +557,7 @@ Files: items `athelas_salve`, `miruvor`; recipes `athelas_salve`, `miruvor`; `sc
 - **Miruvor (Skin):** a reusable skin, not a stack. `minecraft:durability` 4 = 4 sips, stack 1, 30 s cooldown between sips
   (`minecraft:cooldown`, category `lothlorien_miruvor`), drink 2.0 s. Not food: `use_modifiers` + `use_animation: drink`, and the effects and
   the durability loss run in `onCompleteUse` (`athelas.js`); the last sip removes the item. Per sip: instant health I (4 HP), Regeneration II 8 s
-  (about 6 HP), Speed I 30 s, lifts Poison. Recipe (3x3): `ENE / SHS / NSL` = 2 Elanor, 2 Niphredil, 3 salves (6 Athelas), 1 honey bottle, 1 leather. (Phase 14b will swap the honey bottle for Mallorn nectar.)
+  (about 6 HP), Speed I 30 s, lifts Poison. Recipe (3x3): `ENE / SHS / NSL` = 2 Elanor, 2 Niphredil, 3 salves (6 Athelas), 1 Mallorn nectar (Phase 14b; was a honey bottle), 1 leather.
   Balance: one sip is a Healing II potion plus a run, so the skin is paid up front (about 10 items, 3 glass bottles' worth) and throttled by the cooldown.
   **Verified in game (was unverified):** `onCompleteUse` firing for a non-food item with `use_modifiers`, cooldown starting on use, durability bar showing, `durability.damage`
   write-back via the mainhand slot. If `onCompleteUse` does not fire, fall back to `onUse` + a manual timer.
@@ -954,3 +954,22 @@ Leave and re-enter the world to load the entity and script changes. `/summon` wo
 9. Two players: only the offering player is followed; a second player at Disharmony 3 nearby does not change the guidance. Two white deer
    guiding close together may swap beacons (accepted).
 10. Performance: the gift spot search and the tree's space check must not spike a tick (job-sliced).
+
+## Phase 14b - Mallorn nectar, morning dew, Star canopy (2026-10-02; static checks + unit tests only, NOT yet seen in game)
+
+- **Nectar bloom** `lothlorien:nectar_bloom` (`scripts/nectar.js`, rules `nectar_rules.js`): state `lothlorien:nectar` 0-3, four crossed-plane
+  textures (`tools/make_nectar_bloom.py` writes block, item, loot and art). Hangs under a block via `placement_filter` (`allowed_faces: ["down"]`,
+  filter = Mallorn leaves, logs, planks). Random tick, 1/7 per stage, only with Mallorn leaves (green or golden) directly above. Glass bottle on a
+  full bloom -> `lothlorien:mallorn_nectar`, bloom back to 0. Loot table pays the bloom item only for shears. Worldgen: `nectar_bloom_scatter_feature`
+  (8 tries, y +2..18, gaussian x/z +-4) places `nectar_bloom_full_feature` (stage 3, `may_attach_to.top` = leaves) at the end of
+  `select_mallorn_tree_with_litter_feature`, after blossoms and litter. Sapling-grown trees get 0-2 dry blooms (`trees.js`, `treeBloomCount`).
+- **Morning dew** (`scripts/dew.js`, `dew_rules.js`): bool state `lothlorien:dew` on leaf litter and blossoms, component `lothlorien:dew_cover`
+  (random tick). Window = time of day 23000..3000; in it a dry cover turns dewy with its chance (litter 1/8, blossom 1/2) if Mallorn leaves are within
+  40 blocks above (checked only after the dice succeed); outside it dew clears. Dewy cover swaps its `*` material to `<name>_dew` (a permutation,
+  `tools/make_dew_textures.py`). Glass bottle on dewy cover -> `lothlorien:dew_bottle` (durability 8, damage = missing drops, new = 1 drop); each
+  further use adds a drop; at 8 it becomes `lothlorien:morning_dew`. Bottle icons: `tools/make_nectar_dew.py`.
+- **Star canopy** `lothlorien:star_canopy` (`tools/make_star_canopy.py`): full block, `light_emission` 6, 6-frame blended flipbook
+  (`textures/flipbook_textures.json`, `ticks_per_frame` 40), emissive MERS strip. Recipe LLL/DDD/TTT = 3 Mallorn leaves, 3 Bottles of morning dew,
+  3 deepslate tiles -> 9. Unknown until seen: whether flipbook + MERS strip work on a custom block.
+- Miruvor now takes Mallorn nectar. Blossoms are placed before leaf litter in the tree aggregate.
+- Not done / open: trader honey trades (settlements), tick-rate measurement, tuning, in-game test of all of the above.

@@ -1,0 +1,16 @@
+[
+  {
+    "flipbook_texture": "textures/blocks/star_canopy",
+    "atlas_tile": "lothlorien:star_canopy",
+    "ticks_per_frame": 40,
+    "frames": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "blend_frames": true
+  }
+]

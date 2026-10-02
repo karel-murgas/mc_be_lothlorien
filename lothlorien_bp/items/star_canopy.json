@@ -1,0 +1,18 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:item": {
+    "description": {
+      "identifier": "lothlorien:star_canopy",
+      "menu_category": {
+        "category": "construction"
+      }
+    },
+    "components": {
+      "minecraft:block_placer": {
+        "block": "lothlorien:star_canopy",
+        "aligned_placement": true,
+        "replace_block_item": true
+      }
+    }
+  }
+}

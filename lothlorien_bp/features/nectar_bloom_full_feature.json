@@ -1,0 +1,30 @@
+{
+  "format_version": "1.21.40",
+  "minecraft:single_block_feature": {
+    "description": {
+      "identifier": "lothlorien:nectar_bloom_full_feature"
+    },
+    "places_block": {
+      "name": "lothlorien:nectar_bloom",
+      "states": {
+        "lothlorien:nectar": 3
+      }
+    },
+    "enforce_survivability_rules": true,
+    "enforce_placement_rules": true,
+    "may_replace": [
+      "minecraft:air"
+    ],
+    "may_attach_to": {
+      "min_sides_must_attach": 1,
+      "top": [
+        {
+          "name": "lothlorien:mallorn_leaves"
+        },
+        {
+          "name": "lothlorien:mallorn_golden_leaves"
+        }
+      ]
+    }
+  }
+}

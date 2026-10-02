@@ -632,6 +632,8 @@ Graphics/Blockbench + Claude.
 
 # Phase 14b — Mallorn nectar and morning dew (replaces the bees)
 
+_Status: built 2026-10-02, static checks and tests only; not yet tried in game (notes: `docs/TECHNICAL_NOTES.md` "Phase 14b"). Open: measure the random tick rate and tune the chances and the dew window; check the Star canopy flipbook and glow, the hanging placement filter, and shears/loot in game._
+
 Decided 2026-10-02 (owner). Nectar replaces honey: **Miruvor takes Mallorn nectar instead of a honey bottle**, and the
 settlement traders drop honey (supply and demand to be worked out with the settlements). Nectar is an ingredient
 only, not drinkable. A second Mallorn mechanic, **morning dew**, gives its own resource for decorative blocks. The
@@ -683,7 +685,7 @@ A small hanging cluster of golden Mallorn flowers under Mallorn leaves (vanilla 
 - **Uses** (owner): the Star canopy block (below), Elven rope (Phase 17b), and maybe a dew lantern (Phase 17 idea).
   Not a held lamp, not Athelas/healing (Miruvor's role).
 
-## Star canopy (owner, 2026-10-02; planned, not built)
+## Star canopy (owner, 2026-10-02; built, not seen in game)
 
 `lothlorien:star_canopy`: a "sky ceiling" block for Elven halls and the undersides of talans. Deep night blue with silver
 stars that slowly twinkle (animated block texture: check flipbook support for custom blocks), **light level 6** (soft: a
@@ -714,8 +716,9 @@ shears and hung under a home-grown Mallorn keeps working; Miruvor is crafted wit
 Daytime counterpart of the firefly, to make Lórien livelier (the job the bees were meant to do). Built on the firefly
 (`docs/mobs/firefly.md`): tiny hovering flyer, `random_hover`, no AI towards blocks (custom blocks cannot be targeted,
 see the bee spike). Spawns by day on grass in the biome (light high), small groups, pool `animal`, standard despawn.
-2-3 wing colours as a variant property (silver-white, gold, pale blue), fluttering wing animation. No drops, no catch
-for a start. Design sheet in `docs/mobs/butterfly.md` when built.
+Wing colours: **8 bright variants** as a variant property (red, orange, yellow, lime, turquoise, blue, violet, pink; owner
+asked for colourful rather than silver/gold/blue), fluttering wing animation. No drops, no catch for a start.
+**Built 2026-10-02**, untested in game; design sheet `docs/mobs/butterfly.md`.
 
 ## Bee spike (2026-10-02, 1.26.52, removed in favour of the above)
 

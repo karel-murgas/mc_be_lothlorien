@@ -1,0 +1,30 @@
+{
+  "format_version": "1.8.0",
+  "render_controllers": {
+    "controller.render.lothlorien.butterfly": {
+      "arrays": {
+        "textures": {
+          "Array.wings": [
+            "Texture.red",
+            "Texture.orange",
+            "Texture.yellow",
+            "Texture.lime",
+            "Texture.turquoise",
+            "Texture.blue",
+            "Texture.violet",
+            "Texture.pink"
+          ]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "Array.wings[query.property('lothlorien:wing')]"
+      ]
+    }
+  }
+}

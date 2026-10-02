@@ -1,0 +1,36 @@
+{
+  "format_version": "1.20.30",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "lothlorien:star_canopy"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      "LLL",
+      "DDD",
+      "TTT"
+    ],
+    "key": {
+      "L": {
+        "item": "lothlorien:mallorn_leaves"
+      },
+      "D": {
+        "item": "lothlorien:morning_dew"
+      },
+      "T": {
+        "item": "minecraft:deepslate_tiles"
+      }
+    },
+    "unlock": [
+      {
+        "item": "lothlorien:morning_dew"
+      }
+    ],
+    "result": {
+      "item": "lothlorien:star_canopy",
+      "count": 9
+    }
+  }
+}

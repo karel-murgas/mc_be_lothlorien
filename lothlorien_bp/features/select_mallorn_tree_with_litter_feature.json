@@ -7,8 +7,9 @@
     "early_out": "first_failure",
     "features": [
       "lothlorien:select_mallorn_tree_feature",
+      "lothlorien:mallorn_blossom_scatter_feature",
       "lothlorien:mallorn_leaf_carpet_scatter_feature",
-      "lothlorien:mallorn_blossom_scatter_feature"
+      "lothlorien:nectar_bloom_scatter_feature"
     ]
   }
 }

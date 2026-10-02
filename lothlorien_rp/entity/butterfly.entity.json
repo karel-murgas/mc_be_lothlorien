@@ -1,0 +1,39 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "lothlorien:butterfly",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "red": "textures/entity/butterfly/butterfly_red",
+        "orange": "textures/entity/butterfly/butterfly_orange",
+        "yellow": "textures/entity/butterfly/butterfly_yellow",
+        "lime": "textures/entity/butterfly/butterfly_lime",
+        "turquoise": "textures/entity/butterfly/butterfly_turquoise",
+        "blue": "textures/entity/butterfly/butterfly_blue",
+        "violet": "textures/entity/butterfly/butterfly_violet",
+        "pink": "textures/entity/butterfly/butterfly_pink"
+      },
+      "geometry": {
+        "default": "geometry.lothlorien.butterfly"
+      },
+      "animations": {
+        "flutter": "animation.lothlorien.butterfly.flutter"
+      },
+      "scripts": {
+        "animate": [
+          "flutter"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.lothlorien.butterfly"
+      ],
+      "spawn_egg": {
+        "base_color": "#f0589e",
+        "overlay_color": "#38c8f0"
+      }
+    }
+  }
+}

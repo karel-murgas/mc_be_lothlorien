@@ -963,5 +963,69 @@ test("gate: carved models (tools/make_mallorn_gate.py) wear the fence post textu
     assert.equal(c["minecraft:item_visual"].geometry, "geometry.lothlorien.mallorn_fence_gate_closed");
   }
 });
+import * as NR from "../lothlorien_bp/scripts/nectar_rules.js";
+import * as DR from "../lothlorien_bp/scripts/dew_rules.js";
+test("Phase 14b: nectar bloom fills only under Mallorn leaves, 1/7 per stage", () => {
+  assert.equal(NR.nectarAfterTick(0, true, 0.1), 1);
+  assert.equal(NR.nectarAfterTick(0, true, 0.2), 0, "dice fail");
+  assert.equal(NR.nectarAfterTick(0, false, 0), 0, "no leaves above: stays dry");
+  assert.equal(NR.nectarAfterTick(NR.MAX_NECTAR, true, 0), NR.MAX_NECTAR, "full stays full");
+  assert.ok(NR.MALLORN_LEAVES.has("lothlorien:mallorn_golden_leaves") && NR.MALLORN_LEAVES.has("lothlorien:mallorn_leaves"));
+  assert.deepEqual([0.39, 0.4, 0.84, 0.85].map(NR.treeBloomCount), [0, 1, 1, 2]);
+});
+test("Phase 14b: morning dew window, chances and leaves-above scan", () => {
+  for (const t of [23000, 23999, 0, 1000, 2999]) assert.ok(DR.inDewWindow(t), `dew at ${t}`);
+  for (const t of [3000, 6000, 12000, 22999]) assert.ok(!DR.inDewWindow(t), `no dew at ${t}`);
+  assert.ok(DR.inDewWindow(24000 + 100), "time wraps");
+  const yes = () => true;
+  const no = () => false;
+  assert.equal(DR.dewAfterTick(false, 500, 1 / 8, 0.1, yes), true);
+  assert.equal(DR.dewAfterTick(false, 500, 1 / 8, 0.2, yes), false, "dice fail");
+  assert.equal(DR.dewAfterTick(false, 500, 1, 0, no), false, "needs leaves above");
+  assert.equal(DR.dewAfterTick(true, 500, 0, 0.99, no), true, "dew stays within the window");
+  assert.equal(DR.dewAfterTick(true, 8000, 1, 0, yes), false, "dew dries outside the window");
+  assert.equal(DR.dewAfterTick(false, 8000, 1, 0, yes), false, "no new dew by day");
+  assert.equal(DR.DEW_CHANCE["lothlorien:mallorn_leaf_carpet"], 1 / 8);
+  assert.equal(DR.DEW_CHANCE["lothlorien:mallorn_blossom"], 1 / 2);
+  const leaf = (id) => id === "L";
+  assert.ok(DR.leavesAbove((dy) => (dy === 5 ? "L" : "air"), leaf));
+  assert.ok(!DR.leavesAbove(() => "air", leaf));
+  assert.ok(!DR.leavesAbove((dy) => (dy > 2 ? undefined : "air"), leaf), "unloaded chunk stops the scan");
+  assert.ok(!DR.leavesAbove((dy) => (dy === 41 ? "L" : "air"), leaf), "scan limit");
+});
+test("Phase 14b: Dew bottle fills drop by drop into a Bottle of morning dew", () => {
+  assert.equal(DR.dropsIn(DR.NEW_DEW_BOTTLE_DAMAGE), 1, "a new Dew bottle holds one drop");
+  let damage = DR.NEW_DEW_BOTTLE_DAMAGE;
+  let uses = 1;
+  for (let r = DR.addDrop(damage); !r.full; r = DR.addDrop(damage)) {
+    assert.equal(DR.dropsIn(r.damage), DR.dropsIn(damage) + 1);
+    damage = r.damage;
+    uses++;
+  }
+  assert.equal(uses + 1, DR.DEW_DROPS, "8 uses in all from a glass bottle (the last one completes it)");
+  assert.ok(damage > 0, "the bar never reaches a full bottle early");
+});
+test("Phase 14b: nectar and dew content is wired (pack JSON)", () => {
+  const bloom = readJson("../lothlorien_bp/blocks/nectar_bloom.json")["minecraft:block"];
+  assert.deepEqual(bloom.description.states["lothlorien:nectar"], [0, 1, 2, 3]);
+  assert.deepEqual(bloom.components["minecraft:placement_filter"].conditions[0].allowed_faces, ["down"]);
+  const atlas = readJson("../lothlorien_rp/textures/terrain_texture.json").texture_data;
+  for (const s of [0, 1, 2, 3]) assert.ok(atlas[`lothlorien:nectar_bloom_${s}`], `bloom stage ${s} in the atlas`);
+  for (const name of ["mallorn_leaf_carpet", "mallorn_blossom"]) {
+    const b = readJson(`../lothlorien_bp/blocks/${name}.json`)["minecraft:block"];
+    assert.deepEqual(b.description.states["lothlorien:dew"], [false, true]);
+    assert.ok("lothlorien:dew_cover" in b.components);
+    const dewy = b.permutations.find((p) => p.condition === "q.block_state('lothlorien:dew')");
+    const tex = dewy.components["minecraft:material_instances"]["*"].texture;
+    assert.equal(tex, `lothlorien:${name}_dew`);
+    assert.ok(atlas[tex], "dew texture in the atlas");
+  }
+  const recipe = readJson("../lothlorien_bp/recipes/miruvor.json")["minecraft:recipe_shaped"];
+  assert.equal(recipe.key.H.item, "lothlorien:mallorn_nectar", "Miruvor takes nectar, not honey");
+  assert.equal(readJson("../lothlorien_bp/items/dew_bottle.json")["minecraft:item"].components["minecraft:durability"].max_durability, DR.DEW_DROPS);
+  const agg = readJson("../lothlorien_bp/features/select_mallorn_tree_with_litter_feature.json")["minecraft:aggregate_feature"].features;
+  assert.ok(agg.indexOf("lothlorien:mallorn_blossom_scatter_feature") < agg.indexOf("lothlorien:mallorn_leaf_carpet_scatter_feature"), "blossoms before litter");
+  assert.ok(agg.includes("lothlorien:nectar_bloom_scatter_feature"));
+});
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }
 console.log("all tests passed");

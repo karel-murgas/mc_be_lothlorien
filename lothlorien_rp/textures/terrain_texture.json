@@ -111,6 +111,27 @@
     },
     "lothlorien:grass_overlay": {
       "textures": "textures/blocks/grass_top"
+    },
+    "lothlorien:nectar_bloom_0": {
+      "textures": "textures/blocks/nectar_bloom_0"
+    },
+    "lothlorien:nectar_bloom_1": {
+      "textures": "textures/blocks/nectar_bloom_1"
+    },
+    "lothlorien:nectar_bloom_2": {
+      "textures": "textures/blocks/nectar_bloom_2"
+    },
+    "lothlorien:nectar_bloom_3": {
+      "textures": "textures/blocks/nectar_bloom_3"
+    },
+    "lothlorien:mallorn_leaf_carpet_dew": {
+      "textures": "textures/blocks/mallorn_leaf_carpet_dew"
+    },
+    "lothlorien:mallorn_blossom_dew": {
+      "textures": "textures/blocks/mallorn_blossom_dew"
+    },
+    "lothlorien:star_canopy": {
+      "textures": "textures/blocks/star_canopy"
     }
   }
 }
