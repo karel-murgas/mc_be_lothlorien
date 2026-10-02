@@ -1006,7 +1006,7 @@ Design sheet: `docs/mobs/unicorn.md`. What to know when touching it:
   wariness event a tick later so `state_tame` replaces the player flight.
 - **No `minecraft:tameable`/`tamemount`**: both would consume items or tame by their own rules without the Friend check.
 
-## Phase 17b - Elven rope (2026-10-02; climbing and icon accepted by the owner in game, 1.26.52)
+## Phase 17b - Elven rope (2026-10-02, commit 903a520; climbing and icon accepted by the owner in game, 1.26.52)
 
 Owner's design: 1 Bottle of morning dew over 1 golden fern -> 1 rope (shaped recipe, the workspace forbids shapeless). Item
 `lothlorien:elven_rope` (stack 64, item component `lothlorien:rope`, `onUseOn`); block `lothlorien:elven_rope`, state
