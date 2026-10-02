@@ -5,7 +5,7 @@ Archetype: tiny hovering night flyer (analogue: bee `navigation.hover` / `random
 Files: BP `entities/firefly.json`, `spawn_rules/firefly.json`, `items/bottle_of_fireflies.json`. RP `entity/firefly.entity.json`,
 `models/entity/firefly.geo.json`, `animations/firefly.animation.json`, `render_controllers/firefly.render_controllers.json`,
 `textures/entity/firefly.png` (+ `firefly_mers.tga`, `firefly.texture_set.json`), `textures/items/bottle_of_fireflies.png`, `.lang`, `item_texture.json`.
-Art: `tools/make_firefly.py` (generated; green abdomen glows).
+Art: `tools/make_firefly.py` (generated; green abdomen glows). Feature commit: `715d705`.
 
 | Area | Decision |
 | --- | --- |
