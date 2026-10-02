@@ -7,8 +7,7 @@ Mallorn blossom) in every flower list; the open eyeblossom / wither rose feeding
 vanilla bee textures recoloured: yellow -> pale gold, brown stripes -> silver; wings and eyes unchanged.
 Needs reference/vanilla (see tools/refresh_vanilla_ref.ps1).
 
-SPIKE (plan Phase 14b): two variants differ in the nectar property (and, in round 3, the flower goal: see
-SPIKE_FLOWER_GOAL), to learn which one the vanilla hive
+SPIKE (plan Phase 14b): two variants differ in the nectar property (see CONTROL_FLOWERS), to learn which one the vanilla hive
 reads for honey: `mallorn_bee` declares vanilla's `minecraft:has_nectar`, `mallorn_bee_b` our own
 `lothlorien:has_nectar`. Delete the losing variant from VARIANTS after the in-game test.
 """
@@ -27,14 +26,11 @@ VANILLA = MOD.parents[1] / "reference" / "vanilla" / "current"
 FLOWERS = ["lothlorien:elanor", "lothlorien:niphredil", "lothlorien:athelas", "lothlorien:mallorn_blossom"]
 
 
-# SPIKE round 3 (2026-10-02): bare ids and exact-state descriptors were both ignored in game, flowers on grass and on
-# dirt alike. Each variant now tests one cause: A drops vanilla's is_waterlogged target filter; B keeps it and adds
-# vanilla flowers as a control (poppy taken but not Elanor = custom blocks never match; poppy ignored too = the
-# flower goal never runs).
-SPIKE_FLOWER_GOAL = {
-    "mallorn_bee": {"targets": FLOWERS, "drop_filter": True},
-    "mallorn_bee_b": {"targets": FLOWERS + ["minecraft:poppy", "minecraft:dandelion"], "drop_filter": False},
-}
+# SPIKE (2026-10-02, 1.26.52): custom flower blocks in move_to_block.target_blocks are never targeted (bare ids,
+# exact-state descriptors, with or without vanilla's is_waterlogged filter); vanilla poppy/dandelion are. Round 4 gives
+# both variants the vanilla control flowers so the honey test can run: B (lothlorien:has_nectar) brought nectar to a
+# nest and made no honey; does A (minecraft:has_nectar)?
+CONTROL_FLOWERS = ["minecraft:poppy", "minecraft:dandelion"]
 
 
 # identifier suffix -> nectar property
@@ -64,11 +60,7 @@ def behaviour(ident, prop):
     groups["bee_baby"]["minecraft:ageable"]["feed_items"] = FLOWERS
     groups["bee_adult"]["minecraft:breedable"]["breed_items"] = FLOWERS
     groups["bee_adult"]["minecraft:breedable"]["breeds_with"] = {ident: {}}
-    spike = SPIKE_FLOWER_GOAL[ident.split(":")[1]]
-    flower_goal = groups["look_for_food"]["minecraft:behavior.move_to_block"]
-    flower_goal["target_blocks"] = spike["targets"]
-    if spike["drop_filter"]:
-        del flower_goal["target_block_filters"]
+    groups["look_for_food"]["minecraft:behavior.move_to_block"]["target_blocks"] = FLOWERS + CONTROL_FLOWERS
     comps["minecraft:behavior.tempt"]["items"] = FLOWERS
     comps["minecraft:offspring"]["offspring_pairs"] = {ident: ident}
     comps["minecraft:type_family"]["family"].append("lothlorien_bee")
