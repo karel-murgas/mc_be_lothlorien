@@ -10,6 +10,11 @@ export const DEER_ID = "lothlorien:deer";
 // state groups and events). The white deer is a loner, but it still bolts when a deer near it is hurt.
 export const WHITE_DEER_ID = "lothlorien:white_deer";
 export const DEER_TYPES = [DEER_ID, WHITE_DEER_ID];
+// The swan and the ground squirrel share the wariness states, flight distances and alarm too (entities/swan.json and
+// entities/squirrel.json carry the same groups and events), so the whole forest's fauna reads the player's Disharmony.
+export const SWAN_ID = "lothlorien:swan";
+export const SQUIRREL_ID = "lothlorien:squirrel";
+export const WARY_TYPES = [...DEER_TYPES, SWAN_ID, SQUIRREL_ID];
 export const WARINESS = ["calm", "l1", "l2", "l3", "friend"];
 // Deer farther than this from every player keep their last state; it must exceed the largest
 // flight distance in the entity file (alarmed/l3: 36/30 blocks).

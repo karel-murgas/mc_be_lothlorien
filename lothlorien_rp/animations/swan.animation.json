@@ -1,0 +1,84 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.lothlorien.swan.idle": {
+      "loop": true,
+      "bones": {
+        "neck": {
+          "rotation": [
+            0,
+            0,
+            "math.sin(query.life_time * 50.0) * 2.0"
+          ]
+        },
+        "neck_up": {
+          "rotation": [
+            "math.sin(query.life_time * 70.0) * 3.0",
+            0,
+            "math.sin(query.life_time * 50.0 + 40.0) * 3.0"
+          ]
+        },
+        "tail": {
+          "rotation": [
+            "math.sin(query.life_time * 90.0) * 3.0",
+            0,
+            0
+          ]
+        }
+      }
+    },
+    "animation.lothlorien.swan.walk": {
+      "loop": true,
+      "anim_time_update": "query.modified_distance_moved",
+      "bones": {
+        "body": {
+          "rotation": [
+            0,
+            0,
+            "math.sin(query.anim_time * 280.0) * 4.0"
+          ]
+        },
+        "leg_l": {
+          "rotation": [
+            "math.sin(query.anim_time * 280.0) * 30.0",
+            0,
+            0
+          ]
+        },
+        "leg_r": {
+          "rotation": [
+            "-math.sin(query.anim_time * 280.0) * 30.0",
+            0,
+            0
+          ]
+        }
+      }
+    },
+    "animation.lothlorien.swan.swim": {
+      "loop": true,
+      "bones": {
+        "body": {
+          "position": [
+            0,
+            "math.sin(query.life_time * 100.0) * 0.25 - 1.5",
+            0
+          ]
+        },
+        "leg_l": {
+          "rotation": [
+            "math.sin(query.life_time * 240.0) * 25.0",
+            0,
+            0
+          ]
+        },
+        "leg_r": {
+          "rotation": [
+            "-math.sin(query.life_time * 240.0) * 25.0",
+            0,
+            0
+          ]
+        }
+      }
+    }
+  }
+}

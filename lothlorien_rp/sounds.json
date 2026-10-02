@@ -88,6 +88,45 @@
             "volume": 0.3
           }
         }
+      },
+      "lothlorien:swan": {
+        "volume": 0.9,
+        "pitch": [
+          0.7,
+          0.9
+        ],
+        "events": {
+          "ambient": {
+            "sound": "mob.chicken.say",
+            "volume": 0.6
+          },
+          "hurt": "mob.chicken.hurt",
+          "death": "mob.chicken.hurt",
+          "step": {
+            "sound": "mob.chicken.step",
+            "volume": 0.3
+          }
+        }
+      },
+      "lothlorien:squirrel": {
+        "volume": 0.7,
+        "pitch": [
+          1.5,
+          1.9
+        ],
+        "events": {
+          "ambient": {
+            "sound": "mob.rabbit.idle",
+            "volume": 0.5
+          },
+          "hurt": "mob.rabbit.hurt",
+          "death": "mob.rabbit.death",
+          "step": {
+            "sound": "mob.chicken.step",
+            "volume": 0.08,
+            "pitch": 2.0
+          }
+        }
       }
     }
   }

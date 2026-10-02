@@ -1,5 +1,5 @@
 // White deer guidance in the running game (Phase 12; rules in white_deer_rules.js). Offer a Mallorn acorn to a white
-// deer (lothlorien:white_deer) while your Disharmony is 0: once in its life it leads you to its gift, a Great Mallorn nut
+// deer (lothlorien:white_deer) as a Friend of Lothlorien: once in its life it leads you to its gift, a Great Mallorn nut
 // (great_mallorn.js), at a spot inside Lothlorien 36-56 blocks away, waiting for the player to keep up, and lays the nut
 // there on arrival. The spot is kept on the deer (dynamic property) until the gift is given, so a broken-off guidance
 // can be taken up again with another acorn. A leashed white deer does not lead (white_deer_rules.js, offerRefusal).
@@ -11,7 +11,7 @@
 // hops of 8-14 blocks. Several guiding deer close together may follow each other's beacon (accepted by the owner).
 import { EntityInitializationCause, EquipmentSlot, GameMode, ItemStack, system, world } from "@minecraft/server";
 import { disharmonyOf } from "./disharmony_game.js";
-import { levelFor } from "./disharmony.js";
+import { isFriend, levelFor } from "./disharmony.js";
 import { repeatedUse } from "./use_guard.js";
 import {
   ACORN_ID, BEACON_ID, GUIDE_TICKS, WHITE_DEER_ID, canBeGuided, hopStatus, horizontal, keepNaturalSpawn,
@@ -35,6 +35,11 @@ const PROBE_DOWN = 6;
 let sinceSweep = 0;
 
 export const isGuiding = (deerId) => sessions.has(deerId);
+
+// Other users of the guide beacon (the squirrel's errand, squirrel.js) register a function returning their beacon ids,
+// so the stray-beacon sweep below leaves them alone.
+const beaconSources = [];
+export const addBeaconSource = (fn) => beaconSources.push(fn);
 
 const isLeashed = (deer) => deer.getComponent("minecraft:leashable")?.isLeashed ?? false;
 
@@ -116,7 +121,7 @@ function giveGift(deer, s) {
 // Feet height of a deer standing in column (x, z) near feet height y, or undefined: ground within PROBE_UP above to
 // PROBE_DOWN below, no liquid, not on a tree trunk, two blocks of headroom. Passable plants (grass, ferns, flowers,
 // leaf litter) do not stop the rays; leaves are looked through (a canopy over the forest floor is not ground).
-function stand(dimension, x, z, y) {
+export function stand(dimension, x, z, y) {
   try {
     let from = y + PROBE_UP;
     const bottom = y - PROBE_DOWN;
@@ -140,7 +145,7 @@ function stand(dimension, x, z, y) {
 
 const standIn = (dimension) => (x, z, y) => stand(dimension, x, z, y);
 
-function consumeAcorn(player) {
+export function consumeAcorn(player) {
   if (player.getGameMode() === GameMode.Creative) return;
   const slot = player.getComponent("equippable")?.getEquipmentSlot(EquipmentSlot.Mainhand);
   if (!slot?.hasItem() || slot.typeId !== ACORN_ID) return;
@@ -159,9 +164,14 @@ function removeBeacon(beaconId) {
 
 function offer(player, deer) {
   if (sessions.has(deer.id) || searching.has(deer.id)) return;
-  const refusal = offerRefusal({ level: levelFor(disharmonyOf(player).points), leashed: isLeashed(deer) });
+  const state = disharmonyOf(player);
+  const refusal = offerRefusal({ level: levelFor(state.points), friend: isFriend(state), leashed: isLeashed(deer) });
   if (refusal === "leashed") {
     say(player, "§7The white deer will not lead while it is held on a lead.");
+    return;
+  }
+  if (refusal === "untrusted") {
+    say(player, "§7The white deer watches you, but does not trust you yet.");
     return;
   }
   if (refusal) {
@@ -326,6 +336,7 @@ function tickSession(deerId, s) {
 // its own 330 s timer removes it.
 function sweepBeacons() {
   const live = new Set([...sessions.values()].map((s) => s.beaconId));
+  for (const source of beaconSources) for (const id of source()) live.add(id);
   for (const id of DIMENSIONS) {
     try {
       for (const beacon of world.getDimension(id).getEntities({ type: BEACON_ID })) {

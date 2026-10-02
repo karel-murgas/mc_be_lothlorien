@@ -839,8 +839,9 @@ cube: renders nothing but passes the verifier's "geometry has no cubes" check), 
 - **Ordinary deer**: back to its pre-`3426cec` entity, client entity and render controller (no coat, no guiding state); since 2026-09-30 its
   only food is Western Corn grain (see Deer).
 
-**The offer**: right-click an adult white deer holding a **Mallorn acorn** (`lothlorien:mallorn_acorn`) while your Disharmony is 0 (Friend
-included; level I and up: "shies from your restless spirit"). The entity has a `minecraft:interact` entry for a hand holding the acorn
+**The offer**: right-click an adult white deer holding a **Mallorn acorn** (`lothlorien:mallorn_acorn`) as a **Friend of Lothlórien** (owner rule, 2026-10-02: gifts
+need Friend; before that Disharmony 0 was enough). Level I and up: "shies from your restless spirit"; calm but not yet Friend: "watches you,
+but does not trust you yet" (acorn kept). The entity has a `minecraft:interact` entry for a hand holding the acorn
 (`use_item false`, text "Offer Acorn"): the 2.8.0 declarations say `playerInteractWithEntity` fires after a *successful* interaction, so
 without an interaction on the entity the script might never hear of it (**unverified** which is needed). The script then picks the gift spot
 (see Gift); the acorn is consumed (survival) **only when guidance starts** (spot found, first waypoint found, beacon spawned).
@@ -973,3 +974,21 @@ Leave and re-enter the world to load the entity and script changes. `/summon` wo
   3 deepslate tiles -> 9. Unknown until seen: whether flipbook + MERS strip work on a custom block.
 - Miruvor now takes Mallorn nectar. Blossoms are placed before leaf litter in the tree aggregate.
 - Not done / open: trader honey trades (settlements), tick-rate measurement, tuning, in-game test of all of the above.
+
+## Phase 15 - swan and ground squirrel (built and tried in game 2026-10-02: squirrel and deer work very well, swan floats with an occasional dip, left as is)
+
+Design sheets: `docs/mobs/swan.md`, `docs/mobs/squirrel.md`. What to know when touching them:
+
+- **Shared wariness.** Swan and squirrel carry the deer's state groups, events (`lothlorien:set_<state>`, `alarm`, `alarm_over`) and
+  properties (`wariness`, `alarmed`), so `deer.js` drives all four (`WARY_TYPES` in `deer_rules.js`); a test pins the flight radii of
+  both new entities to `FLIGHT_RADIUS`. Alarms cross species: hurting a deer alarms the swans and squirrels within 20 blocks.
+- **Swan spawns in rivers.** Rivers are separate biomes; the swan's spawn filter is `any_of` the `lothlorien` or `river` tag and
+  `swan.js` removes natural spawns with no Lothlorien biome within 48 blocks (25 biome samples, once per spawn).
+- **Squirrel errand = white deer machinery.** `squirrel.js` drives the engine's `follow_target_leader` with a moved
+  `guide_beacon` (away point, dig, onto the player); `white_deer.js` exports `stand`, `consumeAcorn` and `addBeaconSource` for it
+  (the stray-beacon sweep would otherwise delete the squirrel's beacon). Gift = `/loot spawn x y z loot "gifts/squirrel"`.
+- **Gifts need Friend of Lothlorien** (owner rule 2026-10-02): the squirrel's offer and, since the same day, the white deer's
+  (`offerRefusal` in both `*_rules.js`). Luring and taming stay open to calm players.
+- **Verified in game 2026-10-02**: the squirrel errand (beacon following, `/loot spawn` from script) and the Friend gating work. The swan floats
+  with the chicken's float goal but dips now and then (the turtle's `navigation.generic` + `random_swim` dived like a fish, `minecraft:buoyant` sank it).
+  River spawning of swans was not specifically checked.

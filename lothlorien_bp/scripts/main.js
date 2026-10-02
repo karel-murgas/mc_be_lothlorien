@@ -15,6 +15,8 @@ import { leafUndersideY } from "./leaf_fall.js";
 import { handleDisharmonyEvent, startDisharmony } from "./disharmony_game.js";
 import { startDeer } from "./deer.js";
 import { startWhiteDeer } from "./white_deer.js";
+import { startSwans } from "./swan.js";
+import { startSquirrels } from "./squirrel.js";
 import { DEPTH_NAMES, estimateDepth, probeCount } from "./depth.js";
 
 const BIOME_ID = "lothlorien:lothlorien";
@@ -181,5 +183,7 @@ world.afterEvents.worldLoad.subscribe(() => {
     transparent: DEPTH_TRANSPARENT,
     at: (dimension, x, z) => surfaceSampler(dimension, { x, z })(0, 0),
   });
+  startSwans({ id: BIOME_ID, at: (dimension, x, z) => surfaceSampler(dimension, { x, z })(0, 0) });
+  startSquirrels();
   startAntlerSupport();
 });

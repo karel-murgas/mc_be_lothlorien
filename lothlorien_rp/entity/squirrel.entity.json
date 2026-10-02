@@ -1,0 +1,40 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "lothlorien:squirrel",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "brown": "textures/entity/squirrel/squirrel_brown",
+        "russet": "textures/entity/squirrel/squirrel_russet",
+        "dark": "textures/entity/squirrel/squirrel_dark"
+      },
+      "geometry": {
+        "default": "geometry.lothlorien.squirrel"
+      },
+      "animations": {
+        "idle": "animation.lothlorien.squirrel.idle",
+        "walk": "animation.lothlorien.squirrel.walk",
+        "look_at_target": "animation.common.look_at_target"
+      },
+      "scripts": {
+        "animate": [
+          "idle",
+          "look_at_target",
+          {
+            "walk": "query.modified_move_speed > 0.01"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.lothlorien.squirrel"
+      ],
+      "spawn_egg": {
+        "base_color": "#7c5232",
+        "overlay_color": "#ecdcb4"
+      }
+    }
+  }
+}

@@ -203,6 +203,8 @@ Potential later role for:
 - maps/hints,
 - quest progression.
 
+It could teach the Lothlorien mechanics - disharmony, morning dew, syrup, flowers, acrons for deer and squirel, hints on unicorn, lembas baking...
+
 ## Disharmony-aware trading
 
 This should be **player-specific**.

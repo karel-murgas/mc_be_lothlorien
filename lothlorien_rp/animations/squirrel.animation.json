@@ -1,0 +1,72 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.lothlorien.squirrel.idle": {
+      "loop": true,
+      "bones": {
+        "tail": {
+          "rotation": [
+            "math.sin(query.life_time * 120.0) * 4.0",
+            "math.sin(query.life_time * 60.0) * 6.0",
+            0
+          ]
+        },
+        "head": {
+          "rotation": [
+            0,
+            0,
+            "math.sin(query.life_time * 70.0) * 3.0"
+          ]
+        }
+      }
+    },
+    "animation.lothlorien.squirrel.walk": {
+      "loop": true,
+      "anim_time_update": "query.modified_distance_moved",
+      "bones": {
+        "body": {
+          "position": [
+            0,
+            "math.abs(math.sin(query.anim_time * 900.0)) * 0.6",
+            0
+          ]
+        },
+        "leg_fl": {
+          "rotation": [
+            "math.sin(query.anim_time * 900.0 + 0) * 45.0",
+            0,
+            0
+          ]
+        },
+        "leg_br": {
+          "rotation": [
+            "math.sin(query.anim_time * 900.0 + 0) * 45.0",
+            0,
+            0
+          ]
+        },
+        "leg_fr": {
+          "rotation": [
+            "-math.sin(query.anim_time * 900.0 + 0) * 45.0",
+            0,
+            0
+          ]
+        },
+        "leg_bl": {
+          "rotation": [
+            "-math.sin(query.anim_time * 900.0 + 0) * 45.0",
+            0,
+            0
+          ]
+        },
+        "tail": {
+          "rotation": [
+            "math.sin(query.anim_time * 900.0) * 6.0",
+            0,
+            0
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "lothlorien:swan",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/swan/swan"
+      },
+      "geometry": {
+        "default": "geometry.lothlorien.swan"
+      },
+      "animations": {
+        "idle": "animation.lothlorien.swan.idle",
+        "walk": "animation.lothlorien.swan.walk",
+        "swim": "animation.lothlorien.swan.swim",
+        "look_at_target": "animation.common.look_at_target"
+      },
+      "scripts": {
+        "animate": [
+          "idle",
+          "look_at_target",
+          {
+            "walk": "query.is_on_ground && !query.is_in_water && query.modified_move_speed > 0.01"
+          },
+          {
+            "swim": "query.is_in_water"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.lothlorien.swan"
+      ],
+      "spawn_egg": {
+        "base_color": "#f2f4f8",
+        "overlay_color": "#e0702a"
+      }
+    }
+  }
+}

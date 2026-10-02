@@ -743,9 +743,10 @@ Do this after Disharmony and animal infrastructure are stable.
 - strong avoidance of Disharmonious players,
 - Friend-only approach,
 - offer Elanor while Friend status is active to initiate trust/taming,
-- rideable/tamable result.
+- rideable/tamable result,
+- we may create more interesting taming process
 
-Test multiplayer state carefully: one player's Disharmony must not make the unicorn incorrectly react to another player.
+Lurable by Elanor, but not leachable. Ridable, but without a saddle. Saddle can't be put on. Qualities of the best horse.
 
 ## Primary tools
 
@@ -768,8 +769,7 @@ Then expand:
 - ceremonial platform,
 - rare ancient grove landmark.
 
-Use procedural scaffolding when useful, but curate every final structure.
-
+Use procedural scaffolding when useful, but curate every final structure. Maybe some moss paths (moss then needs to be allowed for Lothlorien fauna and flora to spawn on)
 
 ## Primary tools
 
@@ -870,6 +870,8 @@ Player should be able to say:
 > "I'm clearly deeper in the forest now."
 
 without looking at debug UI.
+
+We should look at opportunities to apply Disharmony and Depth to make use of these mechanics.
 
 ---
 

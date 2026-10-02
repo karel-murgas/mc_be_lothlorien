@@ -4,13 +4,14 @@ import { world, system } from "@minecraft/server";
 import { disharmonyOf } from "./disharmony_game.js";
 import { isFriend, levelFor } from "./disharmony.js";
 import { isGuiding } from "./white_deer.js";
-import { ALARM_RADIUS, CORN_ID, DEER_ID, DEER_TYPES, WATCH_RADIUS, pickWariness, setEventFor, warinessFor } from "./deer_rules.js";
+import { isErrand } from "./squirrel.js";
+import { ALARM_RADIUS, CORN_ID, DEER_ID, DEER_TYPES, WARY_TYPES, WATCH_RADIUS, pickWariness, setEventFor, warinessFor } from "./deer_rules.js";
 
 const INTERVAL_TICKS = 40;
 const PLAYER_ID = "minecraft:player";
 
 const nearDeer = (dimension, location, maxDistance) =>
-  DEER_TYPES.flatMap((type) => dimension.getEntities({ type, location, maxDistance }));
+  WARY_TYPES.flatMap((type) => dimension.getEntities({ type, location, maxDistance }));
 
 function updateWariness() {
   const seen = new Map(); // deer id -> { deer, candidates }
@@ -28,8 +29,8 @@ function updateWariness() {
     try {
       if (deer.getProperty("lothlorien:alarmed")) continue; // the alarm timer hands back to the state
       if (deer.getProperty("lothlorien:guiding")) {
-        // a guiding white deer keeps its guiding state; one with no session (world reloaded mid-guidance) is released
-        if (!isGuiding(deer.id)) deer.triggerEvent("lothlorien:guide_end");
+        // a guiding white deer or errand squirrel keeps its guiding state; one with no session (world reloaded mid-way) is released
+        if (!isGuiding(deer.id) && !isErrand(deer.id)) deer.triggerEvent("lothlorien:guide_end");
         continue;
       }
       const wariness = pickWariness(candidates);
@@ -70,10 +71,11 @@ function alarmAround(dimension, location) {
 export function startDeer() {
   system.runInterval(updateWariness, INTERVAL_TICKS);
   world.afterEvents.entityHurt.subscribe(({ hurtEntity, damageSource }) => {
-    if (!DEER_TYPES.includes(hurtEntity.typeId) || damageSource.damagingEntity?.typeId !== PLAYER_ID) return;
+    if (!WARY_TYPES.includes(hurtEntity.typeId) || damageSource.damagingEntity?.typeId !== PLAYER_ID) return;
     try {
-      // untame (no longer persistent unless leashed); the alarm below rebuilds its state without state_tame 20 s later
-      hurtEntity.triggerEvent("lothlorien:untame");
+      // untame (no longer persistent unless leashed); the alarm below rebuilds its state without state_tame 20 s later.
+      // Swans and squirrels are never tamed, so they have no such event.
+      if (DEER_TYPES.includes(hurtEntity.typeId)) hurtEntity.triggerEvent("lothlorien:untame");
     } catch {
       // deer died of the hit
     }
@@ -89,7 +91,7 @@ export function startDeer() {
   });
   world.afterEvents.entityDie.subscribe(({ deadEntity, damageSource }) => {
     try {
-      if (!DEER_TYPES.includes(deadEntity.typeId) || damageSource.damagingEntity?.typeId !== PLAYER_ID) return;
+      if (!WARY_TYPES.includes(deadEntity.typeId) || damageSource.damagingEntity?.typeId !== PLAYER_ID) return;
       alarmAround(deadEntity.dimension, deadEntity.location);
     } catch {
       // entity already gone
