@@ -17,6 +17,7 @@ import { startDeer } from "./deer.js";
 import { startWhiteDeer } from "./white_deer.js";
 import { startSwans } from "./swan.js";
 import { startSquirrels } from "./squirrel.js";
+import { startUnicorns } from "./unicorn.js";
 import { DEPTH_NAMES, estimateDepth, probeCount } from "./depth.js";
 
 const BIOME_ID = "lothlorien:lothlorien";
@@ -185,5 +186,6 @@ world.afterEvents.worldLoad.subscribe(() => {
   });
   startSwans({ id: BIOME_ID, at: (dimension, x, z) => surfaceSampler(dimension, { x, z })(0, 0) });
   startSquirrels();
+  startUnicorns();
   startAntlerSupport();
 });

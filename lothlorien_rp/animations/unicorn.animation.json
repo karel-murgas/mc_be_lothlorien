@@ -1,0 +1,50 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.lothlorien.unicorn.walk": {
+      "loop": true,
+      "bones": {
+        "legbl": {
+          "rotation": [
+            "(-variable.leg_stand_factor * 28.6 * query.modified_move_speed) * (1.0 - variable.stand_anim)",
+            0.0,
+            0.0
+          ]
+        },
+        "legbr": {
+          "rotation": [
+            "(variable.leg_stand_factor * 28.6 * query.modified_move_speed) * (1.0 - variable.stand_anim)",
+            0.0,
+            0.0
+          ]
+        },
+        "legfl": {
+          "rotation": [
+            "variable.leg_x_rot_anim * (1.0 - variable.stand_anim)",
+            0.0,
+            0.0
+          ]
+        },
+        "legfr": {
+          "rotation": [
+            "-variable.leg_x_rot_anim * (1.0 - variable.stand_anim)",
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    "animation.lothlorien.unicorn.look_at_player": {
+      "loop": true,
+      "bones": {
+        "neck": {
+          "rotation": [
+            "variable.head_x_rot",
+            "(variable.stand_anim + variable.inverse_max_stand_eat) * math.clamp(query.head_y_rotation(0), -20.0, 20.0)",
+            0.0
+          ]
+        }
+      }
+    }
+  }
+}

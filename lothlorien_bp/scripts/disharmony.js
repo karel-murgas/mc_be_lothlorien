@@ -24,8 +24,8 @@ export function isFriend(state) {
   return state.friend >= FRIEND_SECONDS;
 }
 
-// Kills that count as more than one (entity type id -> points). The white deer (white hart) counts as two deer.
-export const KILL_WEIGHTS = { "lothlorien:white_deer": 2 };
+// Kills that count as more than one (entity type id -> points). The white deer (white hart) counts as two deer, the unicorn as three.
+export const KILL_WEIGHTS = { "lothlorien:white_deer": 2, "lothlorien:unicorn": 3 };
 export const killWeight = (typeId) => KILL_WEIGHTS[typeId] ?? 1;
 
 // A player kill inside the biome: `weight` more points (killWeight of the victim), and the peaceful streaks start over.

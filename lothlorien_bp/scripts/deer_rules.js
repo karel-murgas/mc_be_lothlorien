@@ -14,7 +14,8 @@ export const DEER_TYPES = [DEER_ID, WHITE_DEER_ID];
 // entities/squirrel.json carry the same groups and events), so the whole forest's fauna reads the player's Disharmony.
 export const SWAN_ID = "lothlorien:swan";
 export const SQUIRREL_ID = "lothlorien:squirrel";
-export const WARY_TYPES = [...DEER_TYPES, SWAN_ID, SQUIRREL_ID];
+export const UNICORN_ID = "lothlorien:unicorn"; // also carries the groups and events; its calm state is as timid as l1 (entities/unicorn.json)
+export const WARY_TYPES = [...DEER_TYPES, SWAN_ID, SQUIRREL_ID, UNICORN_ID];
 export const WARINESS = ["calm", "l1", "l2", "l3", "friend"];
 // Deer farther than this from every player keep their last state; it must exceed the largest
 // flight distance in the entity file (alarmed/l3: 36/30 blocks).

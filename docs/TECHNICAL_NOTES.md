@@ -992,3 +992,17 @@ Design sheets: `docs/mobs/swan.md`, `docs/mobs/squirrel.md`. What to know when t
 - **Verified in game 2026-10-02**: the squirrel errand (beacon following, `/loot spawn` from script) and the Friend gating work. The swan floats
   with the chicken's float goal but dips now and then (the turtle's `navigation.generic` + `random_swim` dived like a fish, `minecraft:buoyant` sank it).
   River spawning of swans was not specifically checked.
+
+## Phase 15 - unicorn (built and tried in game 2026-10-02, owner accepted)
+
+Design sheet: `docs/mobs/unicorn.md`. What to know when touching it:
+
+- **Generated.** `tools/make_unicorn.py` writes the BP entity (the state groups are repetitive) and all client files; edit the generator, not the output.
+  It reads the vanilla horse geometry, animations and white-horse texture from `reference/vanilla/current`.
+- **Shares the deer's wariness** (`WARY_TYPES`, same events `set_<state>`, `alarm`, `alarm_over`; `deer.js` drives it). Its `calm` group flees like `l1`
+  and only `friend` has the Elanor lure, so a test pins calm to the `l1` radius and the rest to `FLIGHT_RADIUS`.
+- **Bond = three Elanor offers** (`unicorn.js`): `lothlorien:trust` (entity property), `lothlorien:last_offer` and `lothlorien:owner` (dynamic properties).
+  `lothlorien:become_tame` adds `lothlorien:bonded` (rideable, jump, persistent), a separate group that the state events never remove; `bond()` re-applies the
+  wariness event a tick later so `state_tame` replaces the player flight.
+- **No `minecraft:tameable`/`tamemount`**: both would consume items or tame by their own rules without the Friend check.
+

@@ -10,3 +10,4 @@ Firefly:
  - nothing, but you should be able to catech one with a glass bottle (to use in lamps)
 Unicorn:
  - nothing, but should be tamable (like horse, but no saddle needed to ride it)
+   - as built (2026-10-02): bond in three Elanor offers from a Friend, then ridden without a saddle (`docs/mobs/unicorn.md`)

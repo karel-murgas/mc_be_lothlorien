@@ -733,6 +733,8 @@ Pollinating our flowers would have needed script-guided flying (owner: no). Deta
 
 # Phase 15 — Unicorn
 
+**Done 2026-10-02 (tried in game, accepted)** - see `docs/mobs/unicorn.md`.
+
 Do this after Disharmony and animal infrastructure are stable.
 
 ## Features

@@ -127,6 +127,26 @@
             "pitch": 2.0
           }
         }
+      },
+      "lothlorien:unicorn": {
+        "volume": 1.0,
+        "pitch": [
+          1.0,
+          1.2
+        ],
+        "events": {
+          "ambient": "mob.horse.idle",
+          "hurt": "mob.horse.hit",
+          "death": "mob.horse.death",
+          "step": {
+            "sound": "mob.horse.soft",
+            "volume": 0.5,
+            "pitch": [
+              1.0,
+              1.3
+            ]
+          }
+        }
       }
     }
   }
