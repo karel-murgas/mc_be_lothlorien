@@ -919,6 +919,11 @@ test("icons: every non-cube plank-family block draws its icon through item_visua
   // the stairs icon is a straight stair whose tall half is EAST (geometry x is mirrored: x -8..0)
   const top = geos.get("geometry.lothlorien.mallorn_stairs_item").bones[0].cubes.find((c) => c.origin[1] === 8);
   assert.deepEqual([top.origin, top.size], [[-8, 8, -8], [8, 8, 16]]);
+  const stair = geos.get("geometry.lothlorien.mallorn_stairs_item");
+  for (const cube of stair.bones[0].cubes) {
+    assert.equal(cube.uv.up.uv_rotation, 90, "stair item top grain follows the stair run");
+    assert.equal(cube.uv.down.uv_rotation, 90, "stair item underside follows the stair run");
+  }
   for (const set of ["mallorn", "mallorn_heartwood"]) {
     assert.ok(readJson(`../lothlorien_bp/items/${set}_door.json`)["minecraft:item"].components["minecraft:icon"], `${set}_door: 2D icon`);
   }
@@ -1267,6 +1272,80 @@ test("flet tree: the rope hangs on the trunk, facing away from it", () => {
     const piece = t.blocks.get(`${LADDER.x},0,${LADDER.z}`);
     assert.deepEqual(piece, { name: B.rope, states: { "lothlorien:face": "north" } });
     assert.ok([B.log, B.wood].includes(at(t, LADDER.x, 0, LADDER.z + 1)), "wall behind the rope");
+  }
+});
+// Elven lighting (Phase 17): lantern, jar, chandelier.
+const LAMPS = { elven_lantern: ["up", "down"], elven_lantern_heartwood: ["up", "down"],
+  firefly_jar: ["up"], elven_chandelier: ["down"] };
+test("elven lamps: faces they may be placed on, light, and script support for each", () => {
+  const antlerJs = readFileSync(new URL("../lothlorien_bp/scripts/antler.js", import.meta.url), "utf8");
+  for (const [id, faces] of Object.entries(LAMPS)) {
+    const b = readJson(`../lothlorien_bp/blocks/${id}.json`)["minecraft:block"];
+    assert.deepEqual(b.components["minecraft:placement_filter"].conditions[0].allowed_faces, faces, id);
+    assert.ok(b.components["minecraft:light_emission"] >= 11, `${id} gives light`);
+    assert.equal(b.components["minecraft:light_dampening"], 0, `${id} lets light through`);
+    assert.ok("lothlorien:lamp_support" in b.components, `${id} pops off when its support goes`);
+    assert.ok(antlerJs.includes(`"lothlorien:${id}"`), `${id} is in the support script's id list`);
+  }
+});
+test("elven lantern: one model stands or hangs by its spire; the jar is all blend (one render_method per block)", () => {
+  const b = readJson("../lothlorien_bp/blocks/elven_lantern.json")["minecraft:block"];
+  assert.equal(b.components["minecraft:geometry"], "geometry.lothlorien.elven_lantern");
+  assert.deepEqual(b.components["minecraft:placement_filter"].conditions[0].allowed_faces, ["up", "down"]);
+  assert.equal(b.components["minecraft:material_instances"].wood.render_method, "opaque"); // the carving is real cubes
+  const gold = readJson("../lothlorien_bp/blocks/elven_lantern_heartwood.json")["minecraft:block"].components;
+  assert.equal(gold["minecraft:geometry"], b.components["minecraft:geometry"]);
+  assert.equal(gold["minecraft:material_instances"].wood.texture, "lothlorien:elven_lantern_wood_heartwood");
+  const jar = readJson("../lothlorien_bp/blocks/firefly_jar.json")["minecraft:block"].components;
+  assert.equal(jar["minecraft:material_instances"].glass.render_method, "blend");
+  for (const [k, m] of Object.entries(jar["minecraft:material_instances"])) assert.equal(m.render_method, "blend", `jar ${k}: one render_method per block`);
+  for (const g of ["elven_lantern", "firefly_jar", "elven_chandelier"]) {
+    assert.ok(existsSync(new URL(`../lothlorien_rp/models/blocks/${g}.geo.json`, import.meta.url)), g);
+  }
+});
+test("elven lantern: one core paints every outward side", () => {
+  const geo = readJson("../lothlorien_rp/models/blocks/elven_lantern.geo.json")["minecraft:geometry"][0];
+  const sides = ["north", "east", "south", "west"];
+  const cores = geo.bones.flatMap((bone) => bone.cubes).filter((cube) =>
+    sides.every((side) => cube.uv?.[side]?.material_instance === "glow"));
+  assert.equal(cores.length, 1, "one four-sided glow core");
+  assert.ok(cores[0].origin[0] < 0 && cores[0].origin[2] < 0, "core is centred behind the windows");
+});
+test("elven lamps: items place their block; recipes use existing items and chain lantern -> chandelier", () => {
+  const ids = new Set(readdirSync(new URL("../lothlorien_bp/items", import.meta.url)).map((f) => `lothlorien:${f.replace(".json", "")}`));
+  for (const id of Object.keys(LAMPS)) {
+    const definition = readJson(`../lothlorien_bp/items/${id}.json`)["minecraft:item"];
+    const item = definition.components;
+    assert.equal(item["minecraft:block_placer"].block, `lothlorien:${id}`);
+    assert.deepEqual(definition.description.menu_category,
+      { category: "items", group: "minecraft:itemGroup.name.lanterns" }, `${id}: creative group`);
+    const r = readJson(`../lothlorien_bp/recipes/${id}.json`)["minecraft:recipe_shaped"];
+    for (const k of Object.values(r.key)) assert.ok(k.item.startsWith("minecraft:") || ids.has(k.item), `${id}: ${k.item}`);
+    assert.equal(r.result.item, `lothlorien:${id}`);
+  }
+  const lantern = readJson("../lothlorien_bp/recipes/elven_lantern.json")["minecraft:recipe_shaped"];
+  assert.ok(Object.values(lantern.key).some((k) => k.item === "lothlorien:bottle_of_fireflies"));
+  const heartwood = readJson("../lothlorien_bp/recipes/elven_lantern_heartwood.json")["minecraft:recipe_shaped"];
+  assert.ok(Object.values(heartwood.key).some((k) => k.item === "lothlorien:mallorn_heartwood_trapdoor"));
+  const chandelier = readJson("../lothlorien_bp/recipes/elven_chandelier.json")["minecraft:recipe_shaped"];
+  assert.ok(Object.values(chandelier.key).some((k) => k.item === "lothlorien:elven_lantern"));
+  assert.ok(Object.values(chandelier.key).some((k) => k.item === "lothlorien:deer_antler"));
+});
+test("elven lamps: flipbook entries exist for every animated tile, names are in the lang file", () => {
+  const flips = readJson("../lothlorien_rp/textures/flipbook_textures.json").map((f) => f.atlas_tile);
+  for (const t of ["elven_lantern_glow", "elven_jar_inner"]) assert.ok(flips.includes(`lothlorien:${t}`), t);
+  const lang = readFileSync(new URL("../lothlorien_rp/texts/en_US.lang", import.meta.url), "utf8");
+  for (const id of Object.keys(LAMPS)) {
+    assert.ok(lang.includes(`tile.lothlorien:${id}.name=`) && lang.includes(`item.lothlorien:${id}=`), id);
+  }
+});
+test("Mallorn boat items use the boat and chest-boat creative groups", () => {
+  for (const wood of ["mallorn", "mallorn_heartwood"]) {
+    for (const [suffix, group] of [["boat", "boat"], ["chest_boat", "chestboat"]]) {
+      const item = readJson(`../lothlorien_bp/items/${wood}_${suffix}.json`)["minecraft:item"];
+      assert.deepEqual(item.description.menu_category,
+        { category: "items", group: `minecraft:itemGroup.name.${group}` });
+    }
   }
 });
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }

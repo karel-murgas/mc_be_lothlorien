@@ -7,14 +7,21 @@
 import { system, world } from "@minecraft/server";
 import { isUnsupported, supportOffset } from "./antler_rules.js";
 
-const ANTLER_ID = "lothlorien:deer_antler";
+// The Elven lamps share the antler's support rule (up = on a block, down = hung from one).
+const SUPPORTED_IDS = new Set([
+  "lothlorien:deer_antler",
+  "lothlorien:elven_lantern",
+  "lothlorien:elven_lantern_heartwood",
+  "lothlorien:firefly_jar",
+  "lothlorien:elven_chandelier",
+]);
 const NEIGHBOURS = [
   [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1],
 ];
 
 function dropIfUnsupported(dimension, { x, y, z }) {
   const antler = dimension.getBlock({ x, y, z });
-  if (antler?.typeId !== ANTLER_ID) return;
+  if (!SUPPORTED_IDS.has(antler?.typeId)) return;
   const offset = supportOffset(antler.permutation.getState("minecraft:block_face"));
   if (!offset) return;
   const support = dimension.getBlock({ x: x + offset.x, y: y + offset.y, z: z + offset.z });
@@ -34,7 +41,7 @@ function checkAround(dimension, location) {
 }
 
 system.beforeEvents.startup.subscribe(({ blockComponentRegistry }) => {
-  blockComponentRegistry.registerCustomComponent("lothlorien:antler_support", {
+  const handler = {
     beforeOnPlayerPlace(event) {
       try {
         const offset = supportOffset(String(event.face).toLowerCase());
@@ -46,7 +53,9 @@ system.beforeEvents.startup.subscribe(({ blockComponentRegistry }) => {
         event.cancel = true; // an unreadable support is not a valid placement
       }
     },
-  });
+  };
+  blockComponentRegistry.registerCustomComponent("lothlorien:antler_support", handler);
+  blockComponentRegistry.registerCustomComponent("lothlorien:lamp_support", handler);
 });
 
 export function startAntlerSupport() {

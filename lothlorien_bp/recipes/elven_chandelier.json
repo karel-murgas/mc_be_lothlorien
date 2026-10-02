@@ -1,0 +1,35 @@
+{
+  "format_version": "1.20.30",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "lothlorien:elven_chandelier"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      "ARA",
+      "ALA"
+    ],
+    "key": {
+      "A": {
+        "item": "lothlorien:deer_antler"
+      },
+      "R": {
+        "item": "lothlorien:elven_rope"
+      },
+      "L": {
+        "item": "lothlorien:elven_lantern"
+      }
+    },
+    "unlock": [
+      {
+        "item": "lothlorien:elven_lantern"
+      }
+    ],
+    "result": {
+      "item": "lothlorien:elven_chandelier",
+      "count": 1
+    }
+  }
+}

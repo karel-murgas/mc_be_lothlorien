@@ -5,7 +5,7 @@
       "identifier": "lothlorien:mallorn_chest_boat",
       "menu_category": {
         "category": "items",
-        "group": "minecraft:itemGroup.name.boat"
+        "group": "minecraft:itemGroup.name.chestboat"
       }
     },
     "components": {

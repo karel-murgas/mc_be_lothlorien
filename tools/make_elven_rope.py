@@ -18,7 +18,7 @@ from PIL import Image
 RP = Path(__file__).resolve().parents[1] / "lothlorien_rp"
 
 HI, LI, MID, SHADE, DEEP = ("#a4a6ae", "#82848c", "#62646c", "#46484f", "#2d2f35")
-OUTLINE = "#1d1e23"
+OUTLINE = "#494d57"
 DEW = "#e4f4fc"
 
 
@@ -100,7 +100,7 @@ def geometry():
 
 
 # Icon ramp: the block's greys widened to 7 values, cool in the shadows and a little warm in the highlight
-ICON_RAMP = ["#22222e", "#343647", "#4b4f5f", "#656a77", "#858a93", "#a9aeb0", "#d3d5cf"]
+ICON_RAMP = ["#4f5360", "#343647", "#4b4f5f", "#656a77", "#858a93", "#a9aeb0", "#d3d5cf"]
 ICON_LIGHT = (-0.7071, -0.7071)  # towards the top-left
 
 
@@ -128,7 +128,7 @@ def rope_stroke(px, path, width=2.0, dark=0.0, lay=3.2):
                 if (arc[i] + s * 1.2) % lay < 0.85:
                     v -= 0.2
                 fill[(x, y)] = max(0, min(len(ICON_RAMP) - 1, int(v * len(ICON_RAMP))))
-            elif d <= width / 2 + 1.0:
+            elif d <= width / 2 + 0.6:
                 edge.add((x, y))
     for pos in edge:
         px[pos] = "o"
@@ -136,16 +136,8 @@ def rope_stroke(px, path, width=2.0, dark=0.0, lay=3.2):
 
 
 def paint_icon():
-    """A coiled hank seen from the front and above: three stacked turns (the lower ones a little darker, each outlined so
-    it reads apart), the dark hole in the middle, the loose end hanging out at the lower right with a lit frayed tip, and
-    one dew glint on the top turn. Earlier icons and why they failed: Phase 17b notes."""
-    import math
-    cx, rx, ry, step, top_cy, turns = 7.5, 6.0, 3.6, 2.2, 4.6, 3
-
-    def ellipse(cy, n=400):
-        return [(cx + rx * math.cos(2 * math.pi * i / n), cy + ry * math.sin(2 * math.pi * i / n)) for i in range(n + 1)]
-
-    def bezier(pts, n=200):
+    """A short working length with an overhand knot, echoing the placed block's knot."""
+    def bezier(pts, n=120):
         out = []
         for i in range(n + 1):
             q = list(pts)
@@ -155,16 +147,11 @@ def paint_icon():
         return out
 
     px = {}
-    for k in range(turns):  # bottom turn first, each lower turn `step` lower on screen
-        cy = top_cy + (turns - 1 - k) * step
-        dark = 0.07 * (turns - 1 - k)
-        rope_stroke(px, ellipse(cy), dark=dark)
-        if k == 0:  # the loose end leaves the bottom turn at the front right
-            x0, y0 = cx + rx * math.cos(0.9), cy + ry * math.sin(0.9)
-            rope_stroke(px, bezier([(x0, y0), (x0 + 2.5, y0 + 1.0), (14.4, y0 + 1.5), (14.1, 15.3)]), dark=dark)
-    px[(13, 15)] = len(ICON_RAMP) - 2  # frayed tip
-    px[(14, 14)] = 4
-    px[(4, 1)] = "dew"
+    rope_stroke(px, bezier([(5, 1), (5, 4), (4, 6), (6, 8)]), width=2.2)
+    rope_stroke(px, bezier([(6, 8), (9, 11), (12, 8), (10, 6)]), width=2.2)
+    rope_stroke(px, bezier([(10, 6), (7, 4), (4, 6), (7, 9)]), width=2.2)
+    rope_stroke(px, bezier([(7, 9), (8, 11), (9, 13), (9, 15)]), width=2.2)
+    px[(5, 2)] = "dew"
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     for pos, c in px.items():
         img.putpixel(pos, hexc(OUTLINE if c == "o" else DEW if c == "dew" else ICON_RAMP[c]))

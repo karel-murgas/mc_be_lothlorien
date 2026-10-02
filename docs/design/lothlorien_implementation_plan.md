@@ -781,6 +781,8 @@ Minecraft Editor/Structure Blocks + Claude generator + graphics where needed.
 
 # Phase 17 — Elven lighting
 
+_Status: silver Elven Lantern, Firefly jar and chandelier built and accepted; golden heartwood lantern and revised icons deployed 2026-10-03. Sconce rejected; dew stays out of the lamp recipes. Details: `docs/TECHNICAL_NOTES.md` "Phase 17"._
+
 Add:
 
 - silver Elven lamp,

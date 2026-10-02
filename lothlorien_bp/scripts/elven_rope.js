@@ -132,8 +132,8 @@ world.afterEvents.blockExplode.subscribe(({ block, dimension, explodedBlockPermu
 
 // WORKAROUND (docs/workarounds.md in the workspace; re-check after every game update): no component makes a custom block
 // climbable (1.26.52). Remove this when one exists.
-// Climbing, by script (a custom block cannot be climbable): in a rope cell Jump or forward climbs (levitation), otherwise
-// you sink slowly (slow falling).
+// Climbing, by script (a custom block cannot be climbable): in a rope cell Jump or forward climbs (levitation), crouch
+// holds your height, and otherwise you sink slowly (slow falling).
 // Jump or walking forward climbs (the movement vector's y is positive forward). Returns the climb speed in blocks per
 // tick, or 0.
 export function climbSpeed(player) {
@@ -148,7 +148,8 @@ export function inRope(player) {
   return [Math.floor(y), Math.floor(y + 1)].some((cy) => player.dimension.getBlock({ x: cx, y: cy, z: cz })?.typeId === ROPE_ID);
 }
 
-// player id -> { v: modelled vertical speed while climbing (see levitationStep), else null; y: last height }
+// player id -> { v: modelled vertical speed while climbing (see levitationStep), else null;
+//                y: last height; holdY: height where crouching began, or undefined }
 const climbing = new Map();
 const CLIMB_EFFECTS = ["levitation", "slow_falling"];
 
@@ -162,6 +163,16 @@ export function startRopeClimbing() {
         }
         const y = player.location.y;
         const last = climbing.get(player.id);
+        if (player.isSneaking) {
+          // A custom block has no ladder's built-in crouch grip. Hold the first crouched height without changing
+          // horizontal movement or the direction the player is facing.
+          const holdY = last?.holdY ?? y;
+          player.removeEffect("levitation");
+          player.removeEffect("slow_falling");
+          player.teleport({ x: player.location.x, y: holdY, z: player.location.z });
+          climbing.set(player.id, { v: null, y: holdY, holdY });
+          continue;
+        }
         const target = climbSpeed(player);
         let v = null;
         let level; // levitation amplifier this tick, or undefined for none

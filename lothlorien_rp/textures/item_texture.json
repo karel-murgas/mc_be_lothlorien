@@ -91,6 +91,18 @@
     },
     "lothlorien:elven_rope": {
       "textures": "textures/items/elven_rope"
+    },
+    "lothlorien:elven_lantern": {
+      "textures": "textures/items/elven_lantern"
+    },
+    "lothlorien:firefly_jar": {
+      "textures": "textures/items/firefly_jar"
+    },
+    "lothlorien:elven_chandelier": {
+      "textures": "textures/items/elven_chandelier"
+    },
+    "lothlorien:elven_lantern_heartwood": {
+      "textures": "textures/items/elven_lantern_heartwood"
     }
   }
 }

@@ -13,7 +13,7 @@ entities; lang and item_texture entries). Do not hand-edit the generated files.
 - BP entities are copies of vanilla `boat` / `chest_boat` (1.26.30) with `runtime_identifier` `minecraft:boat` /
   `minecraft:chest_boat`: the hard-coded boat class does placing, steering, the boat UI and the 27-slot chest.
   Bamboo-raft seat group dropped; own loot tables. Chest boat seat at x 0.35 (vanilla 0.2 would sit in the chest).
-- Items: `entity_placer` + `liquid_clipped`, stack 1, creative group `itemGroup.name.boat`.
+- Items: `entity_placer` + `liquid_clipped`, stack 1; plain boats use `itemGroup.name.boat`, chest boats use `itemGroup.name.chestboat`.
 - Recipes: boat = 5 planks in a U (silver or heartwood planks); chest boat = chest over the boat (shaped only).
 - Client: the `hull` bone is turned by the actor yaw (a runtime boat does not turn a custom model); one `lead`
   locator, identical in every geometry (they share locators), on the bow neck; paddles row while ridden and moving;
@@ -32,4 +32,5 @@ geometry +X), no sail. Mallorn palette: silver planks, gold gunwale and leaves; 
   icon); breaks the style guide on element count and stair curves, hence opt-in. Chest at x -10..2 fits as it is.
 - Switch: RP pack setting `lothlorien:pretty_boats` (manifest v3 `settings`; Resource Packs -> Lothlorien RP -> gear
   icon), read by the boat and chest render controllers. Verified in game.
-- Icon: vanilla boat-icon projection (inventory pose [30, 225, 0]), chest boats with the vanilla chest drawn in.
+- Icon: vanilla boat-icon projection (inventory pose [30, 225, 0]); chest boats have a smaller isometric
+  chest at the stern. The owner accepted the icon revision with the 2026-10-03 icon set.

@@ -76,7 +76,8 @@
                   "uv_size": [
                     16,
                     16
-                  ]
+                  ],
+                  "uv_rotation": 90
                 },
                 "down": {
                   "uv": [
@@ -86,7 +87,8 @@
                   "uv_size": [
                     16,
                     16
-                  ]
+                  ],
+                  "uv_rotation": 90
                 }
               }
             },
@@ -150,7 +152,8 @@
                   "uv_size": [
                     8,
                     16
-                  ]
+                  ],
+                  "uv_rotation": 90
                 },
                 "down": {
                   "uv": [
@@ -160,7 +163,8 @@
                   "uv_size": [
                     8,
                     16
-                  ]
+                  ],
+                  "uv_rotation": 90
                 }
               }
             }

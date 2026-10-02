@@ -1,0 +1,32 @@
+{
+  "format_version": "1.20.30",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "lothlorien:firefly_jar"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      "N",
+      "B"
+    ],
+    "key": {
+      "N": {
+        "item": "lothlorien:mallorn_button"
+      },
+      "B": {
+        "item": "lothlorien:bottle_of_fireflies"
+      }
+    },
+    "unlock": [
+      {
+        "item": "lothlorien:bottle_of_fireflies"
+      }
+    ],
+    "result": {
+      "item": "lothlorien:firefly_jar",
+      "count": 1
+    }
+  }
+}

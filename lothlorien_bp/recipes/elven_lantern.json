@@ -1,0 +1,33 @@
+{
+  "format_version": "1.20.30",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "lothlorien:elven_lantern"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      "T",
+      "B",
+      "T"
+    ],
+    "key": {
+      "T": {
+        "item": "lothlorien:mallorn_trapdoor"
+      },
+      "B": {
+        "item": "lothlorien:bottle_of_fireflies"
+      }
+    },
+    "unlock": [
+      {
+        "item": "lothlorien:bottle_of_fireflies"
+      }
+    ],
+    "result": {
+      "item": "lothlorien:elven_lantern",
+      "count": 1
+    }
+  }
+}

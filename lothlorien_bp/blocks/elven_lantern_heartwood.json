@@ -1,0 +1,80 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:block": {
+    "description": {
+      "identifier": "lothlorien:elven_lantern_heartwood",
+      "traits": {
+        "minecraft:placement_position": {
+          "enabled_states": [
+            "minecraft:block_face"
+          ]
+        }
+      }
+    },
+    "components": {
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 0.8
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 1
+      },
+      "minecraft:sound": {
+        "sound": "wood"
+      },
+      "minecraft:light_emission": 14,
+      "minecraft:light_dampening": 0,
+      "minecraft:map_color": "#bd9a58",
+      "minecraft:geometry": "geometry.lothlorien.elven_lantern",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "lothlorien:elven_lamp_heartwood",
+          "render_method": "opaque"
+        },
+        "glow": {
+          "texture": "lothlorien:elven_lantern_glow",
+          "render_method": "opaque",
+          "ambient_occlusion": 0.0
+        },
+        "wood": {
+          "texture": "lothlorien:elven_lantern_wood_heartwood",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:placement_filter": {
+        "conditions": [
+          {
+            "allowed_faces": [
+              "up",
+              "down"
+            ]
+          }
+        ]
+      },
+      "lothlorien:lamp_support": {},
+      "minecraft:collision_box": {
+        "origin": [
+          -5,
+          0,
+          -5
+        ],
+        "size": [
+          10,
+          16,
+          10
+        ]
+      },
+      "minecraft:selection_box": {
+        "origin": [
+          -5,
+          0,
+          -5
+        ],
+        "size": [
+          10,
+          16,
+          10
+        ]
+      }
+    }
+  }
+}

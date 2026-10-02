@@ -135,6 +135,27 @@
     },
     "lothlorien:elven_rope": {
       "textures": "textures/blocks/elven_rope"
+    },
+    "lothlorien:elven_lamp": {
+      "textures": "textures/blocks/elven_lamp"
+    },
+    "lothlorien:elven_lantern_glow": {
+      "textures": "textures/blocks/elven_lantern_glow"
+    },
+    "lothlorien:elven_lantern_wood": {
+      "textures": "textures/blocks/elven_lantern_wood"
+    },
+    "lothlorien:elven_jar_glass": {
+      "textures": "textures/blocks/elven_jar_glass"
+    },
+    "lothlorien:elven_jar_inner": {
+      "textures": "textures/blocks/elven_jar_inner"
+    },
+    "lothlorien:elven_lamp_heartwood": {
+      "textures": "textures/blocks/elven_lamp_heartwood"
+    },
+    "lothlorien:elven_lantern_wood_heartwood": {
+      "textures": "textures/blocks/elven_lantern_wood_heartwood"
     }
   }
 }

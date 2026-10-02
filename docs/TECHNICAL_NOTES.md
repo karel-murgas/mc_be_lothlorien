@@ -1034,8 +1034,31 @@ dark grey, a knot every 8 units. Art: `tools/make_elven_rope.py`.
   - **HUD icons** cannot be hidden per effect (`showParticles: false` does not do it; one hardcoded `mob_effects_renderer`).
     Options weighed: hide the whole strip while on a rope via a JSON UI override and a title marker (fragile, untried), replace the
     vanilla icon textures (changes potions too, rejected by the owner). Owner kept the icons.
-- Art: the icon was redrawn five times as a flat coil seen from above (coil, loop, arch, spiral; read as a magnifying glass) and
-  rejected. Round 6 (2026-10-02, **accepted by the owner**): a **coiled hank** seen from the front and above, three stacked turns drawn as
-  outlined 2-px strokes back to front, dark hole, loose end at the lower right, one dew glint. The placed rope has one knot per block (owner liked it).
+- Art: the placed rope has one knot per block (owner liked it). The final item icon is a short rope with one
+  overhand knot, a one-pixel hole and dark-grey edge pixels. The owner accepted this version on 2026-10-03;
+  earlier coiled-hank and loop studies are retained in git history.
 - The two lookout giants (`round_05`, `round_07`) use the rope instead of the vanilla ladder (`tools/flet_mallorn.mjs`, `B.rope`);
   structures rebuilt with `node tools/build_structures.mjs`. Existing worlds keep their ladders, new chunks get ropes.
+
+## Phase 17 - Elven lighting (2026-10-03)
+
+Generator: `tools/make_elven_lamps.py`. Owner accepted the silver Elven Lantern design and preferred its compact
+hand-drawn inventory icon on 2026-10-03. The lantern has a small foot, open four-sided amber chamber framed
+by real silver-wood arches, a broad stepped canopy, and a silver collar beneath its gold finial. It can stand or
+hang by the finial. Its previous lean/vine studies and the temporary Arch Study item are retired; git retains them.
+The original two-sided missing-glow problem came from the older core's face UVs. The current core paints every
+outward side. The lowest foot layer was removed at the owner's request; this revision awaits an in-game check.
+
+- Silver lantern: `lothlorien:elven_lantern`, light 14, crafted from two Mallorn trapdoors and a Bottle of Fireflies.
+- Golden lantern: `lothlorien:elven_lantern_heartwood`, the same geometry with the established stripped Mallorn
+  silver-to-heartwood palette mapping (`make_mallorn_wood.to_gold`), silver collar and finial, two heartwood
+  trapdoors in its recipe. Generated and previewed 2026-10-03; in-game verdict pending.
+- Elven chandelier: light 15, ceiling only. Antler arms and five hanging lights; crafted from four deer antlers,
+  Elven rope and the silver lantern. Owner accepted the placed model in game 2026-10-02. Icon redrawn at inventory
+  scale 2026-10-03; in-game verdict pending.
+- Firefly jar: light 11, floor only, blend glass, moss and animated flies. Owner accepted the placed model in game
+  2026-10-02. Icon redrawn with a compact glass rim and two flies 2026-10-03; in-game verdict pending.
+- All four lamp items use `items` / `itemGroup.name.lanterns`. The animated glow and fly tiles use MERS maps.
+
+Static verification and deployment do not prove rendering or Creative menu placement. Check the golden palette,
+icon scale and all lamp groups in game, plus the jar's glass sorting and the lantern's four-sided glow.

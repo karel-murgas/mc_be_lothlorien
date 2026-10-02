@@ -99,7 +99,8 @@ def main():
     path = os.path.join(RP, "texts", "en_US.lang")
     text = read(path)
     nl = "\r\n" if "\r\n" in text else "\n"
-    lines = [ln for ln in text.splitlines() if "mallorn_heartwood_" not in ln]
+    family_name = re.compile(r"^(?:tile|item)\.lothlorien:mallorn_heartwood_(?:%s)(?:\.name)?=" % "|".join(FAMILY))
+    lines = [ln for ln in text.splitlines() if not family_name.match(ln)]
     silver = [i for i, ln in enumerate(lines) if re.match(r"(tile|item)\.lothlorien:mallorn_(%s)\b" % "|".join(FAMILY), ln)]
     at = silver[-1] + 1
     new = []

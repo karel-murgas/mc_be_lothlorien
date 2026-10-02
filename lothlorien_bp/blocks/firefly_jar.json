@@ -1,0 +1,79 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:block": {
+    "description": {
+      "identifier": "lothlorien:firefly_jar",
+      "traits": {
+        "minecraft:placement_position": {
+          "enabled_states": [
+            "minecraft:block_face"
+          ]
+        }
+      }
+    },
+    "components": {
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 0.8
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 1
+      },
+      "minecraft:sound": {
+        "sound": "glass"
+      },
+      "minecraft:light_emission": 11,
+      "minecraft:light_dampening": 0,
+      "minecraft:map_color": "#e0b048",
+      "minecraft:geometry": "geometry.lothlorien.firefly_jar",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "lothlorien:elven_lamp",
+          "render_method": "blend"
+        },
+        "glass": {
+          "texture": "lothlorien:elven_jar_glass",
+          "render_method": "blend"
+        },
+        "inner": {
+          "texture": "lothlorien:elven_jar_inner",
+          "render_method": "blend",
+          "ambient_occlusion": 0.0
+        }
+      },
+      "minecraft:placement_filter": {
+        "conditions": [
+          {
+            "allowed_faces": [
+              "up"
+            ]
+          }
+        ]
+      },
+      "lothlorien:lamp_support": {},
+      "minecraft:collision_box": {
+        "origin": [
+          -3,
+          0,
+          -3
+        ],
+        "size": [
+          6,
+          7,
+          6
+        ]
+      },
+      "minecraft:selection_box": {
+        "origin": [
+          -3,
+          0,
+          -3
+        ],
+        "size": [
+          6,
+          7,
+          6
+        ]
+      }
+    }
+  }
+}

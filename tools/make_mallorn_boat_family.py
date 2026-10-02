@@ -79,19 +79,28 @@ def chest_geometry():
 
 
 def chest_icon(boat_icon):
-    """The boat icon with a chest standing in it (lid top, dark frame, lock), like the vanilla chest-boat icons."""
+    """A small isometric vanilla chest tucked into the stern, leaving the swan bow and hull readable."""
     img = boat_icon.copy()
-    x0, y0 = 4, 2  # top-left of the chest (6 wide, 6 high)
-    rows = ["dddddd",
-            "dlllld",
-            "dmmmmd",
-            "ddkqdd",
-            "dsmmsd",
-            "dddddd"]
-    pal = {"d": CH_DARK, "l": CH_LIGHT, "m": CH_MID, "s": CH_SHADE, "k": LOCK, "q": LOCK_DARK}
-    for j, row in enumerate(rows):
-        for i, ch in enumerate(row):
-            img.putpixel((x0 + i, y0 + j), (*pal[ch], 255))
+    def put(x, y, colour):
+        img.putpixel((x, y), (*colour, 255))
+
+    for x in range(4, 8):  # lid top, tilted to match the boat's inventory pose
+        put(x, 4, CH_DARK if x == 7 else CH_LIGHT)
+    put(3, 5, CH_DARK)
+    for x in range(4, 8):
+        put(x, 5, CH_LIGHT if x < 6 else CH_MID)
+    put(8, 5, CH_DARK)
+    for x in range(3, 9):  # iron-dark lid seam
+        put(x, 6, CH_SHADE if 4 <= x <= 7 else CH_DARK)
+    for y in (7, 8):
+        put(3, y, CH_SHADE)
+        for x in range(4, 8):
+            put(x, y, CH_LIGHT if x == 4 and y == 7 else CH_MID if x < 7 else CH_SHADE)
+        put(8, y, CH_DARK)
+    for x in range(4, 9):
+        put(x, 9, CH_DARK)
+    put(6, 7, LOCK)
+    put(6, 8, LOCK_DARK)
     return img
 
 
@@ -137,9 +146,10 @@ def entity(kind, ident):
 
 
 def item(ident):
+    group = "chestboat" if ident.endswith("_chest_boat") else "boat"
     return {"format_version": "1.26.50", "minecraft:item": {
         "description": {"identifier": ident,
-                        "menu_category": {"category": "items", "group": "minecraft:itemGroup.name.boat"}},
+                        "menu_category": {"category": "items", "group": f"minecraft:itemGroup.name.{group}"}},
         "components": {"minecraft:icon": ident, "minecraft:max_stack_size": 1, "minecraft:liquid_clipped": True,
                        "minecraft:entity_placer": {"entity": ident}}}}
 
