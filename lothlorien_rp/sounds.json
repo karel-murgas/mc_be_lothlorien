@@ -65,6 +65,29 @@
             ]
           }
         }
+      },
+      "lothlorien:songbird": {
+        "volume": 0.8,
+        "pitch": [
+          1.3,
+          1.7
+        ],
+        "events": {
+          "ambient": {
+            "sound": "mob.parrot.idle",
+            "volume": 0.6
+          },
+          "hurt": "mob.parrot.hurt",
+          "death": "mob.parrot.death",
+          "step": {
+            "sound": "mob.parrot.step",
+            "volume": 0.3
+          },
+          "fly": {
+            "sound": "mob.parrot.fly",
+            "volume": 0.3
+          }
+        }
       }
     }
   }

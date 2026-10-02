@@ -1,0 +1,44 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "lothlorien:songbird",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "blue": "textures/entity/songbird/songbird_blue",
+        "yellow": "textures/entity/songbird/songbird_yellow",
+        "pink": "textures/entity/songbird/songbird_pink"
+      },
+      "geometry": {
+        "default": "geometry.lothlorien.songbird"
+      },
+      "animations": {
+        "idle": "animation.lothlorien.songbird.idle",
+        "hop": "animation.lothlorien.songbird.hop",
+        "fly": "animation.lothlorien.songbird.fly",
+        "look_at_target": "animation.common.look_at_target"
+      },
+      "scripts": {
+        "animate": [
+          "idle",
+          "look_at_target",
+          {
+            "hop": "query.is_on_ground && query.modified_move_speed > 0.01"
+          },
+          {
+            "fly": "!query.is_on_ground"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.lothlorien.songbird"
+      ],
+      "spawn_egg": {
+        "base_color": "#7ab8e6",
+        "overlay_color": "#ecd048"
+      }
+    }
+  }
+}

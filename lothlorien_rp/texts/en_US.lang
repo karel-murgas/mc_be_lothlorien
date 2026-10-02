@@ -93,3 +93,5 @@ item.lothlorien:mallorn_heartwood_boat=Mallorn Heartwood Boat
 entity.lothlorien:mallorn_heartwood_boat.name=Mallorn Heartwood Boat
 item.lothlorien:mallorn_heartwood_chest_boat=Mallorn Heartwood Boat with Chest
 entity.lothlorien:mallorn_heartwood_chest_boat.name=Mallorn Heartwood Boat with Chest
+entity.lothlorien:songbird.name=Songbird
+item.spawn_egg.entity.lothlorien:songbird.name=Songbird Spawn Egg

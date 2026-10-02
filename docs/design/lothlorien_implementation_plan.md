@@ -592,6 +592,8 @@ Do not over-engineer.
 
 The bird exists primarily to make the biome feel alive.
 
+_Status: built 2026-10-02 (spawns, flies and lands in game 2026-10-02; placeholder parrot sounds; lead untested). Design sheet and test list: `docs/mobs/songbird.md`._
+
 ## Primary tools
 
 Blockbench + graphics + sound model + Claude.
