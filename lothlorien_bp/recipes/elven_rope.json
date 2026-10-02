@@ -1,0 +1,32 @@
+{
+  "format_version": "1.20.30",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "lothlorien:elven_rope"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      "D",
+      "F"
+    ],
+    "key": {
+      "D": {
+        "item": "lothlorien:morning_dew"
+      },
+      "F": {
+        "item": "lothlorien:golden_fern"
+      }
+    },
+    "unlock": [
+      {
+        "item": "lothlorien:morning_dew"
+      }
+    ],
+    "result": {
+      "item": "lothlorien:elven_rope",
+      "count": 1
+    }
+  }
+}

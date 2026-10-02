@@ -806,6 +806,7 @@ Graphics + Claude.
 # Phase 17b — Elven rope (hithlain)
 
 Owner, 2026-10-02. Replaces the vanilla ladders in the flet giants (`great_mallorn` trees and the structures).
+**Built 2026-10-02, accepted in game (climbing, icon); the decisions below are final, see `TECHNICAL_NOTES.md` Phase 17b:** recipe 1 dew + 1 golden fern -> 1 rope; hangs flat on the side of a block, one piece per item (stack), down first then up; any piece extends it; breaking any piece drops the whole rope where broken; climbing is script-driven.
 
 - Crafted with a **Bottle of morning dew** (Phase 14b) plus a fibre (to decide); stackable item.
 - **Placing:** use the rope on a block face; it unrolls straight down from there (or up, from a floor/ceiling: to decide)

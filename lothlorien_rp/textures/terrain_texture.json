@@ -132,6 +132,9 @@
     },
     "lothlorien:star_canopy": {
       "textures": "textures/blocks/star_canopy"
+    },
+    "lothlorien:elven_rope": {
+      "textures": "textures/blocks/elven_rope"
     }
   }
 }

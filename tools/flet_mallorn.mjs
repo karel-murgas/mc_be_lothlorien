@@ -21,7 +21,7 @@ export const B = {
   leaves: `${NS}:mallorn_leaves`,
   planks: `${NS}:mallorn_planks`,
   fence: `${NS}:mallorn_fence`,
-  ladder: "minecraft:ladder",
+  rope: `${NS}:elven_rope`, // Elven rope (Phase 17b) replaced the vanilla ladder
   chest: "minecraft:chest",
 };
 export const FLET_LOOT = "loot_tables/chests/mallorn_flet.json";
@@ -175,12 +175,12 @@ export function buildFletMallorn(random, { woven = false, lush = false, flet = t
       blocks.set(key(x, floorY + 1, z), { name: B.fence, states });
     }
 
-    // ladder from the ground through a hole in the floor; its column and the space in front stay clear
+    // rope from the ground through a hole in the floor; its column and the space in front stay clear
     for (let y = 0; y <= floorY + 3; y++) {
       const front = key(ladder.x, y, ladder.z - 1);
       if ([B.leaves, B.log, B.wood].includes(blocks.get(front)?.name)) blocks.delete(front);
       blocks.delete(key(ladder.x, y, ladder.z));
-      if (y <= floorY) blocks.set(key(ladder.x, y, ladder.z), { name: B.ladder, states: { facing_direction: 2 } });
+      if (y <= floorY) blocks.set(key(ladder.x, y, ladder.z), { name: B.rope, states: { [`${NS}:face`]: "north" } });
     }
 
     // loot chest against the east face of the trunk, opening away from it

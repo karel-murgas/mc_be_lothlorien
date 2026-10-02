@@ -8,6 +8,7 @@ import "./nectar.js";
 import "./dew.js";
 import "./lembas.js";
 import { startAntlerSupport } from "./antler.js";
+import { startRopeClimbing } from "./elven_rope.js";
 import "./athelas.js";
 import "./trees.js";
 import "./great_mallorn.js";
@@ -188,4 +189,5 @@ world.afterEvents.worldLoad.subscribe(() => {
   startSquirrels();
   startUnicorns();
   startAntlerSupport();
+  startRopeClimbing();
 });

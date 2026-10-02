@@ -114,3 +114,5 @@ entity.lothlorien:swan.name=Swan
 item.spawn_egg.entity.lothlorien:swan.name=Swan Spawn Egg
 entity.lothlorien:squirrel.name=Ground Squirrel
 item.spawn_egg.entity.lothlorien:squirrel.name=Ground Squirrel Spawn Egg
+tile.lothlorien:elven_rope.name=Elven Rope
+item.lothlorien:elven_rope=Elven Rope

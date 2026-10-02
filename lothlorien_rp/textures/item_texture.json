@@ -88,6 +88,9 @@
     },
     "lothlorien:morning_dew": {
       "textures": "textures/items/morning_dew"
+    },
+    "lothlorien:elven_rope": {
+      "textures": "textures/items/elven_rope"
     }
   }
 }
