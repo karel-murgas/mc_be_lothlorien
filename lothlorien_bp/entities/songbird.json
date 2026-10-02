@@ -35,7 +35,7 @@
         "max": 4
       },
       "minecraft:movement": {
-        "value": 0.3
+        "value": 0.4
       },
       "minecraft:movement.fly": {},
       "minecraft:can_fly": {},
@@ -98,10 +98,10 @@
       },
       "minecraft:behavior.random_fly": {
         "priority": 3,
-        "xz_dist": 12,
-        "y_dist": 1,
+        "xz_dist": 16,
+        "y_dist": 2,
         "speed_multiplier": 1.0,
-        "can_land_on_trees": true
+        "can_land_on_trees": false
       },
       "minecraft:behavior.follow_mob": {
         "priority": 4,
