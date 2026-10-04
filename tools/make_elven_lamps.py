@@ -6,7 +6,7 @@ Output (overwritten every run): BP blocks/items/recipes for the three lamps,
 RP models (`elven_lantern`, `firefly_jar`, `elven_chandelier`), textures `elven_lamp`
 (wood, gold, antler), `elven_lantern_glow` and `elven_jar_inner` (flipbooks with MERS maps),
 item icons, and the entries in
-terrain_texture.json, item_texture.json, flipbook_textures.json and en_US.lang (merged, other entries kept).
+terrain_texture.json, item_texture.json, flipbook_textures.json and localized names (catalog-owned, all locale files regenerated).
 
 Models use per-face UV windows that map 1 texel to 1 unit onto one of four material regions of `elven_lamp`
 (vertical wood, horizontal wood, gold, antler), so a 6x1 foot shows planks at real scale. The engine shades faces
@@ -646,12 +646,8 @@ def merge_atlas(path, entries, key="texture_data"):
 
 
 def merge_lang(lines):
-    path = RP / "texts/en_US.lang"
-    text = path.read_text(encoding="utf-8")
-    have = {ln.split("=", 1)[0] for ln in text.splitlines() if "=" in ln}
-    add = [ln for ln in lines if ln.split("=", 1)[0] not in have]
-    if add:
-        path.write_text(text.rstrip("\n") + "\n" + "\n".join(add) + "\n", encoding="utf-8", newline="\n")
+    from localization_support import merge_localized_names
+    merge_localized_names(lines)
 
 
 def box(origin, size):
@@ -855,11 +851,7 @@ def main():
     merge_lang([f"tile.{NS}:{i}.name={n}\nitem.{NS}:{i}={n}" for i, n in (
         ("elven_lantern", "Elven Lantern"), ("elven_lantern_heartwood", "Heartwood Elven Lantern"),
         ("firefly_jar", "Firefly Jar"), ("elven_chandelier", "Elven Chandelier"))])
-    lang = RP / "texts/en_US.lang"
-    lang.write_text("\n".join(line for line in lang.read_text(encoding="utf-8").splitlines()
-                              if not line.startswith((f"tile.{NS}:elven_lantern_arch.",
-                                                      f"item.{NS}:elven_lantern_arch="))) + "\n",
-                    encoding="utf-8", newline="\n")
+    # Removed/renamed language keys are maintained in localization/catalog.json.
     preview(MOD.parents[1] / "temp/lamps")
     print("elven lamps written")
 

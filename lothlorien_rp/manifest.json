@@ -1,8 +1,8 @@
 {
     "format_version": 3,
     "header": {
-        "name": "Lothlorien RP",
-        "description": "Lothlorien resource pack",
+        "name": "pack.name",
+        "description": "pack.description",
         "uuid": "d535a52f-4844-41f8-a99f-343476d5c9dd",
         "version": "1.0.0",
         "min_engine_version": "1.26.50"
@@ -25,11 +25,11 @@
     "settings": [
         {
             "type": "label",
-            "text": "Lothlorien: how things look for you (each player chooses their own)."
+            "text": "lothlorien.settings.appearance"
         },
         {
             "type": "toggle",
-            "text": "Prettier boats (more detailed mallorn boat model)",
+            "text": "lothlorien.settings.pretty_boats",
             "name": "lothlorien:pretty_boats",
             "default": false
         }

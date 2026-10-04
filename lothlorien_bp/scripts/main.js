@@ -1,3 +1,4 @@
+import { message } from "./messages.js";
 import { world, system } from "@minecraft/server";
 import "./blocks.js";
 import "./ground_cover.js";
@@ -60,9 +61,9 @@ function showDebug() {
     const { inside, total } = hostilesInBiome(player);
     const marker = biome === BIOME_ID ? "§a" : "§7";
     const last = lastDepth.get(player.id);
-    const depth = last ? depthLabel(last) : DEPTH_NAMES[0];
+    const depth = last ? depthLabel(last) : message("depth.outside");
     player.onScreenDisplay.setActionBar(
-      `${marker}${biome}§r [${depth}]  hostiles r${HOSTILE_SCAN_RADIUS}: ${inside} in Lórien / ${total}`
+      message("debug.actionbar", marker, biome, depth, HOSTILE_SCAN_RADIUS, inside, total)
     );
   }
 }
@@ -97,7 +98,8 @@ function playerDepth(player) {
 }
 
 function depthLabel(result) {
-  return DEPTH_NAMES[result.level] + (result.complete ? "" : "?");
+  const label = message(`depth.${DEPTH_NAMES[result.level]}`);
+  return result.complete ? label : message("depth.uncertain", label);
 }
 
 const lastDepth = new Map();
@@ -108,7 +110,7 @@ function updateDepth() {
     const prev = lastDepth.get(player.id);
     lastDepth.set(player.id, result);
     if (prev !== undefined && prev.level !== result.level && player.hasTag(DEBUG_TAG)) {
-      player.sendMessage(`[lothlorien] depth: ${depthLabel(prev)} -> ${depthLabel(result)}`);
+      player.sendMessage(message("depth.changed", depthLabel(prev), depthLabel(result)));
     }
   }
 }
@@ -125,8 +127,7 @@ function reportDepth(player) {
   const ms = (Date.now() - t0) / BENCH_RUNS;
   const dist = result.distance === Infinity ? `>${result.beyond}` : result.distance;
   player.sendMessage(
-    `[lothlorien] depth ${depthLabel(result)} (nearest border ~${dist} blocks); ` +
-      `worst case ${probes} probes, ${ms.toFixed(3)} ms per estimate (avg of ${BENCH_RUNS})`
+    message("depth.report", depthLabel(result), dist, probes, ms.toFixed(3), BENCH_RUNS)
   );
 }
 
@@ -142,7 +143,7 @@ function onScriptEvent(event) {
   const on = !player.hasTag(DEBUG_TAG);
   if (on) player.addTag(DEBUG_TAG);
   else player.removeTag(DEBUG_TAG);
-  player.sendMessage(`[lothlorien] debug readout ${on ? "on" : "off"}`);
+  player.sendMessage(message(on ? "debug.on" : "debug.off"));
 }
 
 // Phase 6: golden leaves let go of the canopy near each player standing in the biome. A random

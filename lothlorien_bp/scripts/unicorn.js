@@ -1,3 +1,4 @@
+import { message } from "./messages.js";
 // Unicorns in the running game (Phase 15; rules in unicorn_rules.js). Their wariness follows the nearest player's Disharmony
 // in deer.js (they are in WARY_TYPES): strangers and restless players are fled from, a Friend of Lothlorien may come close
 // and lure one with Elanor. This file is the taming: three offers of Elanor from a Friend bond the unicorn to that player
@@ -29,16 +30,16 @@ function consumeElanor(player) {
 }
 
 const REFUSALS = {
-  restless: "§7The unicorn shies from your restless spirit.",
-  untrusted: "§7The unicorn watches the flower, and you, but does not trust you yet.",
-  alarmed: "§7The unicorn is too frightened to take anything.",
-  wait: "§7The unicorn is still turning the flower over. Give it a moment.",
+  restless: message("unicorn.restless"),
+  untrusted: message("unicorn.untrusted"),
+  alarmed: message("unicorn.alarmed"),
+  wait: message("unicorn.wait"),
 };
 
 const MESSAGES = [
-  "§fThe unicorn sniffs the elanor and watches you.",
-  "§fThe unicorn takes the elanor from your hand.",
-  "§fThe unicorn bows its horn to you. It is yours now; it needs no saddle.",
+  message("unicorn.trust1"),
+  message("unicorn.trust2"),
+  message("unicorn.trust3"),
 ];
 
 // Fed = bonded. Re-applying the current state event one tick after the event swaps state_calm/state_friend for state_tame
@@ -94,7 +95,7 @@ export function startUnicorns() {
     if (target.typeId !== UNICORN_ID || !target.getProperty("lothlorien:tame")) return;
     if (mayRide(target.getDynamicProperty(OWNER), player.id)) return;
     event.cancel = true;
-    system.run(() => say(player, "§7This unicorn is bonded to someone else."));
+    system.run(() => say(player, message("unicorn.other_owner")));
   });
   world.afterEvents.playerInteractWithEntity.subscribe(({ player, target, beforeItemStack, itemStack }) => {
     try {

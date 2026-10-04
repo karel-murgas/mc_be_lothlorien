@@ -1,3 +1,4 @@
+import { message } from "./messages.js";
 // Ground squirrel errands in the running game (Phase 15; rules in squirrel_rules.js). A Friend of Lothlorien offers a
 // Mallorn acorn: the squirrel takes it, runs off to a spot 10-14 blocks away, digs a moment, comes back and drops a small
 // gift (loot_tables/gifts/squirrel.json) at the player's feet. Not a Friend: it sniffs the acorn and keeps it.
@@ -45,19 +46,19 @@ function offer(player, squirrel) {
   const state = disharmonyOf(player);
   const left = cooldownLeft(world.getAbsoluteTime(), squirrel.getDynamicProperty(READY_AT));
   const refusal = offerRefusal({ level: levelFor(state.points), friend: isFriend(state), cooldownLeft: left });
-  if (refusal === "restless") return say(player, "§7The squirrel shies from your restless spirit.");
-  if (refusal === "untrusted") return say(player, "§7The squirrel sniffs the acorn and watches you, but does not trust you yet.");
-  if (refusal === "full") return say(player, "§7The squirrel sniffs the acorn, but it is busy with its stash. Try again later.");
+  if (refusal === "restless") return say(player, message("squirrel.restless"));
+  if (refusal === "untrusted") return say(player, message("squirrel.untrusted"));
+  if (refusal === "full") return say(player, message("squirrel.full"));
   const dimension = squirrel.dimension;
   const away = pickAway(squirrel.location, (x, z, y) => stand(dimension, x, z, y), Math.random() * 2 * Math.PI);
-  if (!away) return say(player, "§7The squirrel sniffs the acorn, looks around, and stays. It has nowhere to run from here.");
+  if (!away) return say(player, message("squirrel.no_path"));
   let beaconId;
   try {
     beaconId = dimension.spawnEntity(BEACON_ID, { x: away.x, y: away.y, z: away.z }).id;
     squirrel.triggerEvent("lothlorien:guide_start");
     consumeAcorn(player); // only now: the errand really starts
     sessions.set(squirrel.id, { playerId: player.id, beaconId, away, born: system.currentTick, phase: "away", phaseStart: system.currentTick, digFor: 0 });
-    say(player, "§fThe squirrel snatches the acorn and bolts into the undergrowth.");
+    say(player, message("squirrel.accept"));
   } catch {
     sessions.delete(squirrel.id);
     removeBeacon(beaconId);
@@ -88,14 +89,14 @@ function giveGift(squirrelId, squirrel, player) {
   } catch {
     // chunk unloaded after all: the gift is lost, the acorn was eaten
   }
-  end(squirrelId, squirrel, player, "§fThe squirrel scampers back and drops something at your feet.");
+  end(squirrelId, squirrel, player, message("squirrel.gift"));
 }
 
 function tickSession(squirrelId, s) {
   const squirrel = world.getEntity(squirrelId);
   const player = world.getPlayers().find((p) => p.id === s.playerId);
   if (!squirrel?.isValid || !player?.isValid || squirrel.dimension.id !== player.dimension.id) return end(squirrelId, squirrel, undefined, undefined);
-  if (squirrel.getProperty("lothlorien:alarmed")) return end(squirrelId, squirrel, player, "§7The squirrel is frightened and drops the errand.");
+  if (squirrel.getProperty("lothlorien:alarmed")) return end(squirrelId, squirrel, player, message("squirrel.alarmed"));
   const now = system.currentTick;
   let beacon = world.getEntity(s.beaconId);
   if (!beacon?.isValid) {
@@ -110,7 +111,7 @@ function tickSession(squirrelId, s) {
     toPlayer: horizontal(squirrel.location, player.location),
     digFor: s.digFor,
   });
-  if (next === "abort") return end(squirrelId, squirrel, player, "§7The squirrel loses its way and gives up. The acorn is gone.");
+  if (next === "abort") return end(squirrelId, squirrel, player, message("squirrel.abort"));
   if (next === "gift") return giveGift(squirrelId, squirrel, player);
   if (next !== s.phase) {
     s.phase = next;

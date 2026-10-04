@@ -1,3 +1,4 @@
+import { message } from "./messages.js";
 // Great Mallorn nut in the running game (rules and numbers in great_mallorn_rules.js).
 //   lothlorien:great_sprout  random tick: stage 0 -> 1 -> a flet giant (structure) grows around the sprout, if the light
 //                            is enough and nothing built stands where the tree would put a block
@@ -39,10 +40,9 @@ function tellBlocked(block, obstacle) {
   const now = system.currentTick;
   if (now - (toldAt.get(key) ?? -BLOCKED_TELL_TICKS) < BLOCKED_TELL_TICKS) return;
   toldAt.set(key, now);
-  const name = obstacle.typeId.replace(/^minecraft:/, "").replace(/_/g, " ");
   for (const player of block.dimension.getPlayers({ location: block.location, maxDistance: BLOCKED_TELL_RADIUS })) {
-    player.sendMessage(`§6The Great Mallorn sprout at ${block.x} ${block.y} ${block.z} cannot grow: ${name} at ` +
-      `${obstacle.x} ${obstacle.y} ${obstacle.z} stands in the way of the tree.`);
+    player.sendMessage(message("mallorn.blocked", `${block.x} ${block.y} ${block.z}`,
+      { translate: obstacle.localizationKey }, `${obstacle.x} ${obstacle.y} ${obstacle.z}`));
   }
 }
 
@@ -111,9 +111,7 @@ system.beforeEvents.startup.subscribe(({ blockComponentRegistry }) => {
 
 world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
   if (block.typeId !== SPROUT_ID) return;
-  player.sendMessage("§6The Great Mallorn nut will grow into a giant Mallorn with a flet: about 40 blocks wide and " +
-    "50 high, roots 5 deep. It needs light, and it will not grow while anything built stands in that space. " +
-    "Break the sprout to get the nut back.");
+  player.sendMessage(message("mallorn.planted"));
 });
 
 // Vanilla bone meal does nothing on a custom block; say why instead of letting it look broken.
@@ -122,5 +120,5 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   if (block.typeId !== SPROUT_ID || itemStack?.typeId !== "minecraft:bone_meal") return;
   event.cancel = true;
   if (repeatedUse(player, "great_sprout")) return;
-  system.run(() => player.sendMessage("§7A Great Mallorn will not be hurried.")); // chat: the action bar shows Disharmony
+  system.run(() => player.sendMessage(message("mallorn.no_bonemeal"))); // chat: the action bar shows Disharmony
 });

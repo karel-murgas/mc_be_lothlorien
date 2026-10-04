@@ -7,7 +7,7 @@ Runs the two model generators (default rotated-plank model, "Prettier boats" ste
   make_mallorn_wood.recolour: silver -> golden wood, gold accents -> silver); chest-boat icons (boat icon + a chest);
   the chest geometry for both models.
 - BP: entities (copies of the vanilla boat / chest boat with runtime_identifier), items, recipes, loot tables.
-- RP: client entities, the chest render controller; upserts item_texture.json and en_US.lang.
+- RP: client entities, the chest render controller; upserts item_texture.json and declares catalog-owned localized names.
 
 The chest is the vanilla one (owner, 2026-10-01: "classical minecraft chest texture"): a second geometry rendered
 by a second render controller with the vanilla chest-boat texture `textures/entity/boat/chest_boat_oak`, whose
@@ -215,14 +215,8 @@ def upsert_item_textures(entries):
 
 
 def upsert_lang(lines):
-    path = os.path.join(RP, "texts", "en_US.lang")
-    text = open(path, encoding="utf-8").read()
-    for key, value in lines.items():
-        line = f"{key}={value}"
-        pat = re.compile(rf"^{re.escape(key)}=.*$", re.M)
-        text = pat.sub(line, text) if pat.search(text) else text.rstrip("\n") + "\n" + line + "\n"
-    with open(path, "w", encoding="utf-8", newline="\n") as f:
-        f.write(text)
+    from localization_support import merge_localized_names
+    merge_localized_names(lines)
 
 
 def main():

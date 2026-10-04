@@ -1,3 +1,4 @@
+import { message } from "./messages.js";
 // White deer guidance in the running game (Phase 12; rules in white_deer_rules.js). Offer a Mallorn acorn to a white
 // deer (lothlorien:white_deer) as a Friend of Lothlorien: once in its life it leads you to its gift, a Great Mallorn nut
 // (great_mallorn.js), at a spot inside Lothlorien 36-56 blocks away, waiting for the player to keep up, and lays the nut
@@ -107,7 +108,7 @@ function giveGift(deer, s) {
   const spot = s.spot;
   const at = { x: spot.x + 0.5, y: spot.y + 0.2, z: spot.z + 0.5 };
   const nut = new ItemStack(NUT_ID, 1);
-  nut.setLore(["§7Grows into a giant Mallorn with a flet.", "§7Needs a space about 40 wide and 50 high.", "§7Plant it on grass or dirt."]);
+  nut.setLore([message("nut.lore.tree"), message("nut.lore.space"), message("nut.lore.plant")]);
   try {
     deer.dimension.spawnItem(nut, at);
     deer.dimension.spawnParticle("minecraft:totem_particle", at);
@@ -167,19 +168,19 @@ function offer(player, deer) {
   const state = disharmonyOf(player);
   const refusal = offerRefusal({ level: levelFor(state.points), friend: isFriend(state), leashed: isLeashed(deer) });
   if (refusal === "leashed") {
-    say(player, "§7The white deer will not lead while it is held on a lead.");
+    say(player, message("deer.leashed"));
     return;
   }
   if (refusal === "untrusted") {
-    say(player, "§7The white deer watches you, but does not trust you yet.");
+    say(player, message("deer.untrusted"));
     return;
   }
   if (refusal) {
-    say(player, "§7The white deer shies from your restless spirit.");
+    say(player, message("deer.restless"));
     return;
   }
   if (deer.getDynamicProperty(GIFTED)) {
-    say(player, "§7The white deer nuzzles the acorn and lets it be. It has given its gift already.");
+    say(player, message("deer.gifted"));
     return;
   }
   const kept = storedSpot(deer);
@@ -193,7 +194,7 @@ function offer(player, deer) {
     try {
       if (!deer.isValid || !player.isValid) return;
       if (!spot) {
-        say(player, "§7The white deer sniffs the acorn, looks around, and stays. It has nowhere to lead you from here.");
+        say(player, message("deer.no_spot"));
         return;
       }
       deer.setDynamicProperty(GIFT_SPOT, JSON.stringify({ ...spot, dim: deer.dimension.id }));
@@ -209,14 +210,14 @@ function lead(player, deer, spot) {
   let beaconId;
   try {
     if (isLeashed(deer)) {
-      say(player, "§7The white deer will not lead while it is held on a lead.");
+      say(player, message("deer.leashed"));
       return;
     }
     const dimension = deer.dimension;
     const target = { x: spot.x + 0.5, z: spot.z + 0.5 };
     const wp = pickWaypoint(deer.location, target, standIn(dimension));
     if (!wp) {
-      say(player, "§7The white deer looks around, but finds no way from here.");
+      say(player, message("deer.no_path"));
       return;
     }
     const beacon = dimension.spawnEntity(BEACON_ID, { x: wp.x, y: wp.y, z: wp.z });
@@ -238,7 +239,7 @@ function lead(player, deer, spot) {
       bias: wp.turn || 1,
       waiting: false,
     });
-    say(player, "§fThe white deer takes the acorn, lifts its head and turns. Follow it.");
+    say(player, message("deer.accept"));
   } catch {
     sessions.delete(deer.id);
     removeBeacon(beaconId);
@@ -259,7 +260,7 @@ function end(deerId, deer, player, text) {
 
 function arrive(deerId, deer, player, s) {
   giveGift(deer, s);
-  end(deerId, deer, player, "§fThe white deer stops and bows its head. Something glints in the moss: a Great Mallorn nut.");
+  end(deerId, deer, player, message("deer.gift"));
 }
 
 const moveBeacon = (beacon, to) => beacon.teleport({ x: to.x, y: to.y, z: to.z });
@@ -312,9 +313,9 @@ function tickSession(deerId, s) {
     playerCalm: canBeGuided(levelFor(disharmonyOf(player).points)),
     leashed: isLeashed(deer),
   });
-  if (s.phase === "leashed") return end(deerId, deer, player, "§7The white deer is held on a lead and stops leading you.");
+  if (s.phase === "leashed") return end(deerId, deer, player, message("deer.stop_leashed"));
   if (s.phase === "arrived") return arrive(deerId, deer, player, s);
-  if (s.phase === "abort") return end(deerId, deer, player, "§7The white deer loses the way and lets you go. Another acorn may set it on its way again.");
+  if (s.phase === "abort") return end(deerId, deer, player, message("deer.abort"));
   const beacon = beaconOf(s, deer.dimension, s.waiting ? deer.location : s.hop.wp);
   if (s.phase === "wait") {
     // the player lags: the beacon comes to the deer's feet, so the deer stands and waits

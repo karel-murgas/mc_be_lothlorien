@@ -95,20 +95,14 @@ def main():
         write(path, json.dumps(data, indent=2).replace("\n", nl) + nl)
         written.append(path)
 
-    # lang: drop old heartwood lines, insert fresh ones after the last silver plank-family line; keep line endings
+    # Catalog owns all locales; declare names without overwriting reviewed wording.
     path = os.path.join(RP, "texts", "en_US.lang")
-    text = read(path)
-    nl = "\r\n" if "\r\n" in text else "\n"
-    family_name = re.compile(r"^(?:tile|item)\.lothlorien:mallorn_heartwood_(?:%s)(?:\.name)?=" % "|".join(FAMILY))
-    lines = [ln for ln in text.splitlines() if not family_name.match(ln)]
-    silver = [i for i, ln in enumerate(lines) if re.match(r"(tile|item)\.lothlorien:mallorn_(%s)\b" % "|".join(FAMILY), ln)]
-    at = silver[-1] + 1
     new = []
     for part in FAMILY:
         new += [f"tile.lothlorien:mallorn_heartwood_{part}.name={NAMES[part]}",
                 f"item.lothlorien:mallorn_heartwood_{part}={NAMES[part]}"]
-    lines[at:at] = new
-    write(path, nl.join(lines) + nl)
+    from localization_support import merge_localized_names
+    merge_localized_names(new)
     written.append(path)
     print(f"wrote {len(written)} files (map colour silver {silver_map} -> heartwood {gold_map})")
 

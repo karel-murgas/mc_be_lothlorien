@@ -99,7 +99,7 @@
             "use_item": true,
             "transform_to_item": "lothlorien:bottle_of_fireflies",
             "swing": true,
-            "interact_text": "action.interact.collect"
+            "interact_text": "action.interact.lothlorien.catch_firefly"
           }
         ]
       },

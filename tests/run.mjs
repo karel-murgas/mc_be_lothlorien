@@ -287,7 +287,11 @@ test("disharmony: Friend after 10 calm minutes inside; outside pauses progress; 
 });
 test("disharmony: status hidden outside, saved state round-trips, junk is tolerated", () => {
   const s = D.newState(); D.recordKill(s);
-  assert.equal(D.statusText(s, false), undefined); assert.equal(D.statusText(s, true), "Disharmony I");
+  assert.equal(D.statusText(s, false), undefined);
+  assert.deepEqual(D.statusText(s, true), { translate: "lothlorien.message.status.disharmony", with: { rawtext: [{ text: "I" }] } });
+  s.points = 0; s.friend = D.FRIEND_SECONDS;
+  assert.equal(D.statusText(s, true).translate, "lothlorien.message.status.friend");
+  assert.equal(D.statusText(s, false), undefined);
   assert.deepEqual(D.parse(D.serialize(s)), s);
   assert.deepEqual(D.parse(undefined), D.newState()); assert.deepEqual(D.parse("{oops"), D.newState());
 });
@@ -492,7 +496,9 @@ test("great nut: unique rare item that plants the sprout; sprout grows like a sa
   for (const f of ["loot_tables/chests/mallorn_flet.json"]) assert.ok(!readFileSync(new URL(`../lothlorien_bp/${f}`, import.meta.url), "utf8").includes(N.NUT_ID), "not in loot");
   const src = readFileSync(new URL("../lothlorien_bp/scripts/great_mallorn.js", import.meta.url), "utf8");
   assert.ok(src.includes("event.cancel = true") && src.includes("repeatedUse"), "bone meal refused once per use");
-  assert.ok(/playerPlaceBlock[\s\S]*40 blocks wide/.test(src), "planting warns about the space");
+  assert.ok(/playerPlaceBlock[\s\S]*message\("mallorn.planted"\)/.test(src), "planting sends a localized space warning");
+  const catalog = readJson("../localization/catalog.json");
+  assert.match(catalog.packs.lothlorien_rp.entries["lothlorien.message.mallorn.planted"].source, /40 blocks wide and 50 high/);
   assert.ok(readFileSync(new URL("../lothlorien_bp/scripts/main.js", import.meta.url), "utf8").includes('import "./great_mallorn.js"'));
 });
 test("the actionbar is only the Disharmony / Friend status (and the debug readout); other messages use chat", () => {

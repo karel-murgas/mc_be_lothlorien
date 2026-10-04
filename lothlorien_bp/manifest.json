@@ -1,8 +1,8 @@
 {
     "format_version": 2,
     "header": {
-        "name": "Lothlorien BP",
-        "description": "Lothlorien behavior pack",
+        "name": "pack.name",
+        "description": "pack.description",
         "uuid": "f1017fe8-4525-4d1b-9e5d-8e1c13851057",
         "version": [
             1,

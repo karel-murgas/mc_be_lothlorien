@@ -1,3 +1,4 @@
+import { message } from "./messages.js";
 // Disharmony in the running game: kills and deaths feed the rules in disharmony.js, state is kept
 // per player in a dynamic property (survives relogging, independent between players).
 import { world, system } from "@minecraft/server";
@@ -32,9 +33,9 @@ function update(player, state, change) {
   const nowLevel = levelFor(state.points);
   const nowFriend = isFriend(state);
   if (nowFriend !== friend) {
-    player.sendMessage(nowFriend ? "§aYou are a Friend of Lothlórien." : "§7You are no longer a Friend of Lothlórien.");
+    player.sendMessage(message(nowFriend ? "friend.gained" : "friend.lost"));
   } else if (nowLevel !== level) {
-    player.sendMessage(nowLevel ? `§cDisharmony ${"I".repeat(nowLevel)}` : "§aThe woods forgive you: Disharmony gone.");
+    player.sendMessage(nowLevel ? message("disharmony.level", "I".repeat(nowLevel)) : message("disharmony.gone"));
   }
   save(player, state);
 }
@@ -46,8 +47,7 @@ export function handleDisharmonyEvent(event, player) {
   const points = Number.parseInt(event.message, 10);
   if (Number.isFinite(points) && points >= 0) update(player, state, () => { state.points = points; state.calm = 0; state.friend = 0; });
   player.sendMessage(
-    `[lothlorien] disharmony ${state.points} points (level ${levelFor(state.points)}), calm ${Math.round(state.calm)}s, ` +
-      `friend progress ${Math.round(state.friend)}s${isFriend(state) ? " (Friend)" : ""}`
+    message(isFriend(state) ? "disharmony.debug_friend" : "disharmony.debug", state.points, levelFor(state.points), Math.round(state.calm), Math.round(state.friend))
   );
   return true;
 }

@@ -16,3 +16,7 @@ Packs: `lothlorien_bp/` + `lothlorien_rp/`. Deploy with `mods deploy lothlorien`
 - Phase 1 (biome spike) — biome generates (1.26 needs `minecraft:` targets), nights are
   peaceful (confirmed in game). Open: region shape tuning (whole-forest replacement), border
   look, caves, Vibrant Visuals (RP now declares `pbr`; untested).
+
+## Localization
+
+Nine locales use a mod-scoped contextual catalog. See [the localization notes](docs/LOCALIZATION.md) before adding or changing player-facing text.

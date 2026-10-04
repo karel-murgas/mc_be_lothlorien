@@ -1,3 +1,4 @@
+import { message } from "./messages.js";
 // Disharmony rules (design KB section 10). Pure (no @minecraft/server) so tests/run.mjs can check
 // them offline; disharmony_game.js wires them to players, deaths and persistence.
 //
@@ -63,9 +64,9 @@ export function tick(state, inside, dt) {
 // without Friend). The status is only ever visible inside the biome.
 export function statusText(state, inside) {
   if (!inside) return undefined;
-  if (isFriend(state)) return "Friend of Lothlórien";
+  if (isFriend(state)) return message("status.friend");
   const level = levelFor(state.points);
-  return level ? `Disharmony ${"I".repeat(level)}` : undefined;
+  return level ? message("status.disharmony", "I".repeat(level)) : undefined;
 }
 
 export function serialize(state) {
