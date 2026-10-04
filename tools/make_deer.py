@@ -405,45 +405,14 @@ def icon(rows, pal):
     return img
 
 
-CHOP = [
-    "................",
-    ".........oooo...",
-    "......ooohhhcoo.",
-    "....oohhhhcccbbo",
-    "...ohhhcccccbbbo",
-    "..ohhhccffccbbao",
-    "..ohhcccffcbbbao",
-    "..occcccccbbbaao",
-    "...obbbbbbbbaado",
-    "....oobbbbaaddo.",
-    "..owwoooaaddo...",
-    ".owwwo..oooo....",
-    ".owwwo..........",
-    "..owwo..........",
-    "...oo...........",
-    "................",
-]
-
-
-def chop(pal, grill):
-    rows = [list(r) for r in CHOP]
-    for (x, y) in grill:
-        if rows[y][x] not in ".ow":
-            rows[y][x] = "g"
-    return icon(["".join(r) for r in rows], pal)
-
-
 def venison_raw():
-    pal = {"o": hexc("#4a1f26"), "h": hexc("#e0888a"), "c": hexc("#cc6268"), "b": hexc("#ad4853"),
-           "a": hexc("#8c3644"), "d": hexc("#732c3a"), "f": hexc("#f2d8c8"), "w": hexc("#f0e6cc")}
-    return chop(pal, [])
+    from make_provisions import venison
+    return venison(False)
 
 
 def venison_cooked():
-    pal = {"o": hexc("#2e1a12"), "h": hexc("#cf9a60"), "c": hexc("#b47a45"), "b": hexc("#8f5730"),
-           "a": hexc("#6b3b22"), "d": hexc("#4d2917"), "f": hexc("#e6cfa8"), "w": hexc("#f0e6cc"),
-           "g": hexc("#3a2014")}
-    return chop(pal, [(4, 4), (5, 5), (6, 6), (7, 4), (8, 5), (9, 6), (10, 7), (9, 4), (10, 5), (11, 6)])
+    from make_provisions import venison
+    return venison(True)
 
 
 def deer_antler():
