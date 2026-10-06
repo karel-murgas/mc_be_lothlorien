@@ -1102,8 +1102,8 @@ a lantern post pair.
 `heightmap_projection` `world_surface`, `terrain_adaptation` none, biome filter `lothlorien`, max distance 116.
 **No structure set**: it only appears with `/place structure lothlorien:elven_village` (owner decision).
 
-**Simulator** `node tools/village_sim.mjs [seeds] [firstSeed]` (PNGs in `temp/elven_village/sim/`; run it from a bash
-shell, under PowerShell the main guard printed nothing). It reads the real `.mcstructure` and pool JSON files and
+**Simulator** `node tools/village_sim.mjs [seeds] [firstSeed]` (PNGs in `temp/elven_village/sim/`; works from bash and
+PowerShell: the main guard compares real paths because `C:\mcmods` is a junction). It reads the real `.mcstructure` and pool JSON files and
 assembles villages with Java jigsaw semantics (aligned joints, box collision, depth-first by depth, fallbacks), then
 checks: connectors meet (deck under 5 cells, rails, headroom), no box overlaps, every platform reachable on the deck,
 termination. Current numbers (100 seeds): 17 / 35.6 / 54 pieces (min/avg/max), 0 failures, 100 distinct layouts,

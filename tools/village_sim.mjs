@@ -2,9 +2,9 @@
 // villages with Java JigsawPlacement semantics (breadth-first, weighted pool order, fallback, first fit), then checks them.
 //   node tools/village_sim.mjs [seeds=20] [firstSeed=1]     (run from mods/lothlorien; PNGs go to temp/elven_village/sim/)
 // Also imported by tests/run.mjs.
-import { readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, readdirSync, writeFileSync, mkdirSync, realpathSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { deflateSync } from "node:zlib";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -368,4 +368,5 @@ function main() {
   if (rows.length) console.log(`\nseed ${rows[0].seed} at deck level (y ${rows[0].ck.deckY}):\n` + asciiDeck(rows[0].ck.world, rows[0].ck.deckY));
   process.exit(bad ? 1 : 0);
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();
+// realpath: C:\mcmods is a junction, so argv[1] and import.meta.url can name the same file differently
+if (process.argv[1] && realpathSync(fileURLToPath(import.meta.url)) === realpathSync(process.argv[1])) main();
