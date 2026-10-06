@@ -1,0 +1,35 @@
+{
+  "format_version": "1.21.100",
+  "minecraft:template_pool": {
+    "description": {
+      "identifier": "lothlorien:village/bridges"
+    },
+    "elements": [
+      {
+        "element": {
+          "element_type": "minecraft:single_pool_element",
+          "location": "lothlorien/village/bridge_short",
+          "projection": "rigid"
+        },
+        "weight": 5
+      },
+      {
+        "element": {
+          "element_type": "minecraft:single_pool_element",
+          "location": "lothlorien/village/bridge_long",
+          "projection": "rigid"
+        },
+        "weight": 5
+      },
+      {
+        "element": {
+          "element_type": "minecraft:single_pool_element",
+          "location": "lothlorien/village/railing_end",
+          "projection": "rigid"
+        },
+        "weight": 1
+      }
+    ],
+    "fallback": "lothlorien:village/plugs"
+  }
+}

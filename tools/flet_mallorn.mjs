@@ -262,7 +262,7 @@ function bentBranch(b, random, sx, sz, dx, dz, y0, len, rise, blobR) {
 }
 
 // Drops leaves more than LEAF_KEEP steps (through leaves) from a log; returns how many went.
-function trimFarLeaves(blocks) {
+export function trimFarLeaves(blocks) {
   const dist = new Map();
   let frontier = [];
   for (const [k, v] of blocks) if (v.name === B.log || v.name === B.wood) { dist.set(k, 0); frontier.push(k); }

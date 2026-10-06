@@ -10,6 +10,7 @@ import { makeRandom } from "../lothlorien_bp/scripts/mallorn_tree.js";
 import { buildFletMallorn, LADDER, ROUND_LADDER, LEAF_KEEP, ROOT_DEPTH, B } from "../tools/flet_mallorn.mjs";
 import { SIZE, SIZE_Y, TRUNK_AT, CHOSEN, TRUNK_ANCHOR } from "../tools/build_structures.mjs";
 import { existsSync, readdirSync } from "node:fs";
+import { loadVillageData, parseMcstructure, runSeeds, PLANKS, FENCE, LANTERN_ID } from "../tools/village_sim.mjs";
 
 const L = "lothlorien:lothlorien", RIVER = "minecraft:river", FOREST = "minecraft:forest";
 const T = new Set([RIVER]);
@@ -1353,6 +1354,65 @@ test("Mallorn boat items use the boat and chest-boat creative groups", () => {
         { category: "items", group: `minecraft:itemGroup.name.${group}` });
     }
   }
+});
+// --- Elven village: connector standard of every piece, pools, and assembled villages (tools/village_sim.mjs) ---
+const VILLAGE = "../lothlorien_bp/structures/lothlorien/village";
+const villageData = loadVillageData();
+const DECK_NAME = "lothlorien:village_deck";
+test("village: every deck connector is on the box face, faces outward, and follows the connector standard", () => {
+  const files = readdirSync(new URL(`${VILLAGE}/`, import.meta.url)).filter((f) => f.endsWith(".mcstructure"));
+  assert.ok(files.length >= 7, `${files.length} village pieces`);
+  for (const f of files) {
+    const name = f.replace(".mcstructure", "");
+    const piece = parseMcstructure(readFileSync(new URL(`${VILLAGE}/${f}`, import.meta.url)), name);
+    const [sx, , sz] = piece.size;
+    const deckJigsaws = piece.jigsaws.filter((j) => j.name === DECK_NAME);
+    assert.ok(deckJigsaws.length >= 1, `${name}: no deck connector`);
+    for (const j of deckJigsaws) {
+      const tag = `${name} ${j.dirId}@${j.x},${j.y},${j.z}`;
+      assert.ok(j.dir, `${tag}: not a horizontal facing`);
+      const [dx, dz] = j.dir;
+      const onFace = dx === 1 ? j.x === sx - 1 : dx === -1 ? j.x === 0 : dz === 1 ? j.z === sz - 1 : j.z === 0;
+      assert.ok(onFace, `${tag}: not on the outer face of the box`);
+      assert.equal(j.target, DECK_NAME, `${tag}: target`);
+      assert.equal(j.final, PLANKS, `${tag}: final_state`);
+      assert.equal(j.joint, "aligned", `${tag}: joint`);
+      const plug = name === "railing_end", depth = plug || name === "lookout_01" ? 1 : 4;
+      const pp = [-dz, dx];
+      for (let a = 0; a < depth; a++) for (let off = -2; off <= 2; off++) {
+        const x = j.x - dx * a + pp[0] * off, z = j.z - dz * a + pp[1] * off, at = (h) => piece.at(x, j.y + h, z);
+        const deck = at(0);
+        assert.ok(a === 0 && off === 0 ? deck === "minecraft:jigsaw" : deck === PLANKS, `${tag}: deck at ${a},${off} is ${deck}`);
+        if (Math.abs(off) === 2) {
+          assert.equal(at(1), FENCE, `${tag}: rail at ${a},${off}`);
+          if (!plug) for (let h = 2; h <= 3; h++) assert.ok([undefined, null, "minecraft:air", LANTERN_ID].includes(at(h)), `${tag}: rail column ${a},${off},${h}: ${at(h)}`);
+        } else if (!plug) for (let h = 1; h <= 3; h++) assert.ok([null, "minecraft:air"].includes(at(h)), `${tag}: headroom ${a},${off},${h}: ${at(h)}`);
+      }
+    }
+  }
+});
+test("village: pools, fallbacks, piece files and connector pools all resolve", () => {
+  const ids = [...villageData.pools.keys()].filter((k) => k.startsWith("lothlorien:village/"));
+  assert.ok(ids.length >= 5, `${ids.length} pools`);
+  for (const id of ids) {
+    const p = villageData.pools.get(id);
+    for (const e of p.elements) {
+      assert.ok(existsSync(new URL(`../lothlorien_bp/structures/${e.element.location}.mcstructure`, import.meta.url)), `${id}: ${e.element.location}`);
+      for (const j of villageData.getPiece(e.element.location).jigsaws) {
+        if (j.name === DECK_NAME) assert.ok(j.pool === "minecraft:empty" || villageData.pools.has(j.pool), `${id}: ${e.element.location} points at missing pool ${j.pool}`);
+      }
+    }
+    if (p.fallback && p.fallback !== "minecraft:empty") assert.ok(villageData.pools.has(p.fallback), `${id}: fallback ${p.fallback}`);
+  }
+  assert.ok(villageData.pools.has(villageData.structure.start_pool));
+  assert.ok(villageData.structure.max_depth >= 1);
+});
+test("village: 30 simulated villages connect, never overlap, terminate and are fully walkable", () => {
+  const t0 = Date.now();
+  const rows = runSeeds(villageData, 30, 1);
+  for (const r of rows) assert.deepEqual([...new Set(r.ck.fail)].slice(0, 3), [], `seed ${r.seed}`);
+  assert.ok(new Set(rows.map((r) => r.hash)).size >= 25, "layouts barely vary");
+  assert.ok(Date.now() - t0 < 20000, `simulation took ${Date.now() - t0} ms`);
 });
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }
 console.log("all tests passed");

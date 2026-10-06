@@ -1,0 +1,18 @@
+{
+  "format_version": "1.21.100",
+  "minecraft:template_pool": {
+    "description": {
+      "identifier": "lothlorien:village/start"
+    },
+    "elements": [
+      {
+        "element": {
+          "element_type": "minecraft:single_pool_element",
+          "location": "lothlorien/village/central_mallorn_01",
+          "projection": "rigid"
+        },
+        "weight": 1
+      }
+    ]
+  }
+}

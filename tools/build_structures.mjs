@@ -82,8 +82,8 @@ export function toMcstructure(blocks, [SX, SY, SZ] = [SIZE, SIZE_Y, SIZE], [OX, 
     if (v.jigsaw) {
       positionData[String(index)] = compound({
         block_entity_data: compound({
-          id: str("JigsawBlock"), isMovable: byte(true), name: str(v.jigsaw), target: str("minecraft:empty"),
-          target_pool: str("minecraft:empty"), final_state: str(v.finalState), joint: str("rollable"),
+          id: str("JigsawBlock"), isMovable: byte(true), name: str(v.jigsaw), target: str(v.jigsawTarget ?? "minecraft:empty"),
+          target_pool: str(v.jigsawPool ?? "minecraft:empty"), final_state: str(v.finalState), joint: str(v.joint ?? "rollable"),
           x: int(x), y: int(y), z: int(z),
         }),
       });

@@ -1062,3 +1062,61 @@ outward side. The lowest foot layer was removed at the owner's request; this rev
 
 Static verification and deployment do not prove rendering or Creative menu placement. Check the golden palette,
 icon scale and all lamp groups in game, plus the jar's glass sorting and the lantern's four-sided glow.
+
+## Elven village (jigsaw, prototype)
+
+Written 2026-10-07, offline-checked only, **not yet seen in game**. Design: `docs/design/lothlorien_jigsaw_settlement.md`;
+engine notes: `.claude/skills/bedrock-modding/references/10-jigsaw-pieces.md`.
+
+Rebuild everything (pieces, pools, structure): `node tools/build_village.mjs` (helpers in `tools/village_mallorn.mjs`;
+exports from `build_structures.mjs` / `flet_mallorn.mjs`). Then `.\mods verify lothlorien`.
+
+**Connector standard** (every piece obeys it; the generator and `tests/run.mjs` check it):
+- One `minecraft:jigsaw` per connection, in the deck layer, on the outer face of the piece's bounding box, in the
+  middle of a 3-wide walk opening, facing outward. `name` = `target` = `lothlorien:village_deck`, joint `aligned`,
+  `final_state` = `lothlorien:mallorn_planks`; `target_pool` depends on the piece type (below).
+- Cross-section: 5-wide deck, walk cells -1..+1, `lothlorien:mallorn_fence` rails at +-2 one above the deck,
+  explicit air for 3 blocks above the walk cells (headroom, so wild leaves cannot block it).
+- FLOOR_H = 16: all decks are 16 above the template's nominal ground (bridges are at their own y 0). ROOTS = 10:
+  trunks and pillars reach 10 below nominal ground. All elements `"projection": "rigid"`.
+- Nothing (leaves, branches) enters the 5x4 corridor in front of a connector or sticks out of the box.
+- Pools `lothlorien:village/{start,bridges,nodes,ends,plugs}` (files `village_*.json`), pieces
+  `lothlorien:village/<name>` (`structures/lothlorien/village/`). Fallbacks: bridges -> plugs, nodes -> ends,
+  ends -> `minecraft:empty`.
+
+| Piece | Box x*z | Connectors | Points at pool |
+|---|---|---|---|
+| `central_mallorn_01` (start) | 33x33, 5x5 trunk | 4 | bridges |
+| `tree_platform_01` | 25x25, 3x3 trunk | 3 (T) | bridges |
+| `tree_platform_02` | 25x25, 3x3 trunk | 2 (straight/corner) | bridges |
+| `bridge_short` / `bridge_long` | 5x7 / 5x11 | 2 | nodes |
+| `lookout_01` (end) | <=9x9 on a log pillar | 1 | empty |
+| `railing_end` (plug) | 5x1 | 1 | empty |
+
+Pool weights: bridges short 5, long 5, plug 1; nodes platform_01 1, platform_02 1; ends lookout 4, plug 1.
+The central tree has the Elven rope from the ground through a hole and lanterns; bridges have fence rails, the long one
+a lantern post pair.
+
+**Structure** `lothlorien:elven_village` (`worldgen/structures/elven_village.json`): start pool `village/start`,
+`start_jigsaw_name` `lothlorien:village_anchor` (trunk base of the central tree), `max_depth` 6, `start_height` -10,
+`heightmap_projection` `world_surface`, `terrain_adaptation` none, biome filter `lothlorien`, max distance 116.
+**No structure set**: it only appears with `/place structure lothlorien:elven_village` (owner decision).
+
+**Simulator** `node tools/village_sim.mjs [seeds] [firstSeed]` (PNGs in `temp/elven_village/sim/`; run it from a bash
+shell, under PowerShell the main guard printed nothing). It reads the real `.mcstructure` and pool JSON files and
+assembles villages with Java jigsaw semantics (aligned joints, box collision, depth-first by depth, fallbacks), then
+checks: connectors meet (deck under 5 cells, rails, headroom), no box overlaps, every platform reachable on the deck,
+termination. Current numbers (100 seeds): 17 / 35.6 / 54 pieces (min/avg/max), 0 failures, 100 distinct layouts,
+92 unfilled connectors in total (~0.9 per village). The simulator encodes our assumptions about the engine; compare
+with the game and correct it where they differ.
+
+**Known limits:** open deck stubs (~0.9 per village a connector has no room even for the railing plug, so a 5-wide
+deck ends without a rail); the rope's `lothlorien:face` and fence connection states may not rotate with rotated
+pieces; rigid placement on uneven terrain (platforms keep one height, trunks reach 10 below, so steep slopes leave
+trunks floating or buried); village Mallorns are smaller than the wild giants (25/33-block boxes).
+
+**In-game test checklist:** new world in the Lothlorien biome, or any world with `/place structure lothlorien:elven_village`.
+Check: (1) it places without an error message (if `/place` fails, note the exact message text); (2) central tree with
+the rope reaching up from the ground; (3) bridges meet platforms exactly, in all 4 rotations (place several times);
+(4) rails and fences connect, no gaps; (5) ropes face the trunk; (6) lanterns present; (7) no jigsaw blocks left;
+(8) layouts differ between placements; (9) trunk bottoms vs terrain; (10) open stubs, not too many.

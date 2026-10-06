@@ -1,0 +1,18 @@
+{
+  "format_version": "1.21.100",
+  "minecraft:template_pool": {
+    "description": {
+      "identifier": "lothlorien:village/plugs"
+    },
+    "elements": [
+      {
+        "element": {
+          "element_type": "minecraft:single_pool_element",
+          "location": "lothlorien/village/railing_end",
+          "projection": "rigid"
+        },
+        "weight": 1
+      }
+    ]
+  }
+}
