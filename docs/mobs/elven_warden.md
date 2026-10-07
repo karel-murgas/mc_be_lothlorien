@@ -7,11 +7,17 @@ documented only (MS docs / d.ts), **[U]** unverified, test first. Owner requirem
 plan (`docs/design/lothlorien_elven_settlements_plan.md`, "Elven Guardians") is the long-term context. The plan's "persistent
 watchpost guardians" are NOT this mob: this one is a normal natural spawn (owner decision), watchposts can add persistent ones later.
 
+**Pool change 2026-10-07 (owner test, game 1.26.52):** a long walk along the edge met no natural warden (summoned ones worked).
+Cause: the Overworld surface `animal` cap is 4 per 9×9 chunks, shared with deer, squirrels, butterflies, fireflies, songbirds,
+unicorns and white deer, so a weight-4 mob almost never got a slot; on top of that 90 % of inland spawns were removed. `ambient`
+has a surface cap of 0 (why songbirds never spawned there). Owner chose the **`pillager` pool** (own surface cap 8, used only by
+pillagers): weight 8 both conditions, density 4, inland keep 30 %. **[U]** spawns on Peaceful, interaction with pillager patrols.
+
 ## 1. Decisions at a glance
 
 | Topic | Decision |
 |---|---|
-| Spawn | Two spawn-rule conditions (ground in the biome, mallorn-plank decks), pool `animal`, `spawn_category creature`, herd 1-2, low weight. Script thins natural spawns by the existing depth estimator: keep 100 % at the **edge** (border <= 16) and on **plank decks**, 10 % elsewhere. |
+| Spawn | Two spawn-rule conditions (ground in the biome, mallorn-plank decks), pool **`pillager`** (2026-10-07, see below), `spawn_category creature`, herd 1-2, weight 8. Script thins natural spawns by the existing depth estimator: keep 100 % at the **edge** (border <= 16) and on **plank decks**, 30 % elsewhere. |
 | Despawn | Natural wardens: standard `{"despawn_from_distance": {}}`, nothing persistent, name tag keeps it. Village wardens: persistent group (section 10). |
 | Weapon | Bow in main hand via `minecraft:equipment` loot table, `minecraft:shooter` arrow, `behavior.ranged_attack`. Quiver is model-only. |
 | Targets | Monster family minus an exclusion list (enderman, warden, wither, piglins, creaking, aquatic, shulker). **Creepers are shot and spiders always** (owner 2026-10-07; section 3 table is superseded). Never players, never other families. |
@@ -131,8 +137,8 @@ The owner's original fallback ("family vanilla monsters target") is therefore th
 ### Rule (`spawn_rules/elven_warden.json`)
 Same skeleton as `spawn_rules/white_deer.json` (mod convention): `population_control: animal` (the proven surface pool, `spawning.md` songbird trap),
 entity `spawn_category: creature`, `herd {min 1, max 2, event lothlorien:spawn_natural, event_skip_count 0}` (every member judged, like the white deer),
-`density_limit.surface 3`, `distance_filter` 16-48, biome tag `lothlorien`, no brightness filter (day and night guard) **[U: omitting it]**.
-Two conditions (alternatives, spawning.md): ground `grass_block`/`dirt`, weight 4; decks `lothlorien:mallorn_planks`, `lothlorien:mallorn_heartwood_planks`, weight 6.
+`density_limit.surface 4`, `distance_filter` 16-48, biome tag `lothlorien`, no brightness filter (day and night guard) **[U: omitting it]**.
+Two conditions (alternatives, spawning.md): ground `grass_block`/`dirt`, weight 8; decks `lothlorien:mallorn_planks`, `lothlorien:mallorn_heartwood_planks`, weight 8.
 Deer 10 and squirrel 12 outweigh it. Risks: shares the `animal` cap with deer, cows, sheep **[V: fixed engine pools]**; `spawns_on_block_filter` with custom block
 ids works for custom blocks in principle but the surface sampler may only pick heightmap columns, i.e. **may never choose a deck 16 up [U, the biggest
 risk]**. Fallback: village piece marker or `structure`-saved entity (persistent, so not "normal rules"; owner call), or a one-time script top-up.
@@ -224,7 +230,7 @@ Check: bow visible in hand and raised when `query.has_target`; arrow flies from 
    3. `/damage <spider> 0.5 entity_attack entity <warden>`: does the spider turn on the warden? Decides layer 2.
    4. Player hits a warden: it shoots back, neighbours within 20 blocks join (angry broadcast); it stops when you leave. Killing it: Harmony -1 for the fight and -6 for the kill (`/scriptevent lothlorien:harmony` shows it), also outside the biome.
    5. Player standing between a warden and a zombie, a deer in the line of fire: no damage taken (guard works), arrow knockback/sticking noted.
-   6. `/summon ... lothlorien:spawn_natural` at edge, in the heart and on a deck: kept always / 10 % / always. `entitySpawn` cause for natural spawns is not `Loaded`.
+   6. `/summon ... lothlorien:spawn_natural` at edge, in the heart and on a deck: kept always / 30 % / always. `entitySpawn` cause for natural spawns is not `Loaded`.
    7. New world: spawn counts at the edge, in the forest, on the village decks (do natural spawns ever pick a deck?), population vs deer, despawn after 2-3 min far away, name tag keeps one.
 5. Knowledge went to `.claude/skills/bedrock-mobs/references/combat.md` (separate workspace commit).
 
@@ -255,9 +261,9 @@ piglin, creaking, aquatic, shulker; `hurt_by_target` (max_dist 64) skipping its 
 `lothlorien:natural`; events `lothlorien:spawn_natural` (herd event, sets it) and `lothlorien:village_warden` (adds the group; summon hook).
 There is **no** `entity_spawned` event: a warden has no state to set up.
 
-**Natural spawns.** Two spawn-rule conditions (grass/dirt weight 4, mallorn / heartwood planks weight 6, herd 1-2, `animal` pool,
-density 3, no brightness filter). `elven_warden.js`: one `entitySpawn` subscriber; a flagged (herd-event) warden is judged once one tick
-later by `spawnKeepChance(level, onDeck)`: kept 100 % at the edge (level 1) and on any plank deck inside the biome, 10 % inner / heart, 0
+**Natural spawns.** Two spawn-rule conditions (grass/dirt weight 8, mallorn / heartwood planks weight 8, herd 1-2, `pillager` pool,
+density 4, no brightness filter). `elven_warden.js`: one `entitySpawn` subscriber; a flagged (herd-event) warden is judged once one tick
+later by `spawnKeepChance(level, onDeck)`: kept 100 % at the edge (level 1) and on any plank deck inside the biome, 30 % inner / heart, 0
 outside; the rest is `remove()`d. No polling.
 
 **Village wardens (persistent).** The structure NBT entity carries `definitions: ["+lothlorien:elven_warden", "+lothlorien:village_warden"]`

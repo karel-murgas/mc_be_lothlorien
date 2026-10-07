@@ -3,7 +3,7 @@
   "minecraft:spawn_rules": {
     "description": {
       "identifier": "lothlorien:elven_warden",
-      "population_control": "animal"
+      "population_control": "pillager"
     },
     "conditions": [
       {
@@ -13,7 +13,7 @@
           "minecraft:dirt"
         ],
         "minecraft:weight": {
-          "default": 4
+          "default": 8
         },
         "minecraft:herd": {
           "min_size": 1,
@@ -22,7 +22,7 @@
           "event_skip_count": 0
         },
         "minecraft:density_limit": {
-          "surface": 3
+          "surface": 4
         },
         "minecraft:distance_filter": {
           "min": 16,
@@ -41,7 +41,7 @@
           "lothlorien:mallorn_heartwood_planks"
         ],
         "minecraft:weight": {
-          "default": 6
+          "default": 8
         },
         "minecraft:herd": {
           "min_size": 1,
@@ -50,7 +50,7 @@
           "event_skip_count": 0
         },
         "minecraft:density_limit": {
-          "surface": 3
+          "surface": 4
         },
         "minecraft:distance_filter": {
           "min": 16,

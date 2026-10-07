@@ -1754,7 +1754,7 @@ test("elven warden: natural wardens despawn by the standard rule; only the villa
 test("elven warden: spawn rule has a ground and a deck condition with the weights of elven_warden_rules.js", () => {
   const r = readJson("../lothlorien_bp/spawn_rules/elven_warden.json")["minecraft:spawn_rules"];
   assert.equal(r.description.identifier, EW.WARDEN_ID);
-  assert.equal(r.description.population_control, "animal");
+  assert.equal(r.description.population_control, "pillager", "own surface cap: the animal cap (4 per 9x9 chunks) is full of critters");
   assert.equal(r.conditions.length, 2);
   const [ground, deck] = r.conditions;
   assert.equal(ground["minecraft:weight"].default, EW.SPAWN_WEIGHT_GROUND);
@@ -1766,17 +1766,17 @@ test("elven warden: spawn rule has a ground and a deck condition with the weight
     assert.ok(!c["minecraft:brightness_filter"], "day and night guard");
   }
 });
-test("elven warden: natural spawns - always at the edge and on decks, 10 % elsewhere in the biome, none outside", () => {
+test("elven warden: natural spawns - always at the edge and on decks, 30 % elsewhere in the biome, none outside", () => {
   assert.equal(EW.spawnKeepChance(0, false), 0);
   assert.equal(EW.spawnKeepChance(0, true), 0, "never outside the biome");
   assert.equal(EW.spawnKeepChance(1, false), 1);
   for (const level of [1, 2, 3]) assert.equal(EW.spawnKeepChance(level, true), 1, `deck at level ${level}`);
-  assert.equal(EW.spawnKeepChance(2, false), 0.1);
-  assert.equal(EW.spawnKeepChance(3, false), 0.1);
+  assert.equal(EW.spawnKeepChance(2, false), 0.3);
+  assert.equal(EW.spawnKeepChance(3, false), 0.3);
   let kept = 0;
   for (let i = 0; i < 1000; i++) if (EW.keepNaturalSpawn(3, false, i / 1000)) kept++;
-  assert.equal(kept, 100);
-  assert.ok(EW.keepNaturalSpawn(1, false, 0.999) && !EW.keepNaturalSpawn(3, false, 0.1));
+  assert.equal(kept, 300);
+  assert.ok(EW.keepNaturalSpawn(1, false, 0.999) && !EW.keepNaturalSpawn(3, false, 0.3));
   const src = readFileSync(new URL("../lothlorien_bp/scripts/elven_warden.js", import.meta.url), "utf8");
   assert.ok(src.includes("EntityInitializationCause.Loaded") && src.includes('setProperty("lothlorien:natural", false)'), "judged once, not on reload");
   assert.ok(!src.includes("runInterval"), "event-driven, no polling");

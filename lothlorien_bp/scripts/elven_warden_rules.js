@@ -15,11 +15,11 @@ export const BOW_ID = "minecraft:bow";
 // weight SPAWN_WEIGHT_DECK; a test keeps the numbers equal). Natural spawns fire the herd event lothlorien:spawn_natural,
 // which sets the property lothlorien:natural; elven_warden.js then keeps each warden with the chance below and removes
 // the rest. /summon and spawn eggs never set the flag, so they always stay.
-export const SPAWN_WEIGHT_GROUND = 4;
-export const SPAWN_WEIGHT_DECK = 6;
+export const SPAWN_WEIGHT_GROUND = 8;
+export const SPAWN_WEIGHT_DECK = 8;
 export const SPAWN_KEEP_EDGE = 1; // depth level 1 (border within the first ring, <= 16 blocks)
 export const SPAWN_KEEP_DECK = 1; // standing on a mallorn plank deck, at any depth inside the biome
-export const SPAWN_KEEP_INNER = 0.1; // depth level 2 and 3 (inner forest, heart) off the decks
+export const SPAWN_KEEP_INNER = 0.3; // depth level 2 and 3 (inner forest, heart) off the decks
 export const DECK_BLOCKS = new Set(["lothlorien:mallorn_planks", "lothlorien:mallorn_heartwood_planks"]);
 
 // level: 0 outside, 1 edge, 2 inner, 3 heart (scripts/depth.js); onDeck: the block under the feet is a deck block.
