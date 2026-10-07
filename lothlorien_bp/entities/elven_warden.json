@@ -221,8 +221,10 @@
           "min": 1.5,
           "max": 2.5
         },
-        "attack_radius": 18,
-        "attack_radius_min": 6,
+        "attack_range": {
+          "min": 0,
+          "max": 18
+        },
         "target_in_sight_time": 0.5,
         "in_range_movement_mode": "hold_position",
         "speed_multiplier": 0.7

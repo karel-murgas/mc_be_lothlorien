@@ -25,7 +25,7 @@ pillagers): weight 8 both conditions, density 4, inland keep 30 %. **[U]** spawn
 | Players | Ignored. `hurt_by_target` retaliates against whoever hurt it (player included), nearby wardens assist through `on_target_acquired` -> group `lothlorien:angry` (`minecraft:angry`, `broadcast_anger`, range 20, 25 s). Script cancels warden arrow damage to players/wildlife unless provoked. |
 | Harmony | **Owner 2026-10-07 (replaced Disharmony): fighting a warden costs 1 Harmony per fight (first player hit after 60 s without one), killing it 6 more; a Hated player (-30 or lower, tag `lothlorien_hated`) is shot on sight.** Unverified in game. |
 | Village wardens | **Added 2026-10-07:** template entities in the village pieces (2 on the central tree deck, 1 on node_b/c/f and tower_a/c), group `lothlorien:village_warden` (persistent + home 20) through the structure's `definitions` list. Section 10. |
-| Stats | 26 hp, speed 0.25, follow range 28, shoots every 1.5-2.5 s from up to 18 blocks (`attack_radius 18`, `attack_radius_min 6`), approaches at 0.7x, backs off from monsters within 5 blocks (`avoid_mob_type`, not skeletons/endermen; owner 2026-10-07: "run very quickly, sometimes too close for a ranged unit"; **[U]** retest), mob arrow (skeleton damage class). Drops 0-2 arrows (looting +1, like a skeleton; owner 2026-10-07), no XP. |
+| Stats | 26 hp, speed 0.25, follow range 28, shoots every 1.5-2.5 s from up to 18 blocks (`attack_range` max 18; `attack_radius`/`_min` failed to load, see below), approaches at 0.7x, backs off from monsters within 5 blocks (`avoid_mob_type`, not skeletons/endermen; owner 2026-10-07: "run very quickly, sometimes too close for a ranged unit"; **[U]** retest), mob arrow (skeleton damage class). Drops 0-2 arrows (looting +1, like a skeleton; owner 2026-10-07), no XP. |
 
 ## 2. Research: ranged bow AI (vanilla)
 
@@ -187,7 +187,7 @@ target goals. Name tag keeps it (`minecraft:nameable`). A warden mid-fight beyon
 | Movement | 0.25 | 0.35 | **0.25** (2026-10-07, was 0.27), approach 0.7x, backs off within 5 blocks |
 | Follow range | default | 64 | **28** |
 | Shot interval | 3 s (2 s hard) | 1 s crossbow | **1.5-2.5 s**, flat (no hard variant) |
-| Range | 15 | 8 | **`attack_radius 18`, `attack_radius_min 6`** (was `attack_range` max 22: wardens closed in to point blank), `hold_position`, `speed_multiplier 0.7` |
+| Range | 15 | 8 | **`attack_range` max 18** (was 22; `attack_radius`/`attack_radius_min` are **not in the schema at entity format 1.26.50**: content log 1.26.52 "not present in the Schema", whole entity failed to load, 2026-10-07), `hold_position`, `speed_multiplier 0.7` |
 | Melee | fallback 2 | fallback 3 | none; `knockback_resistance 0.2` |
 | Drops / XP | bow, bones / 5+ | crossbow, ... | **0-2 arrows** (looting +1; owner 2026-10-07), **0 XP** (a kill costs Harmony, no farm; bow `drop_chance 0`) |
 
@@ -256,7 +256,7 @@ playtest showing monsters standing around unaware). Section 9 questions 1, 2, 4 
 No sounds, no XP. Drops 0-2 arrows (`loot_tables/entities/elven_warden.json`, added 2026-10-07).
 
 **Entity.** Family `lothlorien_warden, irongolem, mob`; 26 hp, speed 0.25, follow range 28; `equipment` (bow, mainhand drop chance 0),
-`shooter arrow`, `ranged_attack` 1.5-2.5 s, `attack_radius 18` / `_min 6`, `hold_position`, approach 0.7x, `avoid_mob_type` monsters within 5; targets: monster minus enderman, warden, wither, zombie_pigman,
+`shooter arrow`, `ranged_attack` 1.5-2.5 s, `attack_range` max 18, `hold_position`, approach 0.7x, `avoid_mob_type` monsters within 5; targets: monster minus enderman, warden, wither, zombie_pigman,
 piglin, creaking, aquatic, shulker; `hurt_by_target` (max_dist 64) skipping its own family; assist via the `lothlorien:angry` broadcast group. Property
 `lothlorien:natural`; events `lothlorien:spawn_natural` (herd event, sets it) and `lothlorien:village_warden` (adds the group; summon hook).
 There is **no** `entity_spawned` event: a warden has no state to set up.

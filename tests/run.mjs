@@ -1901,7 +1901,7 @@ test("elven warden: shoots monsters (spiders and creepers included), never playe
   assert.deepEqual(e.events["lothlorien:on_calm"].remove.component_groups, ["lothlorien:angry"]);
   assert.equal(c["minecraft:shooter"].def, "minecraft:arrow");
   const ra = c["minecraft:behavior.ranged_attack"];
-  assert.equal(ra.attack_radius, 18); assert.equal(ra.attack_radius_min, 6); assert.ok(ra.speed_multiplier < 1, "closes in at a walk");
+  assert.equal(ra.attack_range.max, 18); assert.ok(!("attack_radius" in ra) && !("attack_radius_min" in ra), "not in the schema at format 1.26.50: the entity fails to load"); assert.ok(ra.speed_multiplier < 1, "closes in at a walk");
   assert.equal(c["minecraft:movement"].value, 0.25);
   assert.equal(c["minecraft:behavior.avoid_mob_type"].entity_types[0].max_dist, 5, "keeps monsters off (kiting)");
   assert.ok(!("set_persistent" in c["minecraft:behavior.ranged_attack"]) && !("set_persistent" in c["minecraft:behavior.nearest_attackable_target"]));
