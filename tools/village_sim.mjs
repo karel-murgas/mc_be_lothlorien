@@ -244,7 +244,8 @@ function colour(n) {
   return [120, 120, 130];
 }
 const SCALE = 4, BG = [24, 28, 36];
-function image(w, h, pixel) {
+let scaleNow = SCALE;
+function image(w, h, pixel, SCALE = scaleNow) {
   const buf = Buffer.alloc(w * SCALE * h * SCALE * 3);
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     const c = pixel(x, y) ?? BG;
@@ -255,9 +256,11 @@ function image(w, h, pixel) {
   }
   return png(w * SCALE, h * SCALE, buf);
 }
-export const kindOf = (name) => name.startsWith("central") ? "central" : name.startsWith("node_") ? "node" : name.startsWith("tower_") ? "tower"
-  : name.startsWith("bridge_dog") ? "dog" : name.startsWith("bridge_") ? "straight" : name.startsWith("crown_") ? "crown"
-  : name === "balcony_small" ? "balcony" : name === "lookout_01" ? "lookout" : name === "railing_end" ? "plug" : "other";
+export const kindOf = (name) => name.startsWith("central") ? "central" : name.startsWith("combo_node_") ? "node" : name.startsWith("combo_tower_") ? "tower"
+  : name.startsWith("bridge_") ? "bridgeAlone" : name.startsWith("crown_") ? "crown"
+  : name.startsWith("balcony_") ? "balcony" : name === "lookout_01" ? "lookout" : name === "railing_end" ? "plug" : "other";
+// a combo piece = bridge + its destination tree; the bridge kind is the name suffix
+export const bridgeKindOf = (name) => (!name.startsWith("combo_") ? null : /_bridge_dog_/.test(name) ? "dog" : "straight");
 
 // ---- walking: 3D, half-block steps ---------------------------------------------------------------------------------
 // Heights in half-blocks. A block in layer y spans [2y, 2y+2]; a bottom slab [2y, 2y+1], a top slab [2y+1, 2y+2]; a rail
@@ -312,9 +315,14 @@ export function walkability(res, world, states) {
 export function check(data, res) {
   const fail = [], states = new Map(), world = buildWorld(res, states);
   const get = (x, y, z) => world.get(wkey(x, y, z));
-  const kinds = { central: 0, node: 0, tower: 0, straight: 0, dog: 0, crown: 0, crownSmall: 0, balcony: 0, lookout: 0, plug: 0 };
-  for (const p of res.placed) { const k = kindOf(p.name); if (k in kinds) kinds[k]++; if (p.name === "crown_small") kinds.crownSmall++; }
+  const kinds = { central: 0, node: 0, tower: 0, straight: 0, dog: 0, crown: 0, crownSmall: 0, balcony: 0, lookout: 0, plug: 0, bridgeAlone: 0 };
+  for (const p of res.placed) { const k = kindOf(p.name); if (k in kinds) kinds[k]++; if (p.name === "crown_small") kinds.crownSmall++; const bk = bridgeKindOf(p.name); if (bk) kinds[bk]++; }
   kinds.trees = kinds.central + kinds.node + kinds.tower;
+  // P6: a bridge only exists inside a combo piece, together with the tree it leads to (trunk column to the bottom of the box + crown jigsaw);
+  // balconies and lookouts stand on a log pillar that reaches the bottom of their box (no hanging balcony)
+  const hasLogAtBottom = (p) => p.piece.blocks.some((b) => b.y === 0 && /_(log|wood)$/.test(b.name)) || p.piece.jigsaws.some((j) => j.y === 0);
+  kinds.bridgesNoDest = res.placed.filter((p) => p.name.startsWith("bridge_") || (p.name.startsWith("combo_") && !(hasLogAtBottom(p) && p.piece.jigsaws.some((j) => j.dirId === 1)))).length;
+  kinds.unsupported = res.placed.filter((p) => (p.name.startsWith("balcony_") || p.name === "lookout_01") && !(hasLogAtBottom(p) && p.piece.size[1] >= 38)).length;
   kinds.wardens = res.placed.reduce((n, p) => n + p.piece.entities.filter((e) => e.id === "lothlorien:elven_warden").length, 0); // template entities (placed if Bedrock keeps them)
   const startLoc = data.pools.get(data.structure.start_pool).elements.map((e) => data.getPiece(e.element.location).name);
   if (!startLoc.includes(res.start.name) || res.placed[0] !== res.start) fail.push("start piece missing");
@@ -355,6 +363,8 @@ export function check(data, res) {
       if (!a?.[`minecraft:connection_${sideOf(f)}`] || !b?.[`minecraft:connection_${sideOf([-f[0], 0, -f[2]])}`]) fail.push(`${tag}: rail link across the joint missing at offset ${off}`);
     }
   }
+  if (kinds.bridgesNoDest) fail.push(`${kinds.bridgesNoDest} bridge(s) without a destination tree`);
+  if (kinds.unsupported) fail.push(`${kinds.unsupported} unsupported balcony / lookout`);
   const walk = walkability(res, world, states);
   if (!walk.start) fail.push("no walkable start cell on the central platform");
   else if (walk.unreachable.length) {
@@ -408,7 +418,7 @@ export const layoutHash = (res) => res.placed.map((p) => `${p.name}/${p.rot}/${p
 // Dead-end decks (a connector left open or closed by a plug) of two different pieces that end within `max` blocks of each
 // other without joining: the "bridges that almost meet / lead nowhere" seen in game.
 export function nearMisses(res, max = 8) {
-  const PLUGS = new Set(["railing_end", "lookout_01", "balcony_small"]);
+  const PLUGS = new Set(["railing_end", "lookout_01", "balcony_braced"]);
   const partner = new Map(), pid = new Map(res.placed.map((p, i) => [p, i]));
   const kj = (p, j) => `${pid.get(p)}:${j.x},${j.y},${j.z}`;
   for (const c of res.connections) { partner.set(kj(c.parent, c.pj), c.child); partner.set(kj(c.child, c.cj), c.parent); }
@@ -456,15 +466,16 @@ export function renderTop(world) {
     return base.map((v) => Math.min(255, Math.round(v * k)));
   });
 }
-export function renderSide(world) {
+export function renderSide(world, crop = null, scale = SCALE) {
   const front = new Map(); let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
   for (const [k, n] of world) {
     if (n === AIR || n === JIGSAW) continue;
     const [x, y, z] = wdecode(k), c = x * S + y, cur = front.get(c);
+    if (crop && (x < crop.x0 || x > crop.x1 || z < crop.z0 || z > crop.z1 || y < (crop.y0 ?? -1e9) || y > (crop.y1 ?? 1e9))) continue;
     if (!cur || cur.z < z) front.set(c, { z, n });
     x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
   }
-  return image(x1 - x0 + 1, y1 - y0 + 1, (px, py) => { const t = front.get((px + x0) * S + (y1 - py)); return t ? colour(t.n) : null; });
+  return image(x1 - x0 + 1, y1 - y0 + 1, (px, py) => { const t = front.get((px + x0) * S + (y1 - py)); return t ? colour(t.n) : null; }, scale);
 }
 
 // ---- CLI ---------------------------------------------------------------------------------------------------------
@@ -484,13 +495,13 @@ function main() {
   for (const f of readdirSync(outDir)) if (f.endsWith(".png")) unlinkSync(join(outDir, f));
   const rows = runSeeds(data, count, first);
   console.log(`max_depth ${data.structure.max_depth}`);
-  console.log("seed pieces trees(tow) lvl straight dog balc look plug open crowns(sm) unreach overl ropeW decay oneWay result");
+  console.log("seed pieces trees(tow) lvl straight dog balc look plug open crowns(sm) unreach overl ropeW decay oneWay noDest result");
   let bad = 0;
   const pad = (v, n) => String(v).padStart(n);
   for (const { seed, res, ck } of rows) {
     const ok = ck.fail.length === 0 && ck.info.ropeWrong === 0 && ck.info.decay === 0 && true; if (!ok) bad++;
     const k = ck.kinds;
-    console.log(`${pad(seed, 4)} ${pad(res.placed.length, 6)} ${pad(`${k.trees}(${k.tower})`, 10)} ${pad(ck.levels, 3)} ${pad(k.straight, 8)} ${pad(k.dog, 3)} ${pad(k.balcony, 4)} ${pad(k.lookout, 4)} ${pad(k.plug, 4)} ${pad(ck.open, 4)} ${pad(`${k.crown}(${k.crownSmall})`, 10)} ${pad(ck.unreachable, 7)} ${pad(ck.overlaps, 5)} ${pad(ck.info.ropeWrong, 5)} ${pad(ck.info.decay, 5)} ${pad(ck.info.fenceOneWay, 9)} ${ok ? "ok" : "FAIL"}`);
+    console.log(`${pad(seed, 4)} ${pad(res.placed.length, 6)} ${pad(`${k.trees}(${k.tower})`, 10)} ${pad(ck.levels, 3)} ${pad(k.straight, 8)} ${pad(k.dog, 3)} ${pad(k.balcony, 4)} ${pad(k.lookout, 4)} ${pad(k.plug, 4)} ${pad(ck.open, 4)} ${pad(`${k.crown}(${k.crownSmall})`, 10)} ${pad(ck.unreachable, 7)} ${pad(ck.overlaps, 5)} ${pad(ck.info.ropeWrong, 5)} ${pad(ck.info.decay, 5)} ${pad(ck.info.fenceOneWay, 9)} ${pad(ck.kinds.bridgesNoDest, 6)} ${ok ? "ok" : "FAIL"}`);
     for (const f of [...new Set(ck.fail)].slice(0, 6)) console.log(`       ! ${f}`);
   }
   const avg = (f) => (rows.reduce((a, r) => a + f(r), 0) / rows.length).toFixed(1);
@@ -498,6 +509,7 @@ function main() {
   console.log(`\nseeds ${rows.length}: failures ${bad}, distinct layouts ${new Set(rows.map((r) => r.hash)).size}`);
   console.log(`  pieces ${mm((r) => r.res.placed.length)} | trees ${mm((r) => r.ck.kinds.trees)} | towers avg ${avg((r) => r.ck.kinds.tower)} | levels used ${mm((r) => r.ck.levels)} (villages with 2+ levels: ${rows.filter((r) => r.ck.levels >= 2).length}/${rows.length})`);
   console.log(`  bridges straight ${avg((r) => r.ck.kinds.straight)} dog-leg ${avg((r) => r.ck.kinds.dog)} | balconies ${avg((r) => r.ck.kinds.balcony)} lookouts ${avg((r) => r.ck.kinds.lookout)} plugs ${avg((r) => r.ck.kinds.plug)} | open connectors ${avg((r) => r.ck.open)} (vertical ${avg((r) => r.ck.openVertical)}) | crowns ${avg((r) => r.ck.kinds.crown)}, small fallback ${avg((r) => r.ck.kinds.crownSmall)} | wardens per village (template entities) ${mm((r) => r.ck.kinds.wardens)}`);
+  console.log(`  exits ending in railing ${avg((r) => r.ck.kinds.plug)} / braced balcony ${avg((r) => r.ck.kinds.balcony)} / lookout ${avg((r) => r.ck.kinds.lookout)} per village; bridges without a destination tree ${rows.reduce((a, r) => a + r.ck.kinds.bridgesNoDest, 0)}, unsupported balconies ${rows.reduce((a, r) => a + r.ck.kinds.unsupported, 0)}`);
   const sum = (f) => rows.reduce((a, r) => a + f(r.ck.info), 0);
   console.log(`  totals: unreachable walk cells ${rows.reduce((a, r) => a + r.ck.unreachable, 0)}, overlaps ${rows.reduce((a, r) => a + r.ck.overlaps, 0)}, wrong ropes ${sum((i) => i.ropeWrong)}/${sum((i) => i.ropes)}, ` +
     `decaying leaves ${sum((i) => i.decay)}/${sum((i) => i.leaves)}, one-way fence links (open ends only) ${sum((i) => i.fenceOneWay)} (dangling stub ends ${sum((i) => i.fenceDangling)}), near-miss ends ${sum((i) => i.nearMiss)}`);

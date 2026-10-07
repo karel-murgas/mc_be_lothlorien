@@ -11,7 +11,8 @@ watchpost guardians" are NOT this mob: this one is a normal natural spawn (owner
 Cause: the Overworld surface `animal` cap is 4 per 9×9 chunks, shared with deer, squirrels, butterflies, fireflies, songbirds,
 unicorns and white deer, so a weight-4 mob almost never got a slot; on top of that 90 % of inland spawns were removed. `ambient`
 has a surface cap of 0 (why songbirds never spawned there). Owner chose the **`pillager` pool** (own surface cap 8, used only by
-pillagers): weight 8 both conditions, density 4, inland keep 30 %. **[U]** spawns on Peaceful, interaction with pillager patrols.
+pillagers): weight 8 both conditions, density 4, inland keep 30 %. **Verified in game 2026-10-07: owner confirms natural spawns are now as
+common as wanted.** No spawns on Peaceful is accepted by the owner. **[U]** interaction with pillager patrols.
 
 ## 1. Decisions at a glance
 
@@ -25,7 +26,7 @@ pillagers): weight 8 both conditions, density 4, inland keep 30 %. **[U]** spawn
 | Players | Ignored. `hurt_by_target` retaliates against whoever hurt it (player included), nearby wardens assist through `on_target_acquired` -> group `lothlorien:angry` (`minecraft:angry`, `broadcast_anger`, range 20, 25 s). Script cancels warden arrow damage to players/wildlife unless provoked. |
 | Harmony | **Owner 2026-10-07 (replaced Disharmony): fighting a warden costs 1 Harmony per fight (first player hit after 60 s without one), killing it 6 more; a Hated player (-30 or lower, tag `lothlorien_hated`) is shot on sight.** Unverified in game. |
 | Village wardens | **Added 2026-10-07:** template entities in the village pieces (2 on the central tree deck, 1 on node_b/c/f and tower_a/c), group `lothlorien:village_warden` (persistent + home 20) through the structure's `definitions` list. Section 10. |
-| Stats | 26 hp, speed 0.25, follow range 28, shoots every 1.5-2.5 s from up to 18 blocks (`attack_range` max 18; `attack_radius`/`_min` failed to load, see below), approaches at 0.7x, backs off from monsters within 5 blocks (`avoid_mob_type`, not skeletons/endermen; owner 2026-10-07: "run very quickly, sometimes too close for a ranged unit"; **[U]** retest), mob arrow (skeleton damage class). Drops 0-2 arrows (looting +1, like a skeleton; owner 2026-10-07), no XP. |
+| Stats | 26 hp, speed 0.25, follow range 28, shoots every 1.5-2.5 s from up to 18 blocks (`attack_range` max 18; `attack_radius`/`_min` failed to load, see below), approaches at 0.7x, backs off from monsters within 5 blocks (`avoid_mob_type`, not skeletons/endermen; owner 2026-10-07: "run very quickly, sometimes too close for a ranged unit"; **verified in game 2026-10-07: owner says range, kiting, speed and ally assist "work like a charm"**), mob arrow (skeleton damage class). Drops 0-2 arrows (looting +1, like a skeleton; owner 2026-10-07), no XP. |
 
 ## 2. Research: ranged bow AI (vanilla)
 

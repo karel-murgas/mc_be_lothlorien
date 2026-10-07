@@ -1116,18 +1116,10 @@ Rebuild everything (pieces, pools, structure; it first deletes old village piece
 | Piece (structure `lothlorien:village/<name>`) | Box x*y*z | Connectors | Points at pool |
 |---|---|---|---|
 | `central_mallorn_01` start, 21x21 octagon deck, 5x5 round trunk, rope, anchor | 21x40x21 | 4 (N E S W, offsets -3 2 4 -2) | bridges (crown: crowns_central) |
-| `node_a` cut-corner rectangle | 13x40x11 | 2 | bridges |
-| `node_b` stepped octagon | 15x40x15 | 3 | bridges |
-| `node_c` plus shape | 15x40x15 | 4 | bridges |
-| `node_d` oval (straight runs) | 17x40x13 | 3 | bridges |
-| `node_e` small cut-corner | 11x40x11 | 2 | bridges |
-| `node_f` wide cut-corner | 17x40x11 | 3 | bridges |
-| `tower_a/b/c` two levels (8 apart), 3x3 trunk, slab spiral stair | 15x48x15, 15x48x15, 17x48x13 | 2 + 2 (upper `_hi`), 3 + 2, 2 + 2 | bridges |
+| `combo_<node>_<entry face>_<bridge>` (P6, 35 files): ONE piece = slab-arched bridge + the node/tower it leads to; entry = the bridge's far end (north face, name `village_deck`, pool empty), exits = the node's other connectors (name `village_deck_hi`, so they only act as parents), crown jigsaw on the node trunk | 11-17 x 40 (48 with a tower) x 18-32 | 1 entry + 1-4 exits | combos (crown: crowns) |
 | `crown_small / medium / large` | 15x16x15, 17x20x17, 21x24x21 | down jigsaw | empty |
 | `crown_central_a / b` | 33x34x33, 27x30x27 | down jigsaw | empty |
-| `bridge_7/9/11/13/15` straight slab arches (no 5 since P9) | 5 x (5 or 6) x length | 2 | nodes |
-| `bridge_dog_11_l/r`, `bridge_dog_13_l/r` sideways shift 2 / 3 | 7x6x11, 8x6x13 | 2 | nodes |
-| `balcony_small` half-round end with lantern | 7x4x6 | 1 | empty |
+| `balcony_braced` (P6) half-round rim balcony on a 5-cell log pillar 40 below the deck, 8 log braces under the deck, lantern | 7x44x7 | 1 | empty |
 | `lookout_01` platform on a pillar | 9x38x9 | 1 | empty |
 | `railing_end` plug | 5x2x1 | 1 | empty |
 
@@ -1153,27 +1145,34 @@ Rebuild everything (pieces, pools, structure; it first deletes old village piece
   the last two cells (14, 15) are the exit onto it; rails float one above the stair block on the outer side from cell 3
   on, and the cut gets rails except at the exit. The upper deck clips away what lies beyond the stair well (tower_a: no
   south arm), otherwise the well rail would cut that part off.
-- **Pools** (`village_*.json`): `start` central; `bridges` (7:3, 9:3, 11:3, 13:2, 15:1, four dog-legs 1 each; fallback
-  `plugs`); `nodes` (six nodes 3 each, three towers 3 each, balcony 4, lookout 1; fallback `ends`); `ends` (balcony 8,
-  lookout 2, plug 1; fallback empty); `plugs`; `crowns` (large 3, medium 2; fallback `crowns_small`); `crowns_small`;
-  `crowns_central` (a 2, b 1; fallback `crowns_small`).
+- **Pools** (`village_*.json`): `start` central; `combos` (every combo: straight 3, dog-leg 2, +2 for tower combos so most villages climb; early ends railing 10, balcony 6,
+  lookout 2; fallback `exits`); `exits` (railing 4, braced balcony 2, lookout 1; fallback `plugs`); `plugs`; `crowns` (large 3, medium 2; fallback `crowns_fallback`);
+  `crowns_fallback` (large 12, medium 8, small 1: trees at max_depth only see the fallback pool, so it must offer big crowns too); `crowns_small`; `crowns_central`.
+  There is no `bridges`/`nodes` pool any more: a platform exit gets a bridge only together with its destination tree.
 - **Structure** `lothlorien:elven_village`: start pool `village/start`, `start_jigsaw_name` `lothlorien:village_anchor`
-  (trunk base of the central tree), `max_depth` **5** (central 0, bridge 1, node 2, bridge 3, node 4; the nodes of the
+  (trunk base of the central tree), `max_depth` **2** (central 0, combo 1 = bridge + tree, combo 2; a crown is a sibling, not a deeper level; exits left at the end get railing / balcony / lookout), bridge 1, node 2, bridge 3, node 4; the nodes of the
   last generation still get full crowns and a last bridge to a balcony or lookout), `start_height` -18,
   `heightmap_projection` `world_surface`, `terrain_adaptation` none, biome filter `lothlorien`, max distance 116.
   **No structure set**: only `/place structure lothlorien:elven_village` (owner decision).
 
+- **P6: no bridge to nowhere, no hanging balcony (2026-10-07; generated and sim-checked, not yet seen in game).** `tools/village_combo.mjs`
+  builds the combos: the node is rotated so the chosen entry connector faces the bridge, bridge and node share one deck there
+  (rails linked inside the piece), and the exits only act as parents. A (node, entry face) pair gets a straight bridge (7..15 in turn) and every
+  second pair also a dog-leg (4 variants in turn); pairs where another connector shares the entry face (tower_b south) or where the bridge sticks out
+  of the node's width are skipped (a wider union box would cover the cells in front of the exits: no child could ever be placed). A platform exit that fits
+  no combo ends in `railing_end`, a `balcony_braced` or `lookout_01`. The balcony cannot be braced to the parent's trunk (the trunk lies inside the
+  parent's box, a child piece cannot reach it), so it stands on its own pillar to the ground with braces under the deck. `balcony_small` is deleted.
+  Rail mender: a combo carries two markers (bridge middle, tree axis) so the whole length (up to 32) is inside the scan radius 17 (tested).
+  Sizes: 35 combos, 5.3 MB of structure files in all (a node + bridge each, 70-180 KB).
 **Simulator** `node tools/village_sim.mjs [seeds] [firstSeed]` (PNGs of 6 seeds + one side view in
 `temp/elven_village/sim/`, old PNGs deleted first; `VILLAGE_MAX_DEPTH=n` overrides max_depth for tuning). It reads the real
 `.mcstructure` and pool files, assembles villages with the Java algorithm incl. vertical rollable jigsaws, and checks:
 connectors meet (deck, rails, rail links across the joint), crown trunk continuity and crown box above the headroom, no
 box overlaps, termination, **3D walkability** (surfaces are planks/slabs, 2 blocks clear above, steps of <= 0.5 between
 4-neighbours, every walk cell reachable from the central deck), plus rope sides, leaf decay and one-way rail links.
-Numbers (100 seeds, max_depth 5): pieces 19 / 54.2 / 82, trees 4 / 9.4 / 14, towers 2.3, villages using 2+ levels 84,
-avg 2.1 levels, bridges 16.2 straight + 5.9 dog-leg, balconies 8.8, lookouts 1.9, plugs 2.8, **open connectors 0.5**
-(0.2 of them a crown that found no room), crowns 9.2 (0.2 fell back to small); **0 unreachable walk cells, 0 box
-overlaps, 0 wrong rope sides, 0 decaying leaves, 0 failures**. 22 one-way rail links in 100 villages, all at open ends that
-touch a platform (a bridge end rail links outward to a rim that does not link back).
+Numbers (100 seeds, max_depth 2): pieces 10 / 34.2 / 50, trees 3 / 9.7 / 14, towers 2.2, villages using 2+ levels 80, up to 3 levels, combos 6.5 straight +
+2.2 dog-leg per village, exits ending in railing 8.8 / braced balcony 4.5 / lookout 1.9, **bridges without a destination tree 0, unsupported balconies 0**,
+open connectors 0.4, crowns 9.3 (1.3 small); **0 unreachable walk cells, 0 box overlaps, 0 wrong rope sides, 0 decaying leaves, 0 failures**.
 
 **Engine-state fixes (round 2, 2026-10-07; in-game check pending).** From the owner's world save
 (`.claude/skills/bedrock-modding/references/10-jigsaw-pieces.md` section 6):
@@ -1184,7 +1183,7 @@ touch a platform (a bridge end rail links outward to a rim that does not link ba
 - *Rope:* `lothlorien:elven_rope_hanging` (structure-only twin, `minecraft:cardinal_direction`, hidden from Creative) is
   used by the central tree and the flet giants; assumes Bedrock turns `cardinal_direction` like `block_face`.
 
-**Known limits:** a bridge end next to a platform that is not its target stays an open rail stub; the crown of a tree
+**Known limits:** a platform exit beside another platform can still end in a railing a few blocks from that platform (no loops yet: P7); the crown of a tree
 beside an upper-level balcony or bridge can find no room even as `crown_small` (0.2 per village, the trunk then ends in a
 log stub); a chain of towers climbs 8 per step (decks at 16, 24, 32 above the nominal ground; with ROOTS 18 the trunks
 still reach the ground); rigid placement on uneven terrain.

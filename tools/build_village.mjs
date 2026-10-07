@@ -13,13 +13,17 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { toMcstructure } from "./build_structures.mjs";
 import { B } from "./flet_mallorn.mjs";
-import { bridgeShape } from "../lothlorien_bp/scripts/village_bridge.js";
+import { makeCombo, buildBalcony, STRAIGHT, DOGS } from "./village_combo.mjs";
 import {
   ROOTS, FLOOR_H, LEVEL_H, FACING, SHAPES, key, AIR, planks, slab, Deck, buildTree, buildCrown, deckJigsaw, lantern, lonelyRail,
   writeRails, RAIL, shapeCells, addLanterns,
 } from "./village_mallorn.mjs";
 
-export const MAX_DEPTH = 5;
+export const MAX_DEPTH = 2; // hops from the central tree (a combo = one hop; its crown is a sibling, not a deeper level)
+// exits (no combo fits, or the depth is used up): mostly a plain railing, sometimes a braced balcony or a lookout. The combos pool also
+// holds them as early ends (tuned with the sim so a village keeps ~8-10 trees at max_depth 2).
+const EXIT_WEIGHTS = { railing: 4, balcony: 2, lookout: 1 };
+const EARLY_END = { railing_end: 10, balcony_braced: 6, lookout_01: 2 };
 const MENDER = "lothlorien:rail_mender";
 const WARDEN = "lothlorien:elven_warden";
 // Village wardens (entities/elven_warden.json, group lothlorien:village_warden = persistent + home): placed as template
@@ -84,13 +88,17 @@ export function wardenCells(name, blocks, count, want) {
   }
   return picked.map(({ x, z }) => ({ x, z }));
 }
-function writePiece(name, blocks, size, origin, connectors) {
+// extra.markers: [[x, z]] rail mender marker positions in box coordinates (default: the box centre); extra.wardens: standing cells
+// [{ x, z }] in block coordinates (default: computed here for WARDENS[name])
+function writePiece(name, blocks, size, origin, connectors, extra = {}) {
   checkConnectors(name, blocks, connectors);
   const [sx, sy, sz] = size;
-  // one invisible rail mender marker per piece with rails (scripts/rail_mender.js): box centre, at the lowest rail's height
+  // rail mender markers (scripts/rail_mender.js, scan radius 17): one at the box centre, two for a combo (bridge middle and tree axis,
+  // so the whole bridge + node is covered); y = the lowest rail
   const railYs = [...blocks].filter(([, b]) => b.name === RAIL).map(([k]) => Number(k.split(",")[1]));
-  const markers = railYs.length ? [{ id: MENDER, x: sx / 2, y: Math.min(...railYs) + origin[1], z: sz / 2 }] : [];
-  const wardens = wardenCells(name, blocks, WARDENS[name] ?? 0, name.startsWith("central") ? 7 : 5).map((c) => ({
+  const markers = railYs.length ? (extra.markers ?? [[sx / 2, sz / 2]]).map(([x, z]) => ({ id: MENDER, x, y: Math.min(...railYs) + origin[1], z })) : [];
+  const cells = extra.wardens ?? wardenCells(name, blocks, WARDENS[name] ?? 0, name.startsWith("central") ? 7 : 5);
+  const wardens = cells.map((c) => ({
     id: WARDEN, x: c.x + origin[0] + 0.5, y: FLOOR_H + 1 + origin[1], z: c.z + origin[2] + 0.5,
     definitions: [`+${WARDEN}`, "+lothlorien:village_warden"], mainhand: "minecraft:bow", invulnerable: false,
   }));
@@ -104,31 +112,66 @@ function writePiece(name, blocks, size, origin, connectors) {
     `${tally((b) => b.name === B.planks)} planks, ${tally((b) => b.name.includes("slab"))} slabs, ${tally((b) => b.name === RAIL)} rails, ${buffer.length} bytes`);
 }
 
-// --- tree nodes: platform piece + crown ----------------------------------------------------------------------
-const treePiece = (name, opts) => {
-  const t = buildTree({ pool: POOL("bridges"), upPool: POOL("crowns"), ...opts });
-  writePiece(name, t.blocks, t.size, t.origin, t.connectors);
-};
+// --- tree nodes: platform + crown. Nodes and towers are never written alone: each is a part of combo pieces -----------------
+const treeSpec = (opts) => buildTree({ pool: POOL("combos"), upPool: POOL("crowns"), ...opts });
 const C = (facing, off, hi = false) => ({ facing, off, hi });
-// single level: shape, connectors (face, offset along the face), trunk plus-shaped (round 3x3)
-treePiece("node_a", { trunk: "square3", levels: [{ rows: SHAPES.cutrect13, conn: [C("north", 1), C("south", -2)] }], seed: 11011, lamps: 2 });
-treePiece("node_b", { trunk: "square3", levels: [{ rows: SHAPES.octagon15, conn: [C("west", 1), C("east", -1), C("south", 0)] }], seed: 22022, lamps: 2 });
-treePiece("node_c", { trunk: "square3", levels: [{ rows: SHAPES.plus15, conn: [C("north", -1), C("east", 1), C("south", 1), C("west", 0)] }], seed: 33033, lamps: 3 });
-treePiece("node_d", { trunk: "square3", levels: [{ rows: SHAPES.oval17, conn: [C("east", 0), C("west", 0), C("north", -2)] }], seed: 44044, lamps: 2 });
-treePiece("node_e", { trunk: "square3", levels: [{ rows: SHAPES.cutrect11, conn: [C("north", -1), C("east", 1)] }], seed: 55055, lamps: 2 });
-treePiece("node_f", { trunk: "square3", levels: [{ rows: SHAPES.cutrect17, conn: [C("west", 1), C("east", -1), C("south", 1)] }], seed: 66066, lamps: 3 });
-// two levels: lower deck, upper deck +8, slab spiral stair in the ring round a 3x3 trunk
-treePiece("tower_a", { trunk: "square3", seed: 77077, lamps: 0, levels: [
-  { rows: SHAPES.octagon15, conn: [C("south", -1), C("west", 1)] }, { rows: SHAPES.plus15, conn: [C("north", 1, true), C("east", -1, true)], clip: (x, z) => z >= 4 }] }); // no south arm: the stair well is there
-treePiece("tower_b", { trunk: "square3", seed: 88088, lamps: 0, levels: [
-  { rows: SHAPES.plus15, conn: [C("east", 1), C("north", -1), C("south", 0)] }, { rows: SHAPES.octagon15, conn: [C("south", 1, true), C("west", -1, true)] }] });
-treePiece("tower_c", { trunk: "square3", seed: 99099, lamps: 0, levels: [
-  { rows: SHAPES.oval17, conn: [C("north", 2), C("south", -2)] }, { rows: SHAPES.cutrect17.concat([6]), conn: [C("east", 1, true), C("west", -1, true)] }] });
+// single level: shape, connectors (face, offset along the face), trunk 3x3
+const NODES = {
+  node_a: treeSpec({ trunk: "square3", levels: [{ rows: SHAPES.cutrect13, conn: [C("north", 1), C("south", -2)] }], seed: 11011, lamps: 2 }),
+  node_b: treeSpec({ trunk: "square3", levels: [{ rows: SHAPES.octagon15, conn: [C("west", 1), C("east", -1), C("south", 0)] }], seed: 22022, lamps: 2 }),
+  node_c: treeSpec({ trunk: "square3", levels: [{ rows: SHAPES.plus15, conn: [C("north", -1), C("east", 1), C("south", 1), C("west", 0)] }], seed: 33033, lamps: 3 }),
+  node_d: treeSpec({ trunk: "square3", levels: [{ rows: SHAPES.oval17, conn: [C("east", 0), C("west", 0), C("north", -2)] }], seed: 44044, lamps: 2 }),
+  node_e: treeSpec({ trunk: "square3", levels: [{ rows: SHAPES.cutrect11, conn: [C("north", -1), C("east", 1)] }], seed: 55055, lamps: 2 }),
+  node_f: treeSpec({ trunk: "square3", levels: [{ rows: SHAPES.cutrect17, conn: [C("west", 1), C("east", -1), C("south", 1)] }], seed: 66066, lamps: 3 }),
+  // two levels: lower deck, upper deck +8, slab spiral stair in the ring round a 3x3 trunk
+  tower_a: treeSpec({ trunk: "square3", seed: 77077, lamps: 0, levels: [
+    { rows: SHAPES.octagon15, conn: [C("south", -1), C("west", 1)] }, { rows: SHAPES.plus15, conn: [C("north", 1, true), C("east", -1, true)], clip: (x, z) => z >= 4 }] }), // no south arm: the stair well is there
+  tower_b: treeSpec({ trunk: "square3", seed: 88088, lamps: 0, levels: [
+    { rows: SHAPES.plus15, conn: [C("east", 1), C("north", -1), C("south", 0)] }, { rows: SHAPES.octagon15, conn: [C("south", 1, true), C("west", -1, true)] }] }),
+  tower_c: treeSpec({ trunk: "square3", seed: 99099, lamps: 0, levels: [
+    { rows: SHAPES.oval17, conn: [C("north", 2), C("south", -2)] }, { rows: SHAPES.cutrect17.concat([6]), conn: [C("east", 1, true), C("west", -1, true)] }] }),
+};
 // central tree: single level, 5x5 round trunk, 4 rim connectors, Elven rope from the ground to the deck, start anchor
-treePiece("central_mallorn_01", {
-  levels: [{ rows: SHAPES.octagon21, conn: [C("north", -3), C("east", 2), C("south", 4), C("west", -2)] }],
-  trunk: "round5", seed: 20261007, rope: true, anchor: true, lamps: 4, upPool: POOL("crowns_central"),
-});
+{
+  const t = buildTree({
+    pool: POOL("combos"), levels: [{ rows: SHAPES.octagon21, conn: [C("north", -3), C("east", 2), C("south", 4), C("west", -2)] }],
+    trunk: "round5", seed: 20261007, rope: true, anchor: true, lamps: 4, upPool: POOL("crowns_central"),
+  });
+  writePiece("central_mallorn_01", t.blocks, t.size, t.origin, t.connectors);
+}
+
+// --- combo pieces: bridge + destination tree in one piece ------------------------------------------------------------------
+// Every (node, entry connector) pair gets a straight bridge (lengths cycle 7..15) and every second pair also a dog-leg
+// (cycle 11l, 11r, 13l, 13r); the entry connector's face is the bridge side, the other connectors stay exits.
+const comboList = [];
+{
+  let pair = 0;
+  const next = { straight: 0, dog: 0 }; // each bridge variant is used in turn
+  for (const [node, tree] of Object.entries(NODES)) {
+    for (let ei = 0; ei < tree.connectors.length; ei++) {
+      const facing = tree.connectors[ei].facing;
+      if (makeCombo(tree, ei, STRAIGHT[0], POOL("combos")).why?.match(/^(entry|another)/)) continue; // no bridge side on this connector
+      const want = [[STRAIGHT, "straight"]];
+      if (pair % 2 === 0) want.push([DOGS, "dog"]);
+      for (const [list, kind] of want) {
+        for (let t = 0; t < list.length; t++) {
+          const spec = list[(next[kind] + t) % list.length];
+          const cb = makeCombo(tree, ei, spec, POOL("combos"));
+          if (cb.why) continue; // this bridge sticks out of this node's width: next one
+          const name = `combo_${node}_${facing}_${spec.name}`;
+          const nodeWardens = wardenCells(node, tree.blocks, WARDENS[node] ?? 0, 5).map(cb.wardenMap);
+          writePiece(name, cb.blocks, cb.size, cb.origin, cb.connectors, {
+            markers: [[cb.bridgeMid[0], cb.bridgeMid[1]], [cb.axis[0] + 0.5, cb.axis[1] + 0.5]], wardens: nodeWardens,
+          });
+          comboList.push({ name, kind, node });
+          next[kind] += t + 1;
+          break;
+        }
+      }
+      pair++;
+    }
+  }
+}
 
 // --- crown pieces ------------------------------------------------------------------------------------------------
 const crown = (name, o) => { const c = buildCrown(o); writePiece(name, c.blocks, c.size, c.origin, []); };
@@ -138,46 +181,11 @@ crown("crown_large", { h: 10, H: 24, seed: 8008, branches: 11, blob: 2.9 });
 crown("crown_central_a", { h: 16, H: 34, seed: 12012, branches: 14, blob: 3.6, central: true });
 crown("crown_central_b", { h: 13, H: 30, seed: 10010, branches: 12, blob: 3.3, central: true });
 
-// --- bridges: 5 wide (+ shift for dog-legs), deck at box y 0 on the connectors, gently arched with bottom slabs ----------
-// The shape (deck, arch, rails, connectors) is lothlorien_bp/scripts/village_bridge.js bridgeShape(length, offset, rise), pure JS
-// so the runtime loop-closer builds the same bridge. Arch: one half block (plank / bottom slab) per cell; rise 1 for L <= 7, 2 for
-// L >= 9. Dog-legs shift one block sideways per block forward (45 degrees) between two straight runs; the rail is one face-adjacent line.
-function bridge(name, length, { shift = 0, mirror = false, lanterns = false } = {}) {
-  const shape = bridgeShape(length, mirror ? -shift : shift, length <= 7 ? 1 : 2);
-  const blocks = new Map(), [W, sy] = shape.size;
-  const KIND = { plank: planks, slab_bottom: () => slab("bottom"), slab_top: () => slab("top"), air: () => AIR };
-  for (const c of shape.cells) blocks.set(key(c.x, c.y, c.z), KIND[c.kind]());
-  for (const r of shape.rails) { // fences over the cleared air; a rail may sit outside the deck cells (diagonal corners)
-    const states = {};
-    for (const side of Object.keys(FACING)) states[`minecraft:connection_${side}`] = r.sides.includes(side);
-    blocks.set(key(r.x, r.y, r.z), { name: RAIL, states });
-  }
-  if (lanterns) {
-    const z = Math.floor(length / 2), k = Math.min(z, length - 1 - z, 4), top = k % 2 ? (k + 1) / 2 : k / 2;
-    for (const x of [0, 4]) { blocks.set(key(x, top + 2, z), lonelyRail()); blocks.set(key(x, top + 3, z), lantern()); }
-  }
-  addLanterns(blocks, { x0: 0, x1: W - 1, y0: 0, y1: sy - 1, z0: 0, z1: length - 1 }, (x, y, z) => z === 0 || z === length - 1); // not on the connector rows
-  for (const c of shape.connectors) blocks.set(key(c.x, 0, c.z), deckJigsaw(c.facing, POOL("nodes")));
-  writePiece(name, blocks, shape.size, [0, 0, 0], shape.connectors);
-}
-for (const L of [7, 9, 11, 13, 15]) bridge(`bridge_${L}`, L, { lanterns: L >= 9 });
-bridge("bridge_dog_11_l", 11, { shift: 2 });
-bridge("bridge_dog_11_r", 11, { shift: 2, mirror: true });
-bridge("bridge_dog_13_l", 13, { shift: 3 });
-bridge("bridge_dog_13_r", 13, { shift: 3, mirror: true });
-
-// --- ends -------------------------------------------------------------------------------------------------------
-// balcony_small: half-round deck, rails all round, lantern; one connector, 7 x 6
+// --- ends ---------------------------------------------------------------------------------------------------------------
+// balcony_braced: half-round rim balcony on a log pillar to the ground, braced under the deck; one connector, 7 x 7
 {
-  const blocks = new Map(), cells = new Set(), widths = [2, 3, 3, 3, 2, 2];
-  widths.forEach((w, a) => { for (let x = -w; x <= w; x++) cells.add(`${x},${a}`); });
-  const deck = new Deck(blocks, 0, null, { box: { hx: 3, hz: 0 }, cells });
-  deck.connect("north", 0, "minecraft:empty");
-  const { rails, forced } = deck.build();
-  writeRails(blocks, rails, forced);
-  blocks.set(key(0, 2, widths.length - 1), lantern());
-  addLanterns(blocks, { x0: -3, x1: 3, y0: 0, y1: 3, z0: 0, z1: widths.length - 1 }, (x, y, z) => z === 0);
-  writePiece("balcony_small", blocks, [7, 4, widths.length], [3, 0, 0], deck.connectors.map((c) => ({ ...c, y: 0 })));
+  const b = buildBalcony();
+  writePiece("balcony_braced", b.blocks, b.size, b.origin, b.connectors);
 }
 // lookout_01: square-ish platform on a log pillar down to ROOTS, one connector
 {
@@ -217,13 +225,14 @@ const pool = (name, elements, fallback) => {
     JSON.stringify({ format_version: "1.21.100", "minecraft:template_pool": node }, null, 2) + "\n");
 };
 pool("start", [["central_mallorn_01", 1]]);
-pool("bridges", [["bridge_7", 3], ["bridge_9", 3], ["bridge_11", 3], ["bridge_13", 2], ["bridge_15", 1],
-  ["bridge_dog_11_l", 1], ["bridge_dog_11_r", 1], ["bridge_dog_13_l", 1], ["bridge_dog_13_r", 1]], POOL("plugs"));
-pool("nodes", [["node_a", 3], ["node_b", 3], ["node_c", 3], ["node_d", 3], ["node_e", 3], ["node_f", 3],
-  ["tower_a", 3], ["tower_b", 3], ["tower_c", 3], ["balcony_small", 4], ["lookout_01", 1]], POOL("ends"));
-pool("ends", [["balcony_small", 8], ["lookout_01", 2], ["railing_end", 1]], "minecraft:empty");
+// a platform exit gets a combo (bridge + tree) or, when none fits, a railing / braced balcony / lookout; never a bridge alone
+pool("combos", comboList.map((c) => [c.name, (c.kind === "dog" ? 2 : 3) + (c.node.startsWith("tower_") ? 2 : 0)]) // towers weigh more: most villages should climb to a second level
+    .concat(Object.entries(EARLY_END)), POOL("exits"));
+pool("exits", [["railing_end", EXIT_WEIGHTS.railing], ["balcony_braced", EXIT_WEIGHTS.balcony], ["lookout_01", EXIT_WEIGHTS.lookout]], POOL("plugs"));
 pool("plugs", [["railing_end", 1]]);
-pool("crowns", [["crown_large", 3], ["crown_medium", 2]], POOL("crowns_small"));
+// trees placed at max_depth only get the fallback pool (Java rule), so the fallback offers the big crowns too; small is the last resort
+pool("crowns", [["crown_large", 3], ["crown_medium", 2]], POOL("crowns_fallback"));
+pool("crowns_fallback", [["crown_large", 12], ["crown_medium", 8], ["crown_small", 1]]);
 pool("crowns_small", [["crown_small", 1]]);
 pool("crowns_central", [["crown_central_a", 2], ["crown_central_b", 1]], POOL("crowns_small"));
 for (const f of readdirSync(join(bp, "worldgen", "template_pools"))) if (f.startsWith("village_") && !poolFiles.has(f)) unlinkSync(join(bp, "worldgen", "template_pools", f));

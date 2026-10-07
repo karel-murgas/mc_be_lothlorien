@@ -2,13 +2,21 @@
   "format_version": "1.21.100",
   "minecraft:template_pool": {
     "description": {
-      "identifier": "lothlorien:village/ends"
+      "identifier": "lothlorien:village/crowns_fallback"
     },
     "elements": [
       {
         "element": {
           "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/village/balcony_small",
+          "location": "lothlorien/village/crown_large",
+          "projection": "rigid"
+        },
+        "weight": 12
+      },
+      {
+        "element": {
+          "element_type": "minecraft:single_pool_element",
+          "location": "lothlorien/village/crown_medium",
           "projection": "rigid"
         },
         "weight": 8
@@ -16,20 +24,11 @@
       {
         "element": {
           "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/village/lookout_01",
-          "projection": "rigid"
-        },
-        "weight": 2
-      },
-      {
-        "element": {
-          "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/village/railing_end",
+          "location": "lothlorien/village/crown_small",
           "projection": "rigid"
         },
         "weight": 1
       }
-    ],
-    "fallback": "minecraft:empty"
+    ]
   }
 }

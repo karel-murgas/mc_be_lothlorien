@@ -22,6 +22,6 @@
         "weight": 2
       }
     ],
-    "fallback": "lothlorien:village/crowns_small"
+    "fallback": "lothlorien:village/crowns_fallback"
   }
 }

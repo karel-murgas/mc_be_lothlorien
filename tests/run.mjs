@@ -1437,7 +1437,7 @@ const DECK_NAME = "lothlorien:village_deck", DECK_HI_NAME = "lothlorien:village_
 const MALLORN_LOG = "lothlorien:mallorn_log";
 const villagePieces = () => readdirSync(new URL(`${VILLAGE}/`, import.meta.url)).filter((f) => f.endsWith(".mcstructure")).map((f) =>
   parseMcstructure(readFileSync(new URL(`${VILLAGE}/${f}`, import.meta.url)), f.replace(".mcstructure", "")));
-const isTree = (n) => /^(node_|tower_|central_)/.test(n);
+const isTree = (n) => /^(combo_|central_)/.test(n);
 test("village: every deck connector is a rim connector on the box face, faces outward and follows the connector standard", () => {
   const pieces = villagePieces();
   assert.ok(pieces.length >= 25, `${pieces.length} village pieces`);
@@ -1451,7 +1451,7 @@ test("village: every deck connector is a rim connector on the box face, faces ou
       const [dx, dz] = j.dir;
       const onFace = dx === 1 ? j.x === sx - 1 : dx === -1 ? j.x === 0 : dz === 1 ? j.z === sz - 1 : j.z === 0;
       assert.ok(onFace, `${tag}: not on the outer face of the box`);
-      assert.ok(j.name === DECK_NAME || (j.name === DECK_HI_NAME && /^tower_/.test(name)), `${tag}: name ${j.name}`);
+      assert.ok(j.name === DECK_NAME || (j.name === DECK_HI_NAME && /^(combo_|central_)/.test(name)), `${tag}: name ${j.name}`);
       assert.equal(j.final, PLANKS, `${tag}: final_state`);
       assert.equal(j.joint, "aligned", `${tag}: joint`);
       const plug = name === "railing_end", pp = [-dz, dx];
@@ -1476,7 +1476,7 @@ test("village: tree pieces carry an upward rollable crown jigsaw (log final stat
     assert.equal(j.name, CROWN_NAME); assert.equal(j.target, CROWN_NAME); assert.equal(j.joint, "rollable"); assert.equal(j.final, MALLORN_LOG);
     assert.ok(villageData.pools.has(j.pool), `${p.name}: crown pool ${j.pool}`);
     assert.equal(j.y, sy - 1, `${p.name}: crown jigsaw on the top face`);
-    assert.deepEqual([j.x, j.z], [(sx - 1) / 2, (sz - 1) / 2], `${p.name}: crown jigsaw on the trunk axis`);
+    if (!p.name.startsWith("combo_")) assert.deepEqual([j.x, j.z], [(sx - 1) / 2, (sz - 1) / 2], `${p.name}: crown jigsaw on the trunk axis`);
     const topDeck = Math.max(...p.jigsaws.filter((k) => k.dir).map((k) => k.y));
     assert.equal(j.y - topDeck, 5, `${p.name}: crown box starts 6 above the top deck (headroom + highest arch box)`);
     assert.equal(p.at(j.x, j.y - 1, j.z), MALLORN_LOG, `${p.name}: trunk reaches the jigsaw`);
@@ -1496,13 +1496,15 @@ test("village: tree pieces carry an upward rollable crown jigsaw (log final stat
   const pool = (id) => villageData.pools.get(`lothlorien:village/${id}`);
   const locs = (id) => pool(id).elements.map((e) => e.element.location.split("/").pop());
   assert.deepEqual(locs("crowns"), ["crown_large", "crown_medium"]);
-  assert.equal(pool("crowns").fallback, "lothlorien:village/crowns_small");
+  assert.equal(pool("crowns").fallback, "lothlorien:village/crowns_fallback");
+  assert.deepEqual(locs("crowns_fallback"), ["crown_large", "crown_medium", "crown_small"], "trees at max_depth only see the fallback: it offers the big crowns too");
   assert.deepEqual(locs("crowns_small"), ["crown_small"]);
   assert.equal(pool("crowns_central").fallback, "lothlorien:village/crowns_small");
   assert.ok(locs("crowns_central").length >= 2);
-  assert.equal(pool("ends").elements.length, 3);
-  assert.equal(pool("bridges").fallback, "lothlorien:village/plugs");
-  assert.equal(pool("nodes").fallback, "lothlorien:village/ends");
+  assert.equal(pool("exits").elements.length, 3);
+  assert.equal(pool("combos").fallback, "lothlorien:village/exits");
+  assert.equal(pool("exits").fallback, "lothlorien:village/plugs");
+  assert.ok(!villageData.pools.has("lothlorien:village/bridges") && !villageData.pools.has("lothlorien:village/nodes"), "no pool hands out a bridge or a node alone");
   assert.ok(villageData.getPiece("lothlorien/village/central_mallorn_01").jigsaws.some((j) => j.name === "lothlorien:village_anchor"), "start anchor");
 });
 test("village: the one rail constant is the only rail block, bridges are symmetric slab arches in half steps, rails follow", () => {
@@ -1511,28 +1513,34 @@ test("village: the one rail constant is the only rail block, bridges are symmetr
     for (const b of p.blocks) assert.ok(!b.name.endsWith("_fence") || b.name === FENCE, `${p.name}: another rail block ${b.name}`);
     for (const b of p.blocks) if (b.name === SLAB_ID) assert.ok(["bottom", "top"].includes(b.states["minecraft:vertical_half"]), `${p.name}: slab state`);
   }
-  for (const L of [7, 9, 11, 13, 15]) { // P9: no 5-long bridge any more, the bigger crowns need room
-    const p = parseMcstructure(readFileSync(new URL(`${VILLAGE}/bridge_${L}.mcstructure`, import.meta.url)), `bridge_${L}`);
+  const lengths = new Set();
+  for (const p of villagePieces().filter((q) => /^combo_.*_bridge_\d+$/.test(q.name))) { // straight bridges: the arch of the combo, along the entry column
+    const L = Number(p.name.match(/_bridge_(\d+)$/)[1]);
+    lengths.add(L);
+    const entry = p.jigsaws.find((j) => j.dirId === 2 && j.z === 0 && j.name === DECK_NAME), cx = entry.x, y0 = entry.y;
     const surf = [];
     for (let z = 0; z < L; z++) {
       let s = null;
-      for (let y = 0; y < p.size[1]; y++) {
-        const n = p.at(2, y, z);
-        if (n === PLANKS) s = 2 * y + 2; else if (n === SLAB_ID) s = 2 * y + 1;
-        if (n === "minecraft:jigsaw") s = 2 * y + 2;
+      for (let y = y0; y < p.size[1]; y++) {
+        const n = p.at(cx, y, z);
+        if (n === PLANKS) s = 2 * (y - y0) + 2; else if (n === SLAB_ID) s = 2 * (y - y0) + 1;
+        if (n === "minecraft:jigsaw") s = 2 * (y - y0) + 2;
       }
       surf.push(s);
     }
-    assert.equal(surf[0], 2, `bridge_${L}: starts at the connector deck`);
-    assert.deepEqual(surf, [...surf].reverse(), `bridge_${L}: symmetric arch ${surf}`);
-    for (let z = 1; z < L; z++) assert.ok(Math.abs(surf[z] - surf[z - 1]) <= 1, `bridge_${L}: step > 0.5 block at ${z}: ${surf}`);
-    assert.equal(Math.max(...surf) - 2, L <= 7 ? 2 : 4, `bridge_${L}: rise`);
-    for (let z = 0; z < L; z++) for (const x of [0, 4]) { // rail one cell above the block the walker stands on
+    const bn = `${p.name} (bridge ${L})`;
+    assert.equal(surf[0], 2, `${bn}: starts at the connector deck`);
+    assert.deepEqual(surf, [...surf].reverse(), `${bn}: symmetric arch ${surf}`);
+    for (let z = 1; z < L; z++) assert.ok(Math.abs(surf[z] - surf[z - 1]) <= 1, `${bn}: step > 0.5 block at ${z}: ${surf}`);
+    assert.equal(Math.max(...surf) - 2, L <= 7 ? 2 : 4, `${bn}: rise`);
+    for (let z = 0; z < L; z++) for (const x of [cx - 2, cx + 2]) { // rail one cell above the block the walker stands on
       const layer = surf[z] % 2 === 0 ? surf[z] / 2 - 1 : (surf[z] - 1) / 2;
-      assert.equal(p.at(x, layer + 1, z), FENCE, `bridge_${L}: rail at ${x},${z}`);
+      assert.equal(p.at(x, y0 + layer + 1, z), FENCE, `${bn}: rail at ${x},${z}`);
     }
   }
-  for (const n of ["bridge_dog_11_l", "bridge_dog_11_r", "bridge_dog_13_l", "bridge_dog_13_r"]) assert.ok(readdirSync(new URL(`${VILLAGE}/`, import.meta.url)).includes(`${n}.mcstructure`), n);
+  assert.deepEqual([...lengths].sort((a, b) => a - b), [7, 9, 11, 13, 15], "every straight bridge length is used by some combo"); // P9: no 5-long bridge, the bigger crowns need room
+  const names = villagePieces().map((q) => q.name);
+  for (const n of ["bridge_dog_11_l", "bridge_dog_11_r", "bridge_dog_13_l", "bridge_dog_13_r"]) assert.ok(names.some((q) => q.endsWith(`_${n}`)), `a combo with ${n}`);
 });
 test("village: platform shapes differ (irregular rectilinear outlines of different sizes)", () => {
   const seen = new Map();
@@ -1541,10 +1549,11 @@ test("village: platform shapes differ (irregular rectilinear outlines of differe
     const cells = p.blocks.filter((b) => b.y === y && b.name === PLANKS).map((b) => `${b.x},${b.z}`).sort().join(";") + `|${p.size}`;
     seen.set(p.name, cells);
   }
-  const trees = [...seen.keys()].filter((n) => /^node_/.test(n));
-  assert.equal(new Set(trees.map((n) => seen.get(n))).size, trees.length, "node platforms are all different");
+  const nodes = new Set([...seen.keys()].filter((n) => /^combo_node_/.test(n)).map((n) => n.match(/^combo_(node_[a-z])_/)[1]));
+  assert.equal(nodes.size, 6, "all six node platforms are used by combos");
+  assert.ok(new Set(villagePieces().filter((q) => /^combo_tower_/.test(q.name)).map((q) => q.name.match(/^combo_(tower_[a-z])_/)[1])).size === 3, "all three towers are used by combos");
   const sizes = new Set([...seen.keys()].map((n) => villageData.getPiece(`lothlorien/village/${n}`).size.slice(0, 1).concat(villageData.getPiece(`lothlorien/village/${n}`).size.slice(2)).join("x")));
-  assert.ok(sizes.size >= 5, `footprint sizes: ${[...sizes]}`);
+  assert.ok(sizes.size >= 8, `footprint sizes: ${[...sizes]}`);
 });
 test("village: pools, fallbacks, piece files and connector pools all resolve", () => {
   const ids = [...villageData.pools.keys()].filter((k) => k.startsWith("lothlorien:village/"));
@@ -1564,6 +1573,63 @@ test("village: pools, fallbacks, piece files and connector pools all resolve", (
   const used = new Set([...villageData.pools.values()].flatMap((p) => p.elements.map((e) => e.element.location.split("/").pop())));
   for (const p of villagePieces()) assert.ok(used.has(p.name), `${p.name}: piece file is in no pool (remove it)`);
 });
+// --- Elven village P6: no bridge to nowhere, no hanging balcony ---
+test("village combos: a bridge only exists inside a combo piece with its destination tree (entry on the bridge, tree exits, crown jigsaw, trunk to the ground)", () => {
+  const names = readdirSync(new URL(`${VILLAGE}/`, import.meta.url)).filter((f) => f.endsWith(".mcstructure")).map((f) => f.replace(".mcstructure", ""));
+  assert.ok(!names.some((n) => /^(bridge_|node_|tower_|tree_platform)/.test(n)), "no bridge, node or tower piece is shipped alone");
+  const combos = villagePieces().filter((p) => p.name.startsWith("combo_"));
+  assert.ok(combos.length >= 30, `${combos.length} combo pieces`);
+  const pool = (id) => villageData.pools.get(`lothlorien:village/${id}`);
+  const inCombos = new Set(pool("combos").elements.map((e) => e.element.location.split("/").pop()));
+  for (const p of combos) {
+    assert.ok(inCombos.has(p.name), `${p.name} is in the combos pool`);
+    const deck = p.jigsaws.filter((j) => j.dir && j.target === DECK_NAME);
+    const entries = deck.filter((j) => j.name === DECK_NAME);
+    assert.equal(entries.length, 1, `${p.name}: exactly one entry connector (the bridge's far end)`);
+    const [en] = entries;
+    assert.deepEqual([en.dirId, en.z, en.pool], [2, 0, "minecraft:empty"], `${p.name}: entry faces north on the bridge end`);
+    assert.ok(deck.length >= 2 && deck.every((j) => j === en || (j.name === DECK_HI_NAME && j.pool === "lothlorien:village/combos")), `${p.name}: the tree's exits only act as parents and point at combos`);
+    // the destination tree: crown jigsaw on a log trunk that reaches the bottom of the box, deck on the entry level
+    const up = p.jigsaws.find((j) => j.dirId === 1);
+    assert.ok(up, `${p.name}: crown jigsaw`);
+    assert.equal(p.at(up.x, up.y - 1, up.z), MALLORN_LOG, `${p.name}: trunk`);
+    assert.equal(p.at(up.x, 0, up.z), MALLORN_LOG, `${p.name}: trunk reaches the ground (ROOTS)`);
+    // the bridge end is joined to the platform inside the piece: no jigsaw faces south on the bridge, the exits are the node's own faces
+    const L = deck.length;
+    assert.ok(!p.jigsaws.some((j) => j.dirId === 3 && j.z < 5), `${p.name}: no connector at the bridge's far end (it is joined to the node)`);
+    assert.ok(L >= 2);
+  }
+});
+test("village exits: no free-floating balcony; the braced balcony and the lookout stand on a log pillar to the bottom of the box and are braced under the deck", () => {
+  assert.ok(!existsSync(new URL(`${VILLAGE}/balcony_small.mcstructure`, import.meta.url)), "balcony_small is gone");
+  for (const p of villageData.pools.values()) for (const e of p.elements) assert.ok(!/balcony_small/.test(e.element.location), "balcony_small is in no pool");
+  const bal = villagePieces().find((p) => p.name === "balcony_braced");
+  const con = bal.jigsaws.find((j) => j.dir);
+  assert.deepEqual([con.name, con.target, con.pool, con.final], [DECK_NAME, DECK_NAME, "minecraft:empty", PLANKS]);
+  const logs = bal.blocks.filter((b) => b.name === MALLORN_LOG);
+  const pillarX = new Set(logs.filter((b) => b.y === 0).map((b) => `${b.x},${b.z}`));
+  assert.ok(pillarX.size >= 5, "pillar cross-section at the bottom of the box");
+  for (const k of pillarX) { const [x, z] = k.split(",").map(Number); for (let y = 0; y < con.y; y++) assert.equal(bal.at(x, y, z), MALLORN_LOG, `pillar column ${k} is continuous up to the deck (y ${y})`); }
+  assert.ok(con.y >= 40, "the pillar runs 40 below the deck: it reaches the ground from any deck of the village (up to 3 levels)");
+  const braces = logs.filter((b) => b.y >= con.y - 3 && b.y < con.y && !pillarX.has(`${b.x},${b.z}`));
+  assert.ok(braces.length >= 8, `braces under the deck: ${braces.length}`);
+  assert.ok(braces.every((b) => ["bottom", undefined].every(() => true)) && braces.some((b) => b.y === con.y - 1), "a brace ends right under the deck");
+  const lookout = villagePieces().find((p) => p.name === "lookout_01");
+  assert.equal(lookout.at(4, 0, 4), MALLORN_LOG, "lookout pillar to the bottom of the box");
+  const ex = villageData.pools.get("lothlorien:village/exits");
+  assert.deepEqual(ex.elements.map((e) => e.element.location.split("/").pop()).sort(), ["balcony_braced", "lookout_01", "railing_end"]);
+  assert.equal(ex.fallback, "lothlorien:village/plugs");
+});
+test("village sim: the bridge-without-destination metric flags a bridge piece placed alone and a combo without its tree", () => {
+  const ck = (placed) => { // minimal fake placement run through the same counting rules
+    const hasLog = (p) => p.piece.blocks.some((b) => b.y === 0 && /_(log|wood)$/.test(b.name));
+    return placed.filter((p) => p.name.startsWith("bridge_") || (p.name.startsWith("combo_") && !(hasLog(p) && p.piece.jigsaws.some((j) => j.dirId === 1)))).length;
+  };
+  const good = villageData.getPiece("lothlorien/village/" + villagePieces().find((p) => p.name.startsWith("combo_")).name);
+  assert.equal(ck([{ name: "combo_x", piece: good }]), 0);
+  assert.equal(ck([{ name: "bridge_7", piece: good }]), 1);
+  assert.equal(ck([{ name: "combo_x", piece: { blocks: [], jigsaws: [] } }]), 1);
+});
 let villageRows = null;
 const villages = () => (villageRows ??= runSeeds(villageData, 30, 1));
 test("village: 30 simulated villages connect, never overlap, terminate, are fully walkable in 3D, have crowns and ~8-10 trees", () => {
@@ -1580,6 +1646,11 @@ test("village: 30 simulated villages connect, never overlap, terminate, are full
   const avg = rows.reduce((s, r) => s + r.ck.kinds.trees, 0) / rows.length;
   assert.ok(avg >= 7 && avg <= 12, `average ${avg} trees`);
   assert.ok(rows.filter((r) => r.ck.levels >= 2).length >= rows.length * 0.6, "two levels in most villages");
+  for (const r of rows) { // P6: no bridge to nowhere, no hanging balcony
+    assert.equal(r.ck.kinds.bridgesNoDest, 0, `seed ${r.seed}: bridges without a destination tree`);
+    assert.equal(r.ck.kinds.unsupported, 0, `seed ${r.seed}: unsupported balcony`);
+    assert.equal(r.ck.kinds.bridgeAlone, 0, `seed ${r.seed}: a bridge piece placed alone`);
+  }
   assert.ok(rows.reduce((s, r) => s + r.ck.open, 0) / rows.length <= 1.5, "too many open connectors");
   assert.ok(Date.now() - t0 < 20000, `simulation took ${Date.now() - t0} ms`);
 });
@@ -1666,7 +1737,7 @@ test("Elven rope hanging: structure-only twin of the rope, same geometry, a stat
 // --- Elven village round 4: crown trunk, rail steps, bridge body, stair opening, rails over leaves, light ---
 import { RING, STAIR_FULL, STAIR_TOP, STAIR_CUT, FLOOR_H as V_FLOOR, LEVEL_H as V_LEVEL, ROOTS as V_ROOTS, worstLight, LIGHT_TARGET, LANTERN_LIGHT } from "../tools/village_mallorn.mjs";
 const SLAB_ID = "lothlorien:mallorn_slab", LEAVES_ID = "lothlorien:mallorn_leaves";
-const halfOf = (p) => [(p.size[0] - 1) / 2, (p.size[2] - 1) / 2];
+const halfOf = (p) => { const up = p.jigsaws.find((j) => j.dirId === 1); return up ? [up.x, up.z] : [(p.size[0] - 1) / 2, (p.size[2] - 1) / 2]; }; // trunk axis (a combo is not centred on it)
 test("village crowns: the trunk keeps its full section well up into the crown and thins only in the top third (3x3 village, 5x5 central)", () => {
   for (const p of villagePieces().filter((q) => q.name.startsWith("crown_"))) {
     const central = p.name.startsWith("crown_central"), H = p.size[1], top = H - 4, [hx, hz] = halfOf(p);
@@ -1687,7 +1758,7 @@ test("village crowns: the trunk keeps its full section well up into the crown an
   }
 });
 test("village trees (P9, giant Mallorn style): root flare of bark at ground level, trunk down to ROOTS, bent branches and big leaf blobs in the crowns", () => {
-  const WOOD_ID = "lothlorien:mallorn_wood", BRANCH = (b) => b.name === MALLORN_LOG && (b.states["minecraft:block_face"] === "east" || b.states["minecraft:block_face"] === "south");
+  const WOOD_ID = "lothlorien:mallorn_wood", BRANCH = (b) => b.name === MALLORN_LOG && ["east", "south", "west", "north"].includes(b.states["minecraft:block_face"]); // combos are turned: east/south become west/north
   for (const p of villagePieces().filter((q) => isTree(q.name))) {
     const [hx, hz] = halfOf(p), central = p.name.startsWith("central"), r = central ? 2 : 1;
     const outside = (b) => Math.max(Math.abs(b.x - hx), Math.abs(b.z - hz)) > r;
@@ -1714,8 +1785,11 @@ test("village trees (P9, giant Mallorn style): root flare of bark at ground leve
   }
 });
 test("village bridges: the rail is one continuous stepped line (consecutive rail fences are face-adjacent, no diagonal-only joins)", () => {
-  const bridges = villagePieces().filter((p) => p.name.startsWith("bridge_"));
-  assert.ok(bridges.length >= 9);
+  const bridges = [...STRAIGHT, ...DOGS].map((spec) => { // the shapes the combos are built from (a bridge is never a piece of its own)
+    const b = buildBridge(spec.length, spec);
+    return { name: spec.name, blocks: [...b.blocks].map(([k, v]) => { const [x, y, z] = k.split(",").map(Number); return { x, y, z, name: v.name }; }) };
+  });
+  assert.equal(bridges.length, 9);
   for (const p of bridges) {
     const rail = new Set(p.blocks.filter((b) => b.name === FENCE).map((b) => `${b.x},${b.y},${b.z}`));
     let sawStep = false;
@@ -1744,6 +1818,7 @@ test("village bridges: the rail is one continuous stepped line (consecutive rail
   }
 });
 import { bridgeShape } from "../lothlorien_bp/scripts/village_bridge.js";
+import { buildBridge, STRAIGHT, DOGS, rotateCell } from "../tools/village_combo.mjs";
 test("bridgeShape: dog-legs shift one block sideways per block forward, walk stays 3 wide and connected, exits at the ends", () => {
   for (const [len, off] of [[11, 2], [11, -2], [13, 3], [13, -3], [9, 0], [9, 4]]) {
     const s = bridgeShape(len, off, len <= 7 ? 1 : 2), xs = (z) => s.walk.filter((c) => c[2] === z).map((c) => c[0]).sort((a, b) => a - b);
@@ -1769,12 +1844,13 @@ test("village: a bottom slab is never one slab thin - a top slab (or solid block
 test("village towers: the upper floor covers the stair opening as far as headroom allows (full deck / top slab), spiral stays walkable", () => {
   assert.deepEqual(STAIR_FULL.concat(STAIR_TOP, STAIR_CUT).sort((a, b) => a - b), [9, 10, 11, 12, 13]);
   assert.ok(STAIR_CUT.length <= 3, `remaining hole ${STAIR_CUT.length} cells`);
-  const towers = villagePieces().filter((p) => p.name.startsWith("tower_"));
-  assert.equal(towers.length, 3);
+  const towers = villagePieces().filter((p) => p.name.startsWith("combo_tower_"));
+  assert.ok(towers.length >= 6, `${towers.length} tower combos`);
   for (const p of towers) {
     const [hx, hz] = halfOf(p), yU = V_ROOTS + V_FLOOR + V_LEVEL;
+    const k = (4 - ["north", "east", "south", "west"].indexOf(p.name.match(/^combo_tower_[a-z]_(north|east|south|west)_/)[1])) % 4; // the combo is the tower turned k quarter turns
     for (let i = 0; i < 14; i++) {
-      const [rx, rz] = RING[i], s = 3 + i, at = p.at(rx + hx, yU, rz + hz), blk = p.blocks.find((q) => q.x === rx + hx && q.y === yU && q.z === rz + hz);
+      const [rx, rz] = rotateCell(...RING[i], k), s = 3 + i, at = p.at(rx + hx, yU, rz + hz), blk = p.blocks.find((q) => q.x === rx + hx && q.y === yU && q.z === rz + hz);
       if (2 * V_LEVEL - s >= 4) assert.equal(at, PLANKS, `${p.name}: ring ${i} under full deck`);
       else if (2 * V_LEVEL + 1 - s >= 4) assert.ok(at === SLAB_ID && blk.states["minecraft:vertical_half"] === "top", `${p.name}: ring ${i} top slab, got ${at}`);
       else assert.ok(at === null || at === "minecraft:air", `${p.name}: ring ${i} stays open, got ${at}`);
@@ -1835,16 +1911,19 @@ test("village: block light - every walkable cell of every piece is lit to >= 8 b
 
 // --- rail mender: marker entity in every rail piece, pure link rule ---
 import * as MEND from "../lothlorien_bp/scripts/rail_mender_rules.js";
-test("rail mender: every village piece with rails carries exactly one marker inside its box, others none", () => {
+test("rail mender: markers inside the box, and every rail of every village piece lies inside the scan box of a marker (combos carry two: bridge middle and tree axis)", () => {
   for (const p of villagePieces()) {
-    const rails = p.blocks.filter((b) => b.name === FENCE).length;
+    const rails = p.blocks.filter((b) => b.name === FENCE);
     const m = p.entities.filter((e) => e.id === MEND.MENDER_ID);
     assert.equal(p.entities.length - p.entities.filter((e) => e.id === "lothlorien:elven_warden").length, m.length, `${p.name}: only markers (and village wardens)`);
-    assert.equal(m.length, rails ? 1 : 0, `${p.name}: ${rails} rails, ${m.length} markers`);
+    assert.equal(m.length, !rails.length ? 0 : p.name.startsWith("combo_") ? 2 : 1, `${p.name}: ${rails.length} rails, ${m.length} markers`);
     for (const e of m) {
       const [x, y, z] = e.pos;
       assert.ok(x >= 0 && x < p.size[0] && y >= 0 && y < p.size[1] && z >= 0 && z < p.size[2], `${p.name}: marker inside the box`);
-      assert.ok(Math.max(p.size[0], p.size[2]) / 2 <= MEND.SCAN.radius, `${p.name}: scan radius covers the box`);
+    }
+    for (const r of rails) {
+      const covered = m.some((e) => { const box = MEND.scanBox({ x: e.pos[0], y: e.pos[1], z: e.pos[2] }); return r.x >= box.from.x && r.x <= box.to.x && r.z >= box.from.z && r.z <= box.to.z && r.y >= box.from.y && r.y <= box.to.y; });
+      assert.ok(covered, `${p.name}: rail ${r.x},${r.y},${r.z} is outside every marker's scan box`);
     }
   }
 });
