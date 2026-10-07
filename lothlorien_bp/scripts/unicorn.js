@@ -1,11 +1,11 @@
 import { message } from "./messages.js";
-// Unicorns in the running game (Phase 15; rules in unicorn_rules.js). Their wariness follows the nearest player's Disharmony
+// Unicorns in the running game (Phase 15; rules in unicorn_rules.js). Their wariness follows the nearest player's Harmony band
 // in deer.js (they are in WARY_TYPES): strangers and restless players are fled from, a Friend of Lothlorien may come close
 // and lure one with Elanor. This file is the taming: three offers of Elanor from a Friend bond the unicorn to that player
 // (the `lothlorien:bonded` group in entities/unicorn.json makes it rideable without a saddle), and only the owner may ride it.
 import { EquipmentSlot, GameMode, system, world } from "@minecraft/server";
-import { disharmonyOf } from "./disharmony_game.js";
-import { isFriend, levelFor } from "./disharmony.js";
+import { harmonyOf } from "./harmony_game.js";
+import { bandOf } from "./harmony.js";
 import { repeatedUse } from "./use_guard.js";
 import { setEventFor } from "./deer_rules.js";
 import { ELANOR_ID, UNICORN_ID, mayRide, nextTrust, offerRefusal, ticksSince } from "./unicorn_rules.js";
@@ -15,7 +15,7 @@ const LAST_OFFER = "lothlorien:last_offer"; // dynamic property: world time (tic
 
 const say = (player, text) => {
   try {
-    player.sendMessage(text); // chat: the action bar belongs to the Disharmony / Friend status (disharmony_game.js)
+    player.sendMessage(text); // chat: the action bar belongs to the Harmony status (harmony_game.js)
   } catch {
     // player left
   }
@@ -62,11 +62,10 @@ function bond(unicorn, player) {
 }
 
 function offer(player, unicorn) {
-  const state = disharmonyOf(player);
+  const band = bandOf(harmonyOf(player).harmony);
   const now = world.getAbsoluteTime();
   const refusal = offerRefusal({
-    level: levelFor(state.points),
-    friend: isFriend(state),
+    band,
     tame: !!unicorn.getProperty("lothlorien:tame"),
     alarmed: !!unicorn.getProperty("lothlorien:alarmed"),
     sinceLast: ticksSince(now, unicorn.getDynamicProperty(LAST_OFFER)),

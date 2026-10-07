@@ -7224,9 +7224,9 @@
         "lothlorien.message.squirrel.untrusted": {
           "source": "§7The squirrel sniffs the acorn and watches you, but does not trust you yet.",
           "context": {
-            "meaning": "A calm player has not earned Friend status; acorn offer is refused and the item is kept.",
+            "meaning": "A Guest (Harmony 0 to +9) has not yet earned Friend status (Harmony +10); acorn offer is refused and the item is kept.",
             "location": "lothlorien_rp: chat or action bar",
-            "trigger": "A calm player has not earned Friend status; acorn offer is refused and the item is kept.",
+            "trigger": "Squirrel acorn offer while the player is a Guest, not yet Friend; item is kept.",
             "tone": "Gentle woodland narration",
             "grammar": "Complete sentence; address the player without assuming gender.",
             "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
@@ -7238,42 +7238,42 @@
           "translations": {
             "cs_CZ": {
               "text": "§7Veverka očichává žalud a pozoruje vás, ale zatím vám nedůvěřuje.",
-              "based_on": "c6a61b37c8f6b94dfc0842790c2b081b971e82d63077dd906ac16dea099b8792",
+              "based_on": "4c8e57d6ddee827aff39b067d5e4e33d39a2a77521761c1e9afc6db7b24f57fc",
               "status": "ai-draft"
             },
             "es_ES": {
               "text": "§7La ardilla olfatea la bellota y te observa, pero aún no confía en ti.",
-              "based_on": "c6a61b37c8f6b94dfc0842790c2b081b971e82d63077dd906ac16dea099b8792",
+              "based_on": "4c8e57d6ddee827aff39b067d5e4e33d39a2a77521761c1e9afc6db7b24f57fc",
               "status": "ai-draft"
             },
             "es_MX": {
               "text": "§7La ardilla olfatea la bellota y te observa, pero aún no confía en ti.",
-              "based_on": "c6a61b37c8f6b94dfc0842790c2b081b971e82d63077dd906ac16dea099b8792",
+              "based_on": "4c8e57d6ddee827aff39b067d5e4e33d39a2a77521761c1e9afc6db7b24f57fc",
               "status": "ai-draft"
             },
             "pt_PT": {
               "text": "§7O esquilo cheira a bolota e observa-te, mas ainda não confia em ti.",
-              "based_on": "c6a61b37c8f6b94dfc0842790c2b081b971e82d63077dd906ac16dea099b8792",
+              "based_on": "4c8e57d6ddee827aff39b067d5e4e33d39a2a77521761c1e9afc6db7b24f57fc",
               "status": "ai-draft"
             },
             "pt_BR": {
               "text": "§7O esquilo cheira a bolota e observa você, mas ainda não confia em você.",
-              "based_on": "c6a61b37c8f6b94dfc0842790c2b081b971e82d63077dd906ac16dea099b8792",
+              "based_on": "4c8e57d6ddee827aff39b067d5e4e33d39a2a77521761c1e9afc6db7b24f57fc",
               "status": "ai-draft"
             },
             "de_DE": {
               "text": "§7Das Hörnchen beschnuppert die Eichel und beobachtet dich, vertraut dir aber noch nicht.",
-              "based_on": "c6a61b37c8f6b94dfc0842790c2b081b971e82d63077dd906ac16dea099b8792",
+              "based_on": "4c8e57d6ddee827aff39b067d5e4e33d39a2a77521761c1e9afc6db7b24f57fc",
               "status": "ai-draft"
             },
             "fr_FR": {
               "text": "§7L’écureuil renifle le gland et t’observe, mais ne te fait pas encore confiance.",
-              "based_on": "c6a61b37c8f6b94dfc0842790c2b081b971e82d63077dd906ac16dea099b8792",
+              "based_on": "4c8e57d6ddee827aff39b067d5e4e33d39a2a77521761c1e9afc6db7b24f57fc",
               "status": "ai-draft"
             },
             "pl_PL": {
               "text": "§7Wiewiórka obwąchuje żołądź i przygląda ci się, ale jeszcze ci nie ufa.",
-              "based_on": "c6a61b37c8f6b94dfc0842790c2b081b971e82d63077dd906ac16dea099b8792",
+              "based_on": "4c8e57d6ddee827aff39b067d5e4e33d39a2a77521761c1e9afc6db7b24f57fc",
               "status": "ai-draft"
             }
           }
@@ -7281,9 +7281,9 @@
         "lothlorien.message.squirrel.restless": {
           "source": "§7The squirrel shies from your restless spirit.",
           "context": {
-            "meaning": "An acorn offer is refused because the player has Disharmony I or higher; acorn is kept.",
+            "meaning": "An acorn offer is refused because the player's Harmony is below 0 (Uneasy, Shunned or Hated band); acorn is kept.",
             "location": "lothlorien_rp: chat or action bar",
-            "trigger": "An acorn offer is refused because the player has Disharmony I or higher; acorn is kept.",
+            "trigger": "Squirrel acorn offer while Harmony is below 0; acorn is kept.",
             "tone": "Gentle woodland narration",
             "grammar": "Complete sentence; address the player without assuming gender.",
             "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
@@ -7295,42 +7295,42 @@
           "translations": {
             "cs_CZ": {
               "text": "§7Veverka se leká vašeho neklidného ducha.",
-              "based_on": "82f7082506a37c2d20817d86f617aa61de5d17b788000e2419edc9f02706c1a7",
+              "based_on": "7b2d82f6ec54130ac1aa2ba32eca7c6cfeb0b5f17e01ff216c37da183b412fdb",
               "status": "ai-draft"
             },
             "es_ES": {
               "text": "§7La ardilla rehúye tu espíritu inquieto.",
-              "based_on": "82f7082506a37c2d20817d86f617aa61de5d17b788000e2419edc9f02706c1a7",
+              "based_on": "7b2d82f6ec54130ac1aa2ba32eca7c6cfeb0b5f17e01ff216c37da183b412fdb",
               "status": "ai-draft"
             },
             "es_MX": {
               "text": "§7La ardilla rehúye tu espíritu inquieto.",
-              "based_on": "82f7082506a37c2d20817d86f617aa61de5d17b788000e2419edc9f02706c1a7",
+              "based_on": "7b2d82f6ec54130ac1aa2ba32eca7c6cfeb0b5f17e01ff216c37da183b412fdb",
               "status": "ai-draft"
             },
             "pt_PT": {
               "text": "§7O esquilo afasta-se do teu espírito inquieto.",
-              "based_on": "82f7082506a37c2d20817d86f617aa61de5d17b788000e2419edc9f02706c1a7",
+              "based_on": "7b2d82f6ec54130ac1aa2ba32eca7c6cfeb0b5f17e01ff216c37da183b412fdb",
               "status": "ai-draft"
             },
             "pt_BR": {
               "text": "§7O esquilo se afasta do seu espírito inquieto.",
-              "based_on": "82f7082506a37c2d20817d86f617aa61de5d17b788000e2419edc9f02706c1a7",
+              "based_on": "7b2d82f6ec54130ac1aa2ba32eca7c6cfeb0b5f17e01ff216c37da183b412fdb",
               "status": "ai-draft"
             },
             "de_DE": {
               "text": "§7Das Hörnchen scheut vor deinem unruhigen Geist zurück.",
-              "based_on": "82f7082506a37c2d20817d86f617aa61de5d17b788000e2419edc9f02706c1a7",
+              "based_on": "7b2d82f6ec54130ac1aa2ba32eca7c6cfeb0b5f17e01ff216c37da183b412fdb",
               "status": "ai-draft"
             },
             "fr_FR": {
               "text": "§7L’écureuil fuit ton esprit agité.",
-              "based_on": "82f7082506a37c2d20817d86f617aa61de5d17b788000e2419edc9f02706c1a7",
+              "based_on": "7b2d82f6ec54130ac1aa2ba32eca7c6cfeb0b5f17e01ff216c37da183b412fdb",
               "status": "ai-draft"
             },
             "pl_PL": {
               "text": "§7Wiewiórka płoszy się przed twoim niespokojnym duchem.",
-              "based_on": "82f7082506a37c2d20817d86f617aa61de5d17b788000e2419edc9f02706c1a7",
+              "based_on": "7b2d82f6ec54130ac1aa2ba32eca7c6cfeb0b5f17e01ff216c37da183b412fdb",
               "status": "ai-draft"
             }
           }
@@ -7794,9 +7794,9 @@
         "lothlorien.message.deer.restless": {
           "source": "§7The white deer shies from your restless spirit.",
           "context": {
-            "meaning": "White deer refuses guidance because of Disharmony; acorn is kept.",
+            "meaning": "White deer refuses guidance because the player's Harmony is below 0 (Uneasy, Shunned or Hated band); acorn is kept.",
             "location": "lothlorien_rp: chat or action bar",
-            "trigger": "White deer refuses guidance because of Disharmony; acorn is kept.",
+            "trigger": "White deer acorn offer while Harmony is below 0; acorn is kept.",
             "tone": "Gentle woodland narration",
             "grammar": "Complete sentence; address the player without assuming gender.",
             "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
@@ -7808,42 +7808,42 @@
           "translations": {
             "cs_CZ": {
               "text": "§7Bílý jelen se leká vašeho neklidného ducha.",
-              "based_on": "5e0f6a40d4dab15cbaf847aec091e3ccef782f5b41d40337cfcdb1e1b236d2bd",
+              "based_on": "27838bf52746235e04dce540e0a2411da5b80657a6cd24389010cde04a9f9741",
               "status": "ai-draft"
             },
             "es_ES": {
               "text": "§7El ciervo blanco rehúye tu espíritu inquieto.",
-              "based_on": "5e0f6a40d4dab15cbaf847aec091e3ccef782f5b41d40337cfcdb1e1b236d2bd",
+              "based_on": "27838bf52746235e04dce540e0a2411da5b80657a6cd24389010cde04a9f9741",
               "status": "ai-draft"
             },
             "es_MX": {
               "text": "§7El venado blanco rehúye tu espíritu inquieto.",
-              "based_on": "5e0f6a40d4dab15cbaf847aec091e3ccef782f5b41d40337cfcdb1e1b236d2bd",
+              "based_on": "27838bf52746235e04dce540e0a2411da5b80657a6cd24389010cde04a9f9741",
               "status": "ai-draft"
             },
             "pt_PT": {
               "text": "§7O veado branco afasta-se do teu espírito inquieto.",
-              "based_on": "5e0f6a40d4dab15cbaf847aec091e3ccef782f5b41d40337cfcdb1e1b236d2bd",
+              "based_on": "27838bf52746235e04dce540e0a2411da5b80657a6cd24389010cde04a9f9741",
               "status": "ai-draft"
             },
             "pt_BR": {
               "text": "§7O veado branco se afasta do seu espírito inquieto.",
-              "based_on": "5e0f6a40d4dab15cbaf847aec091e3ccef782f5b41d40337cfcdb1e1b236d2bd",
+              "based_on": "27838bf52746235e04dce540e0a2411da5b80657a6cd24389010cde04a9f9741",
               "status": "ai-draft"
             },
             "de_DE": {
               "text": "§7Der weiße Hirsch scheut vor deinem unruhigen Geist zurück.",
-              "based_on": "5e0f6a40d4dab15cbaf847aec091e3ccef782f5b41d40337cfcdb1e1b236d2bd",
+              "based_on": "27838bf52746235e04dce540e0a2411da5b80657a6cd24389010cde04a9f9741",
               "status": "ai-draft"
             },
             "fr_FR": {
               "text": "§7Le cerf blanc fuit ton esprit agité.",
-              "based_on": "5e0f6a40d4dab15cbaf847aec091e3ccef782f5b41d40337cfcdb1e1b236d2bd",
+              "based_on": "27838bf52746235e04dce540e0a2411da5b80657a6cd24389010cde04a9f9741",
               "status": "ai-draft"
             },
             "pl_PL": {
               "text": "§7Biały jeleń płoszy się przed twoim niespokojnym duchem.",
-              "based_on": "5e0f6a40d4dab15cbaf847aec091e3ccef782f5b41d40337cfcdb1e1b236d2bd",
+              "based_on": "27838bf52746235e04dce540e0a2411da5b80657a6cd24389010cde04a9f9741",
               "status": "ai-draft"
             }
           }
@@ -7851,9 +7851,9 @@
         "lothlorien.message.deer.untrusted": {
           "source": "§7The white deer watches you, but does not trust you yet.",
           "context": {
-            "meaning": "White deer gift guidance needs Friend status, even if a calm player can approach the deer. Acorn is kept.",
+            "meaning": "White deer gift guidance needs Friend status (Harmony +10), even though a Guest can approach the deer. Acorn is kept.",
             "location": "lothlorien_rp: chat or action bar",
-            "trigger": "White deer gift guidance needs Friend status, even if a calm player can approach the deer. Acorn is kept.",
+            "trigger": "White deer acorn offer while the player is a Guest, not yet Friend; acorn is kept.",
             "tone": "Gentle woodland narration",
             "grammar": "Complete sentence; address the player without assuming gender.",
             "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
@@ -7865,42 +7865,42 @@
           "translations": {
             "cs_CZ": {
               "text": "§7Bílý jelen vás pozoruje, ale zatím vám nedůvěřuje.",
-              "based_on": "233c0321932e95b0dd64b04b3d9d6937328f7daa31cbb3308a6222d105c081b6",
+              "based_on": "8736bdc66924308c40b5b08e5df29207d92b89a0d267be21161bebe495c20f68",
               "status": "ai-draft"
             },
             "es_ES": {
               "text": "§7El ciervo blanco te observa, pero aún no confía en ti.",
-              "based_on": "233c0321932e95b0dd64b04b3d9d6937328f7daa31cbb3308a6222d105c081b6",
+              "based_on": "8736bdc66924308c40b5b08e5df29207d92b89a0d267be21161bebe495c20f68",
               "status": "ai-draft"
             },
             "es_MX": {
               "text": "§7El venado blanco te observa, pero aún no confía en ti.",
-              "based_on": "233c0321932e95b0dd64b04b3d9d6937328f7daa31cbb3308a6222d105c081b6",
+              "based_on": "8736bdc66924308c40b5b08e5df29207d92b89a0d267be21161bebe495c20f68",
               "status": "ai-draft"
             },
             "pt_PT": {
               "text": "§7O veado branco observa-te, mas ainda não confia em ti.",
-              "based_on": "233c0321932e95b0dd64b04b3d9d6937328f7daa31cbb3308a6222d105c081b6",
+              "based_on": "8736bdc66924308c40b5b08e5df29207d92b89a0d267be21161bebe495c20f68",
               "status": "ai-draft"
             },
             "pt_BR": {
               "text": "§7O veado branco observa você, mas ainda não confia em você.",
-              "based_on": "233c0321932e95b0dd64b04b3d9d6937328f7daa31cbb3308a6222d105c081b6",
+              "based_on": "8736bdc66924308c40b5b08e5df29207d92b89a0d267be21161bebe495c20f68",
               "status": "ai-draft"
             },
             "de_DE": {
               "text": "§7Der weiße Hirsch beobachtet dich, vertraut dir aber noch nicht.",
-              "based_on": "233c0321932e95b0dd64b04b3d9d6937328f7daa31cbb3308a6222d105c081b6",
+              "based_on": "8736bdc66924308c40b5b08e5df29207d92b89a0d267be21161bebe495c20f68",
               "status": "ai-draft"
             },
             "fr_FR": {
               "text": "§7Le cerf blanc t’observe, mais ne te fait pas encore confiance.",
-              "based_on": "233c0321932e95b0dd64b04b3d9d6937328f7daa31cbb3308a6222d105c081b6",
+              "based_on": "8736bdc66924308c40b5b08e5df29207d92b89a0d267be21161bebe495c20f68",
               "status": "ai-draft"
             },
             "pl_PL": {
               "text": "§7Biały jeleń przygląda ci się, ale jeszcze ci nie ufa.",
-              "based_on": "233c0321932e95b0dd64b04b3d9d6937328f7daa31cbb3308a6222d105c081b6",
+              "based_on": "8736bdc66924308c40b5b08e5df29207d92b89a0d267be21161bebe495c20f68",
               "status": "ai-draft"
             }
           }
@@ -8424,9 +8424,9 @@
         "lothlorien.message.unicorn.untrusted": {
           "source": "§7The unicorn watches the flower, and you, but does not trust you yet.",
           "context": {
-            "meaning": "Player lacks Friend status; flower is kept.",
+            "meaning": "Player lacks Friend status (is a Guest, Harmony 0 to +9); flower is kept.",
             "location": "lothlorien_rp: chat or action bar",
-            "trigger": "Player lacks Friend status; flower is kept.",
+            "trigger": "Unicorn Elanor offer while the player is a Guest, not yet Friend; flower is kept.",
             "tone": "Gentle woodland narration",
             "grammar": "Complete sentence; address the player without assuming gender.",
             "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
@@ -8438,42 +8438,42 @@
           "translations": {
             "cs_CZ": {
               "text": "§7Jednorožec pozoruje květinu i vás, ale zatím vám nedůvěřuje.",
-              "based_on": "2ec8a9aa1d8aaeb86b27b3a8a241b03b3590820a470f0b44f40e1dd5551dc0e0",
+              "based_on": "d1798dcee23bea1656d072103aa72eec003472943d9ffaf1b4be9e8e33015cf5",
               "status": "ai-draft"
             },
             "es_ES": {
               "text": "§7El unicornio observa la flor y te observa a ti, pero aún no confía en ti.",
-              "based_on": "2ec8a9aa1d8aaeb86b27b3a8a241b03b3590820a470f0b44f40e1dd5551dc0e0",
+              "based_on": "d1798dcee23bea1656d072103aa72eec003472943d9ffaf1b4be9e8e33015cf5",
               "status": "ai-draft"
             },
             "es_MX": {
               "text": "§7El unicornio observa la flor y te observa a ti, pero aún no confía en ti.",
-              "based_on": "2ec8a9aa1d8aaeb86b27b3a8a241b03b3590820a470f0b44f40e1dd5551dc0e0",
+              "based_on": "d1798dcee23bea1656d072103aa72eec003472943d9ffaf1b4be9e8e33015cf5",
               "status": "ai-draft"
             },
             "pt_PT": {
               "text": "§7O unicórnio observa a flor e observa-te, mas ainda não confia em ti.",
-              "based_on": "2ec8a9aa1d8aaeb86b27b3a8a241b03b3590820a470f0b44f40e1dd5551dc0e0",
+              "based_on": "d1798dcee23bea1656d072103aa72eec003472943d9ffaf1b4be9e8e33015cf5",
               "status": "ai-draft"
             },
             "pt_BR": {
               "text": "§7O unicórnio observa a flor e você, mas ainda não confia em você.",
-              "based_on": "2ec8a9aa1d8aaeb86b27b3a8a241b03b3590820a470f0b44f40e1dd5551dc0e0",
+              "based_on": "d1798dcee23bea1656d072103aa72eec003472943d9ffaf1b4be9e8e33015cf5",
               "status": "ai-draft"
             },
             "de_DE": {
               "text": "§7Das Einhorn betrachtet die Blume und dich, vertraut dir aber noch nicht.",
-              "based_on": "2ec8a9aa1d8aaeb86b27b3a8a241b03b3590820a470f0b44f40e1dd5551dc0e0",
+              "based_on": "d1798dcee23bea1656d072103aa72eec003472943d9ffaf1b4be9e8e33015cf5",
               "status": "ai-draft"
             },
             "fr_FR": {
               "text": "§7La licorne observe la fleur et t’observe aussi, mais ne te fait pas encore confiance.",
-              "based_on": "2ec8a9aa1d8aaeb86b27b3a8a241b03b3590820a470f0b44f40e1dd5551dc0e0",
+              "based_on": "d1798dcee23bea1656d072103aa72eec003472943d9ffaf1b4be9e8e33015cf5",
               "status": "ai-draft"
             },
             "pl_PL": {
               "text": "§7Jednorożec przygląda się kwiatowi i tobie, ale jeszcze ci nie ufa.",
-              "based_on": "2ec8a9aa1d8aaeb86b27b3a8a241b03b3590820a470f0b44f40e1dd5551dc0e0",
+              "based_on": "d1798dcee23bea1656d072103aa72eec003472943d9ffaf1b4be9e8e33015cf5",
               "status": "ai-draft"
             }
           }
@@ -8481,9 +8481,9 @@
         "lothlorien.message.unicorn.restless": {
           "source": "§7The unicorn shies from your restless spirit.",
           "context": {
-            "meaning": "Elanor offer refused because of Disharmony; flower is kept.",
+            "meaning": "Elanor offer refused because the player's Harmony is below 0 (Uneasy, Shunned or Hated band); flower is kept.",
             "location": "lothlorien_rp: chat or action bar",
-            "trigger": "Elanor offer refused because of Disharmony; flower is kept.",
+            "trigger": "Unicorn Elanor offer while Harmony is below 0; flower is kept.",
             "tone": "Gentle woodland narration",
             "grammar": "Complete sentence; address the player without assuming gender.",
             "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
@@ -8495,42 +8495,42 @@
           "translations": {
             "cs_CZ": {
               "text": "§7Jednorožec se leká vašeho neklidného ducha.",
-              "based_on": "58e18d37d16b8a7231d8884db1d782d2cfa9f366d2b290511b7e9940ab72c6a7",
+              "based_on": "701dfd9a54fd4f2c6966d8facd65bf61fbf8438b3566e6dd9905e3ab51f87e6e",
               "status": "ai-draft"
             },
             "es_ES": {
               "text": "§7El unicornio rehúye tu espíritu inquieto.",
-              "based_on": "58e18d37d16b8a7231d8884db1d782d2cfa9f366d2b290511b7e9940ab72c6a7",
+              "based_on": "701dfd9a54fd4f2c6966d8facd65bf61fbf8438b3566e6dd9905e3ab51f87e6e",
               "status": "ai-draft"
             },
             "es_MX": {
               "text": "§7El unicornio rehúye tu espíritu inquieto.",
-              "based_on": "58e18d37d16b8a7231d8884db1d782d2cfa9f366d2b290511b7e9940ab72c6a7",
+              "based_on": "701dfd9a54fd4f2c6966d8facd65bf61fbf8438b3566e6dd9905e3ab51f87e6e",
               "status": "ai-draft"
             },
             "pt_PT": {
               "text": "§7O unicórnio afasta-se do teu espírito inquieto.",
-              "based_on": "58e18d37d16b8a7231d8884db1d782d2cfa9f366d2b290511b7e9940ab72c6a7",
+              "based_on": "701dfd9a54fd4f2c6966d8facd65bf61fbf8438b3566e6dd9905e3ab51f87e6e",
               "status": "ai-draft"
             },
             "pt_BR": {
               "text": "§7O unicórnio se afasta do seu espírito inquieto.",
-              "based_on": "58e18d37d16b8a7231d8884db1d782d2cfa9f366d2b290511b7e9940ab72c6a7",
+              "based_on": "701dfd9a54fd4f2c6966d8facd65bf61fbf8438b3566e6dd9905e3ab51f87e6e",
               "status": "ai-draft"
             },
             "de_DE": {
               "text": "§7Das Einhorn scheut vor deinem unruhigen Geist zurück.",
-              "based_on": "58e18d37d16b8a7231d8884db1d782d2cfa9f366d2b290511b7e9940ab72c6a7",
+              "based_on": "701dfd9a54fd4f2c6966d8facd65bf61fbf8438b3566e6dd9905e3ab51f87e6e",
               "status": "ai-draft"
             },
             "fr_FR": {
               "text": "§7La licorne fuit ton esprit agité.",
-              "based_on": "58e18d37d16b8a7231d8884db1d782d2cfa9f366d2b290511b7e9940ab72c6a7",
+              "based_on": "701dfd9a54fd4f2c6966d8facd65bf61fbf8438b3566e6dd9905e3ab51f87e6e",
               "status": "ai-draft"
             },
             "pl_PL": {
               "text": "§7Jednorożec płoszy się przed twoim niespokojnym duchem.",
-              "based_on": "58e18d37d16b8a7231d8884db1d782d2cfa9f366d2b290511b7e9940ab72c6a7",
+              "based_on": "701dfd9a54fd4f2c6966d8facd65bf61fbf8438b3566e6dd9905e3ab51f87e6e",
               "status": "ai-draft"
             }
           }
@@ -8538,56 +8538,56 @@
         "lothlorien.message.friend.gained": {
           "source": "§aYou are a Friend of Lothlórien.",
           "context": {
-            "meaning": "Friend status earned after ten peaceful minutes at zero Disharmony inside Lothlorien. Gender-neutral announcement of woodland trust.",
+            "meaning": "Friend status gained: the player's Harmony reached +10 inside Lothlorien after peaceful time. Gender-neutral announcement of woodland trust. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.",
             "location": "lothlorien_rp: chat or action bar",
-            "trigger": "Friend status earned after ten peaceful minutes at zero Disharmony inside Lothlorien. Gender-neutral announcement of woodland trust.",
+            "trigger": "Harmony reaches +10 (Friend band) by recovering inside the forest.",
             "tone": "Gentle woodland narration",
             "grammar": "Complete sentence; address the player without assuming gender.",
             "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
             "source_paths": [
-              "lothlorien_bp/scripts/disharmony_game.js"
+              "lothlorien_bp/scripts/harmony_game.js"
             ]
           },
           "placeholders": [],
           "translations": {
             "cs_CZ": {
               "text": "§aLothlórien vás přijímá mezi své přátele.",
-              "based_on": "3bced29716ed42d5c20eb6e89170b68dd4f234750d07bea8bf9664b5ddcb190e",
+              "based_on": "1a938eaf291f9c8ef18640db9c2428cff08655368c94b49a5b408c55ed825383",
               "status": "ai-draft"
             },
             "es_ES": {
               "text": "§aLothlórien te cuenta entre sus amistades.",
-              "based_on": "3bced29716ed42d5c20eb6e89170b68dd4f234750d07bea8bf9664b5ddcb190e",
+              "based_on": "1a938eaf291f9c8ef18640db9c2428cff08655368c94b49a5b408c55ed825383",
               "status": "ai-draft"
             },
             "es_MX": {
               "text": "§aLothlórien te cuenta entre sus amistades.",
-              "based_on": "3bced29716ed42d5c20eb6e89170b68dd4f234750d07bea8bf9664b5ddcb190e",
+              "based_on": "1a938eaf291f9c8ef18640db9c2428cff08655368c94b49a5b408c55ed825383",
               "status": "ai-draft"
             },
             "pt_PT": {
               "text": "§aLothlórien acolhe-te entre os seus amigos.",
-              "based_on": "3bced29716ed42d5c20eb6e89170b68dd4f234750d07bea8bf9664b5ddcb190e",
+              "based_on": "1a938eaf291f9c8ef18640db9c2428cff08655368c94b49a5b408c55ed825383",
               "status": "ai-draft"
             },
             "pt_BR": {
               "text": "§aLothlórien acolhe você entre seus amigos.",
-              "based_on": "3bced29716ed42d5c20eb6e89170b68dd4f234750d07bea8bf9664b5ddcb190e",
+              "based_on": "1a938eaf291f9c8ef18640db9c2428cff08655368c94b49a5b408c55ed825383",
               "status": "ai-draft"
             },
             "de_DE": {
               "text": "§aLothlórien zählt dich nun zu seinen Freunden.",
-              "based_on": "3bced29716ed42d5c20eb6e89170b68dd4f234750d07bea8bf9664b5ddcb190e",
+              "based_on": "1a938eaf291f9c8ef18640db9c2428cff08655368c94b49a5b408c55ed825383",
               "status": "ai-draft"
             },
             "fr_FR": {
               "text": "§aLothlórien te compte désormais parmi ses amis.",
-              "based_on": "3bced29716ed42d5c20eb6e89170b68dd4f234750d07bea8bf9664b5ddcb190e",
+              "based_on": "1a938eaf291f9c8ef18640db9c2428cff08655368c94b49a5b408c55ed825383",
               "status": "ai-draft"
             },
             "pl_PL": {
               "text": "§aLothlórien zalicza cię do swoich przyjaciół.",
-              "based_on": "3bced29716ed42d5c20eb6e89170b68dd4f234750d07bea8bf9664b5ddcb190e",
+              "based_on": "1a938eaf291f9c8ef18640db9c2428cff08655368c94b49a5b408c55ed825383",
               "status": "ai-draft"
             }
           }
@@ -8595,176 +8595,56 @@
         "lothlorien.message.friend.lost": {
           "source": "§7You are no longer a Friend of Lothlórien.",
           "context": {
-            "meaning": "Friend status lost after a kill or player death. Gender-neutral announcement.",
+            "meaning": "Friend status lost: Harmony dropped below +10 after a deed (a kill). Gender-neutral announcement. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.",
             "location": "lothlorien_rp: chat or action bar",
-            "trigger": "Friend status lost after a kill or player death. Gender-neutral announcement.",
+            "trigger": "A deed lowers Harmony from +10 into a lower band.",
             "tone": "Gentle woodland narration",
             "grammar": "Complete sentence; address the player without assuming gender.",
             "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
             "source_paths": [
-              "lothlorien_bp/scripts/disharmony_game.js"
+              "lothlorien_bp/scripts/harmony_game.js"
             ]
           },
           "placeholders": [],
           "translations": {
             "cs_CZ": {
               "text": "§7Lothlórien vás už neřadí mezi své přátele.",
-              "based_on": "71bd674efc92fe0db239cd2d7bc59845db81c3f36044bcfa4675949c609560b7",
+              "based_on": "dda7afa3e8f5c546996c8358d1c435462cdf8656861dac49717f15e0d858737b",
               "status": "ai-draft"
             },
             "es_ES": {
               "text": "§7Lothlórien ya no te cuenta entre sus amistades.",
-              "based_on": "71bd674efc92fe0db239cd2d7bc59845db81c3f36044bcfa4675949c609560b7",
+              "based_on": "dda7afa3e8f5c546996c8358d1c435462cdf8656861dac49717f15e0d858737b",
               "status": "ai-draft"
             },
             "es_MX": {
               "text": "§7Lothlórien ya no te cuenta entre sus amistades.",
-              "based_on": "71bd674efc92fe0db239cd2d7bc59845db81c3f36044bcfa4675949c609560b7",
+              "based_on": "dda7afa3e8f5c546996c8358d1c435462cdf8656861dac49717f15e0d858737b",
               "status": "ai-draft"
             },
             "pt_PT": {
               "text": "§7Lothlórien já não te conta entre os seus amigos.",
-              "based_on": "71bd674efc92fe0db239cd2d7bc59845db81c3f36044bcfa4675949c609560b7",
+              "based_on": "dda7afa3e8f5c546996c8358d1c435462cdf8656861dac49717f15e0d858737b",
               "status": "ai-draft"
             },
             "pt_BR": {
               "text": "§7Lothlórien já não conta você entre seus amigos.",
-              "based_on": "71bd674efc92fe0db239cd2d7bc59845db81c3f36044bcfa4675949c609560b7",
+              "based_on": "dda7afa3e8f5c546996c8358d1c435462cdf8656861dac49717f15e0d858737b",
               "status": "ai-draft"
             },
             "de_DE": {
               "text": "§7Lothlórien zählt dich nicht mehr zu seinen Freunden.",
-              "based_on": "71bd674efc92fe0db239cd2d7bc59845db81c3f36044bcfa4675949c609560b7",
+              "based_on": "dda7afa3e8f5c546996c8358d1c435462cdf8656861dac49717f15e0d858737b",
               "status": "ai-draft"
             },
             "fr_FR": {
               "text": "§7Lothlórien ne te compte plus parmi ses amis.",
-              "based_on": "71bd674efc92fe0db239cd2d7bc59845db81c3f36044bcfa4675949c609560b7",
+              "based_on": "dda7afa3e8f5c546996c8358d1c435462cdf8656861dac49717f15e0d858737b",
               "status": "ai-draft"
             },
             "pl_PL": {
               "text": "§7Lothlórien nie zalicza cię już do swoich przyjaciół.",
-              "based_on": "71bd674efc92fe0db239cd2d7bc59845db81c3f36044bcfa4675949c609560b7",
-              "status": "ai-draft"
-            }
-          }
-        },
-        "lothlorien.message.disharmony.level": {
-          "source": "§cDisharmony %s",
-          "context": {
-            "meaning": "Announce a changed Disharmony level (I, II or III); killing increases points, peaceful time reduces them.",
-            "location": "lothlorien_rp: chat or action bar",
-            "trigger": "Announce a changed Disharmony level (I, II or III); killing increases points, peaceful time reduces them.",
-            "tone": "Gentle woodland narration",
-            "grammar": "Complete sentence; address the player without assuming gender.",
-            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
-            "source_paths": [
-              "lothlorien_bp/scripts/disharmony_game.js"
-            ]
-          },
-          "placeholders": [
-            {
-              "name": "level",
-              "type": "string",
-              "meaning": "level: Roman numeral I, II or III"
-            }
-          ],
-          "translations": {
-            "cs_CZ": {
-              "text": "§cNesoulad %s",
-              "based_on": "44c6b51e133fbb661234ef351a223d56c3c54e426dac458027854a084c6e3389",
-              "status": "ai-draft"
-            },
-            "es_ES": {
-              "text": "§cDiscordia %s",
-              "based_on": "44c6b51e133fbb661234ef351a223d56c3c54e426dac458027854a084c6e3389",
-              "status": "ai-draft"
-            },
-            "es_MX": {
-              "text": "§cDiscordia %s",
-              "based_on": "44c6b51e133fbb661234ef351a223d56c3c54e426dac458027854a084c6e3389",
-              "status": "ai-draft"
-            },
-            "pt_PT": {
-              "text": "§cDesarmonia %s",
-              "based_on": "44c6b51e133fbb661234ef351a223d56c3c54e426dac458027854a084c6e3389",
-              "status": "ai-draft"
-            },
-            "pt_BR": {
-              "text": "§cDesarmonia %s",
-              "based_on": "44c6b51e133fbb661234ef351a223d56c3c54e426dac458027854a084c6e3389",
-              "status": "ai-draft"
-            },
-            "de_DE": {
-              "text": "§cUnfrieden %s",
-              "based_on": "44c6b51e133fbb661234ef351a223d56c3c54e426dac458027854a084c6e3389",
-              "status": "ai-draft"
-            },
-            "fr_FR": {
-              "text": "§cDisharmonie %s",
-              "based_on": "44c6b51e133fbb661234ef351a223d56c3c54e426dac458027854a084c6e3389",
-              "status": "ai-draft"
-            },
-            "pl_PL": {
-              "text": "§cDysharmonia %s",
-              "based_on": "44c6b51e133fbb661234ef351a223d56c3c54e426dac458027854a084c6e3389",
-              "status": "ai-draft"
-            }
-          }
-        },
-        "lothlorien.message.disharmony.gone": {
-          "source": "§aThe woods forgive you: Disharmony gone.",
-          "context": {
-            "meaning": "Points decayed to zero: the woodland hostility status is gone, but friendship is not automatically earned.",
-            "location": "lothlorien_rp: chat or action bar",
-            "trigger": "Points decayed to zero: the woodland hostility status is gone, but friendship is not automatically earned.",
-            "tone": "Gentle woodland narration",
-            "grammar": "Complete sentence; address the player without assuming gender.",
-            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
-            "source_paths": [
-              "lothlorien_bp/scripts/disharmony_game.js"
-            ]
-          },
-          "placeholders": [],
-          "translations": {
-            "cs_CZ": {
-              "text": "§aLes vám odpouští: nesoulad pominul.",
-              "based_on": "3e23259b24679e790f7b4465b36a1dd3431a45e0e686bc8a5977721f8b1684c9",
-              "status": "ai-draft"
-            },
-            "es_ES": {
-              "text": "§aEl bosque te perdona: la discordia ha cesado.",
-              "based_on": "3e23259b24679e790f7b4465b36a1dd3431a45e0e686bc8a5977721f8b1684c9",
-              "status": "ai-draft"
-            },
-            "es_MX": {
-              "text": "§aEl bosque te perdona: la discordia ha cesado.",
-              "based_on": "3e23259b24679e790f7b4465b36a1dd3431a45e0e686bc8a5977721f8b1684c9",
-              "status": "ai-draft"
-            },
-            "pt_PT": {
-              "text": "§aO bosque perdoa-te: a desarmonia passou.",
-              "based_on": "3e23259b24679e790f7b4465b36a1dd3431a45e0e686bc8a5977721f8b1684c9",
-              "status": "ai-draft"
-            },
-            "pt_BR": {
-              "text": "§aA floresta perdoa você: a desarmonia passou.",
-              "based_on": "3e23259b24679e790f7b4465b36a1dd3431a45e0e686bc8a5977721f8b1684c9",
-              "status": "ai-draft"
-            },
-            "de_DE": {
-              "text": "§aDer Wald vergibt dir: Der Unfrieden ist vorüber.",
-              "based_on": "3e23259b24679e790f7b4465b36a1dd3431a45e0e686bc8a5977721f8b1684c9",
-              "status": "ai-draft"
-            },
-            "fr_FR": {
-              "text": "§aLes bois te pardonnent : la disharmonie s’est dissipée.",
-              "based_on": "3e23259b24679e790f7b4465b36a1dd3431a45e0e686bc8a5977721f8b1684c9",
-              "status": "ai-draft"
-            },
-            "pl_PL": {
-              "text": "§aLas ci wybacza: dysharmonia minęła.",
-              "based_on": "3e23259b24679e790f7b4465b36a1dd3431a45e0e686bc8a5977721f8b1684c9",
+              "based_on": "dda7afa3e8f5c546996c8358d1c435462cdf8656861dac49717f15e0d858737b",
               "status": "ai-draft"
             }
           }
@@ -8772,275 +8652,56 @@
         "lothlorien.message.status.friend": {
           "source": "Friend of Lothlórien",
           "context": {
-            "meaning": "Short action-bar label for earned Friend status. Use an impersonal friendship label to avoid assigning gender to the player.",
+            "meaning": "Short action-bar label for the Friend band (Harmony +10), shown inside the forest. Use an impersonal friendship label to avoid assigning gender to the player. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.",
             "location": "lothlorien_rp: chat or action bar",
-            "trigger": "Short action-bar label for earned Friend status. Use an impersonal friendship label to avoid assigning gender to the player.",
+            "trigger": "Player is in the Friend band and inside the forest.",
             "tone": "Gentle woodland narration",
             "grammar": "Short standalone action-bar or nested debug label.",
             "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
             "source_paths": [
-              "lothlorien_bp/scripts/disharmony.js"
+              "lothlorien_bp/scripts/harmony.js"
             ]
           },
           "placeholders": [],
           "translations": {
             "cs_CZ": {
               "text": "Přízeň Lothlórienu",
-              "based_on": "a6c848ec0a4241be7d9dd5a6dc78ed63af965fef8488500a6a240d3b261f69f7",
+              "based_on": "9f0dad9ca70f1e223d4d3cdb467ac82a2cb1ac8c1b3000615f1e6a72a33b71e9",
               "status": "ai-draft"
             },
             "es_ES": {
               "text": "Amistad de Lothlórien",
-              "based_on": "a6c848ec0a4241be7d9dd5a6dc78ed63af965fef8488500a6a240d3b261f69f7",
+              "based_on": "9f0dad9ca70f1e223d4d3cdb467ac82a2cb1ac8c1b3000615f1e6a72a33b71e9",
               "status": "ai-draft"
             },
             "es_MX": {
               "text": "Amistad de Lothlórien",
-              "based_on": "a6c848ec0a4241be7d9dd5a6dc78ed63af965fef8488500a6a240d3b261f69f7",
+              "based_on": "9f0dad9ca70f1e223d4d3cdb467ac82a2cb1ac8c1b3000615f1e6a72a33b71e9",
               "status": "ai-draft"
             },
             "pt_PT": {
               "text": "Amizade de Lothlórien",
-              "based_on": "a6c848ec0a4241be7d9dd5a6dc78ed63af965fef8488500a6a240d3b261f69f7",
+              "based_on": "9f0dad9ca70f1e223d4d3cdb467ac82a2cb1ac8c1b3000615f1e6a72a33b71e9",
               "status": "ai-draft"
             },
             "pt_BR": {
               "text": "Amizade de Lothlórien",
-              "based_on": "a6c848ec0a4241be7d9dd5a6dc78ed63af965fef8488500a6a240d3b261f69f7",
+              "based_on": "9f0dad9ca70f1e223d4d3cdb467ac82a2cb1ac8c1b3000615f1e6a72a33b71e9",
               "status": "ai-draft"
             },
             "de_DE": {
               "text": "Freundschaft mit Lothlórien",
-              "based_on": "a6c848ec0a4241be7d9dd5a6dc78ed63af965fef8488500a6a240d3b261f69f7",
+              "based_on": "9f0dad9ca70f1e223d4d3cdb467ac82a2cb1ac8c1b3000615f1e6a72a33b71e9",
               "status": "ai-draft"
             },
             "fr_FR": {
               "text": "Amitié de Lothlórien",
-              "based_on": "a6c848ec0a4241be7d9dd5a6dc78ed63af965fef8488500a6a240d3b261f69f7",
+              "based_on": "9f0dad9ca70f1e223d4d3cdb467ac82a2cb1ac8c1b3000615f1e6a72a33b71e9",
               "status": "ai-draft"
             },
             "pl_PL": {
               "text": "Przyjaźń Lothlórien",
-              "based_on": "a6c848ec0a4241be7d9dd5a6dc78ed63af965fef8488500a6a240d3b261f69f7",
-              "status": "ai-draft"
-            }
-          }
-        },
-        "lothlorien.message.status.disharmony": {
-          "source": "Disharmony %s",
-          "context": {
-            "meaning": "Short action-bar label for current Disharmony level, visible only inside the biome.",
-            "location": "lothlorien_rp: chat or action bar",
-            "trigger": "Short action-bar label for current Disharmony level, visible only inside the biome.",
-            "tone": "Gentle woodland narration",
-            "grammar": "Short standalone action-bar or nested debug label.",
-            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
-            "source_paths": [
-              "lothlorien_bp/scripts/disharmony.js"
-            ]
-          },
-          "placeholders": [
-            {
-              "name": "level",
-              "type": "string",
-              "meaning": "level: Roman numeral I, II or III"
-            }
-          ],
-          "translations": {
-            "cs_CZ": {
-              "text": "Nesoulad %s",
-              "based_on": "ddfc248ed838f1bfa8874b7fdd7eb171ede7c4257773daa65f1c731370cbbe54",
-              "status": "ai-draft"
-            },
-            "es_ES": {
-              "text": "Discordia %s",
-              "based_on": "ddfc248ed838f1bfa8874b7fdd7eb171ede7c4257773daa65f1c731370cbbe54",
-              "status": "ai-draft"
-            },
-            "es_MX": {
-              "text": "Discordia %s",
-              "based_on": "ddfc248ed838f1bfa8874b7fdd7eb171ede7c4257773daa65f1c731370cbbe54",
-              "status": "ai-draft"
-            },
-            "pt_PT": {
-              "text": "Desarmonia %s",
-              "based_on": "ddfc248ed838f1bfa8874b7fdd7eb171ede7c4257773daa65f1c731370cbbe54",
-              "status": "ai-draft"
-            },
-            "pt_BR": {
-              "text": "Desarmonia %s",
-              "based_on": "ddfc248ed838f1bfa8874b7fdd7eb171ede7c4257773daa65f1c731370cbbe54",
-              "status": "ai-draft"
-            },
-            "de_DE": {
-              "text": "Unfrieden %s",
-              "based_on": "ddfc248ed838f1bfa8874b7fdd7eb171ede7c4257773daa65f1c731370cbbe54",
-              "status": "ai-draft"
-            },
-            "fr_FR": {
-              "text": "Disharmonie %s",
-              "based_on": "ddfc248ed838f1bfa8874b7fdd7eb171ede7c4257773daa65f1c731370cbbe54",
-              "status": "ai-draft"
-            },
-            "pl_PL": {
-              "text": "Dysharmonia %s",
-              "based_on": "ddfc248ed838f1bfa8874b7fdd7eb171ede7c4257773daa65f1c731370cbbe54",
-              "status": "ai-draft"
-            }
-          }
-        },
-        "lothlorien.message.disharmony.debug": {
-          "source": "[lothlorien] disharmony points=%s level=%s calm=%s s friend progress=%s s",
-          "context": {
-            "meaning": "Developer diagnostic displayed to players who invoke the relevant /scriptevent command: [lothlorien] disharmony points=%s level=%s calm=%s s friend progress=%s s. Translate labels; retain technical tokens and commands.",
-            "location": "lothlorien_rp: chat or action bar",
-            "trigger": "Player runs the relevant diagnostic command or enables the debug readout.",
-            "tone": "Technical and concise",
-            "grammar": "Complete sentence; address the player without assuming gender.",
-            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
-            "source_paths": [
-              "lothlorien_bp/scripts/disharmony_game.js"
-            ]
-          },
-          "placeholders": [
-            {
-              "name": "points",
-              "type": "string",
-              "meaning": "points: nonnegative integer"
-            },
-            {
-              "name": "level",
-              "type": "string",
-              "meaning": "level: 0, 1, 2 or 3"
-            },
-            {
-              "name": "calm_seconds",
-              "type": "string",
-              "meaning": "calm_seconds: peaceful time since last kill"
-            },
-            {
-              "name": "friend_seconds",
-              "type": "string",
-              "meaning": "friend_seconds: peaceful time inside the biome towards friendship"
-            }
-          ],
-          "translations": {
-            "cs_CZ": {
-              "text": "[lothlorien] body nesouladu=%s úroveň=%s klid=%s s postup k přízni=%s s",
-              "based_on": "6d10f7e92271688a25155596dc1d6278d5be74f32844c5e629f8f0d3003bba6e",
-              "status": "ai-draft"
-            },
-            "es_ES": {
-              "text": "[lothlorien] puntos de discordia=%s nivel=%s calma=%s s progreso de amistad=%s s",
-              "based_on": "6d10f7e92271688a25155596dc1d6278d5be74f32844c5e629f8f0d3003bba6e",
-              "status": "ai-draft"
-            },
-            "es_MX": {
-              "text": "[lothlorien] puntos de discordia=%s nivel=%s calma=%s s progreso de amistad=%s s",
-              "based_on": "6d10f7e92271688a25155596dc1d6278d5be74f32844c5e629f8f0d3003bba6e",
-              "status": "ai-draft"
-            },
-            "pt_PT": {
-              "text": "[lothlorien] pontos de desarmonia=%s nível=%s calma=%s s progresso de amizade=%s s",
-              "based_on": "6d10f7e92271688a25155596dc1d6278d5be74f32844c5e629f8f0d3003bba6e",
-              "status": "ai-draft"
-            },
-            "pt_BR": {
-              "text": "[lothlorien] pontos de desarmonia=%s nível=%s calma=%s s progresso de amizade=%s s",
-              "based_on": "6d10f7e92271688a25155596dc1d6278d5be74f32844c5e629f8f0d3003bba6e",
-              "status": "ai-draft"
-            },
-            "de_DE": {
-              "text": "[lothlorien] Unfriedenspunkte=%s Stufe=%s Ruhe=%s s Freundschaftsfortschritt=%s s",
-              "based_on": "6d10f7e92271688a25155596dc1d6278d5be74f32844c5e629f8f0d3003bba6e",
-              "status": "ai-draft"
-            },
-            "fr_FR": {
-              "text": "[lothlorien] points de disharmonie=%s niveau=%s calme=%s s progression d’amitié=%s s",
-              "based_on": "6d10f7e92271688a25155596dc1d6278d5be74f32844c5e629f8f0d3003bba6e",
-              "status": "ai-draft"
-            },
-            "pl_PL": {
-              "text": "[lothlorien] punkty dysharmonii=%s poziom=%s spokój=%s s postęp przyjaźni=%s s",
-              "based_on": "6d10f7e92271688a25155596dc1d6278d5be74f32844c5e629f8f0d3003bba6e",
-              "status": "ai-draft"
-            }
-          }
-        },
-        "lothlorien.message.disharmony.debug_friend": {
-          "source": "[lothlorien] disharmony points=%s level=%s calm=%s s friend progress=%s s (Friend)",
-          "context": {
-            "meaning": "Developer diagnostic displayed to players who invoke the relevant /scriptevent command: [lothlorien] disharmony points=%s level=%s calm=%s s friend progress=%s s (Friend). Translate labels; retain technical tokens and commands.",
-            "location": "lothlorien_rp: chat or action bar",
-            "trigger": "Player runs the relevant diagnostic command or enables the debug readout.",
-            "tone": "Technical and concise",
-            "grammar": "Complete sentence; address the player without assuming gender.",
-            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
-            "source_paths": [
-              "lothlorien_bp/scripts/disharmony_game.js"
-            ]
-          },
-          "placeholders": [
-            {
-              "name": "points",
-              "type": "string",
-              "meaning": "points: nonnegative integer"
-            },
-            {
-              "name": "level",
-              "type": "string",
-              "meaning": "level: 0, 1, 2 or 3"
-            },
-            {
-              "name": "calm_seconds",
-              "type": "string",
-              "meaning": "calm_seconds: peaceful time since last kill"
-            },
-            {
-              "name": "friend_seconds",
-              "type": "string",
-              "meaning": "friend_seconds: friendship already earned"
-            }
-          ],
-          "translations": {
-            "cs_CZ": {
-              "text": "[lothlorien] body nesouladu=%s úroveň=%s klid=%s s postup k přízni=%s s (Přízeň)",
-              "based_on": "1de78b60b62715b4ed45af437f1e1b60dfc15a68ed8daad527168f823385c136",
-              "status": "ai-draft"
-            },
-            "es_ES": {
-              "text": "[lothlorien] puntos de discordia=%s nivel=%s calma=%s s progreso de amistad=%s s (Amistad)",
-              "based_on": "1de78b60b62715b4ed45af437f1e1b60dfc15a68ed8daad527168f823385c136",
-              "status": "ai-draft"
-            },
-            "es_MX": {
-              "text": "[lothlorien] puntos de discordia=%s nivel=%s calma=%s s progreso de amistad=%s s (Amistad)",
-              "based_on": "1de78b60b62715b4ed45af437f1e1b60dfc15a68ed8daad527168f823385c136",
-              "status": "ai-draft"
-            },
-            "pt_PT": {
-              "text": "[lothlorien] pontos de desarmonia=%s nível=%s calma=%s s progresso de amizade=%s s (Amizade)",
-              "based_on": "1de78b60b62715b4ed45af437f1e1b60dfc15a68ed8daad527168f823385c136",
-              "status": "ai-draft"
-            },
-            "pt_BR": {
-              "text": "[lothlorien] pontos de desarmonia=%s nível=%s calma=%s s progresso de amizade=%s s (Amizade)",
-              "based_on": "1de78b60b62715b4ed45af437f1e1b60dfc15a68ed8daad527168f823385c136",
-              "status": "ai-draft"
-            },
-            "de_DE": {
-              "text": "[lothlorien] Unfriedenspunkte=%s Stufe=%s Ruhe=%s s Freundschaftsfortschritt=%s s (Freundschaft)",
-              "based_on": "1de78b60b62715b4ed45af437f1e1b60dfc15a68ed8daad527168f823385c136",
-              "status": "ai-draft"
-            },
-            "fr_FR": {
-              "text": "[lothlorien] points de disharmonie=%s niveau=%s calme=%s s progression d’amitié=%s s (Amitié)",
-              "based_on": "1de78b60b62715b4ed45af437f1e1b60dfc15a68ed8daad527168f823385c136",
-              "status": "ai-draft"
-            },
-            "pl_PL": {
-              "text": "[lothlorien] punkty dysharmonii=%s poziom=%s spokój=%s s postęp przyjaźni=%s s (Przyjaźń)",
-              "based_on": "1de78b60b62715b4ed45af437f1e1b60dfc15a68ed8daad527168f823385c136",
+              "based_on": "9f0dad9ca70f1e223d4d3cdb467ac82a2cb1ac8c1b3000615f1e6a72a33b71e9",
               "status": "ai-draft"
             }
           }
@@ -10244,6 +9905,706 @@
             "pl_PL": {
               "text": "Jajo przyzywające: Elfi strażnik",
               "based_on": "75f12682dd22ac98bcb26ba35b4fb7f1d229e27f618fa949114a3e6f2231213e",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.status.guest": {
+          "source": "Guest of Lothlórien",
+          "context": {
+            "meaning": "Action-bar label while the player is in the Guest band (Harmony 0 to +9): welcome, but not yet trusted. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.",
+            "location": "lothlorien_rp: action bar (inside the forest only)",
+            "trigger": "Action-bar label while the player is in the Guest band (Harmony 0 to +9): welcome, but not yet trusted.",
+            "tone": "Short status label",
+            "grammar": "Short standalone noun phrase naming the forest's attitude, not the player; also nested in the debug readout. Must not assume player gender; keep it short.",
+            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
+            "source_paths": [
+              "lothlorien_bp/scripts/harmony.js"
+            ]
+          },
+          "placeholders": [],
+          "translations": {
+            "cs_CZ": {
+              "text": "Pohostinnost Lothlórienu",
+              "based_on": "35d6af276b3f98fdde2c8fe2ed300457c5d93708f835d8a1601ca6238094a50a",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "Acogida de Lothlórien",
+              "based_on": "35d6af276b3f98fdde2c8fe2ed300457c5d93708f835d8a1601ca6238094a50a",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "Acogida de Lothlórien",
+              "based_on": "35d6af276b3f98fdde2c8fe2ed300457c5d93708f835d8a1601ca6238094a50a",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "Acolhimento de Lothlórien",
+              "based_on": "35d6af276b3f98fdde2c8fe2ed300457c5d93708f835d8a1601ca6238094a50a",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "Acolhimento de Lothlórien",
+              "based_on": "35d6af276b3f98fdde2c8fe2ed300457c5d93708f835d8a1601ca6238094a50a",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "Gastrecht in Lothlórien",
+              "based_on": "35d6af276b3f98fdde2c8fe2ed300457c5d93708f835d8a1601ca6238094a50a",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "Hospitalité de Lothlórien",
+              "based_on": "35d6af276b3f98fdde2c8fe2ed300457c5d93708f835d8a1601ca6238094a50a",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "Gościna w Lothlórien",
+              "based_on": "35d6af276b3f98fdde2c8fe2ed300457c5d93708f835d8a1601ca6238094a50a",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.status.uneasy": {
+          "source": "Unease in Lothlórien",
+          "context": {
+            "meaning": "Action-bar label while the player is in the Uneasy band (Harmony -1 to -14): the forest is uneasy about the player. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.",
+            "location": "lothlorien_rp: action bar (inside the forest only)",
+            "trigger": "Action-bar label while the player is in the Uneasy band (Harmony -1 to -14): the forest is uneasy about the player.",
+            "tone": "Short status label",
+            "grammar": "Short standalone noun phrase naming the forest's attitude, not the player; also nested in the debug readout. Must not assume player gender; keep it short.",
+            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
+            "source_paths": [
+              "lothlorien_bp/scripts/harmony.js"
+            ]
+          },
+          "placeholders": [],
+          "translations": {
+            "cs_CZ": {
+              "text": "Neklid v Lothlórienu",
+              "based_on": "a0cd357c34877490024b64906df35f7a1d6ca53c34bf7d4cd20412254f9c218e",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "Inquietud en Lothlórien",
+              "based_on": "a0cd357c34877490024b64906df35f7a1d6ca53c34bf7d4cd20412254f9c218e",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "Inquietud en Lothlórien",
+              "based_on": "a0cd357c34877490024b64906df35f7a1d6ca53c34bf7d4cd20412254f9c218e",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "Inquietação em Lothlórien",
+              "based_on": "a0cd357c34877490024b64906df35f7a1d6ca53c34bf7d4cd20412254f9c218e",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "Inquietação em Lothlórien",
+              "based_on": "a0cd357c34877490024b64906df35f7a1d6ca53c34bf7d4cd20412254f9c218e",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "Unbehagen in Lothlórien",
+              "based_on": "a0cd357c34877490024b64906df35f7a1d6ca53c34bf7d4cd20412254f9c218e",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "Malaise en Lothlórien",
+              "based_on": "a0cd357c34877490024b64906df35f7a1d6ca53c34bf7d4cd20412254f9c218e",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "Niepokój w Lothlórien",
+              "based_on": "a0cd357c34877490024b64906df35f7a1d6ca53c34bf7d4cd20412254f9c218e",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.status.shunned": {
+          "source": "Shunned by Lothlórien",
+          "context": {
+            "meaning": "Action-bar label while the player is in the Shunned band (Harmony -15 to -29): the forest turns away from the player. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.",
+            "location": "lothlorien_rp: action bar (inside the forest only)",
+            "trigger": "Action-bar label while the player is in the Shunned band (Harmony -15 to -29): the forest turns away from the player.",
+            "tone": "Short status label",
+            "grammar": "Short standalone noun phrase naming the forest's attitude, not the player; also nested in the debug readout. Must not assume player gender; keep it short.",
+            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
+            "source_paths": [
+              "lothlorien_bp/scripts/harmony.js"
+            ]
+          },
+          "placeholders": [],
+          "translations": {
+            "cs_CZ": {
+              "text": "Odmítnutí Lothlórienem",
+              "based_on": "8af55e1edfea8cb174c95112bb746a97d4f5e56c116eaaf9fdfb7e4a6f1b2c81",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "Rechazo de Lothlórien",
+              "based_on": "8af55e1edfea8cb174c95112bb746a97d4f5e56c116eaaf9fdfb7e4a6f1b2c81",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "Rechazo de Lothlórien",
+              "based_on": "8af55e1edfea8cb174c95112bb746a97d4f5e56c116eaaf9fdfb7e4a6f1b2c81",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "Rejeição de Lothlórien",
+              "based_on": "8af55e1edfea8cb174c95112bb746a97d4f5e56c116eaaf9fdfb7e4a6f1b2c81",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "Rejeição de Lothlórien",
+              "based_on": "8af55e1edfea8cb174c95112bb746a97d4f5e56c116eaaf9fdfb7e4a6f1b2c81",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "Von Lothlórien gemieden",
+              "based_on": "8af55e1edfea8cb174c95112bb746a97d4f5e56c116eaaf9fdfb7e4a6f1b2c81",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "Rejet de Lothlórien",
+              "based_on": "8af55e1edfea8cb174c95112bb746a97d4f5e56c116eaaf9fdfb7e4a6f1b2c81",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "Odrzucenie przez Lothlórien",
+              "based_on": "8af55e1edfea8cb174c95112bb746a97d4f5e56c116eaaf9fdfb7e4a6f1b2c81",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.status.hated": {
+          "source": "Hated by Lothlórien",
+          "context": {
+            "meaning": "Action-bar label while the player is in the Hated band (Harmony -30 to -60): the forest hates the player and its wardens attack on sight. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.",
+            "location": "lothlorien_rp: action bar (inside the forest only)",
+            "trigger": "Action-bar label while the player is in the Hated band (Harmony -30 to -60): the forest hates the player and its wardens attack on sight.",
+            "tone": "Short status label",
+            "grammar": "Short standalone noun phrase naming the forest's attitude, not the player; also nested in the debug readout. Must not assume player gender; keep it short.",
+            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
+            "source_paths": [
+              "lothlorien_bp/scripts/harmony.js"
+            ]
+          },
+          "placeholders": [],
+          "translations": {
+            "cs_CZ": {
+              "text": "Nenávist Lothlórienu",
+              "based_on": "bb561984abad50ee342212d586372394a43444cb050c0d3db9f7c7bff2e8c5ba",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "Odio de Lothlórien",
+              "based_on": "bb561984abad50ee342212d586372394a43444cb050c0d3db9f7c7bff2e8c5ba",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "Odio de Lothlórien",
+              "based_on": "bb561984abad50ee342212d586372394a43444cb050c0d3db9f7c7bff2e8c5ba",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "Ódio de Lothlórien",
+              "based_on": "bb561984abad50ee342212d586372394a43444cb050c0d3db9f7c7bff2e8c5ba",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "Ódio de Lothlórien",
+              "based_on": "bb561984abad50ee342212d586372394a43444cb050c0d3db9f7c7bff2e8c5ba",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "Von Lothlórien gehasst",
+              "based_on": "bb561984abad50ee342212d586372394a43444cb050c0d3db9f7c7bff2e8c5ba",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "Haine de Lothlórien",
+              "based_on": "bb561984abad50ee342212d586372394a43444cb050c0d3db9f7c7bff2e8c5ba",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "Nienawiść Lothlórien",
+              "based_on": "bb561984abad50ee342212d586372394a43444cb050c0d3db9f7c7bff2e8c5ba",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.harmony.worse.uneasy": {
+          "source": "§6The forest frowns upon your deeds.",
+          "context": {
+            "meaning": "Chat line when Harmony falls from Guest (or Friend) into the Uneasy band.. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.",
+            "location": "lothlorien_rp: chat",
+            "trigger": "Chat line when Harmony falls from Guest (or Friend) into the Uneasy band.",
+            "tone": "Gentle woodland narration",
+            "grammar": "Complete sentence; address the player without assuming gender.",
+            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
+            "source_paths": [
+              "lothlorien_bp/scripts/harmony_game.js"
+            ]
+          },
+          "placeholders": [],
+          "translations": {
+            "cs_CZ": {
+              "text": "§6Les se mračí nad vašimi skutky.",
+              "based_on": "6db7110c46b001c4661941607f0dd76fa0a58bd2724e37f43e5b13ed660a0ed0",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "§6El bosque frunce el ceño ante tus actos.",
+              "based_on": "6db7110c46b001c4661941607f0dd76fa0a58bd2724e37f43e5b13ed660a0ed0",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "§6El bosque frunce el ceño ante tus actos.",
+              "based_on": "6db7110c46b001c4661941607f0dd76fa0a58bd2724e37f43e5b13ed660a0ed0",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "§6A floresta franze o sobrolho perante os teus atos.",
+              "based_on": "6db7110c46b001c4661941607f0dd76fa0a58bd2724e37f43e5b13ed660a0ed0",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "§6A floresta franze a testa diante dos seus atos.",
+              "based_on": "6db7110c46b001c4661941607f0dd76fa0a58bd2724e37f43e5b13ed660a0ed0",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "§6Der Wald runzelt die Stirn über deine Taten.",
+              "based_on": "6db7110c46b001c4661941607f0dd76fa0a58bd2724e37f43e5b13ed660a0ed0",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "§6La forêt désapprouve tes actes.",
+              "based_on": "6db7110c46b001c4661941607f0dd76fa0a58bd2724e37f43e5b13ed660a0ed0",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "§6Las marszczy czoło na twoje czyny.",
+              "based_on": "6db7110c46b001c4661941607f0dd76fa0a58bd2724e37f43e5b13ed660a0ed0",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.harmony.worse.shunned": {
+          "source": "§cThe forest turns its back on you.",
+          "context": {
+            "meaning": "Chat line when Harmony falls into the Shunned band (-15 to -29), from a better band.. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.",
+            "location": "lothlorien_rp: chat",
+            "trigger": "Chat line when Harmony falls into the Shunned band (-15 to -29), from a better band.",
+            "tone": "Gentle woodland narration",
+            "grammar": "Complete sentence; address the player without assuming gender.",
+            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
+            "source_paths": [
+              "lothlorien_bp/scripts/harmony_game.js"
+            ]
+          },
+          "placeholders": [],
+          "translations": {
+            "cs_CZ": {
+              "text": "§cLes se k vám obrací zády.",
+              "based_on": "0391aec2a38619508c06a168e93186d48bc9994dc71e1c09cb3e386e76eb003f",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "§cEl bosque te da la espalda.",
+              "based_on": "0391aec2a38619508c06a168e93186d48bc9994dc71e1c09cb3e386e76eb003f",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "§cEl bosque te da la espalda.",
+              "based_on": "0391aec2a38619508c06a168e93186d48bc9994dc71e1c09cb3e386e76eb003f",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "§cA floresta vira-te as costas.",
+              "based_on": "0391aec2a38619508c06a168e93186d48bc9994dc71e1c09cb3e386e76eb003f",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "§cA floresta vira as costas para você.",
+              "based_on": "0391aec2a38619508c06a168e93186d48bc9994dc71e1c09cb3e386e76eb003f",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "§cDer Wald kehrt dir den Rücken.",
+              "based_on": "0391aec2a38619508c06a168e93186d48bc9994dc71e1c09cb3e386e76eb003f",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "§cLa forêt te tourne le dos.",
+              "based_on": "0391aec2a38619508c06a168e93186d48bc9994dc71e1c09cb3e386e76eb003f",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "§cLas odwraca się od ciebie.",
+              "based_on": "0391aec2a38619508c06a168e93186d48bc9994dc71e1c09cb3e386e76eb003f",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.harmony.worse.hated": {
+          "source": "§4The wardens will no longer suffer your presence.",
+          "context": {
+            "meaning": "Chat line when Harmony falls into the Hated band (-30 or lower). Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.",
+            "location": "lothlorien_rp: chat",
+            "trigger": "Chat line when Harmony falls into the Hated band (-30 or lower): the elven wardens now attack the player on sight.",
+            "tone": "Gentle woodland narration",
+            "grammar": "Complete sentence; address the player without assuming gender.",
+            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
+            "source_paths": [
+              "lothlorien_bp/scripts/harmony_game.js"
+            ]
+          },
+          "placeholders": [],
+          "translations": {
+            "cs_CZ": {
+              "text": "§4Strážci už vaši přítomnost nestrpí.",
+              "based_on": "a936078df5cf9b156d01f224d7593e42c565cb31b659a0f2ad9b75c61f017bcd",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "§4Los guardianes ya no toleran tu presencia.",
+              "based_on": "a936078df5cf9b156d01f224d7593e42c565cb31b659a0f2ad9b75c61f017bcd",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "§4Los guardianes ya no toleran tu presencia.",
+              "based_on": "a936078df5cf9b156d01f224d7593e42c565cb31b659a0f2ad9b75c61f017bcd",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "§4Os guardas já não suportam a tua presença.",
+              "based_on": "a936078df5cf9b156d01f224d7593e42c565cb31b659a0f2ad9b75c61f017bcd",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "§4Os guardiões não toleram mais a sua presença.",
+              "based_on": "a936078df5cf9b156d01f224d7593e42c565cb31b659a0f2ad9b75c61f017bcd",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "§4Die Wächter dulden deine Gegenwart nicht länger.",
+              "based_on": "a936078df5cf9b156d01f224d7593e42c565cb31b659a0f2ad9b75c61f017bcd",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "§4Les gardiens ne supportent plus ta présence.",
+              "based_on": "a936078df5cf9b156d01f224d7593e42c565cb31b659a0f2ad9b75c61f017bcd",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "§4Strażnicy nie zniosą już twojej obecności.",
+              "based_on": "a936078df5cf9b156d01f224d7593e42c565cb31b659a0f2ad9b75c61f017bcd",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.harmony.better.shunned": {
+          "source": "§cThe wardens lower their bows, but the forest still shuns you.",
+          "context": {
+            "meaning": "Chat line when Harmony rises from Hated into the Shunned band. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.",
+            "location": "lothlorien_rp: chat",
+            "trigger": "Chat line when Harmony rises from Hated into the Shunned band: wardens stop attacking on sight, the forest is still hostile.",
+            "tone": "Gentle woodland narration",
+            "grammar": "Complete sentence; address the player without assuming gender.",
+            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
+            "source_paths": [
+              "lothlorien_bp/scripts/harmony_game.js"
+            ]
+          },
+          "placeholders": [],
+          "translations": {
+            "cs_CZ": {
+              "text": "§cStrážci spouštějí luky, ale les se vám stále vyhýbá.",
+              "based_on": "4fb6052c3a623fa1e449fe057618ef50a01ac4817591f1a158ef707c8fc0be19",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "§cLos guardianes bajan sus arcos, pero el bosque aún te rechaza.",
+              "based_on": "4fb6052c3a623fa1e449fe057618ef50a01ac4817591f1a158ef707c8fc0be19",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "§cLos guardianes bajan sus arcos, pero el bosque aún te rechaza.",
+              "based_on": "4fb6052c3a623fa1e449fe057618ef50a01ac4817591f1a158ef707c8fc0be19",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "§cOs guardas baixam os arcos, mas a floresta ainda te rejeita.",
+              "based_on": "4fb6052c3a623fa1e449fe057618ef50a01ac4817591f1a158ef707c8fc0be19",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "§cOs guardiões baixam os arcos, mas a floresta ainda a rejeita.",
+              "based_on": "4fb6052c3a623fa1e449fe057618ef50a01ac4817591f1a158ef707c8fc0be19",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "§cDie Wächter senken ihre Bögen, doch der Wald meidet dich noch.",
+              "based_on": "4fb6052c3a623fa1e449fe057618ef50a01ac4817591f1a158ef707c8fc0be19",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "§cLes gardiens baissent leurs arcs, mais la forêt te rejette encore.",
+              "based_on": "4fb6052c3a623fa1e449fe057618ef50a01ac4817591f1a158ef707c8fc0be19",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "§cStrażnicy opuszczają łuki, ale las wciąż cię unika.",
+              "based_on": "4fb6052c3a623fa1e449fe057618ef50a01ac4817591f1a158ef707c8fc0be19",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.harmony.better.uneasy": {
+          "source": "§6The forest's anger fades into unease.",
+          "context": {
+            "meaning": "Chat line when Harmony rises from Shunned (or Hated) into the Uneasy band. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.",
+            "location": "lothlorien_rp: chat",
+            "trigger": "Chat line when Harmony rises from Shunned (or Hated) into the Uneasy band: the forest is still wary, no longer hostile.",
+            "tone": "Gentle woodland narration",
+            "grammar": "Complete sentence; address the player without assuming gender.",
+            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
+            "source_paths": [
+              "lothlorien_bp/scripts/harmony_game.js"
+            ]
+          },
+          "placeholders": [],
+          "translations": {
+            "cs_CZ": {
+              "text": "§6Hněv lesa se mění v neklid.",
+              "based_on": "3689e315e95383656647016e58df37f0e0cdcd724a36066c4c7fcd2a01b43b41",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "§6La ira del bosque se apacigua en inquietud.",
+              "based_on": "3689e315e95383656647016e58df37f0e0cdcd724a36066c4c7fcd2a01b43b41",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "§6La ira del bosque se apacigua en inquietud.",
+              "based_on": "3689e315e95383656647016e58df37f0e0cdcd724a36066c4c7fcd2a01b43b41",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "§6A ira da floresta esmorece em inquietação.",
+              "based_on": "3689e315e95383656647016e58df37f0e0cdcd724a36066c4c7fcd2a01b43b41",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "§6A ira da floresta se transforma em inquietação.",
+              "based_on": "3689e315e95383656647016e58df37f0e0cdcd724a36066c4c7fcd2a01b43b41",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "§6Der Zorn des Waldes weicht einem Unbehagen.",
+              "based_on": "3689e315e95383656647016e58df37f0e0cdcd724a36066c4c7fcd2a01b43b41",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "§6La colère de la forêt se change en malaise.",
+              "based_on": "3689e315e95383656647016e58df37f0e0cdcd724a36066c4c7fcd2a01b43b41",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "§6Gniew lasu ustępuje niepokojowi.",
+              "based_on": "3689e315e95383656647016e58df37f0e0cdcd724a36066c4c7fcd2a01b43b41",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.harmony.better.guest": {
+          "source": "§aThe woods forgive you.",
+          "context": {
+            "meaning": "Chat line when Harmony rises from Uneasy (or lower) back to Guest (0). Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.",
+            "location": "lothlorien_rp: chat",
+            "trigger": "Chat line when Harmony rises from Uneasy (or lower) back to Guest (0): the forest forgives the player.",
+            "tone": "Gentle woodland narration",
+            "grammar": "Complete sentence; address the player without assuming gender.",
+            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
+            "source_paths": [
+              "lothlorien_bp/scripts/harmony_game.js"
+            ]
+          },
+          "placeholders": [],
+          "translations": {
+            "cs_CZ": {
+              "text": "§aLesy vám odpouštějí.",
+              "based_on": "b2b8a2aa5eafc73c91fe6f1181f1d448b95e1de701c8bf7a122e0d88fd4ba11d",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "§aLos bosques te perdonan.",
+              "based_on": "b2b8a2aa5eafc73c91fe6f1181f1d448b95e1de701c8bf7a122e0d88fd4ba11d",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "§aLos bosques te perdonan.",
+              "based_on": "b2b8a2aa5eafc73c91fe6f1181f1d448b95e1de701c8bf7a122e0d88fd4ba11d",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "§aOs bosques perdoam-te.",
+              "based_on": "b2b8a2aa5eafc73c91fe6f1181f1d448b95e1de701c8bf7a122e0d88fd4ba11d",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "§aOs bosques perdoam você.",
+              "based_on": "b2b8a2aa5eafc73c91fe6f1181f1d448b95e1de701c8bf7a122e0d88fd4ba11d",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "§aDie Wälder vergeben dir.",
+              "based_on": "b2b8a2aa5eafc73c91fe6f1181f1d448b95e1de701c8bf7a122e0d88fd4ba11d",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "§aLes bois te pardonnent.",
+              "based_on": "b2b8a2aa5eafc73c91fe6f1181f1d448b95e1de701c8bf7a122e0d88fd4ba11d",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "§aLasy ci wybaczają.",
+              "based_on": "b2b8a2aa5eafc73c91fe6f1181f1d448b95e1de701c8bf7a122e0d88fd4ba11d",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.harmony.hint": {
+          "source": "§7The trees grow quiet around you.",
+          "context": {
+            "meaning": "A short hint after a deed (a kill) that lowered Harmony without changing the band: the forest noticed. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.",
+            "location": "lothlorien_rp: chat",
+            "trigger": "A deed lowered Harmony but did not change the band; sent at most once per 30 seconds per player.",
+            "tone": "Gentle woodland narration",
+            "grammar": "Complete sentence; address the player without assuming gender.",
+            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
+            "source_paths": [
+              "lothlorien_bp/scripts/harmony_game.js"
+            ]
+          },
+          "placeholders": [],
+          "translations": {
+            "cs_CZ": {
+              "text": "§7Stromy kolem vás ztichly.",
+              "based_on": "a6d32bc56f150f433ac3c72b3943010c30b687350b1d9fe7469aae7bad936921",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "§7Los árboles callan a tu alrededor.",
+              "based_on": "a6d32bc56f150f433ac3c72b3943010c30b687350b1d9fe7469aae7bad936921",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "§7Los árboles callan a tu alrededor.",
+              "based_on": "a6d32bc56f150f433ac3c72b3943010c30b687350b1d9fe7469aae7bad936921",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "§7As árvores calam-se à tua volta.",
+              "based_on": "a6d32bc56f150f433ac3c72b3943010c30b687350b1d9fe7469aae7bad936921",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "§7As árvores se calam ao seu redor.",
+              "based_on": "a6d32bc56f150f433ac3c72b3943010c30b687350b1d9fe7469aae7bad936921",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "§7Die Bäume verstummen um dich herum.",
+              "based_on": "a6d32bc56f150f433ac3c72b3943010c30b687350b1d9fe7469aae7bad936921",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "§7Les arbres se taisent autour de toi.",
+              "based_on": "a6d32bc56f150f433ac3c72b3943010c30b687350b1d9fe7469aae7bad936921",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "§7Drzewa milkną wokół ciebie.",
+              "based_on": "a6d32bc56f150f433ac3c72b3943010c30b687350b1d9fe7469aae7bad936921",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.harmony.debug": {
+          "source": "[lothlorien] harmony=%s band=%s timer=%s s",
+          "context": {
+            "meaning": "Developer diagnostic displayed to players who invoke /scriptevent lothlorien:harmony: [lothlorien] harmony=%s band=%s timer=%s s. Translate labels; retain technical tokens and commands. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.",
+            "location": "lothlorien_rp: chat",
+            "trigger": "Player runs /scriptevent lothlorien:harmony (with or without a value).",
+            "tone": "Technical and concise",
+            "grammar": "Short diagnostic line made of label=value pairs.",
+            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender.",
+            "source_paths": [
+              "lothlorien_bp/scripts/harmony_game.js"
+            ]
+          },
+          "placeholders": [
+            {
+              "name": "harmony",
+              "type": "string",
+              "meaning": "harmony: integer from -60 to +10"
+            },
+            {
+              "name": "band",
+              "type": "string",
+              "meaning": "band: nested translated band label (the status.* action-bar label)"
+            },
+            {
+              "name": "timer",
+              "type": "string",
+              "meaning": "timer_seconds: seconds since the last deed or recovered point"
+            }
+          ],
+          "translations": {
+            "cs_CZ": {
+              "text": "[lothlorien] soulad=%s pásmo=%s časovač=%s s",
+              "based_on": "ef5c692218c18aaa8a2271a7a7bd40ff549c3d9929cfb9c74223eaba45cf4769",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "[lothlorien] armonía=%s banda=%s temporizador=%s s",
+              "based_on": "ef5c692218c18aaa8a2271a7a7bd40ff549c3d9929cfb9c74223eaba45cf4769",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "[lothlorien] armonía=%s banda=%s temporizador=%s s",
+              "based_on": "ef5c692218c18aaa8a2271a7a7bd40ff549c3d9929cfb9c74223eaba45cf4769",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "[lothlorien] harmonia=%s faixa=%s temporizador=%s s",
+              "based_on": "ef5c692218c18aaa8a2271a7a7bd40ff549c3d9929cfb9c74223eaba45cf4769",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "[lothlorien] harmonia=%s faixa=%s temporizador=%s s",
+              "based_on": "ef5c692218c18aaa8a2271a7a7bd40ff549c3d9929cfb9c74223eaba45cf4769",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "[lothlorien] Harmonie=%s Stufe=%s Timer=%s s",
+              "based_on": "ef5c692218c18aaa8a2271a7a7bd40ff549c3d9929cfb9c74223eaba45cf4769",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "[lothlorien] harmonie=%s niveau=%s minuterie=%s s",
+              "based_on": "ef5c692218c18aaa8a2271a7a7bd40ff549c3d9929cfb9c74223eaba45cf4769",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "[lothlorien] harmonia=%s poziom=%s licznik=%s s",
+              "based_on": "ef5c692218c18aaa8a2271a7a7bd40ff549c3d9929cfb9c74223eaba45cf4769",
               "status": "ai-draft"
             }
           }

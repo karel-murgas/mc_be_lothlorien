@@ -1,8 +1,8 @@
 // White deer guidance rules (Phase 12). Pure (no @minecraft/server) so tests/run.mjs can check them offline;
 // white_deer.js wires them to the game.
 //
-// Offer a Mallorn acorn to a white deer (entity lothlorien:white_deer) as a Friend of Lothlorien (Disharmony 0 and the
-// Friend status earned; a merely calm player is refused, 2026-10-02): once in its life it leads the player to its gift, a Great Mallorn nut (great_mallorn_rules.js) at a spot inside
+// Offer a Mallorn acorn to a white deer (entity lothlorien:white_deer) as a Friend of Lothlorien (harmony +10; a mere Guest is
+// refused, 2026-10-02): once in its life it leads the player to its gift, a Great Mallorn nut (great_mallorn_rules.js) at a spot inside
 // Lothlorien 36-56 blocks away (giftCandidates), and lays it there on arrival. The walking is the engine's own pathfinding: the deer follows an invisible
 // helper entity (lothlorien:guide_beacon, goal in the `state_guiding` group of entities/white_deer.json) that the script
 // moves ahead in hops of HOP..MIN_HOP blocks (pickWaypoint), checking each hop with hopStatus.
@@ -27,17 +27,17 @@ export const REACHED = 3; // deer this close (horizontal) to the waypoint: pick 
 export const FINAL_RING = 5; // last waypoint: a standable column within this ring around the target
 export const HOP_STUCK_TICKS = 100; // 5 s without getting a block closer to the current waypoint: try another heading
 
-// A guidance in progress carries on while the player is calm (Disharmony 0); starting one needs Friend (offerRefusal).
-export const canBeGuided = (level) => level <= 0;
+// A guidance in progress carries on while the player is a Friend (harmony band); starting one needs Friend too (offerRefusal).
+export const canBeGuided = (band) => band === "friend";
 
 // Leash rule: a lead always wins over guidance. A leashed white deer refuses the acorn (kept), and a guidance ends the
 // moment the deer is leashed (beacon removed, deer back to its wariness state). One rule, no tug of war between the
 // lead and the follow goal.
-// Why the offer is refused: "leashed" | "restless" (Disharmony I+) | "untrusted" (calm, not yet Friend) | undefined (go ahead).
-export function offerRefusal({ level, friend, leashed }) {
+// Why the offer is refused: "leashed" | "restless" (harmony below 0) | "untrusted" (Guest, not yet Friend) | undefined (go ahead).
+export function offerRefusal({ band, leashed }) {
   if (leashed) return "leashed";
-  if (!canBeGuided(level)) return "restless";
-  if (!friend) return "untrusted";
+  if (band !== "friend" && band !== "guest") return "restless"; // Uneasy, Shunned, Hated: harmony below 0
+  if (!canBeGuided(band)) return "untrusted";
   return undefined;
 }
 

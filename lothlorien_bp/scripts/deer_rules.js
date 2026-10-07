@@ -1,7 +1,7 @@
 // Deer rules (Phase 11). Pure (no @minecraft/server) so tests/run.mjs can check them offline;
 // deer.js wires them to the game.
 //
-// A deer's flight distance comes from its wariness state, which mirrors the Disharmony of the
+// A deer's flight distance comes from its wariness state, which mirrors the Harmony band of the
 // nearest player. The states are component groups in entities/deer.json (`lothlorien:state_<name>`)
 // switched by the events `lothlorien:set_<name>`.
 
@@ -11,7 +11,7 @@ export const DEER_ID = "lothlorien:deer";
 export const WHITE_DEER_ID = "lothlorien:white_deer";
 export const DEER_TYPES = [DEER_ID, WHITE_DEER_ID];
 // The swan and the ground squirrel share the wariness states, flight distances and alarm too (entities/swan.json and
-// entities/squirrel.json carry the same groups and events), so the whole forest's fauna reads the player's Disharmony.
+// entities/squirrel.json carry the same groups and events), so the whole forest's fauna reads the player's Harmony band.
 export const SWAN_ID = "lothlorien:swan";
 export const SQUIRREL_ID = "lothlorien:squirrel";
 export const UNICORN_ID = "lothlorien:unicorn"; // also carries the groups and events; its calm state is as timid as l1 (entities/unicorn.json)
@@ -24,15 +24,12 @@ export const WATCH_RADIUS = 40;
 export const ALARM_RADIUS = 20;
 // Holding the lure stops a calm or Friend deer fleeing from that player (entity filter has_equipment), so a lured deer
 // walks all the way up. Feeding it sets lothlorien:tame: while calm or Friend it then takes the state_tame group
-// (lure, no flight from players). A player hurting it clears tame. Disharmony I-III and the alarm still make it flee.
+// (lure, no flight from players). A player hurting it clears tame. The Uneasy, Shunned and Hated bands and the alarm still make it flee.
 export const CORN_ID = "lothlorien:western_corn_grain";
 
-// Disharmony level 0-3 and Friend status -> wariness. Friend only counts at level 0 (a kill
-// already resets Friend in disharmony.js; this keeps the rule safe on its own).
-export function warinessFor(level, friend) {
-  if (level <= 0) return friend ? "friend" : "calm";
-  return WARINESS[Math.min(level, 3)];
-}
+// Harmony band (harmony.js bandOf) -> wariness. An unknown band is treated as calm.
+export const WARINESS_OF_BAND = { friend: "friend", guest: "calm", uneasy: "l1", shunned: "l2", hated: "l3" };
+export const warinessFor = (band) => WARINESS_OF_BAND[band] ?? "calm";
 
 export const setEventFor = (wariness) => `lothlorien:set_${wariness}`;
 
@@ -42,7 +39,7 @@ export const FLIGHT_RADIUS = { friend: 3, calm: 10, l1: 13, l2: 20, l3: 30 };
 const SEVERITY = ["friend", "calm", "l1", "l2", "l3"];
 
 // candidates: [{ distance, wariness }] one per player near a deer. The most severe state among
-// players inside their own state's flight radius wins (a Disharmony III player 25 blocks away
+// players inside their own state's flight radius wins (a Hated player 25 blocks away
 // outweighs a calm player 5 blocks away); if nobody is that close, the nearest player decides.
 export function pickWariness(candidates) {
   let worst, nearest;

@@ -120,5 +120,5 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   if (block.typeId !== SPROUT_ID || itemStack?.typeId !== "minecraft:bone_meal") return;
   event.cancel = true;
   if (repeatedUse(player, "great_sprout")) return;
-  system.run(() => player.sendMessage(message("mallorn.no_bonemeal"))); // chat: the action bar shows Disharmony
+  system.run(() => player.sendMessage(message("mallorn.no_bonemeal"))); // chat: the action bar shows the Harmony status
 });

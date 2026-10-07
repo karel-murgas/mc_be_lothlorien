@@ -1,8 +1,8 @@
-// Deer in the running game: wariness follows the nearest player's Disharmony, and a player
+// Deer in the running game: wariness follows the nearest player's Harmony band, and a player
 // hurting a deer alarms the herd. The flight behaviour itself is JSON (entities/deer.json, entities/white_deer.json).
 import { world, system } from "@minecraft/server";
-import { disharmonyOf } from "./disharmony_game.js";
-import { isFriend, levelFor } from "./disharmony.js";
+import { harmonyOf } from "./harmony_game.js";
+import { bandOf } from "./harmony.js";
 import { isGuiding } from "./white_deer.js";
 import { isErrand } from "./squirrel.js";
 import { ALARM_RADIUS, CORN_ID, DEER_ID, DEER_TYPES, WARY_TYPES, WATCH_RADIUS, pickWariness, setEventFor, warinessFor } from "./deer_rules.js";
@@ -16,8 +16,7 @@ const nearDeer = (dimension, location, maxDistance) =>
 function updateWariness() {
   const seen = new Map(); // deer id -> { deer, candidates }
   for (const player of world.getPlayers()) {
-    const state = disharmonyOf(player);
-    const wariness = warinessFor(levelFor(state.points), isFriend(state));
+    const wariness = warinessFor(bandOf(harmonyOf(player).harmony));
     for (const deer of nearDeer(player.dimension, player.location, WATCH_RADIUS)) {
       const entry = seen.get(deer.id) ?? { deer, candidates: [] };
       const dx = deer.location.x - player.location.x, dz = deer.location.z - player.location.z;

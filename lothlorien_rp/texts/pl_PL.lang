@@ -261,9 +261,9 @@ lothlorien.message.squirrel.accept=§fWiewiórka chwyta żołądź i znika w zar
 lothlorien.message.squirrel.no_path=§7Wiewiórka obwąchuje żołądź, rozgląda się i zostaje. Nie ma dokąd pobiec.
 ## Context: Squirrel is on its ten-minute gift cooldown; not a claim that it has eaten too much. Acorn is kept.
 lothlorien.message.squirrel.full=§7Wiewiórka obwąchuje żołądź, ale zajmuje się swoimi zapasami. Spróbuj później.
-## Context: A calm player has not earned Friend status; acorn offer is refused and the item is kept.
+## Context: A Guest (Harmony 0 to +9) has not yet earned Friend status (Harmony +10); acorn offer is refused and the item is kept.
 lothlorien.message.squirrel.untrusted=§7Wiewiórka obwąchuje żołądź i przygląda ci się, ale jeszcze ci nie ufa.
-## Context: An acorn offer is refused because the player has Disharmony I or higher; acorn is kept.
+## Context: An acorn offer is refused because the player's Harmony is below 0 (Uneasy, Shunned or Hated band); acorn is kept.
 lothlorien.message.squirrel.restless=§7Wiewiórka płoszy się przed twoim niespokojnym duchem.
 ## Context: Guidance ended unsuccessfully. Offering another acorn can resume toward the saved gift spot.
 lothlorien.message.deer.abort=§7Biały jeleń gubi drogę i pozwala ci odejść. Kolejny żołądź może zachęcić go do ponownej próby.
@@ -281,9 +281,9 @@ lothlorien.message.deer.leashed=§7Biały jeleń nie poprowadzi cię, dopóki je
 lothlorien.message.deer.no_spot=§7Biały jeleń obwąchuje żołądź, rozgląda się i zostaje. Nie ma dokąd cię stąd poprowadzić.
 ## Context: Each white deer gives a Great Mallorn nut only once. It already gave its gift; offered acorn is kept.
 lothlorien.message.deer.gifted=§7Biały jeleń trąca żołądź pyskiem i zostawia go. Swój dar już przekazał.
-## Context: White deer refuses guidance because of Disharmony; acorn is kept.
+## Context: White deer refuses guidance because the player's Harmony is below 0 (Uneasy, Shunned or Hated band); acorn is kept.
 lothlorien.message.deer.restless=§7Biały jeleń płoszy się przed twoim niespokojnym duchem.
-## Context: White deer gift guidance needs Friend status, even if a calm player can approach the deer. Acorn is kept.
+## Context: White deer gift guidance needs Friend status (Harmony +10), even though a Guest can approach the deer. Acorn is kept.
 lothlorien.message.deer.untrusted=§7Biały jeleń przygląda ci się, ale jeszcze ci nie ufa.
 ## Context: Tooltip line 3. Plant the nut on grass or dirt. Full tooltip also explains giant tree and space requirements.
 lothlorien.message.nut.lore.plant=§7Posadź na trawie lub ziemi.
@@ -303,26 +303,16 @@ lothlorien.message.unicorn.trust1=§fJednorożec obwąchuje elanor i przygląda 
 lothlorien.message.unicorn.wait=§7Jednorożec wciąż przygląda się kwiatowi. Daj mu chwilę.
 ## Context: Unicorn is alarmed and refuses the offer; flower is kept.
 lothlorien.message.unicorn.alarmed=§7Jednorożec jest zbyt przerażony, by cokolwiek przyjąć.
-## Context: Player lacks Friend status; flower is kept.
+## Context: Player lacks Friend status (is a Guest, Harmony 0 to +9); flower is kept.
 lothlorien.message.unicorn.untrusted=§7Jednorożec przygląda się kwiatowi i tobie, ale jeszcze ci nie ufa.
-## Context: Elanor offer refused because of Disharmony; flower is kept.
+## Context: Elanor offer refused because the player's Harmony is below 0 (Uneasy, Shunned or Hated band); flower is kept.
 lothlorien.message.unicorn.restless=§7Jednorożec płoszy się przed twoim niespokojnym duchem.
-## Context: Friend status earned after ten peaceful minutes at zero Disharmony inside Lothlorien. Gender-neutral announcement of woodland trust.
+## Context: Friend status gained: the player's Harmony reached +10 inside Lothlorien after peaceful time. Gender-neutral announcement of woodland trust. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
 lothlorien.message.friend.gained=§aLothlórien zalicza cię do swoich przyjaciół.
-## Context: Friend status lost after a kill or player death. Gender-neutral announcement.
+## Context: Friend status lost: Harmony dropped below +10 after a deed (a kill). Gender-neutral announcement. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
 lothlorien.message.friend.lost=§7Lothlórien nie zalicza cię już do swoich przyjaciół.
-## Context: Announce a changed Disharmony level (I, II or III); killing increases points, peaceful time reduces them.
-lothlorien.message.disharmony.level=§cDysharmonia %s
-## Context: Points decayed to zero: the woodland hostility status is gone, but friendship is not automatically earned.
-lothlorien.message.disharmony.gone=§aLas ci wybacza: dysharmonia minęła.
-## Context: Short action-bar label for earned Friend status. Use an impersonal friendship label to avoid assigning gender to the player.
+## Context: Short action-bar label for the Friend band (Harmony +10), shown inside the forest. Use an impersonal friendship label to avoid assigning gender to the player. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
 lothlorien.message.status.friend=Przyjaźń Lothlórien
-## Context: Short action-bar label for current Disharmony level, visible only inside the biome.
-lothlorien.message.status.disharmony=Dysharmonia %s
-## Context: Developer diagnostic displayed to players who invoke the relevant /scriptevent command: [lothlorien] disharmony points=%s level=%s calm=%s s friend progress=%s s. Translate labels; retain technical tokens and commands.
-lothlorien.message.disharmony.debug=[lothlorien] punkty dysharmonii=%s poziom=%s spokój=%s s postęp przyjaźni=%s s
-## Context: Developer diagnostic displayed to players who invoke the relevant /scriptevent command: [lothlorien] disharmony points=%s level=%s calm=%s s friend progress=%s s (Friend). Translate labels; retain technical tokens and commands.
-lothlorien.message.disharmony.debug_friend=[lothlorien] punkty dysharmonii=%s poziom=%s spokój=%s s postęp przyjaźni=%s s (Przyjaźń)
 ## Context: Growth collision warning identifies sprout coordinates, translated obstacle block name and obstacle coordinates. Use Block.localizationKey; never derive a fake English block name from its namespace ID.
 lothlorien.message.mallorn.blocked=§6Kiełek wielkiego mallornu w %s nie może rosnąć. Przeszkoda: %s w %s.
 ## Context: Planting warning for Great Mallorn nut: giant tree with a flet (wooden platform). Reserve about 40x40 horizontal blocks, 50 above and 5 below; light required, built blocks prevent growth. Breaking sprout returns nut.
@@ -363,3 +353,27 @@ action.interact.lothlorien.catch_firefly=Złap świetlika
 entity.lothlorien:elven_warden.name=Elfi strażnik
 ## Context: Creative spawn egg for Elven Warden. Spawn Egg is the Minecraft item type; do not translate as an animal-laid egg.
 item.spawn_egg.entity.lothlorien:elven_warden.name=Jajo przyzywające: Elfi strażnik
+## Context: Action-bar label while the player is in the Guest band (Harmony 0 to +9): welcome, but not yet trusted. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
+lothlorien.message.status.guest=Gościna w Lothlórien
+## Context: Action-bar label while the player is in the Uneasy band (Harmony -1 to -14): the forest is uneasy about the player. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
+lothlorien.message.status.uneasy=Niepokój w Lothlórien
+## Context: Action-bar label while the player is in the Shunned band (Harmony -15 to -29): the forest turns away from the player. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
+lothlorien.message.status.shunned=Odrzucenie przez Lothlórien
+## Context: Action-bar label while the player is in the Hated band (Harmony -30 to -60): the forest hates the player and its wardens attack on sight. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
+lothlorien.message.status.hated=Nienawiść Lothlórien
+## Context: Chat line when Harmony falls from Guest (or Friend) into the Uneasy band.. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
+lothlorien.message.harmony.worse.uneasy=§6Las marszczy czoło na twoje czyny.
+## Context: Chat line when Harmony falls into the Shunned band (-15 to -29), from a better band.. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
+lothlorien.message.harmony.worse.shunned=§cLas odwraca się od ciebie.
+## Context: Chat line when Harmony falls into the Hated band (-30 or lower). Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
+lothlorien.message.harmony.worse.hated=§4Strażnicy nie zniosą już twojej obecności.
+## Context: Chat line when Harmony rises from Hated into the Shunned band. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
+lothlorien.message.harmony.better.shunned=§cStrażnicy opuszczają łuki, ale las wciąż cię unika.
+## Context: Chat line when Harmony rises from Shunned (or Hated) into the Uneasy band. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
+lothlorien.message.harmony.better.uneasy=§6Gniew lasu ustępuje niepokojowi.
+## Context: Chat line when Harmony rises from Uneasy (or lower) back to Guest (0). Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
+lothlorien.message.harmony.better.guest=§aLasy ci wybaczają.
+## Context: A short hint after a deed (a kill) that lowered Harmony without changing the band: the forest noticed. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
+lothlorien.message.harmony.hint=§7Drzewa milkną wokół ciebie.
+## Context: Developer diagnostic displayed to players who invoke /scriptevent lothlorien:harmony: [lothlorien] harmony=%s band=%s timer=%s s. Translate labels; retain technical tokens and commands. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
+lothlorien.message.harmony.debug=[lothlorien] harmonia=%s poziom=%s licznik=%s s

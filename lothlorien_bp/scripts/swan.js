@@ -1,4 +1,4 @@
-// Swans in the running game (Phase 15; rules in swan_rules.js). Their wariness follows the nearest player's Disharmony in
+// Swans in the running game (Phase 15; rules in swan_rules.js). Their wariness follows the nearest player's Harmony band in
 // deer.js (they are in WARY_TYPES), exactly like the deer. This file only judges natural spawns: the spawn rule lets
 // swans spawn in any river (see swan_rules.js), and one that spawned where no Lothlorien biome is near is removed.
 import { EntityInitializationCause, system, world } from "@minecraft/server";

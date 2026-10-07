@@ -34,15 +34,21 @@ export const keepNaturalSpawn = (level, onDeck, roll) => roll < spawnKeepChance(
 // ---- Friendly fire ----
 // A warden's arrow hits whoever stands in the line (as skeleton arrows hit zombies). elven_warden.js cancels the damage
 // (world.beforeEvents.entityHurt) when this returns true. Wardens never hurt other wardens, Lothlorien's own creatures,
-// vanilla animals, or a player who has not hurt a warden within PROVOKE_MS. Villagers and golems in the line are accepted.
+// vanilla animals, or a player who has not hurt a warden within PROVOKE_MS. A Hated player (harmony band, tag
+// lothlorien_hated) is never shielded: the wardens shoot such a player on sight.
+// Villagers and golems in the line are accepted.
 export const PROVOKE_MS = 60000;
 export const SHIELDED_FAMILIES = ["animal", WARDEN_FAMILY];
 export const PLAYER_ID = "minecraft:player";
 
-// victim: { typeId, families: string[] }; sinceProvokedMs: ms since this player last hurt a warden (undefined = never)
-export function isFriendlyFire({ shooterId, victim, sinceProvokedMs }) {
+// A hit on a warden after more than PROVOKE_MS without one starts a new fight (one harmony cost per fight).
+export const isNewFight = (sinceProvokedMs) => sinceProvokedMs === undefined || sinceProvokedMs > PROVOKE_MS;
+
+// victim: { typeId, families: string[] }; sinceProvokedMs: ms since this player last hurt a warden (undefined = never);
+// hated: the victim is a player with the lothlorien_hated tag
+export function isFriendlyFire({ shooterId, victim, sinceProvokedMs, hated = false }) {
   if (shooterId !== WARDEN_ID) return false;
-  if (victim.typeId === PLAYER_ID) return !(sinceProvokedMs !== undefined && sinceProvokedMs <= PROVOKE_MS);
+  if (victim.typeId === PLAYER_ID) return !(hated || (sinceProvokedMs !== undefined && sinceProvokedMs <= PROVOKE_MS));
   if (victim.typeId.startsWith("lothlorien:")) return true;
   return victim.families.some((f) => SHIELDED_FAMILIES.includes(f));
 }

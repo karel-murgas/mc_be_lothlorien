@@ -9,13 +9,13 @@ export const ELANOR_ID = "lothlorien:elanor";
 export const TRUST_OFFERS = 3; // offers until the bond
 export const OFFER_GAP_TICKS = 200; // 10 s between two offers: the unicorn takes its time
 
-// Why an offer is refused: "tame" | "alarmed" | "restless" (Disharmony I+) | "untrusted" (calm, not yet Friend) |
+// Why an offer is refused: "tame" | "alarmed" | "restless" (harmony below 0) | "untrusted" (Guest, not yet Friend) |
 // "wait" (the last offer was less than OFFER_GAP_TICKS ago) | undefined (go ahead).
-export function offerRefusal({ level, friend, tame, alarmed, sinceLast }) {
+export function offerRefusal({ band, tame, alarmed, sinceLast }) {
   if (tame) return "tame";
   if (alarmed) return "alarmed";
-  if (level > 0) return "restless";
-  if (!friend) return "untrusted";
+  if (band !== "friend" && band !== "guest") return "restless"; // Uneasy, Shunned, Hated: harmony below 0
+  if (band !== "friend") return "untrusted";
   if (sinceLast !== undefined && sinceLast < OFFER_GAP_TICKS) return "wait";
   return undefined;
 }

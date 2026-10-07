@@ -19,11 +19,11 @@ export const ABORT_DIST = 40; // the player this far away: the errand is dropped
 export const MAX_TICKS = 2400; // an errand lasts 2 minutes at most (the beacon's own despawn timer is 330 s)
 export const COOLDOWN_TICKS = 12000; // 10 minutes of world time before the same squirrel runs another errand
 
-// Why an offer is refused: "restless" (Disharmony I+) | "untrusted" (calm, not yet Friend) | "full" (errand done lately)
+// Why an offer is refused: "restless" (harmony below 0) | "untrusted" (Guest, not yet Friend) | "full" (errand done lately)
 // | undefined (go ahead). Gifts are for Friends of Lothlorien only (owner rule, 2026-10-02).
-export function offerRefusal({ level, friend, cooldownLeft }) {
-  if (level > 0) return "restless";
-  if (!friend) return "untrusted";
+export function offerRefusal({ band, cooldownLeft }) {
+  if (band !== "friend" && band !== "guest") return "restless"; // Uneasy, Shunned, Hated: harmony below 0
+  if (band !== "friend") return "untrusted";
   if (cooldownLeft > 0) return "full";
   return undefined;
 }

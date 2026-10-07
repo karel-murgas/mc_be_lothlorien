@@ -11,8 +11,8 @@ import { message } from "./messages.js";
 // invisible helper entity (entities/guide_beacon.json), one per session, that this script spawns and moves ahead in
 // hops of 8-14 blocks. Several guiding deer close together may follow each other's beacon (accepted by the owner).
 import { EntityInitializationCause, EquipmentSlot, GameMode, ItemStack, system, world } from "@minecraft/server";
-import { disharmonyOf } from "./disharmony_game.js";
-import { isFriend, levelFor } from "./disharmony.js";
+import { harmonyOf } from "./harmony_game.js";
+import { bandOf } from "./harmony.js";
 import { repeatedUse } from "./use_guard.js";
 import {
   ACORN_ID, BEACON_ID, GUIDE_TICKS, WHITE_DEER_ID, canBeGuided, hopStatus, horizontal, keepNaturalSpawn,
@@ -46,7 +46,7 @@ const isLeashed = (deer) => deer.getComponent("minecraft:leashable")?.isLeashed 
 
 const say = (player, text) => {
   try {
-    player.sendMessage(text); // chat: the action bar belongs to the Disharmony / Friend status (disharmony_game.js)
+    player.sendMessage(text); // chat: the action bar belongs to the Harmony status (harmony_game.js)
   } catch {
     // player left
   }
@@ -165,8 +165,7 @@ function removeBeacon(beaconId) {
 
 function offer(player, deer) {
   if (sessions.has(deer.id) || searching.has(deer.id)) return;
-  const state = disharmonyOf(player);
-  const refusal = offerRefusal({ level: levelFor(state.points), friend: isFriend(state), leashed: isLeashed(deer) });
+  const refusal = offerRefusal({ band: bandOf(harmonyOf(player).harmony), leashed: isLeashed(deer) });
   if (refusal === "leashed") {
     say(player, message("deer.leashed"));
     return;
@@ -310,7 +309,7 @@ function tickSession(deerId, s) {
     toPlayer,
     stuck: s.stuck,
     age: system.currentTick - s.born,
-    playerCalm: canBeGuided(levelFor(disharmonyOf(player).points)),
+    playerCalm: canBeGuided(bandOf(harmonyOf(player).harmony)),
     leashed: isLeashed(deer),
   });
   if (s.phase === "leashed") return end(deerId, deer, player, message("deer.stop_leashed"));

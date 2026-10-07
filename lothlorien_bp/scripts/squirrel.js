@@ -8,8 +8,8 @@ import { message } from "./messages.js";
 // nearest guide beacon; this script moves the beacon: to the away point, to the squirrel's feet while it digs, then onto
 // the player. The beacon is the white deer's invisible helper entity, so white_deer.js's stray sweep is told about ours.
 import { system, world } from "@minecraft/server";
-import { disharmonyOf } from "./disharmony_game.js";
-import { isFriend, levelFor } from "./disharmony.js";
+import { harmonyOf } from "./harmony_game.js";
+import { bandOf } from "./harmony.js";
 import { repeatedUse } from "./use_guard.js";
 import { addBeaconSource, consumeAcorn, stand } from "./white_deer.js";
 import { ACORN_ID, BEACON_ID } from "./white_deer_rules.js";
@@ -24,7 +24,7 @@ export const isErrand = (squirrelId) => sessions.has(squirrelId);
 
 const say = (player, text) => {
   try {
-    player.sendMessage(text); // chat: the action bar belongs to the Disharmony / Friend status (disharmony_game.js)
+    player.sendMessage(text); // chat: the action bar belongs to the Harmony status (harmony_game.js)
   } catch {
     // player left
   }
@@ -43,9 +43,9 @@ const moveBeacon = (beacon, to) => beacon.teleport({ x: to.x, y: to.y, z: to.z }
 
 function offer(player, squirrel) {
   if (sessions.has(squirrel.id)) return;
-  const state = disharmonyOf(player);
+  const band = bandOf(harmonyOf(player).harmony);
   const left = cooldownLeft(world.getAbsoluteTime(), squirrel.getDynamicProperty(READY_AT));
-  const refusal = offerRefusal({ level: levelFor(state.points), friend: isFriend(state), cooldownLeft: left });
+  const refusal = offerRefusal({ band, cooldownLeft: left });
   if (refusal === "restless") return say(player, message("squirrel.restless"));
   if (refusal === "untrusted") return say(player, message("squirrel.untrusted"));
   if (refusal === "full") return say(player, message("squirrel.full"));

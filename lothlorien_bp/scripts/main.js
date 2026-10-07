@@ -15,7 +15,7 @@ import "./trees.js";
 import "./great_mallorn.js";
 import "./rail_mender.js";
 import { leafUndersideY } from "./leaf_fall.js";
-import { handleDisharmonyEvent, startDisharmony } from "./disharmony_game.js";
+import { handleHarmonyEvent, startHarmony } from "./harmony_game.js";
 import { startDeer } from "./deer.js";
 import { startWhiteDeer } from "./white_deer.js";
 import { startElvenWardens } from "./elven_warden.js";
@@ -136,7 +136,7 @@ function reportDepth(player) {
 function onScriptEvent(event) {
   const player = event.sourceEntity;
   if (!player || player.typeId !== "minecraft:player") return;
-  if (handleDisharmonyEvent(event, player)) return;
+  if (handleHarmonyEvent(event, player)) return;
   if (event.id === "lothlorien:depth") {
     reportDepth(player);
     return;
@@ -181,7 +181,7 @@ world.afterEvents.worldLoad.subscribe(() => {
   system.runInterval(showDebug, DEBUG_INTERVAL_TICKS);
   system.runInterval(updateDepth, DEPTH_INTERVAL_TICKS);
   system.runInterval(fallLeaves, LEAF_INTERVAL_TICKS);
-  startDisharmony(inBiome, DEBUG_TAG);
+  startHarmony(inBiome, DEBUG_TAG);
   startDeer();
   startWhiteDeer(depthAt, {
     id: BIOME_ID,

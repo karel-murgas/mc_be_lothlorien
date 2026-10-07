@@ -5,7 +5,7 @@ import { BONEMEAL_TABLE, SPREAD_TRIES, COVERS, pickWeighted } from "../lothlorie
 import { readFileSync } from "node:fs";
 import { MAX_GROWTH, growChance, bonemealSteps, advanceGrowth } from "../lothlorien_bp/scripts/crop_rules.js";
 import { estimateDepth, probeCount, ringOffsets, DEPTH_NAMES, DEPTH_RADII } from "../lothlorien_bp/scripts/depth.js";
-import * as D from "../lothlorien_bp/scripts/disharmony.js";
+import * as H from "../lothlorien_bp/scripts/harmony.js";
 import { makeRandom } from "../lothlorien_bp/scripts/mallorn_tree.js";
 import { buildFletMallorn, LADDER, ROUND_LADDER, LEAF_KEEP, ROOT_DEPTH, B } from "../tools/flet_mallorn.mjs";
 import { SIZE, SIZE_Y, TRUNK_AT, CHOSEN, TRUNK_ANCHOR } from "../tools/build_structures.mjs";
@@ -264,37 +264,113 @@ test("giants: the jigsaw pool matches CHOSEN, every piece ships, the structure s
   }
 });
 
-test("disharmony: levels", () => {
-  assert.deepEqual([0, 1, 2, 3, 4, 9].map(D.levelFor), [0, 1, 2, 2, 3, 3]);
+const catalogEntries = () => JSON.parse(readFileSync(new URL("../localization/catalog.json", import.meta.url), "utf8")).packs.lothlorien_rp.entries;
+const hs = (harmony, timer = 0) => ({ harmony, timer });
+const afterPenalty = (h, p) => { const s = hs(h); H.applyPenalty(s, p); return s.harmony; };
+test("harmony: band table incl. every edge, wariness and boundary constants", () => {
+  const band = (h) => H.bandOf(h);
+  assert.deepEqual([10, 9, 0, -1, -14, -15, -29, -30, -60].map(band),
+    ["friend", "guest", "guest", "uneasy", "uneasy", "shunned", "shunned", "hated", "hated"]);
+  assert.deepEqual([H.FRIEND_FROM, H.GUEST_FROM, H.UNEASY_FROM, H.SHUNNED_FROM, H.MIN_HARMONY, H.MAX_HARMONY], [10, 0, -14, -29, -60, 10]);
+  assert.deepEqual(H.BANDS, ["hated", "shunned", "uneasy", "guest", "friend"]);
+  assert.ok(H.isFriend(hs(10)) && !H.isFriend(hs(9)) && H.isHated(hs(-30)) && !H.isHated(hs(-29)));
 });
-test("disharmony: a point decays after 3 min inside, 6 min outside", () => {
-  const a = D.newState(); D.recordKill(a); D.tick(a, true, 179); assert.equal(a.points, 1); D.tick(a, true, 1); assert.equal(a.points, 0);
-  const b = D.newState(); D.recordKill(b); D.tick(b, false, 359); assert.equal(b.points, 1); D.tick(b, false, 1); assert.equal(b.points, 0);
+test("harmony: recovery is +1 per 60 s inside up to 10, +1 per 120 s outside and never above 0", () => {
+  const a = hs(0); H.tick(a, true, 59); assert.equal(a.harmony, 0); H.tick(a, true, 1); assert.equal(a.harmony, 1);
+  H.tick(a, true, 100000); assert.equal(a.harmony, 10, "capped at +10");
+  const b = hs(-5); H.tick(b, false, 119); assert.equal(b.harmony, -5); H.tick(b, false, 1); assert.equal(b.harmony, -4);
+  H.tick(b, false, 10000); assert.equal(b.harmony, 0, "outside stops at 0");
+  const c = hs(6); H.tick(c, false, 10000); assert.equal(c.harmony, 6, "positive harmony is kept outside, not raised");
+  const d = hs(-3); H.tick(d, true, 60); assert.equal(d.harmony, -2, "inside recovers from below zero too");
+  const e = hs(10, 40); H.tick(e, true, 1); assert.equal(e.timer, 0, "no credit piles up at the cap");
 });
-test("disharmony: a new kill restarts the decay timer", () => {
-  const s = D.newState(); D.recordKill(s); D.tick(s, true, 170); D.recordKill(s); D.tick(s, true, 170);
-  assert.equal(s.points, 2); D.tick(s, true, 10); assert.equal(s.points, 1);
+test("harmony: a deed restarts the minute timer", () => {
+  const s = hs(0); H.tick(s, true, 50); H.recordDeed(s, "animal"); assert.equal(s.harmony, -3); assert.equal(s.timer, 0);
+  H.tick(s, true, 59); assert.equal(s.harmony, -3); H.tick(s, true, 1); assert.equal(s.harmony, -2);
 });
-test("disharmony: death resets points and timers", () => {
-  const s = D.newState(); D.recordKill(s); D.recordKill(s); D.tick(s, true, 100); D.recordDeath(s);
-  assert.deepEqual(s, D.newState());
+test("harmony: above 0 a penalty point costs 2, from 0 down 1 (point by point)", () => {
+  assert.equal(afterPenalty(4, 3), -1, "2, 0, -1");
+  assert.equal(afterPenalty(5, 3), -1, "3, 1, -1");
+  assert.equal(afterPenalty(1, 1), -1);
+  assert.equal(afterPenalty(10, 1), 8);
+  assert.equal(afterPenalty(10, 3), 4);
+  assert.equal(afterPenalty(0, 3), -3, "at 0 and below one point costs one");
+  assert.equal(afterPenalty(-10, 3), -13);
+  assert.ok(!H.isFriend(hs(8)), "any deed loses Friend");
 });
-test("disharmony: Friend after 10 calm minutes inside; outside pauses progress; kill or death loses it", () => {
-  const s = D.newState(); D.tick(s, true, 300); D.tick(s, false, 1000); assert.equal(s.friend, 300);
-  D.tick(s, true, 299); assert.ok(!D.isFriend(s)); D.tick(s, true, 1); assert.ok(D.isFriend(s));
-  D.tick(s, false, 1000); assert.ok(D.isFriend(s));
-  D.recordKill(s); assert.ok(!D.isFriend(s));
-  D.tick(s, true, 600); D.recordDeath(s); assert.ok(!D.isFriend(s));
+test("harmony: floor at -60", () => {
+  assert.equal(afterPenalty(-58, 10), -60);
+  const s = hs(-60); H.recordDeed(s, "unicorn"); assert.equal(s.harmony, -60);
 });
-test("disharmony: status hidden outside, saved state round-trips, junk is tolerated", () => {
-  const s = D.newState(); D.recordKill(s);
-  assert.equal(D.statusText(s, false), undefined);
-  assert.deepEqual(D.statusText(s, true), { translate: "lothlorien.message.status.disharmony", with: { rawtext: [{ text: "I" }] } });
-  s.points = 0; s.friend = D.FRIEND_SECONDS;
-  assert.equal(D.statusText(s, true).translate, "lothlorien.message.status.friend");
-  assert.equal(D.statusText(s, false), undefined);
-  assert.deepEqual(D.parse(D.serialize(s)), s);
-  assert.deepEqual(D.parse(undefined), D.newState()); assert.deepEqual(D.parse("{oops"), D.newState());
+test("harmony: every deed cost", () => {
+  assert.deepEqual(H.DEED_COSTS, { animal: 3, monster: 1, white_deer: 6, unicorn: 10, warden_fight: 1, warden_kill: 6, player: 3 });
+  for (const [kind, cost] of Object.entries(H.DEED_COSTS)) { const s = hs(0); H.recordDeed(s, kind); assert.equal(s.harmony, -cost, kind); }
+  const s = hs(10); H.recordDeed(s, "monster"); assert.equal(s.harmony, 8);
+  const u = hs(10); H.recordDeed(u, "unicorn"); assert.equal(u.harmony, -5, "8, 6, 4, 2, 0, then five at 1 each");
+  const n = hs(3, 7); H.recordDeed(n, "nonsense"); assert.deepEqual(n, hs(3, 7), "unknown deed kinds count nothing");
+});
+test("harmony: victims are classified into deed kinds (inanimate counts nothing, wardens and players are their own kinds)", () => {
+  const k = H.deedKindOf;
+  assert.equal(k("minecraft:armor_stand", ["inanimate", "mob"]), undefined);
+  assert.equal(k("lothlorien:deer", ["mob"]), "animal");
+  assert.equal(k("minecraft:cow", ["cow", "animal", "mob"]), "animal");
+  assert.equal(k("minecraft:villager_v2", ["villager"]), "animal");
+  assert.equal(k("minecraft:zombie", ["zombie", "monster", "mob"]), "monster");
+  assert.equal(k(W.WHITE_DEER_ID, ["mob"]), "white_deer");
+  assert.equal(k("lothlorien:unicorn"), "unicorn");
+  assert.equal(k(EW.WARDEN_ID, ["lothlorien_warden", "irongolem", "mob"]), "warden_kill");
+  assert.equal(k("minecraft:player", ["player"]), "player");
+  assert.equal(k("minecraft:cow"), "animal");
+});
+test("harmony: death changes nothing, except inside the forest while Hated (-> -29)", () => {
+  const cases = [[-30, true, -29], [-60, true, -29], [-30, false, -30], [-29, true, -29], [-20, true, -20], [-20, false, -20], [5, true, 5], [10, true, 10]];
+  for (const [h, inside, want] of cases) { const s = hs(h, 33); H.recordDeath(s, inside); assert.equal(s.harmony, want, `${h} inside=${inside}`); }
+  assert.equal(H.bandOf(H.HATED_DEATH_HARMONY), "shunned");
+});
+test("harmony: chat lines per band change and direction; Friend gained / lost; the deed hint is rate limited", () => {
+  const m = H.changeMessages;
+  assert.deepEqual(m(9, 10), ["friend.gained"]);
+  assert.deepEqual(m(10, 8), ["friend.lost"]);
+  assert.deepEqual(m(10, -5), ["friend.lost", "harmony.worse.uneasy"]);
+  assert.deepEqual(m(5, -2), ["harmony.worse.uneasy"]);
+  assert.deepEqual(m(-10, -16), ["harmony.worse.shunned"]);
+  assert.deepEqual(m(-20, -31), ["harmony.worse.hated"]);
+  assert.deepEqual(m(-30, -29), ["harmony.better.shunned"]);
+  assert.deepEqual(m(-15, -14), ["harmony.better.uneasy"]);
+  assert.deepEqual(m(-1, 0), ["harmony.better.guest"]);
+  assert.deepEqual(m(3, 2), [], "same band: no band line");
+  const entries = catalogEntries();
+  for (const key of ["harmony.worse.uneasy", "harmony.worse.shunned", "harmony.worse.hated", "harmony.better.shunned", "harmony.better.uneasy", "harmony.better.guest", "harmony.hint", "harmony.debug", "friend.gained", "friend.lost"]) {
+    assert.ok(entries[`lothlorien.message.${key}`], key);
+  }
+  assert.ok(!Object.keys(entries).some((k) => k.includes("disharmony")), "the Disharmony keys are retired");
+  assert.ok(H.hintDue(undefined, 5) && !H.hintDue(1000, 1000 + H.HINT_GAP_MS - 1) && H.hintDue(1000, 1000 + H.HINT_GAP_MS));
+  assert.equal(H.HINT_GAP_MS, 30000);
+});
+test("harmony: the action bar shows the band name inside the forest only; saved state round-trips; junk is tolerated", () => {
+  const entries = catalogEntries();
+  for (const [h, band] of [[10, "friend"], [0, "guest"], [-5, "uneasy"], [-20, "shunned"], [-40, "hated"]]) {
+    assert.deepEqual(H.statusText(hs(h), true), { translate: `lothlorien.message.status.${band}` }, band);
+    assert.equal(H.statusText(hs(h), false), undefined);
+    assert.ok(entries[`lothlorien.message.status.${band}`], band);
+  }
+  const s = hs(-7, 12.5);
+  assert.deepEqual(H.parse(H.serialize(s)), s);
+  assert.deepEqual(H.parse(undefined), H.newState()); assert.deepEqual(H.parse("{oops"), H.newState());
+  assert.deepEqual(H.parse('{"harmony":"x","timer":-4}'), H.newState());
+  assert.deepEqual(H.parse('{"harmony":500,"timer":3}'), hs(10, 3), "clamped");
+  assert.deepEqual(H.parse('{"harmony":-500}'), hs(-60, 0));
+  assert.deepEqual(H.parse('{"points":3,"calm":9,"friend":2}'), H.newState(), "the old Disharmony format is ignored");
+});
+test("harmony: the game wiring - deeds need player or victim inside, only a player killer, saves only on change, hated tag, debug event", () => {
+  const game = readFileSync(new URL("../lothlorien_bp/scripts/harmony_game.js", import.meta.url), "utf8");
+  assert.ok(game.includes('"lothlorien:harmony"') && !game.includes("isharmony"));
+  assert.ok(/isInside\(player\.dimension, player\.location\) \|\| isInside\(victim\.dimension, victim\.location\)/.test(game), "player OR victim inside");
+  assert.ok(game.includes("damageSource.damagingEntity") && game.includes("deedKindOf(deadEntity.typeId"));
+  assert.ok(/if \(state\.harmony === before\) return false;[\s\S]*setDynamicProperty\(PROPERTY/.test(game), "save only when harmony changed");
+  assert.ok(game.includes("HATED_TAG") && game.includes("addTag") && game.includes("removeTag"));
+  assert.ok(game.includes("handleHarmonyEvent"));
+  assert.ok(readFileSync(new URL("../lothlorien_bp/scripts/main.js", import.meta.url), "utf8").includes("startHarmony(inBiome, DEBUG_TAG)"));
 });
 
 // Phase 11: deer.
@@ -303,11 +379,10 @@ const readJson = (p) => JSON.parse(readFileSync(new URL(p, import.meta.url), "ut
 const deerEntity = () => readJson("../lothlorien_bp/entities/deer.json")["minecraft:entity"];
 const avoidRadius = (e, w) => e.component_groups[`lothlorien:state_${w}`]["minecraft:behavior.avoid_mob_type"].entity_types[0].max_dist;
 
-test("deer: wariness follows Disharmony level; Friend only at level 0", () => {
-  assert.equal(R.warinessFor(0, false), "calm");
-  assert.equal(R.warinessFor(0, true), "friend");
-  assert.deepEqual([1, 2, 3].map((l) => R.warinessFor(l, false)), ["l1", "l2", "l3"]);
-  assert.equal(R.warinessFor(2, true), "l2");
+test("deer: wariness follows the Harmony band (Friend -> friend, Guest -> calm, Uneasy -> l1, Shunned -> l2, Hated -> l3)", () => {
+  assert.deepEqual(["friend", "guest", "uneasy", "shunned", "hated"].map(R.warinessFor), ["friend", "calm", "l1", "l2", "l3"]);
+  assert.deepEqual([10, 9, 0, -1, -14, -15, -29, -30].map((h) => R.warinessFor(H.bandOf(h))), ["friend", "calm", "calm", "l1", "l1", "l2", "l2", "l3"]);
+  assert.equal(R.warinessFor(undefined), "calm");
 });
 test("deer: the most severe player inside their own flight radius decides", () => {
   const pick = (...c) => R.pickWariness(c.map(([distance, wariness]) => ({ distance, wariness })));
@@ -322,7 +397,7 @@ test("deer: flight radii match the entity file", () => {
   const e = deerEntity();
   for (const w of R.WARINESS) assert.equal(avoidRadius(e, w), R.FLIGHT_RADIUS[w], w);
 });
-test("deer: every wariness has a state group and a set event; flight distance grows with Disharmony", () => {
+test("deer: every wariness has a state group and a set event; flight distance grows with the Harmony band", () => {
   const e = deerEntity();
   for (const w of R.WARINESS) {
     assert.ok(e.component_groups[`lothlorien:state_${w}`], `group ${w}`);
@@ -424,9 +499,9 @@ import * as W from "../lothlorien_bp/scripts/white_deer_rules.js";
 import { CHEST_BLOCK, hasChest } from "../tools/build_structures.mjs";
 import * as G from "../tools/dev_scripts/guide_goal/variants.mjs";
 
-test("white deer: only Disharmony 0 is guided", () => {
-  assert.equal(W.canBeGuided(0), true);
-  assert.deepEqual([1, 2, 3].map(W.canBeGuided), [false, false, false]);
+test("white deer: a guidance in progress continues only while Friend", () => {
+  assert.equal(W.canBeGuided("friend"), true);
+  assert.deepEqual(["guest", "uneasy", "shunned", "hated"].map(W.canBeGuided), [false, false, false, false]);
 });
 // Phase 12 gift: the white deer leads to a spot where it lays a Great Mallorn nut; the nut grows a flet giant.
 import * as N from "../lothlorien_bp/scripts/great_mallorn_rules.js";
@@ -502,7 +577,7 @@ test("great nut: unique rare item that plants the sprout; sprout grows like a sa
   assert.match(catalog.packs.lothlorien_rp.entries["lothlorien.message.mallorn.planted"].source, /40 blocks wide and 50 high/);
   assert.ok(readFileSync(new URL("../lothlorien_bp/scripts/main.js", import.meta.url), "utf8").includes('import "./great_mallorn.js"'));
 });
-test("the actionbar is only the Disharmony / Friend status (and the debug readout); other messages use chat", () => {
+test("the actionbar is only the Harmony band status (and the debug readout); other messages use chat", () => {
   for (const f of ["white_deer.js", "great_mallorn.js", "deer.js", "trees.js", "athelas.js", "lembas.js", "crop.js", "antler.js"]) {
     const src = readFileSync(new URL(`../lothlorien_bp/scripts/${f}`, import.meta.url), "utf8");
     assert.ok(!src.includes("setActionBar"), f);
@@ -807,11 +882,11 @@ test("white deer: always an antlered hart; sure antler plus the usual deer drops
   }
 });
 test("white deer: leash rule - a lead always wins over guidance", () => {
-  assert.equal(W.offerRefusal({ level: 0, friend: true, leashed: false }), undefined);
-  assert.equal(W.offerRefusal({ level: 0, friend: true, leashed: true }), "leashed");
-  assert.equal(W.offerRefusal({ level: 2, friend: false, leashed: true }), "leashed");
-  assert.equal(W.offerRefusal({ level: 1, friend: false, leashed: false }), "restless");
-  assert.equal(W.offerRefusal({ level: 0, friend: false, leashed: false }), "untrusted"); // calm is not enough: Friend only
+  assert.equal(W.offerRefusal({ band: "friend", leashed: false }), undefined);
+  assert.equal(W.offerRefusal({ band: "friend", leashed: true }), "leashed");
+  assert.equal(W.offerRefusal({ band: "shunned", leashed: true }), "leashed");
+  for (const band of ["uneasy", "shunned", "hated"]) assert.equal(W.offerRefusal({ band, leashed: false }), "restless", band);
+  assert.equal(W.offerRefusal({ band: "guest", leashed: false }), "untrusted"); // a Guest is not enough: Friend only
   const base = { toTarget: 40, toPlayer: 5, stuck: 0, age: 0, playerCalm: true };
   assert.equal(W.phase(base), "walk");
   assert.equal(W.phase({ ...base, leashed: true }), "leashed");
@@ -820,19 +895,13 @@ test("white deer: leash rule - a lead always wins over guidance", () => {
   const src = readFileSync(new URL("../lothlorien_bp/scripts/white_deer.js", import.meta.url), "utf8");
   assert.ok(src.includes('getComponent("minecraft:leashable")?.isLeashed'), "the game script reads the lead");
 });
-test("disharmony: a white deer kill counts as two deer kills, everything else as one", () => {
-  assert.equal(D.killWeight(W.WHITE_DEER_ID), 2);
-  assert.equal(D.killWeight("lothlorien:unicorn"), 3);
-  assert.equal(D.killWeight(R.DEER_ID), 1);
-  assert.equal(D.killWeight("minecraft:cow"), 1);
-  const a = D.newState(); D.recordKill(a, D.killWeight(W.WHITE_DEER_ID));
-  const b = D.newState(); D.recordKill(b, D.killWeight(R.DEER_ID)); D.recordKill(b, D.killWeight(R.DEER_ID));
-  assert.deepEqual(a, b);
-  assert.equal(D.levelFor(a.points), 2, "straight to Disharmony II");
-  D.tick(a, true, D.DECAY_SECONDS_INSIDE); assert.equal(a.points, 1, "decays one point at a time");
-  const c = D.newState(); D.recordKill(c); assert.equal(c.points, 1, "default weight 1");
-  const game = readFileSync(new URL("../lothlorien_bp/scripts/disharmony_game.js", import.meta.url), "utf8");
-  assert.ok(game.includes("killWeight(deadEntity.typeId)"));
+test("harmony: a white deer kill costs 6 (two animals), a unicorn 10, a warden 6 on top of 1 per fight", () => {
+  const cost = (kind) => { const x = hs(0); H.recordDeed(x, kind); return -x.harmony; };
+  assert.equal(cost(H.deedKindOf(W.WHITE_DEER_ID)), 6);
+  assert.equal(cost(H.deedKindOf(R.DEER_ID)), 3);
+  assert.equal(cost("white_deer"), 2 * cost("animal"));
+  assert.equal(H.bandOf(-cost("white_deer")), "uneasy");
+  assert.equal(cost(H.deedKindOf(EW.WARDEN_ID)) + cost("warden_fight"), 7);
 });
 test("white deer: client entity uses the white texture on the antlered deer model only; no unused fawn texture", () => {
   const c = readJson("../lothlorien_rp/entity/white_deer.entity.json")["minecraft:client_entity"].description;
@@ -1064,7 +1133,7 @@ test("Phase 15: swan spawn rule takes Lothlorien or river water, and the natural
   assert.equal(swanEntity().events["lothlorien:spawn_natural"].set_property["lothlorien:natural"], true);
   assert.ok("lothlorien:natural" in swanEntity().description.properties);
 });
-test("Phase 15: swan and squirrel read Disharmony like the deer (same states, radii, alarm; in WARY_TYPES)", () => {
+test("Phase 15: swan and squirrel read the Harmony band like the deer (same states, radii, alarm; in WARY_TYPES)", () => {
   assert.deepEqual(R.WARY_TYPES, [R.DEER_ID, R.WHITE_DEER_ID, "lothlorien:swan", "lothlorien:squirrel", "lothlorien:unicorn"]);
   for (const e of [swanEntity(), squirrelEntity()]) {
     for (const w of R.WARINESS) {
@@ -1087,10 +1156,10 @@ test("Phase 15: swan floats on the surface like the chicken (float goal, path ov
   assert.deepEqual(loot, ["minecraft:feather"]);
 });
 test("Phase 15: squirrel gifts are for Friends only; calm and restless players are refused", () => {
-  assert.equal(QR.offerRefusal({ level: 0, friend: true, cooldownLeft: 0 }), undefined);
-  assert.equal(QR.offerRefusal({ level: 0, friend: false, cooldownLeft: 0 }), "untrusted");
-  assert.equal(QR.offerRefusal({ level: 1, friend: true, cooldownLeft: 0 }), "restless");
-  assert.equal(QR.offerRefusal({ level: 0, friend: true, cooldownLeft: 100 }), "full");
+  assert.equal(QR.offerRefusal({ band: "friend", cooldownLeft: 0 }), undefined);
+  assert.equal(QR.offerRefusal({ band: "guest", cooldownLeft: 0 }), "untrusted");
+  for (const band of ["uneasy", "shunned", "hated"]) assert.equal(QR.offerRefusal({ band, cooldownLeft: 0 }), "restless", band);
+  assert.equal(QR.offerRefusal({ band: "friend", cooldownLeft: 100 }), "full");
   assert.equal(QR.cooldownLeft(100, 160), 60);
   assert.equal(QR.cooldownLeft(200, 160), 0);
   assert.equal(QR.cooldownLeft(100, undefined), 0);
@@ -1150,10 +1219,10 @@ test("Phase 15: art, sounds and names are wired for both animals", () => {
 import * as UR from "../lothlorien_bp/scripts/unicorn_rules.js";
 const unicornEntity = () => readJson("../lothlorien_bp/entities/unicorn.json")["minecraft:entity"];
 test("unicorn: offers need a calm Friend, an unfrightened unicorn and a pause between offers", () => {
-  const ok = { level: 0, friend: true, tame: false, alarmed: false, sinceLast: undefined };
+  const ok = { band: "friend", tame: false, alarmed: false, sinceLast: undefined };
   assert.equal(UR.offerRefusal(ok), undefined);
-  assert.equal(UR.offerRefusal({ ...ok, friend: false }), "untrusted");
-  assert.equal(UR.offerRefusal({ ...ok, level: 1 }), "restless");
+  assert.equal(UR.offerRefusal({ ...ok, band: "guest" }), "untrusted");
+  for (const band of ["uneasy", "shunned", "hated"]) assert.equal(UR.offerRefusal({ ...ok, band }), "restless", band);
   assert.equal(UR.offerRefusal({ ...ok, alarmed: true }), "alarmed");
   assert.equal(UR.offerRefusal({ ...ok, tame: true }), "tame");
   assert.equal(UR.offerRefusal({ ...ok, sinceLast: UR.OFFER_GAP_TICKS - 1 }), "wait");
@@ -1167,7 +1236,7 @@ test("unicorn: the third offer bonds it; only the owner may ride", () => {
   assert.equal(UR.ticksSince(10, undefined), undefined);
   assert.ok(UR.mayRide("a", "a") && !UR.mayRide("a", "b") && UR.mayRide(undefined, "b"));
 });
-test("unicorn entity: Disharmony states and flight radii (calm is as timid as l1; Friend alone may lure it with Elanor)", () => {
+test("unicorn entity: Harmony wariness states and flight radii (calm is as timid as l1; Friend alone may lure it with Elanor)", () => {
   const e = unicornEntity();
   for (const w of R.WARINESS) {
     assert.ok(e.component_groups[`lothlorien:state_${w}`], `group ${w}`);
@@ -1641,7 +1710,10 @@ test("elven warden: shoots monsters (spiders and creepers included), never playe
   const excluded = filters.slice(1).map((f) => { assert.equal(f.operator, "!="); return f.value; }).sort();
   assert.deepEqual(excluded, ["aquatic", "creaking", "enderman", "piglin", "shulker", "wither", "warden", "zombie_pigman"].sort());
   for (const keep of ["creeper", "spider", "cave_spider"]) assert.ok(!excluded.includes(keep), `${keep} stays a target`);
-  assert.ok(!JSON.stringify(c["minecraft:behavior.nearest_attackable_target"]).includes('"player"'));
+  const targets = c["minecraft:behavior.nearest_attackable_target"].entity_types;
+  assert.equal(targets.length, 2, "monsters, and Hated players");
+  assert.ok(!JSON.stringify(targets[0]).includes('"player"'), "players are only targets through the hated tag entry");
+  assert.ok(JSON.stringify(targets[1]).includes('"has_tag"'));
   assert.ok(c["minecraft:behavior.hurt_by_target"].alert_same_type && c["minecraft:behavior.hurt_by_target"].entity_types.max_dist >= 64);
   assert.equal(c["minecraft:shooter"].def, "minecraft:arrow");
   assert.equal(c["minecraft:behavior.ranged_attack"].attack_range.max, 22);
@@ -1695,22 +1767,33 @@ test("elven warden: natural spawns - always at the edge and on decks, 10 % elsew
 });
 test("elven warden: friendly fire - never on wardens, own creatures, animals; players only after hitting a warden", () => {
   const v = (typeId, families = []) => ({ typeId, families });
-  const ff = (victim, sinceProvokedMs) => EW.isFriendlyFire({ shooterId: EW.WARDEN_ID, victim, sinceProvokedMs });
+  const ff = (victim, sinceProvokedMs, hated) => EW.isFriendlyFire({ shooterId: EW.WARDEN_ID, victim, sinceProvokedMs, hated });
   assert.ok(ff(v(EW.WARDEN_ID, ["lothlorien_warden", "irongolem", "mob"])));
   assert.ok(ff(v("lothlorien:deer", ["mob"])) && ff(v("lothlorien:unicorn")) && ff(v("lothlorien:swan")));
   assert.ok(ff(v("minecraft:cow", ["cow", "animal", "mob"])));
   assert.ok(ff(v("minecraft:player"), undefined), "unprovoked player is shielded");
   assert.ok(ff(v("minecraft:player"), EW.PROVOKE_MS + 1), "provocation expires");
   assert.ok(!ff(v("minecraft:player"), 0) && !ff(v("minecraft:player"), EW.PROVOKE_MS), "a player who hit a warden is fair game");
+  assert.ok(!ff(v("minecraft:player"), undefined, true) && !ff(v("minecraft:player"), EW.PROVOKE_MS + 1, true), "a Hated player is never shielded");
+  assert.ok(ff(v("minecraft:player"), undefined, false) && ff(v("lothlorien:deer"), undefined, true), "the hated flag only concerns players");
   assert.ok(!ff(v("minecraft:zombie", ["zombie", "monster", "mob"])), "monsters take arrows");
   assert.ok(!ff(v("minecraft:villager_v2", ["villager"])), "villagers in the line of fire are accepted");
   assert.ok(!EW.isFriendlyFire({ shooterId: "minecraft:skeleton", victim: v("minecraft:player"), sinceProvokedMs: undefined }), "only warden arrows");
   const src = readFileSync(new URL("../lothlorien_bp/scripts/elven_warden.js", import.meta.url), "utf8");
   assert.ok(src.includes("beforeEvents.entityHurt") && src.includes("event.cancel = true"));
 });
-test("elven warden: Disharmony - a kill counts one point, hitting counts none; localized name and spawn egg name", () => {
-  assert.equal(D.killWeight(EW.WARDEN_ID), 1);
-  assert.equal(D.KILL_WEIGHTS[EW.WARDEN_ID], 1, "listed explicitly (owner decision 2026-10-07)");
+test("elven warden: Harmony - a fight costs 1 (first hit after 60 s), a kill 6; Hated players are shot on sight; localized name and spawn egg name", () => {
+  assert.ok(EW.isNewFight(undefined) && EW.isNewFight(EW.PROVOKE_MS + 1) && !EW.isNewFight(EW.PROVOKE_MS) && !EW.isNewFight(0));
+  assert.equal(H.deedCost("warden_fight"), 1);
+  assert.equal(H.deedCost(H.deedKindOf(EW.WARDEN_ID)), 6);
+  const src = readFileSync(new URL("../lothlorien_bp/scripts/elven_warden.js", import.meta.url), "utf8");
+  assert.ok(/isNewFight[\s\S]*recordWardenFight\(hitter, hurtEntity\)/.test(src), "a new fight is charged");
+  assert.ok(src.includes("hasTag(HATED_TAG)"), "friendly fire reads the hated tag");
+  const tag = readFileSync(new URL("../lothlorien_bp/scripts/harmony_game.js", import.meta.url), "utf8").match(/HATED_TAG = "([a-z_]+)"/)[1];
+  const goal = readJson("../lothlorien_bp/entities/elven_warden.json")["minecraft:entity"].components["minecraft:behavior.nearest_attackable_target"];
+  const hatedEntry = goal.entity_types.find((t) => JSON.stringify(t.filters).includes(tag));
+  assert.ok(hatedEntry, "the warden targets players carrying the hated tag");
+  assert.deepEqual(hatedEntry.filters.all_of.map((f) => [f.test, f.subject, f.value]), [["is_family", "other", "player"], ["has_tag", "other", tag]]);
   const lang = readFileSync(new URL("../lothlorien_rp/texts/en_US.lang", import.meta.url), "utf8");
   assert.ok(/entity\.lothlorien:elven_warden\.name=Elven Warden\r?\n/.test(lang));
   assert.ok(/item\.spawn_egg\.entity\.lothlorien:elven_warden\.name=Elven Warden Spawn Egg\r?\n/.test(lang));
