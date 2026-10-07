@@ -222,6 +222,8 @@ item.spawn_egg.entity.lothlorien:squirrel.name=Vajíčko tvora: Lesní veverka
 ## Context: Elven Rope.
 tile.lothlorien:elven_rope.name=Elfí lano
 ## Context: Elven Rope.
+tile.lothlorien:elven_rope_hanging.name=Elfí lano
+## Context: Elven Rope.
 item.lothlorien:elven_rope=Elfí lano
 ## Context: Elven Lantern.
 tile.lothlorien:elven_lantern.name=Elfí lucerna

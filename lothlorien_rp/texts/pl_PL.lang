@@ -222,6 +222,8 @@ item.spawn_egg.entity.lothlorien:squirrel.name=Jajo przyzywające: Wiewiórka le
 ## Context: Elven Rope.
 tile.lothlorien:elven_rope.name=Elficka lina
 ## Context: Elven Rope.
+tile.lothlorien:elven_rope_hanging.name=Elficka lina
+## Context: Elven Rope.
 item.lothlorien:elven_rope=Elficka lina
 ## Context: Elven Lantern.
 tile.lothlorien:elven_lantern.name=Elficka latarnia

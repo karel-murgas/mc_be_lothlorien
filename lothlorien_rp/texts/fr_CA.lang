@@ -223,6 +223,8 @@ item.spawn_egg.entity.lothlorien:squirrel.name=Œuf d’apparition : Écureuil d
 ## Context: Elven Rope.
 tile.lothlorien:elven_rope.name=Corde elfique
 ## Context: Elven Rope.
+tile.lothlorien:elven_rope_hanging.name=Corde elfique
+## Context: Elven Rope.
 item.lothlorien:elven_rope=Corde elfique
 ## Context: Elven Lantern.
 tile.lothlorien:elven_lantern.name=Lanterne elfique

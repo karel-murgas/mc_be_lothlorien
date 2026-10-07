@@ -222,6 +222,8 @@ item.spawn_egg.entity.lothlorien:squirrel.name=Spawn-Ei: Waldhörnchen
 ## Context: Elven Rope.
 tile.lothlorien:elven_rope.name=Elbenseil
 ## Context: Elven Rope.
+tile.lothlorien:elven_rope_hanging.name=Elbenseil
+## Context: Elven Rope.
 item.lothlorien:elven_rope=Elbenseil
 ## Context: Elven Lantern.
 tile.lothlorien:elven_lantern.name=Elbenlaterne

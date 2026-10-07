@@ -222,6 +222,8 @@ item.spawn_egg.entity.lothlorien:squirrel.name=Ovo de invocação: Esquilo do bo
 ## Context: Elven Rope.
 tile.lothlorien:elven_rope.name=Corda élfica
 ## Context: Elven Rope.
+tile.lothlorien:elven_rope_hanging.name=Corda élfica
+## Context: Elven Rope.
 item.lothlorien:elven_rope=Corda élfica
 ## Context: Elven Lantern.
 tile.lothlorien:elven_lantern.name=Lanterna élfica

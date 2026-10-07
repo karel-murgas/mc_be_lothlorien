@@ -21,7 +21,10 @@ export const B = {
   leaves: `${NS}:mallorn_leaves`,
   planks: `${NS}:mallorn_planks`,
   fence: `${NS}:mallorn_fence`,
-  rope: `${NS}:elven_rope`, // Elven rope (Phase 17b) replaced the vanilla ladder
+  rope: `${NS}:elven_rope`, // Elven rope (Phase 17b) replaced the vanilla ladder; players place this one
+  // structure-only twin: same look and use, but its side is `minecraft:cardinal_direction`, which Bedrock turns with a
+  // rotated piece (the custom `lothlorien:face` of `rope` stays put, so the rope would hang on the empty side)
+  ropeHanging: `${NS}:elven_rope_hanging`,
   chest: "minecraft:chest",
 };
 export const FLET_LOOT = "loot_tables/chests/mallorn_flet.json";
@@ -180,7 +183,7 @@ export function buildFletMallorn(random, { woven = false, lush = false, flet = t
       const front = key(ladder.x, y, ladder.z - 1);
       if ([B.leaves, B.log, B.wood].includes(blocks.get(front)?.name)) blocks.delete(front);
       blocks.delete(key(ladder.x, y, ladder.z));
-      if (y <= floorY) blocks.set(key(ladder.x, y, ladder.z), { name: B.rope, states: { [`${NS}:face`]: "north" } });
+      if (y <= floorY) blocks.set(key(ladder.x, y, ladder.z), { name: B.ropeHanging, states: { "minecraft:cardinal_direction": "north" } });
     }
 
     // loot chest against the east face of the trunk, opening away from it

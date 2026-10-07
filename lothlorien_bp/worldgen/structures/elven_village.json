@@ -14,11 +14,11 @@
     "terrain_adaptation": "none",
     "start_pool": "lothlorien:village/start",
     "start_jigsaw_name": "lothlorien:village_anchor",
-    "max_depth": 6,
+    "max_depth": 5,
     "start_height": {
       "type": "constant",
       "value": {
-        "absolute": -10
+        "absolute": -18
       }
     },
     "heightmap_projection": "world_surface",

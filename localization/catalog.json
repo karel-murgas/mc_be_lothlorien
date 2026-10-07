@@ -6123,6 +6123,60 @@
             }
           }
         },
+        "tile.lothlorien:elven_rope_hanging.name": {
+          "source": "Elven Rope",
+          "context": {
+            "meaning": "Elven Rope.",
+            "location": "lothlorien_rp: inventory/block tooltip, entity name or spawn egg",
+            "trigger": "Viewed in inventory, Creative inventory, block targeting or entity UI, as appropriate to this key.",
+            "tone": "Clear Minecraft UI",
+            "grammar": "Standalone noun phrase, no sentence punctuation.",
+            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender."
+          },
+          "placeholders": [],
+          "translations": {
+            "cs_CZ": {
+              "text": "Elfí lano",
+              "based_on": "32f075d840e5cf10fcfa6aa6025ae834f09217444783bf33df7a9bba59fcbb09",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "Cuerda élfica",
+              "based_on": "32f075d840e5cf10fcfa6aa6025ae834f09217444783bf33df7a9bba59fcbb09",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "Cuerda élfica",
+              "based_on": "32f075d840e5cf10fcfa6aa6025ae834f09217444783bf33df7a9bba59fcbb09",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "Corda élfica",
+              "based_on": "32f075d840e5cf10fcfa6aa6025ae834f09217444783bf33df7a9bba59fcbb09",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "Corda élfica",
+              "based_on": "32f075d840e5cf10fcfa6aa6025ae834f09217444783bf33df7a9bba59fcbb09",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "Elbenseil",
+              "based_on": "32f075d840e5cf10fcfa6aa6025ae834f09217444783bf33df7a9bba59fcbb09",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "Corde elfique",
+              "based_on": "32f075d840e5cf10fcfa6aa6025ae834f09217444783bf33df7a9bba59fcbb09",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "Elficka lina",
+              "based_on": "32f075d840e5cf10fcfa6aa6025ae834f09217444783bf33df7a9bba59fcbb09",
+              "status": "ai-draft"
+            }
+          }
+        },
         "item.lothlorien:elven_rope": {
           "source": "Elven Rope",
           "context": {

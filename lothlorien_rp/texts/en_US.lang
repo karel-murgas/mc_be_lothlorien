@@ -222,6 +222,8 @@ item.spawn_egg.entity.lothlorien:squirrel.name=Ground Squirrel Spawn Egg
 ## Context: Elven Rope.
 tile.lothlorien:elven_rope.name=Elven Rope
 ## Context: Elven Rope.
+tile.lothlorien:elven_rope_hanging.name=Elven Rope
+## Context: Elven Rope.
 item.lothlorien:elven_rope=Elven Rope
 ## Context: Elven Lantern.
 tile.lothlorien:elven_lantern.name=Elven Lantern

@@ -23,10 +23,13 @@ export const SIZE = 40, SIZE_Y = 54, TRUNK_AT = 18;
 const BLOCK_VERSION = 18168865; // as in the vanilla 1.26.30 structures
 
 // --- little-endian NBT (Bedrock) -------------------------------------------------------------
-const T = { byte: 1, int: 3, string: 8, list: 9, compound: 10 };
+const T = { byte: 1, short: 2, int: 3, long: 4, float: 5, string: 8, list: 9, compound: 10 };
 const tag = (type, value, of) => ({ type, value, of });
 const byte = (v) => tag(T.byte, v ? 1 : 0);
 const int = (v) => tag(T.int, v);
+const short = (v) => tag(T.short, v);
+const long = (v) => tag(T.long, BigInt(v));
+const float = (v) => tag(T.float, v);
 const str = (v) => tag(T.string, v);
 const list = (of, items) => tag(T.list, items, of);
 const compound = (obj) => tag(T.compound, obj);
@@ -38,7 +41,10 @@ function encode(root) {
   const s = (v) => { const d = Buffer.from(v, "utf8"); const b = Buffer.alloc(2); b.writeUInt16LE(d.length); parts.push(b, d); };
   const payload = (t) => {
     if (t.type === T.byte) { const b = Buffer.alloc(1); b.writeInt8(t.value); parts.push(b); }
+    else if (t.type === T.short) { const b = Buffer.alloc(2); b.writeInt16LE(t.value); parts.push(b); }
     else if (t.type === T.int) i32(t.value);
+    else if (t.type === T.long) { const b = Buffer.alloc(8); b.writeBigInt64LE(t.value); parts.push(b); }
+    else if (t.type === T.float) { const b = Buffer.alloc(4); b.writeFloatLE(t.value); parts.push(b); }
     else if (t.type === T.string) s(t.value);
     else if (t.type === T.list) { u8(t.value.length ? t.of : 0); i32(t.value.length); for (const e of t.value) payload(e); }
     else if (t.type === T.compound) {
@@ -53,7 +59,17 @@ function encode(root) {
 const stateTag = (v) => (typeof v === "boolean" ? byte(v) : typeof v === "number" ? int(v) : str(v));
 
 // blocks: Map<"x,y,z" (tree coords), { name, states, loot? }>. size/offset default to the giant tree box.
-export function toMcstructure(blocks, [SX, SY, SZ] = [SIZE, SIZE_Y, SIZE], [OX, OY, OZ] = [TRUNK_AT, ROOT_DEPTH, TRUNK_AT]) {
+// Template entity (structure.entities): positions are structure-local because structure_world_origin is 0,0,0.
+// entities: [{ id, x, y, z }] with x/y/z in structure cells (floats allowed).
+const entityTag = ({ id, x, y, z }, n) => compound({
+  Air: short(300), Fire: short(0), OnGround: byte(false), Invulnerable: byte(true), isPersistent: byte(true),
+  identifier: str(id), definitions: list(T.string, [str(`+${id}`)]),
+  Pos: list(T.float, [float(x), float(y), float(z)]), Motion: list(T.float, [float(0), float(0), float(0)]),
+  Rotation: list(T.float, [float(0), float(0)]), UniqueID: long(-(2n ** 33n) - BigInt(n) * 7919n),
+});
+
+// blocks: Map<"x,y,z" (tree coords), { name, states, loot? }>. size/offset default to the giant tree box.
+export function toMcstructure(blocks, [SX, SY, SZ] = [SIZE, SIZE_Y, SIZE], [OX, OY, OZ] = [TRUNK_AT, ROOT_DEPTH, TRUNK_AT], entities = []) {
   const volume = SX * SY * SZ;
   const layer0 = new Array(volume).fill(-1);
   const palette = [], paletteIndex = new Map(), positionData = {};
@@ -94,7 +110,7 @@ export function toMcstructure(blocks, [SX, SY, SZ] = [SIZE, SIZE_Y, SIZE], [OX, 
     size: list(T.int, [SX, SY, SZ].map(int)),
     structure: compound({
       block_indices: list(T.list, [list(T.int, layer0.map(int)), list(T.int, new Array(volume).fill(int(-1)))]),
-      entities: list(T.compound, []),
+      entities: list(T.compound, entities.map(entityTag)),
       palette: compound({ default: compound({ block_palette: list(T.compound, palette), block_position_data: compound(positionData) }) }),
     }),
     structure_world_origin: list(T.int, [0, 0, 0].map(int)),

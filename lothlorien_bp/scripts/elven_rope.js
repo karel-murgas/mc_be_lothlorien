@@ -1,5 +1,7 @@
 // Elven rope (Phase 17b): a stackable item that unrolls a rope on the side of a block, and the script that makes it
-// climbable. Rope pieces are the block `lothlorien:elven_rope` (state `lothlorien:face`).
+// climbable. Rope pieces are the block `lothlorien:elven_rope` (state `lothlorien:face`) and its structure-only twin
+// `lothlorien:elven_rope_hanging` (state `minecraft:cardinal_direction`, same values: Bedrock rotates that state with a
+// rotated structure piece, but not the custom `lothlorien:face`). Both are one rope to every rule below.
 //   - Using the rope on the side of a block hangs pieces in the clicked cell, downwards first, then upwards, one per
 //     item up to the stack. Using it on a piece extends that rope the same way (down from its bottom, then up).
 //   - Breaking any piece breaks the whole rope: every piece drops where it was broken. Losing the wall behind any
@@ -11,9 +13,14 @@ import { repeatedUse } from "./use_guard.js";
 
 const ROPE_ID = "lothlorien:elven_rope";
 const FACE_STATE = "lothlorien:face";
+const HANGING_ID = "lothlorien:elven_rope_hanging";
+const HANGING_STATE = "minecraft:cardinal_direction";
+const ROPE_IDS = new Set([ROPE_ID, HANGING_ID]);
 const HORIZONTAL = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
-const faceOf = (block) => (block?.typeId === ROPE_ID ? block.permutation.getState(FACE_STATE) : undefined);
+// the face a rope permutation hangs on, or undefined for any other block
+const permFace = (perm) => (perm?.type.id === ROPE_ID ? perm.getState(FACE_STATE) : perm?.type.id === HANGING_ID ? perm.getState(HANGING_STATE) : undefined);
+const faceOf = (block) => (block && ROPE_IDS.has(block.typeId) ? permFace(block.permutation) : undefined);
 
 function hasWall(dimension, { x, y, z }, face) {
   const w = wallOffset(face);
@@ -110,9 +117,9 @@ system.beforeEvents.startup.subscribe(({ itemComponentRegistry }) => {
 // Breaking a piece breaks the whole rope: the piece is already gone, the rest is removed and everything drops here
 world.afterEvents.playerBreakBlock.subscribe(({ block, brokenBlockPermutation, player }) => {
   try {
-    if (brokenBlockPermutation.type.id === ROPE_ID) {
+    if (ROPE_IDS.has(brokenBlockPermutation.type.id)) {
       const creative = player.getGameMode() === GameMode.Creative;
-      dropWholeRope(block.dimension, block.location, brokenBlockPermutation.getState(FACE_STATE), { creative, gone: true });
+      dropWholeRope(block.dimension, block.location, permFace(brokenBlockPermutation), { creative, gone: true });
     }
     checkWalls(block.dimension, block.location);
   } catch {
@@ -121,8 +128,8 @@ world.afterEvents.playerBreakBlock.subscribe(({ block, brokenBlockPermutation, p
 });
 world.afterEvents.blockExplode.subscribe(({ block, dimension, explodedBlockPermutation }) => {
   try {
-    if (explodedBlockPermutation?.type.id === ROPE_ID) {
-      dropWholeRope(dimension, block.location, explodedBlockPermutation.getState(FACE_STATE), { gone: true });
+    if (ROPE_IDS.has(explodedBlockPermutation?.type.id)) {
+      dropWholeRope(dimension, block.location, permFace(explodedBlockPermutation), { gone: true });
     }
     checkWalls(dimension, block.location);
   } catch {
@@ -145,7 +152,7 @@ export function inRope(player) {
   const { x, y, z } = player.location;
   const cx = Math.floor(x);
   const cz = Math.floor(z);
-  return [Math.floor(y), Math.floor(y + 1)].some((cy) => player.dimension.getBlock({ x: cx, y: cy, z: cz })?.typeId === ROPE_ID);
+  return [Math.floor(y), Math.floor(y + 1)].some((cy) => ROPE_IDS.has(player.dimension.getBlock({ x: cx, y: cy, z: cz })?.typeId));
 }
 
 // player id -> { v: modelled vertical speed while climbing (see levitationStep), else null;

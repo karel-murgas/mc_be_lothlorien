@@ -13,6 +13,7 @@ import { startRopeClimbing } from "./elven_rope.js";
 import "./athelas.js";
 import "./trees.js";
 import "./great_mallorn.js";
+import "./rail_mender.js";
 import { leafUndersideY } from "./leaf_fall.js";
 import { handleDisharmonyEvent, startDisharmony } from "./disharmony_game.js";
 import { startDeer } from "./deer.js";

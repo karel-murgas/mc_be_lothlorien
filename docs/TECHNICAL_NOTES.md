@@ -1063,60 +1063,103 @@ outward side. The lowest foot layer was removed at the owner's request; this rev
 Static verification and deployment do not prove rendering or Creative menu placement. Check the golden palette,
 icon scale and all lamp groups in game, plus the jar's glass sorting and the lantern's four-sided glow.
 
-## Elven village (jigsaw, prototype)
+## Elven village (jigsaw, R3 layout)
 
-Written 2026-10-07, offline-checked only, **not yet seen in game**. Design: `docs/design/lothlorien_jigsaw_settlement.md`;
-engine notes: `.claude/skills/bedrock-modding/references/10-jigsaw-pieces.md`.
+Layout redesign R3 written 2026-10-07, offline-checked only (sim + tests), **not yet seen in game**. Design:
+`docs/design/lothlorien_jigsaw_settlement.md`; engine notes: `.claude/skills/bedrock-modding/references/10-jigsaw-pieces.md`.
 
-Rebuild everything (pieces, pools, structure): `node tools/build_village.mjs` (helpers in `tools/village_mallorn.mjs`;
-exports from `build_structures.mjs` / `flet_mallorn.mjs`). Then `.\mods verify lothlorien`.
+Rebuild everything (pieces, pools, structure; it first deletes old village pieces and pools): `node tools/build_village.mjs`
+(geometry in `tools/village_mallorn.mjs`, exports from `build_structures.mjs` / `flet_mallorn.mjs`). Then `.\mods verify lothlorien`.
 
 **Connector standard** (every piece obeys it; the generator and `tests/run.mjs` check it):
-- One `minecraft:jigsaw` per connection, in the deck layer, on the outer face of the piece's bounding box, in the
-  middle of a 3-wide walk opening, facing outward. `name` = `target` = `lothlorien:village_deck`, joint `aligned`,
-  `final_state` = `lothlorien:mallorn_planks`; `target_pool` depends on the piece type (below).
-- Cross-section: 5-wide deck, walk cells -1..+1, `lothlorien:mallorn_fence` rails at +-2 one above the deck,
-  explicit air for 3 blocks above the walk cells (headroom, so wild leaves cannot block it).
-- FLOOR_H = 16: all decks are 16 above the template's nominal ground (bridges are at their own y 0). ROOTS = 10:
-  trunks and pillars reach 10 below nominal ground. All elements `"projection": "rigid"`.
-- Nothing (leaves, branches) enters the 5x4 corridor in front of a connector or sticks out of the box.
-- Pools `lothlorien:village/{start,bridges,nodes,ends,plugs}` (files `village_*.json`), pieces
-  `lothlorien:village/<name>` (`structures/lothlorien/village/`). Fallbacks: bridges -> plugs, nodes -> ends,
-  ends -> `minecraft:empty`.
+- One `minecraft:jigsaw` per connection in the deck layer, on the outer face of the piece's bounding box, in the middle of a
+  3-wide walk opening, facing outward. `name` = `lothlorien:village_deck` (upper-level connectors of towers:
+  `village_deck_hi`, so they only act as parents), `target` = `village_deck`, joint `aligned`, `final_state` planks.
+- Cross-section (depth 1, the connector cell itself): deck under 5 cells, walk cells -1..+1 with 3 air above, rails
+  (`RAIL`) at +-2 one above the deck. Platform connectors are **rim connectors**: the platform box is the deck footprint,
+  the connector sits on a box face at an offset (0..+-3) along a straight face run; no stub walkways.
+- **Rails:** one constant `RAIL` in `village_mallorn.mjs` (now `lothlorien:mallorn_fence`); the owner may swap it. Rails are
+  straight runs and square corners only (rim = deck cells with a missing 8-neighbour; outer corner posts at the stair).
+  `writeRails` stores `minecraft:connection_*` states: another rail block needs its own states there.
+- Heights: FLOOR_H 16 (lower deck above nominal ground), upper deck +8 (LEVEL_H), ROOTS 18. Pieces are `rigid`.
+- **Crowns:** a tree = platform piece + crown piece. The platform has an upward jigsaw (`facing_direction` 1, joint
+  `rollable`, name = target `lothlorien:village_crown`, `final_state` the plain mallorn log, whose default block_face is
+  vertical) on its trunk axis in the top layer, 5 above the highest deck; the crown's jigsaw faces down (0) in its box's
+  bottom centre. So a crown box starts 6 above the deck: above the 3-high headroom and the top of a rise-2 arch box
+  (deck + 5), and a crown may overhang a neighbouring bridge without colliding. The trunk continues from the jigsaw upward
+  inside the crown. Both vertical jigsaws are **unverified in game** (Java rules assumed; the sim models them).
 
-| Piece | Box x*z | Connectors | Points at pool |
+| Piece (structure `lothlorien:village/<name>`) | Box x*y*z | Connectors | Points at pool |
 |---|---|---|---|
-| `central_mallorn_01` (start) | 33x33, 5x5 trunk | 4 | bridges |
-| `tree_platform_01` | 25x25, 3x3 trunk | 3 (T) | bridges |
-| `tree_platform_02` | 25x25, 3x3 trunk | 2 (straight/corner) | bridges |
-| `bridge_short` / `bridge_long` | 5x7 / 5x11 | 2 | nodes |
-| `lookout_01` (end) | <=9x9 on a log pillar | 1 | empty |
-| `railing_end` (plug) | 5x1 | 1 | empty |
+| `central_mallorn_01` start, 21x21 octagon deck, 5x5 round trunk, rope, anchor | 21x40x21 | 4 (N E S W, offsets -3 2 4 -2) | bridges (crown: crowns_central) |
+| `node_a` cut-corner rectangle | 13x40x11 | 2 | bridges |
+| `node_b` stepped octagon | 15x40x15 | 3 | bridges |
+| `node_c` plus shape | 15x40x15 | 4 | bridges |
+| `node_d` oval (straight runs) | 17x40x13 | 3 | bridges |
+| `node_e` small cut-corner | 11x40x11 | 2 | bridges |
+| `node_f` wide cut-corner | 17x40x11 | 3 | bridges |
+| `tower_a/b/c` two levels (8 apart), 3x3 trunk, slab spiral stair | 15x48x15, 15x48x15, 17x48x13 | 2 + 2 (upper `_hi`), 3 + 2, 2 + 2 | bridges |
+| `crown_small / medium / large` | 9x14x9, 13x18x13, 17x22x17 | down jigsaw | empty |
+| `crown_central_a / b` | 25x28x25, 21x24x21 | down jigsaw | empty |
+| `bridge_5/7/9/11/13` straight slab arches | 5 x (5 or 6) x length | 2 | nodes |
+| `bridge_dog_11_l/r`, `bridge_dog_13_l/r` sideways shift 2 / 3 | 7x6x11, 8x6x13 | 2 | nodes |
+| `balcony_small` half-round end with lantern | 7x4x6 | 1 | empty |
+| `lookout_01` platform on a pillar | 9x38x9 | 1 | empty |
+| `railing_end` plug | 5x2x1 | 1 | empty |
 
-Pool weights: bridges short 5, long 5, plug 1; nodes platform_01 1, platform_02 1; ends lookout 4, plug 1.
-The central tree has the Elven rope from the ground through a hole and lanterns; bridges have fence rails, the long one
-a lantern post pair.
+- **Bridges:** walking surface in half blocks `k(z) = min(z, L-1-z, top)`, top 2 (rise 1) for L <= 7 and 4 (rise 2) for
+  L >= 9; even k = planks at layer k/2, odd k = bottom `lothlorien:mallorn_slab` (`minecraft:vertical_half` = bottom, a
+  vanilla-named state) at layer (k+1)/2, so every step is 0.5 block (steppable without jumping). Rails stand one cell above
+  the block the walker stands on (above a bottom slab that leaves a half-block gap, like a fence on a slab in vanilla).
+  Dog-legs: two straight 5-wide parts joined by 3 full-width rows on the plateau (rails turn at square corners); L and R
+  files because the engine never mirrors.
+- **Spiral stair** (towers): the 16 cells of the 5x5 ring round the 3x3 trunk, one half-step per cell (cell i: surface
+  3 + i half blocks, planks on even, bottom slab on odd), 3 air above each; the upper deck is cut over ring cells 9..13 and
+  the last two cells (14, 15) are the exit onto it; rails float one above the stair block on the outer side from cell 3
+  on, and the cut gets rails except at the exit. The upper deck clips away what lies beyond the stair well (tower_a: no
+  south arm), otherwise the well rail would cut that part off.
+- **Pools** (`village_*.json`): `start` central; `bridges` (5:2, 7:3, 9:3, 11:2, 13:1, four dog-legs 1 each; fallback
+  `plugs`); `nodes` (six nodes 3 each, three towers 3 each, balcony 4, lookout 1; fallback `ends`); `ends` (balcony 8,
+  lookout 2, plug 1; fallback empty); `plugs`; `crowns` (large 3, medium 2; fallback `crowns_small`); `crowns_small`;
+  `crowns_central` (a 2, b 1; fallback `crowns_small`).
+- **Structure** `lothlorien:elven_village`: start pool `village/start`, `start_jigsaw_name` `lothlorien:village_anchor`
+  (trunk base of the central tree), `max_depth` **5** (central 0, bridge 1, node 2, bridge 3, node 4; the nodes of the
+  last generation still get full crowns and a last bridge to a balcony or lookout), `start_height` -18,
+  `heightmap_projection` `world_surface`, `terrain_adaptation` none, biome filter `lothlorien`, max distance 116.
+  **No structure set**: only `/place structure lothlorien:elven_village` (owner decision).
 
-**Structure** `lothlorien:elven_village` (`worldgen/structures/elven_village.json`): start pool `village/start`,
-`start_jigsaw_name` `lothlorien:village_anchor` (trunk base of the central tree), `max_depth` 6, `start_height` -10,
-`heightmap_projection` `world_surface`, `terrain_adaptation` none, biome filter `lothlorien`, max distance 116.
-**No structure set**: it only appears with `/place structure lothlorien:elven_village` (owner decision).
+**Simulator** `node tools/village_sim.mjs [seeds] [firstSeed]` (PNGs of 6 seeds + one side view in
+`temp/elven_village/sim/`, old PNGs deleted first; `VILLAGE_MAX_DEPTH=n` overrides max_depth for tuning). It reads the real
+`.mcstructure` and pool files, assembles villages with the Java algorithm incl. vertical rollable jigsaws, and checks:
+connectors meet (deck, rails, rail links across the joint), crown trunk continuity and crown box above the headroom, no
+box overlaps, termination, **3D walkability** (surfaces are planks/slabs, 2 blocks clear above, steps of <= 0.5 between
+4-neighbours, every walk cell reachable from the central deck), plus rope sides, leaf decay and one-way rail links.
+Numbers (100 seeds, max_depth 5): pieces 19 / 54.2 / 82, trees 4 / 9.4 / 14, towers 2.3, villages using 2+ levels 84,
+avg 2.1 levels, bridges 16.2 straight + 5.9 dog-leg, balconies 8.8, lookouts 1.9, plugs 2.8, **open connectors 0.5**
+(0.2 of them a crown that found no room), crowns 9.2 (0.2 fell back to small); **0 unreachable walk cells, 0 box
+overlaps, 0 wrong rope sides, 0 decaying leaves, 0 failures**. 22 one-way rail links in 100 villages, all at open ends that
+touch a platform (a bridge end rail links outward to a rim that does not link back).
 
-**Simulator** `node tools/village_sim.mjs [seeds] [firstSeed]` (PNGs in `temp/elven_village/sim/`; works from bash and
-PowerShell: the main guard compares real paths because `C:\mcmods` is a junction). It reads the real `.mcstructure` and pool JSON files and
-assembles villages with Java jigsaw semantics (aligned joints, box collision, depth-first by depth, fallbacks), then
-checks: connectors meet (deck under 5 cells, rails, headroom), no box overlaps, every platform reachable on the deck,
-termination. Current numbers (100 seeds): 17 / 35.6 / 54 pieces (min/avg/max), 0 failures, 100 distinct layouts,
-92 unfilled connectors in total (~0.9 per village). The simulator encodes our assumptions about the engine; compare
-with the game and correct it where they differ.
+**Engine-state fixes (round 2, 2026-10-07; in-game check pending).** From the owner's world save
+(`.claude/skills/bedrock-modding/references/10-jigsaw-pieces.md` section 6):
+- *Leaves:* the orphan trim (`trimFarLeaves`, 8 steps) is the last clearing step in `buildTree` and `buildCrown`; the test
+  checks every shipped structure (no orphan leaves).
+- *Fences:* templates are symmetric (tested); Bedrock drops a link toward the later-placed neighbour in some cells (cause
+  unknown), so rails are straight runs with square corners and the rail block is one constant for the owner to change.
+- *Rope:* `lothlorien:elven_rope_hanging` (structure-only twin, `minecraft:cardinal_direction`, hidden from Creative) is
+  used by the central tree and the flet giants; assumes Bedrock turns `cardinal_direction` like `block_face`.
 
-**Known limits:** open deck stubs (~0.9 per village a connector has no room even for the railing plug, so a 5-wide
-deck ends without a rail); the rope's `lothlorien:face` and fence connection states may not rotate with rotated
-pieces; rigid placement on uneven terrain (platforms keep one height, trunks reach 10 below, so steep slopes leave
-trunks floating or buried); village Mallorns are smaller than the wild giants (25/33-block boxes).
+**Known limits:** a bridge end next to a platform that is not its target stays an open rail stub; the crown of a tree
+beside an upper-level balcony or bridge can find no room even as `crown_small` (0.2 per village, the trunk then ends in a
+log stub); a chain of towers climbs 8 per step (decks at 16, 24, 32 above the nominal ground; with ROOTS 18 the trunks
+still reach the ground); rigid placement on uneven terrain.
 
-**In-game test checklist:** new world in the Lothlorien biome, or any world with `/place structure lothlorien:elven_village`.
-Check: (1) it places without an error message (if `/place` fails, note the exact message text); (2) central tree with
-the rope reaching up from the ground; (3) bridges meet platforms exactly, in all 4 rotations (place several times);
-(4) rails and fences connect, no gaps; (5) ropes face the trunk; (6) lanterns present; (7) no jigsaw blocks left;
-(8) layouts differ between placements; (9) trunk bottoms vs terrain; (10) open stubs, not too many.
+**In-game test checklist:** world in the Lothlorien biome or any world, `/place structure lothlorien:elven_village`.
+Check: (1) it places without an error message; (2) central tree with the rope reaching the deck, crown on top;
+(3) every tree has a crown (vertical jigsaw works, crowns spin) and the trunk is continuous; (4) bridges meet platforms
+exactly in all 4 rotations and the arches walk without jumping (slabs); (5) the spiral stair in towers: walkable, rails,
+2 blocks headroom, exit onto the upper deck; (6) rails: which links the engine drops (owner picks the rail block later);
+(7) ropes face the trunk; (8) lanterns present; (9) no jigsaw blocks left; (10) layouts differ, 8-10 trees, a second level
+in most; (11) trunk bottoms vs terrain, open stubs.
+
+**Fence link repair (2026-10-07, written, not yet seen in game).** Village rail pieces carry an invisible marker entity `lothlorien:rail_mender`; `scripts/rail_mender.js` mends dropped `minecraft:connection_*` links (own fences only, never off) once when the marker loads, then removes it. Whether Bedrock jigsaw places template entities is unverified. Details: workspace skill `bedrock-modding/references/10-jigsaw-pieces.md`.

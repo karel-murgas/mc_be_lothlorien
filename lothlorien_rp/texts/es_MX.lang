@@ -222,6 +222,8 @@ item.spawn_egg.entity.lothlorien:squirrel.name=Huevo generador: Ardilla del bosq
 ## Context: Elven Rope.
 tile.lothlorien:elven_rope.name=Cuerda élfica
 ## Context: Elven Rope.
+tile.lothlorien:elven_rope_hanging.name=Cuerda élfica
+## Context: Elven Rope.
 item.lothlorien:elven_rope=Cuerda élfica
 ## Context: Elven Lantern.
 tile.lothlorien:elven_lantern.name=Farol élfico

@@ -148,7 +148,7 @@ const plains = Array.from({ length: 30 }, (_, i) => buildFletMallorn(makeRandom(
 const at = (t, x, y, z) => t.blocks.get(`${x},${y},${z}`)?.name;
 test("flet: ladder unbroken from the ground through the floor, with a floor to step onto", () => {
   for (const t of flets) {
-    for (let y = 0; y <= t.floorY; y++) assert.equal(at(t, LADDER.x, y, LADDER.z), B.rope, `ladder gap at y ${y}`);
+    for (let y = 0; y <= t.floorY; y++) assert.equal(at(t, LADDER.x, y, LADDER.z), B.ropeHanging, `ladder gap at y ${y}`);
     for (let y = 0; y <= t.floorY + 2; y++) assert.equal(at(t, LADDER.x, y, LADDER.z - 1) === B.leaves || at(t, LADDER.x, y, LADDER.z - 1) === B.log, false);
     assert.equal(at(t, LADDER.x, t.floorY, LADDER.z - 1), B.planks);
     for (let y = t.floorY + 1; y <= t.floorY + 3; y++) assert.equal(at(t, LADDER.x, y, LADDER.z), undefined, "headroom over the hole");
@@ -192,7 +192,7 @@ test("giants: tree fits the structure box and drops few leaves", () => {
 
 test("plain giant: no platform, fence, ladder or chest", () => {
   for (const t of plains) {
-    for (const v of t.blocks.values()) assert.ok(![B.rope, B.chest, B.fence, B.planks].includes(v.name), v.name);
+    for (const v of t.blocks.values()) assert.ok(![B.ropeHanging, B.chest, B.fence, B.planks].includes(v.name), v.name);
   }
 });
 
@@ -205,12 +205,12 @@ test("round trunk: 12 cells (corners cut above the roots) up to the top of the 4
     for (let y = -ROOT_DEPTH; y < t.floorY; y++) {
       for (const [x, z] of [[0, 0], [3, 0], [0, 3], [3, 3]]) if (y > 3) assert.ok(![B.log, B.wood].includes(at(t, x, y, z)), `corner log above the foot at ${x},${y},${z}`);
       for (let x = 0; x < 4; x++) for (let z = 0; z < 4; z++) {
-        if (![0, 3].includes(x) || ![0, 3].includes(z)) assert.equal([B.log, B.wood, B.rope].includes(at(t, x, y, z)), true, `hole in trunk ${x},${y},${z}`);
+        if (![0, 3].includes(x) || ![0, 3].includes(z)) assert.equal([B.log, B.wood, B.ropeHanging].includes(at(t, x, y, z)), true, `hole in trunk ${x},${y},${z}`);
       }
     }
   }
   for (const t of roundFlets) {
-    for (let y = 0; y <= t.floorY; y++) assert.equal(at(t, ROUND_LADDER.x, y, ROUND_LADDER.z), B.rope, `ladder gap at y ${y}`);
+    for (let y = 0; y <= t.floorY; y++) assert.equal(at(t, ROUND_LADDER.x, y, ROUND_LADDER.z), B.ropeHanging, `ladder gap at y ${y}`);
     for (let y = -ROOT_DEPTH; y <= t.floorY; y++) assert.ok([B.log, B.wood].includes(at(t, ROUND_LADDER.x, y, ROUND_LADDER.z + 1)), `nothing behind the ladder at y ${y}`);
     for (let y = 0; y <= t.floorY + 2; y++) assert.ok(![B.leaves, B.log, B.wood].includes(at(t, ROUND_LADDER.x, y, ROUND_LADDER.z - 1)), "ladder front blocked");
     for (let y = t.floorY + 1; y <= t.floorY + 3; y++) assert.equal(at(t, ROUND_LADDER.x, y, ROUND_LADDER.z), undefined, "headroom over the hole");
@@ -242,7 +242,7 @@ test("round trunk: fits the box and keeps leaves in reach of a log", () => {
     }
     assert.ok(t.trimmed < 60);
   }
-  for (const t of roundPlains) for (const v of t.blocks.values()) assert.ok(![B.rope, B.chest, B.fence, B.planks].includes(v.name), v.name);
+  for (const t of roundPlains) for (const v of t.blocks.values()) assert.ok(![B.ropeHanging, B.chest, B.fence, B.planks].includes(v.name), v.name);
 });
 
 test("giants: the jigsaw pool matches CHOSEN, every piece ships, the structure set uses it", () => {
@@ -1277,7 +1277,7 @@ test("Elven rope: block, item and recipe agree", () => {
 test("flet tree: the rope hangs on the trunk, facing away from it", () => {
   for (const t of flets) {
     const piece = t.blocks.get(`${LADDER.x},0,${LADDER.z}`);
-    assert.deepEqual(piece, { name: B.rope, states: { "lothlorien:face": "north" } });
+    assert.deepEqual(piece, { name: B.ropeHanging, states: { "minecraft:cardinal_direction": "north" } });
     assert.ok([B.log, B.wood].includes(at(t, LADDER.x, 0, LADDER.z + 1)), "wall behind the rope");
   }
 });
@@ -1355,64 +1355,276 @@ test("Mallorn boat items use the boat and chest-boat creative groups", () => {
     }
   }
 });
-// --- Elven village: connector standard of every piece, pools, and assembled villages (tools/village_sim.mjs) ---
+// --- Elven village (R3 layout): connector standard of every piece, vertical crown jigsaws, slab arches, pools, assembled villages ---
 const VILLAGE = "../lothlorien_bp/structures/lothlorien/village";
 const villageData = loadVillageData();
-const DECK_NAME = "lothlorien:village_deck";
-test("village: every deck connector is on the box face, faces outward, and follows the connector standard", () => {
-  const files = readdirSync(new URL(`${VILLAGE}/`, import.meta.url)).filter((f) => f.endsWith(".mcstructure"));
-  assert.ok(files.length >= 7, `${files.length} village pieces`);
-  for (const f of files) {
-    const name = f.replace(".mcstructure", "");
-    const piece = parseMcstructure(readFileSync(new URL(`${VILLAGE}/${f}`, import.meta.url)), name);
-    const [sx, , sz] = piece.size;
-    const deckJigsaws = piece.jigsaws.filter((j) => j.name === DECK_NAME);
+const DECK_NAME = "lothlorien:village_deck", DECK_HI_NAME = "lothlorien:village_deck_hi", CROWN_NAME = "lothlorien:village_crown";
+const MALLORN_LOG = "lothlorien:mallorn_log";
+const villagePieces = () => readdirSync(new URL(`${VILLAGE}/`, import.meta.url)).filter((f) => f.endsWith(".mcstructure")).map((f) =>
+  parseMcstructure(readFileSync(new URL(`${VILLAGE}/${f}`, import.meta.url)), f.replace(".mcstructure", "")));
+const isTree = (n) => /^(node_|tower_|central_)/.test(n);
+test("village: every deck connector is a rim connector on the box face, faces outward and follows the connector standard", () => {
+  const pieces = villagePieces();
+  assert.ok(pieces.length >= 25, `${pieces.length} village pieces`);
+  for (const piece of pieces) {
+    const name = piece.name, [sx, , sz] = piece.size;
+    const deckJigsaws = piece.jigsaws.filter((j) => j.dir && j.pool !== undefined && j.target === DECK_NAME);
+    if (name.startsWith("crown_")) { assert.equal(deckJigsaws.length, 0, `${name}: crowns have no deck connector`); continue; }
     assert.ok(deckJigsaws.length >= 1, `${name}: no deck connector`);
     for (const j of deckJigsaws) {
       const tag = `${name} ${j.dirId}@${j.x},${j.y},${j.z}`;
-      assert.ok(j.dir, `${tag}: not a horizontal facing`);
       const [dx, dz] = j.dir;
       const onFace = dx === 1 ? j.x === sx - 1 : dx === -1 ? j.x === 0 : dz === 1 ? j.z === sz - 1 : j.z === 0;
       assert.ok(onFace, `${tag}: not on the outer face of the box`);
-      assert.equal(j.target, DECK_NAME, `${tag}: target`);
+      assert.ok(j.name === DECK_NAME || (j.name === DECK_HI_NAME && /^tower_/.test(name)), `${tag}: name ${j.name}`);
       assert.equal(j.final, PLANKS, `${tag}: final_state`);
       assert.equal(j.joint, "aligned", `${tag}: joint`);
-      const plug = name === "railing_end", depth = plug || name === "lookout_01" ? 1 : 4;
-      const pp = [-dz, dx];
-      for (let a = 0; a < depth; a++) for (let off = -2; off <= 2; off++) {
-        const x = j.x - dx * a + pp[0] * off, z = j.z - dz * a + pp[1] * off, at = (h) => piece.at(x, j.y + h, z);
+      const plug = name === "railing_end", pp = [-dz, dx];
+      for (let off = -2; off <= 2; off++) {
+        const x = j.x + pp[0] * off, z = j.z + pp[1] * off, at = (h) => piece.at(x, j.y + h, z);
         const deck = at(0);
-        assert.ok(a === 0 && off === 0 ? deck === "minecraft:jigsaw" : deck === PLANKS, `${tag}: deck at ${a},${off} is ${deck}`);
-        if (Math.abs(off) === 2) {
-          assert.equal(at(1), FENCE, `${tag}: rail at ${a},${off}`);
-          if (!plug) for (let h = 2; h <= 3; h++) assert.ok([undefined, null, "minecraft:air", LANTERN_ID].includes(at(h)), `${tag}: rail column ${a},${off},${h}: ${at(h)}`);
-        } else if (!plug) for (let h = 1; h <= 3; h++) assert.ok([null, "minecraft:air"].includes(at(h)), `${tag}: headroom ${a},${off},${h}: ${at(h)}`);
+        assert.ok(off === 0 ? deck === "minecraft:jigsaw" : deck === PLANKS, `${tag}: deck at ${off} is ${deck}`);
+        if (Math.abs(off) === 2) assert.equal(at(1), FENCE, `${tag}: rail at ${off}`);
+        else if (!plug) for (let h = 1; h <= 3; h++) assert.ok([null, "minecraft:air"].includes(at(h)), `${tag}: headroom ${off},${h}: ${at(h)}`);
       }
     }
   }
 });
+test("village: tree pieces carry an upward rollable crown jigsaw (log final state) 5 above the top deck; crowns have the matching downward one", () => {
+  const pieces = villagePieces();
+  const trees = pieces.filter((p) => isTree(p.name));
+  assert.ok(trees.length >= 10, `${trees.length} tree pieces`);
+  for (const p of trees) {
+    const ups = p.jigsaws.filter((j) => j.dirId === 1);
+    assert.equal(ups.length, 1, `${p.name}: upward jigsaws`);
+    const [j] = ups, [sx, sy, sz] = p.size;
+    assert.equal(j.name, CROWN_NAME); assert.equal(j.target, CROWN_NAME); assert.equal(j.joint, "rollable"); assert.equal(j.final, MALLORN_LOG);
+    assert.ok(villageData.pools.has(j.pool), `${p.name}: crown pool ${j.pool}`);
+    assert.equal(j.y, sy - 1, `${p.name}: crown jigsaw on the top face`);
+    assert.deepEqual([j.x, j.z], [(sx - 1) / 2, (sz - 1) / 2], `${p.name}: crown jigsaw on the trunk axis`);
+    const topDeck = Math.max(...p.jigsaws.filter((k) => k.dir).map((k) => k.y));
+    assert.equal(j.y - topDeck, 5, `${p.name}: crown box starts 6 above the top deck (headroom + highest arch box)`);
+    assert.equal(p.at(j.x, j.y - 1, j.z), MALLORN_LOG, `${p.name}: trunk reaches the jigsaw`);
+  }
+  const crowns = pieces.filter((p) => p.name.startsWith("crown_"));
+  assert.ok(crowns.length >= 5);
+  for (const p of crowns) {
+    const downs = p.jigsaws.filter((j) => j.dirId === 0);
+    assert.equal(downs.length, 1, `${p.name}: downward jigsaws`);
+    const [j] = downs, [sx, , sz] = p.size;
+    assert.equal(j.name, CROWN_NAME); assert.equal(j.target, CROWN_NAME); assert.equal(j.final, MALLORN_LOG); assert.equal(j.pool, "minecraft:empty");
+    assert.deepEqual([j.x, j.y, j.z], [(sx - 1) / 2, 0, (sz - 1) / 2], `${p.name}: jigsaw at the bottom centre`);
+    assert.equal(p.at(j.x, 1, j.z), MALLORN_LOG, `${p.name}: the trunk continues above the jigsaw`);
+    assert.ok(p.blocks.some((b) => b.name === "lothlorien:mallorn_leaves"), `${p.name}: leaves`);
+    assert.equal(p.blocks.filter((b) => b.y === 0 && b.name !== "lothlorien:mallorn_leaves").length, 0, `${p.name}: nothing else in the jigsaw layer`);
+  }
+  const pool = (id) => villageData.pools.get(`lothlorien:village/${id}`);
+  const locs = (id) => pool(id).elements.map((e) => e.element.location.split("/").pop());
+  assert.deepEqual(locs("crowns"), ["crown_large", "crown_medium"]);
+  assert.equal(pool("crowns").fallback, "lothlorien:village/crowns_small");
+  assert.deepEqual(locs("crowns_small"), ["crown_small"]);
+  assert.equal(pool("crowns_central").fallback, "lothlorien:village/crowns_small");
+  assert.ok(locs("crowns_central").length >= 2);
+  assert.equal(pool("ends").elements.length, 3);
+  assert.equal(pool("bridges").fallback, "lothlorien:village/plugs");
+  assert.equal(pool("nodes").fallback, "lothlorien:village/ends");
+  assert.ok(villageData.getPiece("lothlorien/village/central_mallorn_01").jigsaws.some((j) => j.name === "lothlorien:village_anchor"), "start anchor");
+});
+test("village: the one rail constant is the only rail block, bridges are symmetric slab arches in half steps, rails follow", () => {
+  const SLAB_ID = "lothlorien:mallorn_slab";
+  for (const p of villagePieces()) {
+    for (const b of p.blocks) assert.ok(!b.name.endsWith("_fence") || b.name === FENCE, `${p.name}: another rail block ${b.name}`);
+    for (const b of p.blocks) if (b.name === SLAB_ID) assert.ok(["bottom", "top"].includes(b.states["minecraft:vertical_half"]), `${p.name}: slab state`);
+  }
+  for (const L of [5, 7, 9, 11, 13]) {
+    const p = parseMcstructure(readFileSync(new URL(`${VILLAGE}/bridge_${L}.mcstructure`, import.meta.url)), `bridge_${L}`);
+    const surf = [];
+    for (let z = 0; z < L; z++) {
+      let s = null;
+      for (let y = 0; y < p.size[1]; y++) {
+        const n = p.at(2, y, z);
+        if (n === PLANKS) s = 2 * y + 2; else if (n === SLAB_ID) s = 2 * y + 1;
+        if (n === "minecraft:jigsaw") s = 2 * y + 2;
+      }
+      surf.push(s);
+    }
+    assert.equal(surf[0], 2, `bridge_${L}: starts at the connector deck`);
+    assert.deepEqual(surf, [...surf].reverse(), `bridge_${L}: symmetric arch ${surf}`);
+    for (let z = 1; z < L; z++) assert.ok(Math.abs(surf[z] - surf[z - 1]) <= 1, `bridge_${L}: step > 0.5 block at ${z}: ${surf}`);
+    assert.equal(Math.max(...surf) - 2, L <= 7 ? 2 : 4, `bridge_${L}: rise`);
+    for (let z = 0; z < L; z++) for (const x of [0, 4]) { // rail one cell above the block the walker stands on
+      const layer = surf[z] % 2 === 0 ? surf[z] / 2 - 1 : (surf[z] - 1) / 2;
+      assert.equal(p.at(x, layer + 1, z), FENCE, `bridge_${L}: rail at ${x},${z}`);
+    }
+  }
+  for (const n of ["bridge_dog_11_l", "bridge_dog_11_r", "bridge_dog_13_l", "bridge_dog_13_r"]) assert.ok(readdirSync(new URL(`${VILLAGE}/`, import.meta.url)).includes(`${n}.mcstructure`), n);
+});
+test("village: platform shapes differ (irregular rectilinear outlines of different sizes)", () => {
+  const seen = new Map();
+  for (const p of villagePieces().filter((q) => isTree(q.name))) {
+    const ys = p.jigsaws.filter((j) => j.dir).map((j) => j.y), y = Math.min(...ys);
+    const cells = p.blocks.filter((b) => b.y === y && b.name === PLANKS).map((b) => `${b.x},${b.z}`).sort().join(";") + `|${p.size}`;
+    seen.set(p.name, cells);
+  }
+  const trees = [...seen.keys()].filter((n) => /^node_/.test(n));
+  assert.equal(new Set(trees.map((n) => seen.get(n))).size, trees.length, "node platforms are all different");
+  const sizes = new Set([...seen.keys()].map((n) => villageData.getPiece(`lothlorien/village/${n}`).size.slice(0, 1).concat(villageData.getPiece(`lothlorien/village/${n}`).size.slice(2)).join("x")));
+  assert.ok(sizes.size >= 5, `footprint sizes: ${[...sizes]}`);
+});
 test("village: pools, fallbacks, piece files and connector pools all resolve", () => {
   const ids = [...villageData.pools.keys()].filter((k) => k.startsWith("lothlorien:village/"));
-  assert.ok(ids.length >= 5, `${ids.length} pools`);
+  assert.ok(ids.length >= 8, `${ids.length} pools`);
   for (const id of ids) {
     const p = villageData.pools.get(id);
     for (const e of p.elements) {
       assert.ok(existsSync(new URL(`../lothlorien_bp/structures/${e.element.location}.mcstructure`, import.meta.url)), `${id}: ${e.element.location}`);
       for (const j of villageData.getPiece(e.element.location).jigsaws) {
-        if (j.name === DECK_NAME) assert.ok(j.pool === "minecraft:empty" || villageData.pools.has(j.pool), `${id}: ${e.element.location} points at missing pool ${j.pool}`);
+        if (j.name === DECK_NAME || j.name === DECK_HI_NAME || j.name === CROWN_NAME) assert.ok(j.pool === "minecraft:empty" || villageData.pools.has(j.pool), `${id}: ${e.element.location} points at missing pool ${j.pool}`);
       }
     }
     if (p.fallback && p.fallback !== "minecraft:empty") assert.ok(villageData.pools.has(p.fallback), `${id}: fallback ${p.fallback}`);
   }
   assert.ok(villageData.pools.has(villageData.structure.start_pool));
   assert.ok(villageData.structure.max_depth >= 1);
+  const used = new Set([...villageData.pools.values()].flatMap((p) => p.elements.map((e) => e.element.location.split("/").pop())));
+  for (const p of villagePieces()) assert.ok(used.has(p.name), `${p.name}: piece file is in no pool (remove it)`);
 });
-test("village: 30 simulated villages connect, never overlap, terminate and are fully walkable", () => {
+let villageRows = null;
+const villages = () => (villageRows ??= runSeeds(villageData, 30, 1));
+test("village: 30 simulated villages connect, never overlap, terminate, are fully walkable in 3D, have crowns and ~8-10 trees", () => {
   const t0 = Date.now();
-  const rows = runSeeds(villageData, 30, 1);
-  for (const r of rows) assert.deepEqual([...new Set(r.ck.fail)].slice(0, 3), [], `seed ${r.seed}`);
+  const rows = villages();
+  for (const r of rows) {
+    assert.deepEqual([...new Set(r.ck.fail)].slice(0, 3), [], `seed ${r.seed}`);
+    assert.equal(r.ck.unreachable, 0, `seed ${r.seed}: unreachable walk cells`);
+    assert.equal(r.ck.overlaps, 0);
+    assert.ok(r.ck.walkCells > 200 && r.ck.reached === r.ck.walkCells, `seed ${r.seed}: walk cells ${r.ck.reached}/${r.ck.walkCells}`);
+    assert.ok(r.ck.kinds.crown >= r.ck.kinds.trees - 3, `seed ${r.seed}: crowns ${r.ck.kinds.crown} for ${r.ck.kinds.trees} trees`);
+  }
   assert.ok(new Set(rows.map((r) => r.hash)).size >= 25, "layouts barely vary");
+  const avg = rows.reduce((s, r) => s + r.ck.kinds.trees, 0) / rows.length;
+  assert.ok(avg >= 7 && avg <= 12, `average ${avg} trees`);
+  assert.ok(rows.filter((r) => r.ck.levels >= 2).length >= rows.length * 0.6, "two levels in most villages");
+  assert.ok(rows.reduce((s, r) => s + r.ck.open, 0) / rows.length <= 1.5, "too many open connectors");
   assert.ok(Date.now() - t0 < 20000, `simulation took ${Date.now() - t0} ms`);
 });
+// --- Elven village: engine-state fixes (leaf decay, fence links, rope side under rotation) ---
+const shippedStructures = () => ["../lothlorien_bp/structures/lothlorien", VILLAGE].flatMap((d) =>
+  readdirSync(new URL(`${d}/`, import.meta.url)).filter((f) => f.endsWith(".mcstructure")).map((f) =>
+    parseMcstructure(readFileSync(new URL(`${d}/${f}`, import.meta.url)), f.replace(".mcstructure", ""))));
+test("village and giants: no orphan leaves (every leaf has a 6-neighbour path of <= 10 leaves to a log; trees.js decays the rest)", () => {
+  for (const piece of shippedStructures()) {
+    const names = new Map(piece.blocks.map((b) => [`${b.x},${b.y},${b.z}`, b.name]));
+    const dist = new Map();
+    const queue = [];
+    for (const [k, n] of names) if (n === "lothlorien:mallorn_log" || n === "lothlorien:mallorn_wood") { dist.set(k, 0); queue.push(k); }
+    for (let i = 0; i < queue.length; i++) {
+      const [x, y, z] = queue[i].split(",").map(Number);
+      for (const [dx, dy, dz] of [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]]) {
+        const n = `${x + dx},${y + dy},${z + dz}`;
+        if (names.get(n) === "lothlorien:mallorn_leaves" && !dist.has(n)) { dist.set(n, dist.get(queue[i]) + 1); queue.push(n); }
+      }
+    }
+    const orphans = [...names].filter(([k, n]) => n === "lothlorien:mallorn_leaves" && !(dist.get(k) <= 10));
+    assert.equal(orphans.length, 0, `${piece.name}: ${orphans.length} orphan leaves, e.g. ${orphans[0]?.[0]}`);
+  }
+});
+test("village: fence links are symmetric and consistent in every piece (the stored state matches the neighbouring fence)", () => {
+  const OPP = { north: "south", south: "north", east: "west", west: "east" };
+  const VEC = { north: [0, -1], south: [0, 1], west: [-1, 0], east: [1, 0] };
+  const pieces = shippedStructures().filter((p) => villageData.pieces.has(`lothlorien/village/${p.name}`));
+  assert.ok(pieces.length >= 25);
+  for (const piece of pieces) {
+    const at = new Map(piece.blocks.map((b) => [`${b.x},${b.y},${b.z}`, b]));
+    for (const b of piece.blocks) {
+      if (b.name !== FENCE) continue;
+      for (const [side, [dx, dz]] of Object.entries(VEC)) {
+        const stored = !!b.states[`minecraft:connection_${side}`];
+        const inBox = piece.at(b.x + dx, b.y, b.z + dz) !== undefined;
+        const nb = at.get(`${b.x + dx},${b.y},${b.z + dz}`);
+        const tag = `${piece.name} fence ${b.x},${b.y},${b.z} ${side}`;
+        if (!inBox) continue; // a link out of the box is the connector standard's forced link, checked in the connector test
+        assert.equal(stored, nb?.name === FENCE, `${tag}: stored ${stored}, neighbour ${nb?.name}`);
+        if (nb?.name === FENCE) assert.equal(!!nb.states[`minecraft:connection_${OPP[side]}`], stored, `${tag}: one-way link`);
+      }
+    }
+  }
+});
+test("village: rails are straight runs and square corners only (no diagonal staircase of single cells)", () => {
+  for (const piece of shippedStructures()) {
+    if (!villageData.pieces.has(`lothlorien/village/${piece.name}`)) continue;
+    const rail = new Set(piece.blocks.filter((b) => b.name === FENCE && b.y > 0).map((b) => `${b.x},${b.y},${b.z}`));
+    for (const k of rail) {
+      const [x, y, z] = k.split(",").map(Number);
+      for (const [dx, dz] of [[1, 1], [1, -1]]) {
+        // a diagonal pair with neither orthogonal cell present would be an unlinked staircase step
+        if (rail.has(`${x + dx},${y},${z + dz}`)) assert.ok(rail.has(`${x + dx},${y},${z}`) || rail.has(`${x},${y},${z + dz}`), `${piece.name}: diagonal rail step at ${k}`);
+      }
+    }
+  }
+});
+test("village: simulated villages have no wrong rope side, no decaying leaf, linked rails across every joint", () => {
+  for (const r of villages()) {
+    assert.equal(r.ck.info.ropeWrong, 0, `seed ${r.seed}: ropes facing away from the trunk`);
+    assert.ok(r.ck.info.ropes > 0 && r.ck.info.hangingRopes === r.ck.info.ropes, `seed ${r.seed}: village ropes are the rotating variant`);
+    assert.equal(r.ck.info.decay, 0, `seed ${r.seed}: leaves that will decay`);
+    assert.ok(!r.ck.fail.some((f) => f.includes("rail link")), `seed ${r.seed}: ${r.ck.fail.find((f) => f.includes("rail link"))}`);
+  }
+});
+test("Elven rope hanging: structure-only twin of the rope, same geometry, a state Bedrock rotates, same script handling", () => {
+  const rope = readJson("../lothlorien_bp/blocks/elven_rope.json")["minecraft:block"];
+  const hang = readJson("../lothlorien_bp/blocks/elven_rope_hanging.json")["minecraft:block"];
+  assert.equal(hang.description.identifier, "lothlorien:elven_rope_hanging");
+  assert.deepEqual(hang.description.menu_category, { category: "none" }, "hidden from the Creative menu");
+  assert.deepEqual(hang.description.traits["minecraft:placement_direction"].enabled_states, ["minecraft:cardinal_direction"]);
+  assert.equal(hang.description.states, undefined, "no custom state: custom-namespace states are not rotated with a piece");
+  assert.deepEqual(hang.components, rope.components, "same geometry, texture, sound, selection box");
+  assert.equal(hang.components["minecraft:loot"], undefined, "the script drops the whole rope as the normal item");
+  assert.deepEqual(hang.permutations.map((p) => p.condition.replace("minecraft:cardinal_direction", "lothlorien:face")), rope.permutations.map((p) => p.condition));
+  assert.deepEqual(hang.permutations.map((p) => p.components), rope.permutations.map((p) => p.components), "same side for the same value");
+  const js = readFileSync(new URL("../lothlorien_bp/scripts/elven_rope.js", import.meta.url), "utf8");
+  assert.ok(js.includes('"lothlorien:elven_rope_hanging"') && js.includes("ROPE_IDS.has"), "script treats it as a rope (climb, break, wall check)");
+  const lang = readFileSync(new URL("../lothlorien_rp/texts/en_US.lang", import.meta.url), "utf8");
+  assert.ok(lang.includes("tile.lothlorien:elven_rope_hanging.name=Elven Rope"), "named like the rope");
+});
+
+// --- rail mender: marker entity in every rail piece, pure link rule ---
+import * as MEND from "../lothlorien_bp/scripts/rail_mender_rules.js";
+test("rail mender: every village piece with rails carries exactly one marker inside its box, others none", () => {
+  for (const p of villagePieces()) {
+    const rails = p.blocks.filter((b) => b.name === FENCE).length;
+    const m = p.entities.filter((e) => e.id === MEND.MENDER_ID);
+    assert.equal(p.entities.length, m.length, `${p.name}: only markers`);
+    assert.equal(m.length, rails ? 1 : 0, `${p.name}: ${rails} rails, ${m.length} markers`);
+    for (const e of m) {
+      const [x, y, z] = e.pos;
+      assert.ok(x >= 0 && x < p.size[0] && y >= 0 && y < p.size[1] && z >= 0 && z < p.size[2], `${p.name}: marker inside the box`);
+      assert.ok(Math.max(p.size[0], p.size[2]) / 2 <= MEND.SCAN.radius, `${p.name}: scan radius covers the box`);
+    }
+  }
+});
+test("rail mender: marker entity files exist and the scan box is centred on the marker", () => {
+  const bpE = JSON.parse(readFileSync(new URL("../lothlorien_bp/entities/rail_mender.json", import.meta.url), "utf8"))["minecraft:entity"];
+  assert.equal(bpE.description.identifier, MEND.MENDER_ID);
+  assert.ok(bpE.components["minecraft:persistent"] && bpE.components["minecraft:physics"].has_collision === false);
+  assert.ok(existsSync(new URL("../lothlorien_rp/entity/rail_mender.entity.json", import.meta.url)));
+  const b = MEND.scanBox({ x: 10.5, y: 70, z: -3.5 });
+  assert.deepEqual(b.from, { x: -7, y: 67, z: -21 });
+  assert.deepEqual(b.to, { x: 27, y: 84, z: 13 });
+});
+test("rail mender: only switches links on, only toward our own fences, never toward loaded other blocks or unloaded cells", () => {
+  const world = new Map([["1,0,0", "lothlorien:mallorn_fence"], ["-1,0,0", "lothlorien:mallorn_heartwood_fence"], ["0,0,1", "minecraft:oak_fence"], ["0,0,-1", undefined]]);
+  const typeAt = (x, y, z) => world.get(`${x},${y},${z}`);
+  const none = () => false;
+  assert.deepEqual(MEND.missingLinks({ x: 0, y: 0, z: 0 }, typeAt, none).sort(), ["minecraft:connection_east", "minecraft:connection_west"]);
+  assert.deepEqual(MEND.missingLinks({ x: 0, y: 0, z: 0 }, typeAt, (s) => s === "minecraft:connection_east"), ["minecraft:connection_west"]);
+  assert.deepEqual(MEND.missingLinks({ x: 5, y: 0, z: 5 }, typeAt, none), []);
+});
+const railJs = readFileSync(new URL("../lothlorien_bp/scripts/rail_mender.js", import.meta.url), "utf8");
+test("rail mender: script is imported by main.js and removes the marker only after the scan", () => {
+  assert.ok(readFileSync(new URL("../lothlorien_bp/scripts/main.js", import.meta.url), "utf8").includes('import "./rail_mender.js"'));
+  assert.ok(railJs.includes("entityLoad") && railJs.includes("entitySpawn") && railJs.includes("entity.remove()"));
+});
+
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }
 console.log("all tests passed");

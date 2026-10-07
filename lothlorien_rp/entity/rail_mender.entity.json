@@ -1,0 +1,20 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "lothlorien:rail_mender",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/guide_beacon"
+      },
+      "geometry": {
+        "default": "geometry.lothlorien.rail_mender"
+      },
+      "render_controllers": [
+        "controller.render.default"
+      ]
+    }
+  }
+}
