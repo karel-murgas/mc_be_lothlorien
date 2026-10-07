@@ -202,20 +202,22 @@ export function buildFletMallorn(random, { woven = false, lush = false, flet = t
 //    trunk. A ridge narrows and drops with every step out, so it leaves the ground as a tapering spur, not a column.
 // Below ground the ground-level footprint goes down ROOT_DEPTH as anchor. `ladder` (flet trees) keeps its column
 // and the cell in front of it free. rng is private to the foot, so it cannot disturb the tree's own sequence.
-function roundFoot(b, rng, ladder) {
-  const R0 = 1.9, C = 1.5;
+// `o` (defaults = the giants' foot, so their trees stay as they were; the village trees pass their own):
+//   C trunk centre (x = z), R0 trunk radius, depth logs below ground, scale ridge reach / skirt multiplier, extra ridge height.
+export function roundFoot(b, rng, ladder, o = {}) {
+  const { C = 1.5, R0 = 1.9, depth = ROOT_DEPTH, scale = 1, extra = 0 } = o;
   const lobes = [];
   const n = 5 + Math.floor(rng() * 3);
   for (let i = 0; i < n; i++) {
     const reach = 1 + rng() * 2;
     lobes.push({
       angle: ((i + (rng() - 0.5) * 0.7) * 2 * Math.PI) / n,
-      reach, // cells beyond the trunk at ground level
-      high: reach > 2.2 ? 2 + Math.floor(rng() * 2) : 3 + Math.floor(rng() * 2), // longer ridges stay lower
+      reach: reach * scale, // cells beyond the trunk at ground level
+      high: (reach > 2.2 ? 2 + Math.floor(rng() * 2) : 3 + Math.floor(rng() * 2)) + extra, // longer ridges stay lower
       wide: 0.5 + rng() * 0.4, // half-width at the trunk
     });
   }
-  const skirt = 0.5 + rng() * 0.4, skirtPhase = rng() * 2 * Math.PI;
+  const skirt = (0.5 + rng() * 0.4) * scale, skirtPhase = rng() * 2 * Math.PI;
   const inFoot = (x, z, y) => {
     const dx = x - C, dz = z - C, d = Math.hypot(dx, dz), th = Math.atan2(dz, dx);
     if (d <= R0) return true;
@@ -229,21 +231,22 @@ function roundFoot(b, rng, ladder) {
     }
     return false;
   };
-  for (let x = -7; x <= 10; x++) {
-    for (let z = -7; z <= 10; z++) {
+  const lo = Math.floor(C) - 8, hi = Math.floor(C) + 9, top = 4 + extra;
+  for (let x = lo; x <= hi; x++) {
+    for (let z = lo; z <= hi; z++) {
       if (ladder && x === ladder.x && z <= ladder.z && z >= ladder.z - 1) { // ladder column and the cell in front
-        for (let y = -ROOT_DEPTH; y < 0; y++) if (inFoot(x, z, 0)) b.addLog(x, y, z, "up");
+        for (let y = -depth; y < 0; y++) if (inFoot(x, z, 0)) b.addLog(x, y, z, "up");
         continue;
       }
-      for (let y = 0; y < 4; y++) if (inFoot(x, z, y)) b.addLog(x, y, z, "wood"); // bark on top too, not log rings
-      if (inFoot(x, z, 0)) for (let y = -ROOT_DEPTH; y < 0; y++) b.addLog(x, y, z, "up");
+      for (let y = 0; y < top; y++) if (inFoot(x, z, y)) b.addLog(x, y, z, "wood"); // bark on top too, not log rings
+      if (inFoot(x, z, 0)) for (let y = -depth; y < 0; y++) b.addLog(x, y, z, "up");
     }
   }
 }
 
 // A branch that rises with chance `rise` per step and may turn 45 degrees once or twice on the way (never
 // back towards the trunk); leaves grow along its top and a leaf blob sits on its tip.
-function bentBranch(b, random, sx, sz, dx, dz, y0, len, rise, blobR) {
+export function bentBranch(b, random, sx, sz, dx, dz, y0, len, rise, blobR) {
   const RING = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]]; // 45 degrees apart
   const r0 = RING.findIndex(([ex, ez]) => ex === dx && ez === dz);
   let x = sx, z = sz, y = y0, r = r0;

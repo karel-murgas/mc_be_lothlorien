@@ -111,12 +111,12 @@ const treePiece = (name, opts) => {
 };
 const C = (facing, off, hi = false) => ({ facing, off, hi });
 // single level: shape, connectors (face, offset along the face), trunk plus-shaped (round 3x3)
-treePiece("node_a", { levels: [{ rows: SHAPES.cutrect13, conn: [C("north", 1), C("south", -2)] }], seed: 11011, lamps: 2 });
-treePiece("node_b", { levels: [{ rows: SHAPES.octagon15, conn: [C("west", 1), C("east", -1), C("south", 0)] }], seed: 22022, lamps: 2 });
-treePiece("node_c", { levels: [{ rows: SHAPES.plus15, conn: [C("north", -1), C("east", 1), C("south", 1), C("west", 0)] }], seed: 33033, lamps: 3 });
-treePiece("node_d", { levels: [{ rows: SHAPES.oval17, conn: [C("east", 0), C("west", 0), C("north", -2)] }], seed: 44044, lamps: 2 });
-treePiece("node_e", { levels: [{ rows: SHAPES.cutrect11, conn: [C("north", -1), C("east", 1)] }], seed: 55055, lamps: 2 });
-treePiece("node_f", { levels: [{ rows: SHAPES.cutrect17, conn: [C("west", 1), C("east", -1), C("south", 1)] }], seed: 66066, lamps: 3 });
+treePiece("node_a", { trunk: "square3", levels: [{ rows: SHAPES.cutrect13, conn: [C("north", 1), C("south", -2)] }], seed: 11011, lamps: 2 });
+treePiece("node_b", { trunk: "square3", levels: [{ rows: SHAPES.octagon15, conn: [C("west", 1), C("east", -1), C("south", 0)] }], seed: 22022, lamps: 2 });
+treePiece("node_c", { trunk: "square3", levels: [{ rows: SHAPES.plus15, conn: [C("north", -1), C("east", 1), C("south", 1), C("west", 0)] }], seed: 33033, lamps: 3 });
+treePiece("node_d", { trunk: "square3", levels: [{ rows: SHAPES.oval17, conn: [C("east", 0), C("west", 0), C("north", -2)] }], seed: 44044, lamps: 2 });
+treePiece("node_e", { trunk: "square3", levels: [{ rows: SHAPES.cutrect11, conn: [C("north", -1), C("east", 1)] }], seed: 55055, lamps: 2 });
+treePiece("node_f", { trunk: "square3", levels: [{ rows: SHAPES.cutrect17, conn: [C("west", 1), C("east", -1), C("south", 1)] }], seed: 66066, lamps: 3 });
 // two levels: lower deck, upper deck +8, slab spiral stair in the ring round a 3x3 trunk
 treePiece("tower_a", { trunk: "square3", seed: 77077, lamps: 0, levels: [
   { rows: SHAPES.octagon15, conn: [C("south", -1), C("west", 1)] }, { rows: SHAPES.plus15, conn: [C("north", 1, true), C("east", -1, true)], clip: (x, z) => z >= 4 }] }); // no south arm: the stair well is there
@@ -132,11 +132,11 @@ treePiece("central_mallorn_01", {
 
 // --- crown pieces ------------------------------------------------------------------------------------------------
 const crown = (name, o) => { const c = buildCrown(o); writePiece(name, c.blocks, c.size, c.origin, []); };
-crown("crown_small", { h: 4, H: 14, seed: 4004, branches: 5, blob: 1.8 });
-crown("crown_medium", { h: 6, H: 18, seed: 6006, branches: 7, blob: 2.2 });
-crown("crown_large", { h: 8, H: 22, seed: 8008, branches: 8, blob: 2.6 });
-crown("crown_central_a", { h: 12, H: 28, seed: 12012, branches: 10, blob: 3.2, central: true });
-crown("crown_central_b", { h: 10, H: 24, seed: 10010, branches: 9, blob: 3.0, central: true });
+crown("crown_small", { h: 7, H: 16, seed: 4004, branches: 8, blob: 2.1 });
+crown("crown_medium", { h: 8, H: 20, seed: 6006, branches: 9, blob: 2.6 });
+crown("crown_large", { h: 10, H: 24, seed: 8008, branches: 11, blob: 2.9 });
+crown("crown_central_a", { h: 16, H: 34, seed: 12012, branches: 14, blob: 3.6, central: true });
+crown("crown_central_b", { h: 13, H: 30, seed: 10010, branches: 12, blob: 3.3, central: true });
 
 // --- bridges: 5 wide (+ shift for dog-legs), deck at box y 0 on the connectors, gently arched with bottom slabs ----------
 // The shape (deck, arch, rails, connectors) is lothlorien_bp/scripts/village_bridge.js bridgeShape(length, offset, rise), pure JS
@@ -160,7 +160,7 @@ function bridge(name, length, { shift = 0, mirror = false, lanterns = false } = 
   for (const c of shape.connectors) blocks.set(key(c.x, 0, c.z), deckJigsaw(c.facing, POOL("nodes")));
   writePiece(name, blocks, shape.size, [0, 0, 0], shape.connectors);
 }
-for (const L of [5, 7, 9, 11, 13]) bridge(`bridge_${L}`, L, { lanterns: L >= 9 });
+for (const L of [7, 9, 11, 13, 15]) bridge(`bridge_${L}`, L, { lanterns: L >= 9 });
 bridge("bridge_dog_11_l", 11, { shift: 2 });
 bridge("bridge_dog_11_r", 11, { shift: 2, mirror: true });
 bridge("bridge_dog_13_l", 13, { shift: 3 });
@@ -217,7 +217,7 @@ const pool = (name, elements, fallback) => {
     JSON.stringify({ format_version: "1.21.100", "minecraft:template_pool": node }, null, 2) + "\n");
 };
 pool("start", [["central_mallorn_01", 1]]);
-pool("bridges", [["bridge_5", 2], ["bridge_7", 3], ["bridge_9", 3], ["bridge_11", 2], ["bridge_13", 1],
+pool("bridges", [["bridge_7", 3], ["bridge_9", 3], ["bridge_11", 3], ["bridge_13", 2], ["bridge_15", 1],
   ["bridge_dog_11_l", 1], ["bridge_dog_11_r", 1], ["bridge_dog_13_l", 1], ["bridge_dog_13_r", 1]], POOL("plugs"));
 pool("nodes", [["node_a", 3], ["node_b", 3], ["node_c", 3], ["node_d", 3], ["node_e", 3], ["node_f", 3],
   ["tower_a", 3], ["tower_b", 3], ["tower_c", 3], ["balcony_small", 4], ["lookout_01", 1]], POOL("ends"));

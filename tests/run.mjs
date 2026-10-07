@@ -1511,7 +1511,7 @@ test("village: the one rail constant is the only rail block, bridges are symmetr
     for (const b of p.blocks) assert.ok(!b.name.endsWith("_fence") || b.name === FENCE, `${p.name}: another rail block ${b.name}`);
     for (const b of p.blocks) if (b.name === SLAB_ID) assert.ok(["bottom", "top"].includes(b.states["minecraft:vertical_half"]), `${p.name}: slab state`);
   }
-  for (const L of [5, 7, 9, 11, 13]) {
+  for (const L of [7, 9, 11, 13, 15]) { // P9: no 5-long bridge any more, the bigger crowns need room
     const p = parseMcstructure(readFileSync(new URL(`${VILLAGE}/bridge_${L}.mcstructure`, import.meta.url)), `bridge_${L}`);
     const surf = [];
     for (let z = 0; z < L; z++) {
@@ -1684,6 +1684,33 @@ test("village crowns: the trunk keeps its full section well up into the crown an
     const [hx, hz] = halfOf(p), central = p.name.startsWith("central"), top = p.size[1] - 1;
     const n = (y) => p.blocks.filter((b) => b.y === y && b.name === MALLORN_LOG && Math.abs(b.x - hx) <= 2 && Math.abs(b.z - hz) <= 2).length + (p.at(hx, y, hz) === "minecraft:jigsaw" ? 1 : 0);
     assert.ok(n(top - 1) >= (central ? 21 : 9), `${p.name}: full section under the crown jigsaw`);
+  }
+});
+test("village trees (P9, giant Mallorn style): root flare of bark at ground level, trunk down to ROOTS, bent branches and big leaf blobs in the crowns", () => {
+  const WOOD_ID = "lothlorien:mallorn_wood", BRANCH = (b) => b.name === MALLORN_LOG && (b.states["minecraft:block_face"] === "east" || b.states["minecraft:block_face"] === "south");
+  for (const p of villagePieces().filter((q) => isTree(q.name))) {
+    const [hx, hz] = halfOf(p), central = p.name.startsWith("central"), r = central ? 2 : 1;
+    const outside = (b) => Math.max(Math.abs(b.x - hx), Math.abs(b.z - hz)) > r;
+    const flare = p.blocks.filter((b) => b.name === WOOD_ID && b.y >= V_ROOTS && b.y < V_ROOTS + 4 && outside(b));
+    assert.ok(flare.length >= (central ? 30 : 15), `${p.name}: root flare of bark round the trunk at nominal ground level, got ${flare.length}`);
+    assert.ok(flare.some((b) => b.y === V_ROOTS) && flare.some((b) => b.y >= V_ROOTS + 2), `${p.name}: the flare rises above the ground`);
+    assert.ok(!p.blocks.some((b) => b.name === WOOD_ID && b.y >= V_ROOTS + 8), `${p.name}: bark foot only near the ground`);
+    const trunkBottom = p.blocks.filter((b) => b.y === 0 && b.name === MALLORN_LOG && !outside(b)).length + (p.at(hx, 0, hz) === "minecraft:jigsaw" ? 1 : 0); // the start anchor jigsaw replaces the centre log
+    assert.ok(trunkBottom >= (central ? 21 : 9), `${p.name}: the trunk reaches ROOTS below nominal ground with its full section (${trunkBottom})`);
+    // the round trunk: no corner cell in the central 5x5
+    if (central) for (const [cx, cz] of [[-2, -2], [2, -2], [-2, 2], [2, 2]]) assert.ok(!p.blocks.some((b) => b.y === V_ROOTS + 8 && b.x === hx + cx && b.z === hz + cz && b.name === MALLORN_LOG), "round trunk: corner cell empty");
+    assert.ok(p.blocks.filter(BRANCH).length >= (central ? 40 : 15), `${p.name}: bent low branches on the bare trunk`);
+  }
+  const need = { crown_small: [7, 16], crown_medium: [8, 20], crown_large: [10, 24], crown_central_a: [16, 34], crown_central_b: [13, 30] };
+  for (const [name, [h, H]] of Object.entries(need)) {
+    const p = villagePieces().find((q) => q.name === name);
+    assert.deepEqual([(p.size[0] - 1) / 2, p.size[1]], [h, H], `${name}: giant-style crowns are this big`);
+    const branches = p.blocks.filter(BRANCH), leaves = p.blocks.filter((b) => b.name === LEAVES_ID);
+    assert.ok(branches.length >= 3 * h, `${name}: bent branches (${branches.length})`);
+    assert.ok(new Set(branches.map((b) => b.y)).size >= 5, `${name}: branches climb (rise on the way)`);
+    assert.ok(leaves.length >= 14 * h * h / 3, `${name}: full leaf blobs (${leaves.length})`);
+    const [hx, hz] = halfOf(p), far = Math.max(...branches.map((b) => Math.max(Math.abs(b.x - hx), Math.abs(b.z - hz))));
+    assert.ok(far >= h - 5, `${name}: branches reach out (${far} of ${h})`);
   }
 });
 test("village bridges: the rail is one continuous stepped line (consecutive rail fences are face-adjacent, no diagonal-only joins)", () => {

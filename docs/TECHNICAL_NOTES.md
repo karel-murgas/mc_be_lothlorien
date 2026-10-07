@@ -1123,14 +1123,25 @@ Rebuild everything (pieces, pools, structure; it first deletes old village piece
 | `node_e` small cut-corner | 11x40x11 | 2 | bridges |
 | `node_f` wide cut-corner | 17x40x11 | 3 | bridges |
 | `tower_a/b/c` two levels (8 apart), 3x3 trunk, slab spiral stair | 15x48x15, 15x48x15, 17x48x13 | 2 + 2 (upper `_hi`), 3 + 2, 2 + 2 | bridges |
-| `crown_small / medium / large` | 9x14x9, 13x18x13, 17x22x17 | down jigsaw | empty |
-| `crown_central_a / b` | 25x28x25, 21x24x21 | down jigsaw | empty |
-| `bridge_5/7/9/11/13` straight slab arches | 5 x (5 or 6) x length | 2 | nodes |
+| `crown_small / medium / large` | 15x16x15, 17x20x17, 21x24x21 | down jigsaw | empty |
+| `crown_central_a / b` | 33x34x33, 27x30x27 | down jigsaw | empty |
+| `bridge_7/9/11/13/15` straight slab arches (no 5 since P9) | 5 x (5 or 6) x length | 2 | nodes |
 | `bridge_dog_11_l/r`, `bridge_dog_13_l/r` sideways shift 2 / 3 | 7x6x11, 8x6x13 | 2 | nodes |
 | `balcony_small` half-round end with lantern | 7x4x6 | 1 | empty |
 | `lookout_01` platform on a pillar | 9x38x9 | 1 | empty |
 | `railing_end` plug | 5x2x1 | 1 | empty |
 
+- **Trees in the giant Mallorn style (P9, 2026-10-07; generated, not yet seen in game):** the village trees reuse the Phase 5
+  generator's pieces (`roundFoot`, `bentBranch`, `trimFarLeaves` from `flet_mallorn.mjs`, parameterised with defaults that keep
+  the six shipped giants byte-identical). Platform pieces: trunk 3x3 (nodes and towers; central 5x5 round), the giants' bark root
+  flare at nominal ground level (skirt + 5-7 buttress ridges, up to 4 high, `mallorn_wood`), flare footprint 8 deep, trunk on
+  down to ROOTS as plain logs, bent low branches with leaf blobs on the bare trunk (central: 7-8, longer), woven struts and
+  hanging blobs under each deck as before. Crowns: the trunk keeps the taper rule (full section to 40 %, central 30 %), 7-14 bent
+  branches (45 degree turns, rise on 45 % of the steps, length fitted so tip + blob stay in the box) each with a big blob, a blob
+  hugging the trunk and a cap. Diagonal corner lanterns of square-trunk nodes moved out to (3,3) (at (2,2) they cut the walk
+  round the 3x3 trunk) and are skipped where a rail stands. Bigger crowns made the 5-long bridge too short (crowns of
+  neighbouring nodes collided and some nodes lost their crown): straight bridges are now 7..15. Sim 100 seeds: 0 failures,
+  trees 9.5 per village, crowns 9.1, small fallback 0.2 per village (the same as before P9).
 - **Bridges:** walking surface in half blocks `k(z) = min(z, L-1-z, top)`, top 2 (rise 1) for L <= 7 and 4 (rise 2) for
   L >= 9; even k = planks at layer k/2, odd k = bottom `lothlorien:mallorn_slab` (`minecraft:vertical_half` = bottom, a
   vanilla-named state) at layer (k+1)/2, so every step is 0.5 block (steppable without jumping). Rails stand one cell above
@@ -1142,7 +1153,7 @@ Rebuild everything (pieces, pools, structure; it first deletes old village piece
   the last two cells (14, 15) are the exit onto it; rails float one above the stair block on the outer side from cell 3
   on, and the cut gets rails except at the exit. The upper deck clips away what lies beyond the stair well (tower_a: no
   south arm), otherwise the well rail would cut that part off.
-- **Pools** (`village_*.json`): `start` central; `bridges` (5:2, 7:3, 9:3, 11:2, 13:1, four dog-legs 1 each; fallback
+- **Pools** (`village_*.json`): `start` central; `bridges` (7:3, 9:3, 11:3, 13:2, 15:1, four dog-legs 1 each; fallback
   `plugs`); `nodes` (six nodes 3 each, three towers 3 each, balcony 4, lookout 1; fallback `ends`); `ends` (balcony 8,
   lookout 2, plug 1; fallback empty); `plugs`; `crowns` (large 3, medium 2; fallback `crowns_small`); `crowns_small`;
   `crowns_central` (a 2, b 1; fallback `crowns_small`).

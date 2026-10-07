@@ -5,7 +5,7 @@
 // Tree-piece coordinates: trunk centre (0,0), y 0 = the first block above the nominal ground, roots down to -ROOTS.
 // The box is (2*hx+1) x (2*hz+1), so toMcstructure offset = [hx, ROOTS, hz].
 import { makeBuilder, makeRandom, DIRS8 } from "../lothlorien_bp/scripts/mallorn_tree.js";
-import { B, trimFarLeaves } from "./flet_mallorn.mjs";
+import { B, trimFarLeaves, roundFoot, bentBranch } from "./flet_mallorn.mjs"; // the giant Mallorns' foot and bent branch (Phase 5, accepted in game)
 import { blockLight } from "../../../.claude/skills/bedrock-modding/scripts/structure_light.mjs"; // shared skill script (one implementation of the light model)
 
 export const ROOTS = 18; // trunks and pillars reach this far below the nominal ground (levels up to +16 still reach the ground)
@@ -248,14 +248,13 @@ export const STAIR_CUT = ringOver.filter((i) => !STAIR_FULL.includes(i) && !STAI
 //   trunk: "plus" | "square3" | "round5"; seed; upPool (pool of the crown jigsaw); rope; anchor; lamps (rim lanterns)
 export function buildTree({ levels, trunk = "plus", seed, pool, upPool, rope = false, anchor = false, lamps = 0, diagLamps = true }) {
   const random = makeRandom(seed), b = makeBuilder(random);
-  const tk = TRUNKS[trunk], rT = tk.r, two = levels.length === 2;
+  const tk = TRUNKS[trunk], rT = tk.r, two = levels.length === 2, central = trunk === "round5";
   const D = FLOOR_H, topY = two ? D + LEVEL_H : D; // y of the highest deck
   const hx = Math.max(...levels.flatMap((l) => l.rows)), hz = Math.max(...levels.map((l) => l.rows.length - 1));
   const box = { hx, hz };
   const inner = new Set(tk.cells.map(([x, z]) => `${x},${z}`));
   const ropeAt = rope ? { x: 0, z: -(rT + 1) } : null;
   if (ropeAt) inner.add(`${ropeAt.x},${ropeAt.z}`);
-  const isTrunk = (x, z) => tk.cells.some(([a, c]) => a === x && c === z);
 
   // trunk sunk ROOTS into the ground; it keeps its full section up to the crown, and the crown piece goes on with the same
   // section (3x3 for village trees, round 5x5 for the central one): a plus-shaped trunk widens to 3x3 in the top two layers
@@ -264,17 +263,9 @@ export function buildTree({ levels, trunk = "plus", seed, pool, upPool, rope = f
     for (const [x, z] of y >= topY + 4 ? crownCells : tk.cells) b.addLog(x, y, z, "up");
   }
 
-  // foot: bark flare round the trunk (not at the rope), logs down to the roots
-  const frng = makeRandom(seed ^ 0x51ed);
-  for (let x = -rT - 2; x <= rT + 2; x++) for (let z = -rT - 2; z <= rT + 2; z++) {
-    if (isTrunk(x, z) || Math.hypot(x, z) > rT + 1.3) continue;
-    if (ropeAt && Math.abs(x - ropeAt.x) <= 1 && z <= ropeAt.z + 0 && z >= ropeAt.z - 1) continue;
-    if (frng() < 0.75) {
-      const high = frng() < 0.45 ? 2 : 1;
-      for (let y = -ROOTS; y < 0; y++) b.addLog(x, y, z, "up");
-      for (let y = 0; y < high; y++) b.addLog(x, y, z, "wood");
-    }
-  }
+  // foot: the giants' root flare (flet_mallorn.mjs roundFoot) at nominal ground level, bark above ground, logs below; it keeps the
+  // rope column free. The trunk itself goes on down to -ROOTS as plain logs; the flare's own footprint goes 8 down.
+  roundFoot(b, makeRandom(seed ^ 0x51ed), ropeAt, { C: 0, R0: trunk === "round5" ? 2.3 : 1.6, depth: 8, scale: trunk === "round5" ? 1.7 : 0.85, extra: trunk === "round5" ? 1 : 0 });
   // under each deck: woven struts one layer below it (diagonals, never on the walkway axes) with hanging leaves; low branches
   const decks = two ? [D, D + LEVEL_H] : [D];
   const lenW = Math.round(Math.min(hx, hz) * 0.9);
@@ -286,10 +277,12 @@ export function buildTree({ levels, trunk = "plus", seed, pool, upPool, rope = f
     }
     b.blob(x, Y - 2, z, 2.4 + random() * 0.6, 1.8, Y - 6, 0.7);
   }
-  for (let i = 0, n = 3 + Math.floor(random() * 2); i < n; i++) {
+  // bent low branches on the bare trunk (as the giants' lush ones), each with a leaf blob; the central tree gets more, and longer ones
+  const reachMax = Math.min(hx, hz) - rT - 3;
+  for (let i = 0, n = (central ? 7 : 3) + Math.floor(random() * 2); i < n; i++) {
     const [dx, dz] = DIRS8[Math.floor(random() * 8)];
     const sx = dx !== 0 ? dx * rT : 0, sz = dx !== 0 ? 0 : dz * rT;
-    b.branch(sx, sz, dx, dz, b.between([5, D - 6]), b.between([3, Math.max(3, Math.min(hx, hz) - 3)]), 0, 2.0 + random() * 0.6);
+    bentBranch(b, random, sx, sz, dx, dz, b.between([4, D - 7]), Math.max(3, b.between([central ? 6 : 3, reachMax])), 0.3, 2.0 + random() * 0.8);
   }
   const tree = b.result(topY + CROWN_AT);
   const blocks = new Map();
@@ -367,7 +360,10 @@ export function buildTree({ levels, trunk = "plus", seed, pool, upPool, rope = f
   // the orphan-leaf trim stays the LAST step that changes leaves: drop every leaf that has no path <= 8 to a log (leaf decay in game breaks the rest)
   trimFarLeaves(blocks);
   // lanterns: on the deck beside the trunk (diagonals), and on rim posts away from the connectors
-  if (diagLamps && !two) for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) blocks.set(key(sx * (rT + 1), D + 1, sz * (rT + 1)), lantern());
+  if (diagLamps && !two) for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+    const at = key(sx * (rT + (central ? 1 : 2)), D + 1, sz * (rT + (central ? 1 : 2))); // not on the ring corners of a square trunk (they would cut the walk round it), never on a rail
+    if (!blocks.has(at)  || blocks.get(at).name === "minecraft:air") blocks.set(at, lantern());
+  }
   if (lamps) {
     const rim = [...deckObjs[0].rim].map((k) => k.split(",").map(Number)).filter(([x, z]) =>
       deckObjs[0].connectors.every((c) => Math.max(Math.abs(c.x - x), Math.abs(c.z - z)) > 4));
@@ -397,11 +393,20 @@ export function buildCrown({ h, H, seed, branches, blob, central = false }) {
   // village 3x3 -> plus (from 40 %) -> 1x1 (from 67 %); central round 5x5 -> 3x3 (30 %) -> plus (50 %) -> 1x1 (67 %)
   const top = H - 4, steps = central ? [[0.3, ROUND5], [0.5, SQUARE3], [0.67, PLUS]] : [[0.4, SQUARE3], [0.67, PLUS]];
   const section = (y) => (steps.find(([t]) => y / top < t)?.[1] ?? [[0, 0]]);
+  const radiusAt = (y) => Math.max(...section(y).map(([x, z]) => Math.max(Math.abs(x), Math.abs(z))));
   for (let y = 1; y <= top; y++) for (const [x, z] of section(y)) b.addLog(x, y, z, "up");
-  const rT = central ? 2 : 1, dirs = b.shuffled();
+  // the giants' crown: rising bent branches round the trunk (they turn up to 45 degrees, rise on 45 % of the steps), each with
+  // tufts along it and a big leaf blob on its tip; a blob hugging the trunk, and a cap. Branch length is fitted to the box:
+  // tip + blob stay inside (a diagonal branch moves one axis per step, so it may be longer).
+  const dirs = b.shuffled();
   for (let i = 0; i < branches; i++) {
-    const [dx, dz] = dirs[i % 8];
-    b.branch(dx !== 0 ? dx * rT : 0, dx !== 0 ? 0 : dz * rT, dx, dz, b.between([3, Math.max(4, H - 12)]), b.between([Math.max(2, h - 6), Math.max(3, h - 4)]), 0.45, blob + random() * 0.5);
+    const [dx, dz] = dirs[i % 8], diag = dx !== 0 && dz !== 0;
+    const blobR = blob + random() * 0.6;
+    const y0 = b.between([2, Math.max(3, H - 10)]);
+    const r0 = radiusAt(y0);
+    const room = h - r0 - Math.ceil(blobR); // cells of branch the box allows along an axis
+    const len = Math.max(3, Math.floor((diag ? room * 1.5 : room) - random() * 2));
+    bentBranch(b, random, dx !== 0 ? dx * r0 : 0, dx !== 0 ? 0 : dz * r0, dx, dz, y0, len, 0.45, blobR);
   }
   b.blob(0, H - 6, 0, Math.min(h - 0.5, blob + 2.6), Math.min(4, H / 4), 3, 1.0);
   b.blob(0, H - 3, 0, Math.min(h - 2, blob + 1.4), 2.6, H - 5, 0.8);

@@ -8,14 +8,6 @@
       {
         "element": {
           "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/village/bridge_5",
-          "projection": "rigid"
-        },
-        "weight": 2
-      },
-      {
-        "element": {
-          "element_type": "minecraft:single_pool_element",
           "location": "lothlorien/village/bridge_7",
           "projection": "rigid"
         },
@@ -35,12 +27,20 @@
           "location": "lothlorien/village/bridge_11",
           "projection": "rigid"
         },
-        "weight": 2
+        "weight": 3
       },
       {
         "element": {
           "element_type": "minecraft:single_pool_element",
           "location": "lothlorien/village/bridge_13",
+          "projection": "rigid"
+        },
+        "weight": 2
+      },
+      {
+        "element": {
+          "element_type": "minecraft:single_pool_element",
+          "location": "lothlorien/village/bridge_15",
           "projection": "rigid"
         },
         "weight": 1
