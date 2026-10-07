@@ -44,7 +44,7 @@ trading stays refused. Prevents both a "die to reset" exploit and warden spawn-c
 | 0...+9 | Guest | green | plain leaf | `calm` (10) | "untrusted" | normal stock and prices |
 | -1...-14 | Uneasy | orange | wilted leaf | `l1` (13) | "restless" | fewer items, higher prices |
 | -15...-29 | Shunned | red | leaf broken in two (owner rejected the thorn twig 2026-10-07) | `l2` (20) | "restless" | refused; Loremaster: "Learn to live in peace with the forest, then return." |
-| -30...-60 | Hated | dark red | elven arrow with a leaf-shaped head (owner rejected the eye: too Sauron) | `l3` (30) | "restless" | refused; **wardens shoot on sight** |
+| -30...-60 | Hated | dark red | arrow drawn after the vanilla arrow item (owner rejected the eye: too Sauron) | `l3` (30) | "restless" | refused; **wardens shoot on sight** |
 
 Friend is +10 only on purpose: any single bad deed loses it (a monster kill at +10 costs 2). Any negative value already shows that the
 forest dislikes you. The Uneasy/Shunned boundary (-15) is a starting value. The wildlife states and radii are the existing ones, so the
