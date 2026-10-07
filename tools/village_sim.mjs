@@ -455,7 +455,7 @@ export function markerCell(p) {
 export function closeLoops(res, world, states) {
   const at = (x, y, z) => world.get(wkey(x, y, z)) ?? AIR;
   const markers = res.placed.filter((p) => p.name === "railing_end").map(markerCell).filter(Boolean).sort((a, b) => a[0] - b[0] || a[2] - b[2]);
-  const out = { markers: markers.length, missed: 0, loops: 0, lengths: [], offsets: [], reasons: {}, remaining: 0, builds: [] };
+  const out = { markers: markers.length, missed: 0, loops: 0, loopsExit: 0, loopsSide: 0, lengths: [], offsets: [], reasons: {}, remaining: 0, builds: [] };
   for (const [x, y, z] of markers) {
     const A = exitAt(at, x, y, z);
     if (!A) { if (at(x, y + 1, z) === FENCE) out.missed++; continue; } // gone = closed from the other side
@@ -466,7 +466,7 @@ export function closeLoops(res, world, states) {
         if (b.id === AIR) world.delete(wk); else world.set(wk, b.id);
         if (b.id === AIR) states.delete(wk); else states.set(wk, b.states ?? {});
       }
-      out.loops++; out.lengths.push(d.plan.length); out.offsets.push(Math.abs(d.plan.offset)); out.builds.push(d.plan);
+      out.loops++; out[d.kind === "side" ? "loopsSide" : "loopsExit"]++; out.lengths.push(d.plan.length); out.offsets.push(Math.abs(d.plan.offset)); out.builds.push(d.plan);
     } else if (d.action === "none") out.reasons[d.reason] = (out.reasons[d.reason] ?? 0) + 1;
   }
   for (const [x, y, z] of markers) if (exitAt(at, x, y, z)) out.remaining++;
@@ -549,8 +549,8 @@ function main() {
   console.log(`  exits ending in railing ${avg((r) => r.ck.kinds.plug)} / braced balcony ${avg((r) => r.ck.kinds.balcony)} / lookout ${avg((r) => r.ck.kinds.lookout)} per village; bridges without a destination tree ${rows.reduce((a, r) => a + r.ck.kinds.bridgesNoDest, 0)}, unsupported balconies ${rows.reduce((a, r) => a + r.ck.kinds.unsupported, 0)}`);
   const lsum = (f) => rows.reduce((a, r) => a + f(r.lp), 0), reasons = {};
   for (const r of rows) for (const [k, v] of Object.entries(r.lp.reasons)) reasons[k] = (reasons[k] ?? 0) + v;
-  console.log(`  loops (loop closer, markers on closed railing exits): closed ${mm((r) => r.lp.loops)} per village (villages with a loop: ${rows.filter((r) => r.lp.loops).length}/${rows.length}), ` +
-    `closed exits before ${avg((r) => r.lp.markers)} / left ${avg((r) => r.lp.remaining)} per village; no partner ${reasons["no partner"] ?? 0}, not mutual ${reasons["not mutual"] ?? 0}, corridor blocked ${reasons.blocked ?? 0}, ` +
+  console.log(`  loops (loop closer, markers on closed railing exits): closed ${mm((r) => r.lp.loops)} per village (villages with a loop: ${rows.filter((r) => r.lp.loops).length}/${rows.length}; exit-exit ${avg((r) => r.lp.loopsExit)}, exit-to-platform-side ${avg((r) => r.lp.loopsSide)}), ` +
+    `closed exits before ${avg((r) => r.lp.markers)} / left ${avg((r) => r.lp.remaining)} per village; no target ${(reasons["no partner"] ?? 0)}, not mutual ${reasons["not mutual"] ?? 0}, corridor blocked ${reasons.blocked ?? 0}, ` +
     `markers not on an exit ${lsum((l) => l.missed)}/${lsum((l) => l.markers)}, unreachable walk cells after the loops ${rows.reduce((a, r) => a + r.lpUnreach, 0)}; bridge lengths ${rows.flatMap((r) => r.lp.lengths).join(",") || "-"}`);
   const sum = (f) => rows.reduce((a, r) => a + f(r.ck.info), 0);
   console.log(`  totals: unreachable walk cells ${rows.reduce((a, r) => a + r.ck.unreachable, 0)}, overlaps ${rows.reduce((a, r) => a + r.ck.overlaps, 0)}, wrong ropes ${sum((i) => i.ropeWrong)}/${sum((i) => i.ropes)}, ` +

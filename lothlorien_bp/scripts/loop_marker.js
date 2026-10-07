@@ -4,7 +4,7 @@
 //
 // On load the marker waits until the chunks around it are loaded, finds its exit by reading the blocks (rotation independent: the
 // marker only has to sit on the railing's centre), and asks decide(): build (it is the smaller (x, z) of a mutually-best pair), stand
-// down (the partner builds) or none. Then it removes itself. Unloaded neighbours keep the marker for another load, at most LOOP.maxTries
+// down (the partner builds) or none. P7b: an exit without a partner exit may also join the side of a platform (decide() kind "side"). Then it removes itself. Unloaded neighbours keep the marker for another load, at most LOOP.maxTries
 // times; a blocked corridor gives up for good. The writes run as a job (a few dozen blocks per tick).
 import { BlockPermutation, system, world } from "@minecraft/server";
 import { LOOP, MARKER_ID, decide, exitAt, finalBlocks } from "./village_loop.js";
@@ -60,9 +60,9 @@ function* build(entity, dimension, plan, at) {
       if (on.length) { let next = perm; for (const s of on) next = next.withState(s, true); block.setPermutation(next); }
     } catch (e) { failed++; }
   }
-  removeMarkerNear(dimension, plan.B);
+  if (!plan.side) removeMarkerNear(dimension, plan.B);
   if (entity.isValid) entity.remove();
-  console.warn(`[lothlorien] loop closer: bridge of ${plan.length} (offset ${plan.offset}) built between ${plan.A.x},${plan.A.y},${plan.A.z} and ${plan.B.x},${plan.B.y},${plan.B.z}: ${writes.length} blocks, ${plan.lanterns.length} lanterns${failed ? `, ${failed} write(s) failed` : ""}`);
+  console.warn(`[lothlorien] loop closer: ${plan.side ? "side" : "exit"} bridge of ${plan.length} (offset ${plan.offset}) built between ${plan.A.x},${plan.A.y},${plan.A.z} and ${plan.B.x},${plan.B.y},${plan.B.z}: ${writes.length} blocks, ${plan.lanterns.length} lanterns${failed ? `, ${failed} write(s) failed` : ""}`);
 }
 
 function retryLater(entity) { // not everything was loaded: keep the marker for the next load, but not forever

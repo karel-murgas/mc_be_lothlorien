@@ -5,6 +5,9 @@
 // `lothlorien:loop_marker`). When two such exits face each other on the same deck height, the marker of the one with the smaller
 // (x, z) builds an arched slab bridge between them (scripts/village_bridge.js) and the other stands down.
 //
+// P7b: an exit may also join the SIDE of any platform (node / tower deck at either level, central deck, braced balcony, lookout): a straight
+// run of 5 rail cells perpendicular to the bridge, deck under them, and two rows of open deck behind (see sideTarget).
+//
 // World reader: at(x, y, z) -> block type id; undefined = not loaded. An "exit" is { x, y, z, dir: [dx, dz] }: x, z, y = the centre
 // deck cell of the railing row, dir = the way out (away from the platform the railing closes).
 import { bridgeShape } from "./village_bridge.js";
@@ -71,21 +74,24 @@ export function findPartner(at, A) {
 // ---- the bridge in world coordinates ---------------------------------------------------------------------------------------------
 // Local frame of bridgeShape: z runs from A (z = 0) to B (z = length - 1) along A's dir, local x (east) is ex = (dir.z, -dir.x).
 // Rows 0 and length - 1 are the two railing rows themselves.
-export function planBridge(A, B, length, offset) {
+export function planBridge(A, B, length, offset, side = false) {
   const shape = bridgeShape(length, offset, length <= 7 ? 1 : 2);
   const d = A.dir, ex = [d[1], -d[0]], c0 = shape.connectors[0].x;
   const w = (lx, ly, lz) => ({ x: A.x + ex[0] * (lx - c0) + d[0] * lz, y: A.y + ly, z: A.z + ex[1] * (lx - c0) + d[1] * lz });
   const vec = { north: [-d[0], -d[1]], south: [d[0], d[1]], west: [-ex[0], -ex[1]], east: [ex[0], ex[1]] };
-  const cells = shape.cells.map((c) => ({ ...w(c.x, c.y, c.z), kind: c.kind, row: c.z }));
+  // side target: the far end row is the platform's own rim row; its edge posts keep their place (no air above them: a lantern may sit there)
+  const endC = shape.connectors[1].x;
+  const isEdge = (c) => c.z === length - 1 && (Math.abs(c.x - endC) === 2);
+  const cells = shape.cells.filter((c) => !(side && isEdge(c) && c.kind === "air")).map((c) => ({ ...w(c.x, c.y, c.z), kind: c.kind, row: c.z }));
   const rails = shape.rails.map((r) => {
     const states = { "minecraft:connection_north": false, "minecraft:connection_south": false, "minecraft:connection_west": false, "minecraft:connection_east": false };
-    for (const s of r.sides) states[`minecraft:connection_${SIDE_OF(vec[s])}`] = true;
+    for (const s of r.sides) if (!(side && r.z === length - 1 && s === "south")) states[`minecraft:connection_${SIDE_OF(vec[s])}`] = true; // side: no link into the platform interior
     return { ...w(r.x, r.y, r.z), states, row: r.z };
   });
   const lanterns = planLanterns(shape).map(([x, y, z]) => ({ ...w(x, y, z), row: z }));
   const end = w(shape.connectors[1].x, 0, length - 1);
   if (end.x !== B.x || end.z !== B.z || end.y !== B.y) throw new Error(`planBridge: far end ${end.x},${end.z} is not the partner ${B.x},${B.z}`);
-  return { A, B, length, offset, shape, cells, rails, lanterns };
+  return { A, B, length, offset, shape, cells, rails, lanterns, side };
 }
 
 // Everything the bridge writes: Map "x,y,z" -> { id, states? }. Later entries win (rails and lanterns replace headroom air).
@@ -109,17 +115,66 @@ export function blockedCells(at, plan) {
   return bad;
 }
 
-// What a marker at exit A does: build / standDown / none (+ reason). Both exits must pick each other; the smaller (x, z) builds.
+// Platform side the exit can join: (x, y, z) is the rim deck cell the bridge's far end row is centred on, d = the bridge heading.
+// Needs: a straight run of 5 rail cells on 5 plank cells across the heading; in front (toward the exit) nothing walkable; behind it two
+// rows of plain planks (-2..2) with open air above their centre 3 cells (so no stair opening, slab, trunk or connector corridor).
+export function sideTarget(at, x, y, z, d) {
+  const a = [d[1], -d[0]];
+  if (at(x, y + 1, z) !== FENCE) return false;
+  for (let o = -2; o <= 2; o++) {
+    if (at(x + a[0] * o, y, z + a[1] * o) !== PLANKS || at(x + a[0] * o, y + 1, z + a[1] * o) !== FENCE) return false;
+    const fx = x - d[0] + a[0] * o, fz = z - d[1] + a[1] * o;
+    if (at(fx, y, fz) === PLANKS || at(fx, y, fz) === SLAB) return false; // a rail inside a deck, not on its rim
+  }
+  for (const k of [1, 2]) {
+    for (let o = -2; o <= 2; o++) {
+      const bx = x + d[0] * k + a[0] * o, bz = z + d[1] * k + a[1] * o;
+      if (at(bx, y, bz) !== PLANKS) return false;
+      if (Math.abs(o) <= 1 && !(isAir(at(bx, y + 1, bz)) && isAir(at(bx, y + 2, bz)))) return false;
+    }
+  }
+  return true;
+}
+// Nearest platform side ahead of A (same reach as findPartner), skipping railing exits. -> { B: {x,y,z}, length, offset, score } or null
+export function findSide(at, A) {
+  const d = A.dir, ex = [d[1], -d[0]];
+  let best = null;
+  for (let dist = LOOP.minDist; dist <= LOOP.maxDist; dist++) {
+    const length = dist + 1, maxOff = Math.min(LOOP.maxOffset, length - 3);
+    for (let lat = -maxOff; lat <= maxOff; lat++) {
+      const x = A.x + d[0] * dist + ex[0] * lat, z = A.z + d[1] * dist + ex[1] * lat;
+      if (at(x, A.y + 1, z) !== FENCE || exitAt(at, x, A.y, z) || !sideTarget(at, x, A.y, z, d)) continue;
+      const score = dist + 3 * Math.abs(lat);
+      if (!best || score < best.score) best = { B: { x, y: A.y, z }, length, offset: lat, score };
+    }
+  }
+  return best;
+}
+
+// What a marker at exit A does: build / standDown / none (+ reason). Exit-exit first: both exits must pick each other, the smaller
+// (x, z) builds. Otherwise (no partner, not mutual, blocked) A joins the nearest platform side by itself (kind "side").
 export function decide(at, A) {
   const p = findPartner(at, A);
-  if (!p) return { action: "none", reason: "no partner" };
-  const q = findPartner(at, p.B);
-  if (!q || !same(q.B, A)) return { action: "none", reason: "not mutual" };
-  if (!before(A, p.B)) return { action: "standDown", partner: p.B };
-  const plan = planBridge(A, p.B, p.length, p.offset);
-  const blocked = blockedCells(at, plan);
-  if (blocked.length) return { action: "none", reason: "blocked", blocked, partner: p.B };
-  return { action: "build", partner: p.B, plan };
+  let why = "no partner", blockedList = null;
+  if (p) {
+    const q = findPartner(at, p.B);
+    if (!q || !same(q.B, A)) why = "not mutual";
+    else if (!before(A, p.B)) return { action: "standDown", partner: p.B };
+    else {
+      const plan = planBridge(A, p.B, p.length, p.offset);
+      const blocked = blockedCells(at, plan);
+      if (!blocked.length) return { action: "build", kind: "exit", partner: p.B, plan };
+      why = "blocked"; blockedList = blocked;
+    }
+  }
+  const sd = findSide(at, A);
+  if (sd) {
+    const plan = planBridge(A, sd.B, sd.length, sd.offset, true), blocked = blockedCells(at, plan);
+    if (!blocked.length) return { action: "build", kind: "side", partner: sd.B, plan };
+    return { action: "none", reason: "blocked", blocked, partner: sd.B };
+  }
+  if (blockedList) return { action: "none", reason: "blocked", blocked: blockedList, partner: p.B };
+  return { action: "none", reason: why };
 }
 
 // ---- lanterns: the generator's greedy (tools/village_mallorn.mjs addLanterns) on the bridge alone ---------------------------------

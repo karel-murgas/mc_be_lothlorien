@@ -2056,6 +2056,62 @@ test("loop closer: corridor check - air and leaves are cleared, anything else (l
   assert.equal(f.at(A.x + 2, A.y + 1, A.z), FENCE, "the railing's outer posts stay as the bridge rails");
   assert.equal(f.at(mx, my + 2, mz), "minecraft:air", "leaves in the corridor are cleared");
 });
+// platform fixture: deck x0..x1 x z0..z1 at height y, fence ring on the rim cells (like a rectangular platform)
+function addPlatform(w, x0, x1, z0, z1, y = 40) {
+  for (let x = x0; x <= x1; x++) for (let z = z0; z <= z1; z++) {
+    w.set(`${x},${y},${z}`, PLANKS);
+    if (x === x0 || x === x1 || z === z0 || z === z1) w.set(`${x},${y + 1},${z}`, FENCE);
+  }
+}
+test("loop closer (P7b): an exit joins the side of a platform - straight 5-cell rail run, plain deck two rows deep; stairs, slabs, short runs, other heights, curved rims and bridges are refused", () => {
+  const A = E(0, 0, [0, 1]);
+  const mk = (edit) => { const f = fixtureWorld([A]); addPlatform(f.w, -3, 3, 12, 20); edit?.(f.w); return f; };
+  const f = mk(), d = LOOP.decide(f.at, A);
+  assert.equal(d.action, "build");
+  assert.equal(d.kind, "side");
+  assert.deepEqual([d.plan.B.x, d.plan.B.z, d.plan.length, d.plan.offset], [0, 12, 13, 0]);
+  const sided = LOOP.decide(mk().at, E(3, 0, [0, 1]));
+  assert.equal(sided.kind, "side", "any cell of the straight run (sideways offset within reach)");
+  // apply: the 3 centre rail cells open, the two posts stay, no link into the platform, bridge rails link to the posts
+  const blocks = LOOP.finalBlocks(d.plan);
+  for (const [k, b] of blocks) b.id === "minecraft:air" ? f.w.delete(k) : f.w.set(k, b.id);
+  for (const o of [-1, 0, 1]) assert.equal(f.at(o, 41, 12), "minecraft:air");
+  for (const o of [-2, 2]) assert.equal(f.at(o, 41, 12), FENCE);
+  assert.equal(blocks.get("-2,41,12").states["minecraft:connection_south"], false);
+  assert.equal(blocks.get("-2,42,12").states["minecraft:connection_north"], true, "the arch's step post above the rim post links to the bridge rail");
+  assert.equal(blocks.get("-2,42,12").states["minecraft:connection_south"], false);
+  assert.equal(f.at(0, 40, 12), PLANKS);
+  // refusals (each makes the exit find no target)
+  const none = (edit, why) => assert.equal(LOOP.findSide(mk(edit).at, A), null, why);
+  none((w) => { for (const o of [-1, 0, 1]) w.delete(`${o},40,13`); }, "stair opening / hole right behind the rim");
+  none((w) => { w.set("0,40,13", SLAB_NAME); }, "slab behind the rim");
+  none((w) => { w.set("0,41,13", "lothlorien:mallorn_log"); }, "obstacle in the walk cells behind");
+  none((w) => { for (let x = -3; x <= 3; x++) for (let z = 14; z <= 20; z++) w.delete(`${x},40,${z}`), w.delete(`${x},41,${z}`); }, "only one deck row behind");
+  none((w) => { w.delete("-1,41,12"); }, "rail run shorter than 5 around the centre");
+  const short = fixtureWorld([A]); addPlatform(short.w, -2, 3, 12, 20); // 6 wide platform: a run of 6 rail cells (a 5-wide one is a railing_end lookalike) -> accepted
+  assert.ok(LOOP.findSide(short.at, A));
+  const four = fixtureWorld([A]); addPlatform(four.w, -1, 2, 12, 20); // 4 wide
+  assert.equal(LOOP.findSide(four.at, A), null, "deck run shorter than 5");
+  const high = fixtureWorld([A]); addPlatform(high.w, -5, 5, 12, 20, 41);
+  assert.equal(LOOP.findSide(high.at, A), null, "wrong height");
+  const curved = fixtureWorld([A]); // rounded rim: the front row is only 3 wide, wider rows follow one step back
+  addPlatform(curved.w, -5, 5, 13, 20); for (let x = -1; x <= 1; x++) { curved.w.set(`${x},40,12`, PLANKS); curved.w.set(`${x},41,12`, FENCE); }
+  for (const x of [-1, 1]) curved.w.set(`${x},41,13`, FENCE);
+  assert.equal(LOOP.findSide(curved.at, A), null, "a rounded rim (3-cell nub in front of the straight run) is refused: no straight 5-run with open space in front");
+  const bridge = fixtureWorld([A]); // a 5-wide bridge crossing the heading: rails at +-2 across, only one walk row deep
+  addPlatform(bridge.w, -6, 6, 12, 16); for (let x = -6; x <= 6; x++) { bridge.w.delete(`${x},41,13`); bridge.w.delete(`${x},41,15`); }
+  for (let x = -6; x <= 6; x++) for (const z of [13, 14, 15]) bridge.w.delete(`${x},41,${z}`);
+  addPlatform(bridge.w, -6, 6, 12, 14);
+  assert.equal(LOOP.findSide(bridge.at, A), null, "a 3-deep strip (bridge) is no target");
+  // exit-exit wins over a platform side that is nearer
+  const both = fixtureWorld([A, E(0, 15, [0, -1])]); addPlatform(both.w, -5, 5, 8, 11);
+  const pick = LOOP.decide(both.at, A);
+  assert.equal(pick.kind, "exit");
+  assert.equal(pick.partner.z, 15);
+  // blocked side corridor reports
+  const blockedSide = mk((w) => w.set("0,43,6", "lothlorien:mallorn_log"));
+  assert.equal(LOOP.decide(blockedSide.at, A).reason, "blocked");
+});
 test("loop closer: runtime bridges are lit to >= 8 on every walk cell (shared flood fill over the plan's own blocks), all lengths / offsets / headings", () => {
   const passes = (n) => n === undefined || /^minecraft:air$|fence$|elven_lantern$/.test(n);
   let worst = 99, count = 0;
