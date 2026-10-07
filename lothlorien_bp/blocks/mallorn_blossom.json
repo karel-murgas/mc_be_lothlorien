@@ -88,6 +88,19 @@
               "minecraft:moss_block",
               "minecraft:mud",
               "minecraft:farmland",
+              "minecraft:sand",
+              "minecraft:red_sand",
+              "minecraft:gravel",
+              "minecraft:clay",
+              "minecraft:stone",
+              "minecraft:granite",
+              "minecraft:diorite",
+              "minecraft:andesite",
+              "minecraft:deepslate",
+              "minecraft:tuff",
+              "minecraft:calcite",
+              "minecraft:snow",
+              "minecraft:mycelium",
               "lothlorien:mallorn_blossom"
             ]
           }
