@@ -1,5 +1,11 @@
 # Localization
 
+2026-10-04 RawMessage repair (target 1.26.52 / API 2.8.0): omit `with` for
+translations without arguments, including nested labels. The same helper pattern
+caused Torchlight's owner-reported `RawMessageError`; see workspace
+`docs/localization.md`. Offline payload regressions cover this case; in-game
+confirmation of the corrected helper is pending.
+
 2026-10-04; target Bedrock 1.26.52 / Script API 2.8.0.
 Commit: `Localize lothlorien with contextual catalogs and nine locales`.
 
