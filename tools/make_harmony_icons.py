@@ -5,8 +5,8 @@
 Output (overwritten every run): lothlorien_rp/font/glyph_E5.png (256x256 RGBA, 16x16 cells of 16x16 px, cell n = U+E500+n).
 Cells 0-4 hold the band icons used by scripts/harmony.js BAND_ICONS (action bar prefix):
   U+E500 Friend  bright green mallorn leaf with a gold star   U+E501 Guest   paler green plain leaf
-  U+E502 Uneasy  orange wilted, drooping leaf                  U+E503 Shunned red broken thorn twig
-  U+E504 Hated   dark red eye
+  U+E502 Uneasy  orange wilted, drooping leaf                  U+E503 Shunned red leaf broken in two
+  U+E504 Hated   dark red elven arrow, leaf-shaped head
 Colour AND shape differ per band (colour-blind safe); every icon has a 1 px darker outline so it reads on light and dark
 scenes. Same layout as vanilla font/glyph_E1.png. Rendering of this page in the action bar is not verified in game yet.
 --preview DIR also writes an upscaled sheet of the icons on a dark and a light background (iteration scratch, not in the mod).
@@ -147,46 +147,48 @@ def uneasy():
 
 
 def shunned():
-    """A broken twig with two thorns, splintered at the top."""
-    pal = {"l": hexc("#ff8272"), "m": hexc("#e0342c"), "d": hexc("#a01a1c")}
+    """A red mallorn leaf broken in two across its widest part, the upper half pushed apart: harmony broken."""
+    red = tuple(hexc(c) for c in ("#ff8272", "#e0342c", "#a01a1c"))
+    leaf_px = diagonal_leaf(red, hexc("#ffb0a4"))
     img = blank()
-    paint(img, [
-        ".......l.l..",
-        ".l.....ml.l.",
-        "..l....mml..",
-        "..ml..lmd...",
-        "...mllmd....",
-        "....lmd.....",
-        "...lmmd.....",
-        "..lmmd.m....",
-        "..lmd...md..",
-        ".lmd.....d..",
-        "lmd.........",
-        "ld..........",
-    ], pal)
+    for y in range(N):
+        for x in range(N):
+            c = leaf_px[y][x]
+            if not c:
+                continue
+            k = x - y - (1 if (x + y) % 4 < 2 else 0)  # across the leaf axis, with a zigzag break line
+            if k in (0, 1):
+                continue  # the gap
+            if k > 1:
+                nx, ny = x + 1, y - 1  # the upper half moves away along the axis
+                if 0 <= nx < N and 0 <= ny < N:
+                    img[ny][nx] = c
+            else:
+                img[y][x] = c
     return outline(img, hexc("#4a0a10"))
 
 
 def hated():
-    pal = {"m": hexc("#9a2030"), "d": hexc("#5c0f1c"), "i": hexc("#ff3a2a"), "p": hexc("#12020a"), "w": hexc("#ffd0c4"),
-           "b": hexc("#5c0f1c")}
+    """A dark red elven arrow with a leaf-shaped head (lower left) and fletching (upper right): the wardens shoot on sight."""
+    shaft = hexc("#6e1a22")
+    head = (hexc("#ff6a52"), hexc("#d42a28"), hexc("#7c0f1a"))  # light, mid, dark
+    vane_l, vane_d = hexc("#b8303c"), hexc("#5e0c18")
     img = blank()
-    paint(img, [
-        "............",
-        "............",
-        "...dddddd...",
-        "..diippiid..",
-        ".dmiippiimd.",
-        "dmmiippiimmd",
-        "dmmiippiimmd",
-        ".dmiippiimd.",
-        "..diippiid..",
-        "...dddddd...",
-        "............",
-        "............",
-    ], pal)
-    img[4][4] = pal["w"]
-    return outline(img, hexc("#2a050c"))
+    for i in range(0, 9):  # shaft from the tail (11, 0) towards the head
+        img[i][N - 1 - i] = shaft
+    for x, y in ((9, 1), (8, 2), (7, 3), (9, 0), (8, 1)):  # vane on the upper left side of the tail
+        img[y][x] = vane_l
+    for x, y in ((10, 2), (9, 3), (8, 4), (11, 2), (10, 3)):  # vane on the lower right side
+        img[y][x] = vane_d
+    cx, cy = 2.3, 8.7  # leaf-shaped head, tip at the lower left corner
+    for y in range(N):
+        for x in range(N):
+            px, py = x + 0.5, y + 0.5
+            a = ((cx - px) + (py - cy)) / math.sqrt(2)  # along the arrow, towards the tip
+            q = ((px - cx) + (py - cy)) / math.sqrt(2)  # across
+            if -2.4 <= a <= 3.0 and abs(q) <= 1.75 * max(0.0, 1 - (abs(a) / 3.0) ** 1.6):
+                img[y][x] = head[0] if q < -0.45 else (head[2] if q > 0.45 else head[1])
+    return outline(img, hexc("#24040a"))
 
 
 ICONS = [friend, guest, uneasy, shunned, hated]
