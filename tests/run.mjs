@@ -1716,6 +1716,19 @@ test("village bridges: the rail is one continuous stepped line (consecutive rail
     assert.equal(comps, 2, `${p.name}: one rail line per side, got ${comps}`);
   }
 });
+import { bridgeShape } from "../lothlorien_bp/scripts/village_bridge.js";
+test("bridgeShape: dog-legs shift one block sideways per block forward, walk stays 3 wide and connected, exits at the ends", () => {
+  for (const [len, off] of [[11, 2], [11, -2], [13, 3], [13, -3], [9, 0], [9, 4]]) {
+    const s = bridgeShape(len, off, len <= 7 ? 1 : 2), xs = (z) => s.walk.filter((c) => c[2] === z).map((c) => c[0]).sort((a, b) => a - b);
+    for (let z = 0; z < len; z++) {
+      const r = xs(z);
+      assert.equal(r.length, 3, `${len}/${off} row ${z}: 3 wide`);
+      if (z) assert.ok(Math.abs(r[1] - xs(z - 1)[1]) <= 1, `${len}/${off} row ${z}: centre moves at most one block`);
+    }
+    assert.equal(s.connectors[1].x - s.connectors[0].x, off);
+    assert.equal(s.size[0], 5 + Math.abs(off));
+  }
+});
 test("village: a bottom slab is never one slab thin - a top slab (or solid block) directly under every bottom slab", () => {
   for (const p of villagePieces()) {
     for (const b of p.blocks) {
@@ -1860,7 +1873,10 @@ test("elven warden: shoots monsters (spiders and creepers included), never playe
   assert.deepEqual(e.events["lothlorien:become_angry"].add.component_groups, ["lothlorien:angry"]);
   assert.deepEqual(e.events["lothlorien:on_calm"].remove.component_groups, ["lothlorien:angry"]);
   assert.equal(c["minecraft:shooter"].def, "minecraft:arrow");
-  assert.equal(c["minecraft:behavior.ranged_attack"].attack_range.max, 22);
+  const ra = c["minecraft:behavior.ranged_attack"];
+  assert.equal(ra.attack_radius, 18); assert.equal(ra.attack_radius_min, 6); assert.ok(ra.speed_multiplier < 1, "closes in at a walk");
+  assert.equal(c["minecraft:movement"].value, 0.25);
+  assert.equal(c["minecraft:behavior.avoid_mob_type"].entity_types[0].max_dist, 5, "keeps monsters off (kiting)");
   assert.ok(!("set_persistent" in c["minecraft:behavior.ranged_attack"]) && !("set_persistent" in c["minecraft:behavior.nearest_attackable_target"]));
   assert.deepEqual(c["minecraft:equipment"].slot_drop_chance, [{ slot: "slot.weapon.mainhand", drop_chance: 0 }]);
   assert.ok(!c["minecraft:experience_reward"], "no XP");

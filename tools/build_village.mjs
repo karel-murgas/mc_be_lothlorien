@@ -13,6 +13,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { toMcstructure } from "./build_structures.mjs";
 import { B } from "./flet_mallorn.mjs";
+import { bridgeShape } from "../lothlorien_bp/scripts/village_bridge.js";
 import {
   ROOTS, FLOOR_H, LEVEL_H, FACING, SHAPES, key, AIR, planks, slab, Deck, buildTree, buildCrown, deckJigsaw, lantern, lonelyRail,
   writeRails, RAIL, shapeCells, addLanterns,
@@ -138,53 +139,26 @@ crown("crown_central_a", { h: 12, H: 28, seed: 12012, branches: 10, blob: 3.2, c
 crown("crown_central_b", { h: 10, H: 24, seed: 10010, branches: 9, blob: 3.0, central: true });
 
 // --- bridges: 5 wide (+ shift for dog-legs), deck at box y 0 on the connectors, gently arched with bottom slabs ----------
-// Walking surface in half-blocks k(z) = min(z, L-1-z, top): even k = planks at layer k/2, odd k = bottom slab at layer
-// (k+1)/2, one half-step (0.5 block, steppable) per cell. top 2 (rise 1) for L <= 7, 4 (rise 2) for L >= 9.
-// Rails: one cell above the block the walker stands on; straight runs and square corners only (dog-leg: 3 wide rows
-// between the two straight parts).
+// The shape (deck, arch, rails, connectors) is lothlorien_bp/scripts/village_bridge.js bridgeShape(length, offset, rise), pure JS
+// so the runtime loop-closer builds the same bridge. Arch: one half block (plank / bottom slab) per cell; rise 1 for L <= 7, 2 for
+// L >= 9. Dog-legs shift one block sideways per block forward (45 degrees) between two straight runs; the rail is one face-adjacent line.
 function bridge(name, length, { shift = 0, mirror = false, lanterns = false } = {}) {
-  const blocks = new Map(), W = 5 + shift, top = length <= 7 ? 2 : 4;
-  const j0 = shift ? Math.floor((length - 3) / 2) : -1;
-  const range = (z) => (z < 0 ? [0, 4] : z >= length ? [shift, shift + 4] : !shift || z < j0 ? [0, 4] : z <= j0 + 2 ? [0, shift + 4] : [shift, shift + 4]);
-  const isDeck = (x, z) => { const [a, b] = range(z); return x >= a && x <= b; };
-  const mx = (x) => (mirror ? W - 1 - x : x);
-  const kOf = (z) => Math.min(z, length - 1 - z, top);
-  const layerOf = (k) => (k % 2 === 0 ? k / 2 : (k + 1) / 2);
-  const rails = new Set(), forced = new Map();
-  for (let z = 0; z < length; z++) {
-    const k = kOf(z), L = layerOf(k), [a, b] = range(z);
-    for (let x = a; x <= b; x++) {
-      blocks.set(key(mx(x), L, z), k % 2 === 0 ? planks() : slab("bottom"));
-      if (k % 2 === 1) blocks.set(key(mx(x), L - 1, z), slab("top")); // the body is never one slab thin: top slab under a bottom slab
-      for (let h = 1; h <= 3; h++) blocks.set(key(mx(x), L + h, z), AIR);
-      let rim = false;
-      for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) if (!isDeck(x + dx, z + dz)) rim = true;
-      if (!rim) continue;
-      const rk = key(mx(x), L + 1, z);
-      rails.add(rk);
-      const sides = [];
-      if (z === 0) sides.push("north");
-      if (z === length - 1) sides.push("south");
-      if (sides.length) forced.set(rk, sides);
-    }
+  const shape = bridgeShape(length, mirror ? -shift : shift, length <= 7 ? 1 : 2);
+  const blocks = new Map(), [W, sy] = shape.size;
+  const KIND = { plank: planks, slab_bottom: () => slab("bottom"), slab_top: () => slab("top"), air: () => AIR };
+  for (const c of shape.cells) blocks.set(key(c.x, c.y, c.z), KIND[c.kind]());
+  for (const r of shape.rails) { // fences over the cleared air; a rail may sit outside the deck cells (diagonal corners)
+    const states = {};
+    for (const side of Object.keys(FACING)) states[`minecraft:connection_${side}`] = r.sides.includes(side);
+    blocks.set(key(r.x, r.y, r.z), { name: RAIL, states });
   }
-  // step links: where the rail rises one block between neighbouring cells, the lower cell gets a fence one block up, so the rail is
-  // one stepped line with no diagonal-only join (both sides, both halves of the arch)
-  for (const rk of [...rails]) {
-    const [x, y, z] = rk.split(",").map(Number);
-    for (const dz of [-1, 1]) if (rails.has(key(x, y + 1, z + dz))) rails.add(key(x, y + 1, z));
-  }
-  // the walk cells of the rail rows' air are overwritten by the rails above
-  writeRails(blocks, rails, forced);
   if (lanterns) {
-    const z = Math.floor(length / 2), L = layerOf(kOf(z));
-    for (const x of [0, 4]) { blocks.set(key(mx(x), L + 2, z), lonelyRail()); blocks.set(key(mx(x), L + 3, z), lantern()); }
+    const z = Math.floor(length / 2), k = Math.min(z, length - 1 - z, 4), top = k % 2 ? (k + 1) / 2 : k / 2;
+    for (const x of [0, 4]) { blocks.set(key(x, top + 2, z), lonelyRail()); blocks.set(key(x, top + 3, z), lantern()); }
   }
-  const sy = layerOf(top) + 4;
   addLanterns(blocks, { x0: 0, x1: W - 1, y0: 0, y1: sy - 1, z0: 0, z1: length - 1 }, (x, y, z) => z === 0 || z === length - 1); // not on the connector rows
-  const connectors = [{ x: mx(2), y: 0, z: 0, facing: "north" }, { x: mx(shift + 2), y: 0, z: length - 1, facing: "south" }];
-  for (const c of connectors) blocks.set(key(c.x, 0, c.z), deckJigsaw(c.facing, POOL("nodes")));
-  writePiece(name, blocks, [W, sy, length], [0, 0, 0], connectors);
+  for (const c of shape.connectors) blocks.set(key(c.x, 0, c.z), deckJigsaw(c.facing, POOL("nodes")));
+  writePiece(name, blocks, shape.size, [0, 0, 0], shape.connectors);
 }
 for (const L of [5, 7, 9, 11, 13]) bridge(`bridge_${L}`, L, { lanterns: L >= 9 });
 bridge("bridge_dog_11_l", 11, { shift: 2 });

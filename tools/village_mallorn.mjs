@@ -6,6 +6,7 @@
 // The box is (2*hx+1) x (2*hz+1), so toMcstructure offset = [hx, ROOTS, hz].
 import { makeBuilder, makeRandom, DIRS8 } from "../lothlorien_bp/scripts/mallorn_tree.js";
 import { B, trimFarLeaves } from "./flet_mallorn.mjs";
+import { blockLight } from "../../../.claude/skills/bedrock-modding/scripts/structure_light.mjs"; // shared skill script (one implementation of the light model)
 
 export const ROOTS = 18; // trunks and pillars reach this far below the nominal ground (levels up to +16 still reach the ground)
 export const FLOOR_H = 16; // lower deck above the nominal ground
@@ -66,28 +67,20 @@ export function writeRails(blocks, rails, forced = new Map()) {
 
 // ---- block light -----------------------------------------------------------------------------------------------------
 // Monsters spawn at block light 0 only; the owner wants a vivid city: >= LIGHT_TARGET on every walkable cell. Model: lanterns are
-// the only sources (the lantern block emits 14), light spreads through air, void, rails and lanterns losing 1 per step
+// the only sources (the lantern block emits 14; flood fill = shared skill script), light spreads through air, void, rails and lanterns losing 1 per step
 // (6-neighbours), and is stopped by everything else (planks, slabs, logs, leaves: the safe assumption). Only sources inside the
 // piece box count. Walk cell = the feet cell above a deck / slab / connector block with feet and head cell free (not a rail).
 export const LANTERN_LIGHT = 14, LIGHT_TARGET = 8;
 const N6 = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
 const clearForLight = (n) => n === undefined || n === "minecraft:air" || n === RAIL || n === LANTERN;
 const inBox = (b, x, y, z) => x >= b.x0 && x <= b.x1 && y >= b.y0 && y <= b.y1 && z >= b.z0 && z <= b.z1;
-// nameAt(x, y, z) -> block name, undefined for structure void; b = { x0, x1, y0, y1, z0, z1 }
+// nameAt(x, y, z) -> block name, undefined for structure void; b = { x0, x1, y0, y1, z0, z1 }. The flood fill itself is the shared
+// skill script (.claude/skills/bedrock-modding/scripts/structure_light.mjs); this wraps it for boxes that do not start at 0.
 export function lightField(nameAt, b) {
-  const L = new Map(), q = [];
-  for (let x = b.x0; x <= b.x1; x++) for (let y = b.y0; y <= b.y1; y++) for (let z = b.z0; z <= b.z1; z++) {
-    if (nameAt(x, y, z) === LANTERN) { L.set(key(x, y, z), LANTERN_LIGHT); q.push([x, y, z]); }
-  }
-  for (let i = 0; i < q.length; i++) {
-    const [x, y, z] = q[i], l = L.get(key(x, y, z));
-    if (l <= 1) continue;
-    for (const [dx, dy, dz] of N6) {
-      const nx = x + dx, ny = y + dy, nz = z + dz, nk = key(nx, ny, nz);
-      if (L.has(nk) || !inBox(b, nx, ny, nz) || !clearForLight(nameAt(nx, ny, nz))) continue;
-      L.set(nk, l - 1); q.push([nx, ny, nz]);
-    }
-  }
+  const get = (x, y, z) => nameAt(x + b.x0, y + b.y0, z + b.z0);
+  const raw = blockLight(get, [b.x1 - b.x0 + 1, b.y1 - b.y0 + 1, b.z1 - b.z0 + 1], { [LANTERN]: LANTERN_LIGHT }, clearForLight);
+  const L = new Map();
+  for (const [k, v] of raw) { const [x, y, z] = k.split(",").map(Number); L.set(key(x + b.x0, y + b.y0, z + b.z0), v); }
   return L;
 }
 export function walkCells(nameAt, b) {
