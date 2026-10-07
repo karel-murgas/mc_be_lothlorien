@@ -1,0 +1,29 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.lothlorien.elven_warden.walk_cloak": {
+      "loop": true,
+      "bones": {
+        "cloak": {
+          "rotation": [
+            "math.min(query.modified_move_speed, 1.0) * 4.0 + math.cos(query.modified_distance_moved * 38.17) * 1.5 * query.modified_move_speed",
+            0.0,
+            "math.sin(query.modified_distance_moved * 38.17) * 0.8 * query.modified_move_speed"
+          ]
+        }
+      }
+    },
+    "animation.lothlorien.elven_warden.idle_sway": {
+      "loop": true,
+      "bones": {
+        "cloak": {
+          "rotation": [
+            "math.sin(query.life_time * 90.0) * 0.5",
+            0.0,
+            0.0
+          ]
+        }
+      }
+    }
+  }
+}

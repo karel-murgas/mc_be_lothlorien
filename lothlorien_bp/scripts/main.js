@@ -18,6 +18,7 @@ import { leafUndersideY } from "./leaf_fall.js";
 import { handleDisharmonyEvent, startDisharmony } from "./disharmony_game.js";
 import { startDeer } from "./deer.js";
 import { startWhiteDeer } from "./white_deer.js";
+import { startElvenWardens } from "./elven_warden.js";
 import { startSwans } from "./swan.js";
 import { startSquirrels } from "./squirrel.js";
 import { startUnicorns } from "./unicorn.js";
@@ -91,7 +92,7 @@ function surfaceSampler(dim, location) {
   };
 }
 
-// Depth at any spot (the white deer's natural spawns are thinned by it, see white_deer_rules.js).
+// Depth at any spot (the white deer's and the elven warden's natural spawns are thinned by it, see white_deer_rules.js, elven_warden_rules.js).
 const depthAt = (dimension, location) => estimateDepth(surfaceSampler(dimension, location), BIOME_ID, DEPTH_TRANSPARENT);
 
 function playerDepth(player) {
@@ -187,6 +188,7 @@ world.afterEvents.worldLoad.subscribe(() => {
     transparent: DEPTH_TRANSPARENT,
     at: (dimension, x, z) => surfaceSampler(dimension, { x, z })(0, 0),
   });
+  startElvenWardens(depthAt);
   startSwans({ id: BIOME_ID, at: (dimension, x, z) => surfaceSampler(dimension, { x, z })(0, 0) });
   startSquirrels();
   startUnicorns();

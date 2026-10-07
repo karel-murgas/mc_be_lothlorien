@@ -1594,7 +1594,7 @@ test("rail mender: every village piece with rails carries exactly one marker ins
   for (const p of villagePieces()) {
     const rails = p.blocks.filter((b) => b.name === FENCE).length;
     const m = p.entities.filter((e) => e.id === MEND.MENDER_ID);
-    assert.equal(p.entities.length, m.length, `${p.name}: only markers`);
+    assert.equal(p.entities.length - p.entities.filter((e) => e.id === "lothlorien:elven_warden").length, m.length, `${p.name}: only markers (and village wardens)`);
     assert.equal(m.length, rails ? 1 : 0, `${p.name}: ${rails} rails, ${m.length} markers`);
     for (const e of m) {
       const [x, y, z] = e.pos;
@@ -1624,6 +1624,129 @@ const railJs = readFileSync(new URL("../lothlorien_bp/scripts/rail_mender.js", i
 test("rail mender: script is imported by main.js and removes the marker only after the scan", () => {
   assert.ok(readFileSync(new URL("../lothlorien_bp/scripts/main.js", import.meta.url), "utf8").includes('import "./rail_mender.js"'));
   assert.ok(railJs.includes("entityLoad") && railJs.includes("entitySpawn") && railJs.includes("entity.remove()"));
+});
+
+// --- elven warden: entity invariants, spawn rule, natural-spawn thinning, friendly fire, village wardens ---
+import * as EW from "../lothlorien_bp/scripts/elven_warden_rules.js";
+const wardenEntity = () => readJson("../lothlorien_bp/entities/elven_warden.json")["minecraft:entity"];
+test("elven warden: family has mob + irongolem (monsters hunt it, arrows get the mob group), never monster", () => {
+  const fam = wardenEntity().components["minecraft:type_family"].family;
+  for (const f of ["lothlorien_warden", "irongolem", "mob"]) assert.ok(fam.includes(f), f);
+  assert.ok(!fam.includes("monster") && !fam.includes("player"));
+});
+test("elven warden: shoots monsters (spiders and creepers included), never players or other families; bow never drops", () => {
+  const c = wardenEntity().components;
+  const filters = c["minecraft:behavior.nearest_attackable_target"].entity_types[0].filters.all_of;
+  assert.deepEqual(filters[0], { test: "is_family", subject: "other", value: "monster" });
+  const excluded = filters.slice(1).map((f) => { assert.equal(f.operator, "!="); return f.value; }).sort();
+  assert.deepEqual(excluded, ["aquatic", "creaking", "enderman", "piglin", "shulker", "wither", "warden", "zombie_pigman"].sort());
+  for (const keep of ["creeper", "spider", "cave_spider"]) assert.ok(!excluded.includes(keep), `${keep} stays a target`);
+  assert.ok(!JSON.stringify(c["minecraft:behavior.nearest_attackable_target"]).includes('"player"'));
+  assert.ok(c["minecraft:behavior.hurt_by_target"].alert_same_type && c["minecraft:behavior.hurt_by_target"].entity_types.max_dist >= 64);
+  assert.equal(c["minecraft:shooter"].def, "minecraft:arrow");
+  assert.equal(c["minecraft:behavior.ranged_attack"].attack_range.max, 22);
+  assert.ok(!("set_persistent" in c["minecraft:behavior.ranged_attack"]) && !("set_persistent" in c["minecraft:behavior.nearest_attackable_target"]));
+  assert.deepEqual(c["minecraft:equipment"].slot_drop_chance, [{ slot: "slot.weapon.mainhand", drop_chance: 0 }]);
+  assert.ok(!c["minecraft:loot"] && !c["minecraft:experience_reward"], "no drops, no XP");
+  const gear = JSON.stringify(readJson("../lothlorien_bp/loot_tables/entities/elven_warden_gear.json"));
+  assert.ok(gear.includes('"minecraft:bow"'));
+});
+test("elven warden: natural wardens despawn by the standard rule; only the village group is persistent", () => {
+  const e = wardenEntity();
+  assert.deepEqual(e.components["minecraft:despawn"], { despawn_from_distance: {} }, "standard rules, no filters (TECHNICAL_NOTES, Phase 10)");
+  assert.ok(!e.components["minecraft:persistent"]);
+  const g = e.component_groups[EW.VILLAGE_GROUP];
+  assert.ok(g["minecraft:persistent"] && g["minecraft:home"].restriction_radius <= 20 && g["minecraft:behavior.move_towards_home_restriction"]);
+  assert.deepEqual(e.events["lothlorien:village_warden"].add.component_groups, [EW.VILLAGE_GROUP], "summon hook for tests");
+  assert.equal(e.events["lothlorien:spawn_natural"].set_property["lothlorien:natural"], true);
+  assert.ok(!e.events["minecraft:entity_spawned"], "nothing to set up at spawn");
+  assert.deepEqual(e.description.properties["lothlorien:natural"], { type: "bool", default: false, client_sync: false });
+});
+test("elven warden: spawn rule has a ground and a deck condition with the weights of elven_warden_rules.js", () => {
+  const r = readJson("../lothlorien_bp/spawn_rules/elven_warden.json")["minecraft:spawn_rules"];
+  assert.equal(r.description.identifier, EW.WARDEN_ID);
+  assert.equal(r.description.population_control, "animal");
+  assert.equal(r.conditions.length, 2);
+  const [ground, deck] = r.conditions;
+  assert.equal(ground["minecraft:weight"].default, EW.SPAWN_WEIGHT_GROUND);
+  assert.equal(deck["minecraft:weight"].default, EW.SPAWN_WEIGHT_DECK);
+  assert.deepEqual([...EW.DECK_BLOCKS].sort(), [...deck["minecraft:spawns_on_block_filter"]].sort());
+  for (const c of r.conditions) {
+    assert.equal(c["minecraft:herd"].event, "lothlorien:spawn_natural");
+    assert.equal(c["minecraft:biome_filter"].value, "lothlorien");
+    assert.ok(!c["minecraft:brightness_filter"], "day and night guard");
+  }
+});
+test("elven warden: natural spawns - always at the edge and on decks, 10 % elsewhere in the biome, none outside", () => {
+  assert.equal(EW.spawnKeepChance(0, false), 0);
+  assert.equal(EW.spawnKeepChance(0, true), 0, "never outside the biome");
+  assert.equal(EW.spawnKeepChance(1, false), 1);
+  for (const level of [1, 2, 3]) assert.equal(EW.spawnKeepChance(level, true), 1, `deck at level ${level}`);
+  assert.equal(EW.spawnKeepChance(2, false), 0.1);
+  assert.equal(EW.spawnKeepChance(3, false), 0.1);
+  let kept = 0;
+  for (let i = 0; i < 1000; i++) if (EW.keepNaturalSpawn(3, false, i / 1000)) kept++;
+  assert.equal(kept, 100);
+  assert.ok(EW.keepNaturalSpawn(1, false, 0.999) && !EW.keepNaturalSpawn(3, false, 0.1));
+  const src = readFileSync(new URL("../lothlorien_bp/scripts/elven_warden.js", import.meta.url), "utf8");
+  assert.ok(src.includes("EntityInitializationCause.Loaded") && src.includes('setProperty("lothlorien:natural", false)'), "judged once, not on reload");
+  assert.ok(!src.includes("runInterval"), "event-driven, no polling");
+  assert.ok(readFileSync(new URL("../lothlorien_bp/scripts/main.js", import.meta.url), "utf8").includes("startElvenWardens(depthAt)"));
+});
+test("elven warden: friendly fire - never on wardens, own creatures, animals; players only after hitting a warden", () => {
+  const v = (typeId, families = []) => ({ typeId, families });
+  const ff = (victim, sinceProvokedMs) => EW.isFriendlyFire({ shooterId: EW.WARDEN_ID, victim, sinceProvokedMs });
+  assert.ok(ff(v(EW.WARDEN_ID, ["lothlorien_warden", "irongolem", "mob"])));
+  assert.ok(ff(v("lothlorien:deer", ["mob"])) && ff(v("lothlorien:unicorn")) && ff(v("lothlorien:swan")));
+  assert.ok(ff(v("minecraft:cow", ["cow", "animal", "mob"])));
+  assert.ok(ff(v("minecraft:player"), undefined), "unprovoked player is shielded");
+  assert.ok(ff(v("minecraft:player"), EW.PROVOKE_MS + 1), "provocation expires");
+  assert.ok(!ff(v("minecraft:player"), 0) && !ff(v("minecraft:player"), EW.PROVOKE_MS), "a player who hit a warden is fair game");
+  assert.ok(!ff(v("minecraft:zombie", ["zombie", "monster", "mob"])), "monsters take arrows");
+  assert.ok(!ff(v("minecraft:villager_v2", ["villager"])), "villagers in the line of fire are accepted");
+  assert.ok(!EW.isFriendlyFire({ shooterId: "minecraft:skeleton", victim: v("minecraft:player"), sinceProvokedMs: undefined }), "only warden arrows");
+  const src = readFileSync(new URL("../lothlorien_bp/scripts/elven_warden.js", import.meta.url), "utf8");
+  assert.ok(src.includes("beforeEvents.entityHurt") && src.includes("event.cancel = true"));
+});
+test("elven warden: Disharmony - a kill counts one point, hitting counts none; localized name and spawn egg name", () => {
+  assert.equal(D.killWeight(EW.WARDEN_ID), 1);
+  assert.equal(D.KILL_WEIGHTS[EW.WARDEN_ID], 1, "listed explicitly (owner decision 2026-10-07)");
+  const lang = readFileSync(new URL("../lothlorien_rp/texts/en_US.lang", import.meta.url), "utf8");
+  assert.ok(/entity\.lothlorien:elven_warden\.name=Elven Warden\r?\n/.test(lang));
+  assert.ok(/item\.spawn_egg\.entity\.lothlorien:elven_warden\.name=Elven Warden Spawn Egg\r?\n/.test(lang));
+});
+test("elven warden: village wardens - 2 on the central tree, 1 on some nodes/towers, persistent, mortal, armed, on open deck", () => {
+  const counts = {};
+  for (const p of villagePieces()) {
+    const w = p.entities.filter((e) => e.id === EW.WARDEN_ID);
+    counts[p.name] = w.length;
+    for (const e of w) {
+      assert.ok(isTree(p.name), `${p.name}: wardens only on tree pieces`);
+      assert.deepEqual(e.defs, [`+${EW.WARDEN_ID}`, `+${EW.VILLAGE_GROUP}`], `${p.name}: village group via the definitions list`);
+      assert.equal(e.invulnerable, false, `${p.name}: mortal`);
+      assert.equal(e.mainhand, EW.BOW_ID, `${p.name}: bow in hand`);
+      const [x, y, z] = e.pos;
+      assert.ok(x > 0 && x < p.size[0] && z > 0 && z < p.size[2] && y > 0 && y < p.size[1], `${p.name}: inside the box`);
+      // feet cell: planks below, air above, open deck around, no rail or fence within 2 cells
+      const [cx, cy, cz] = [Math.floor(x), Math.floor(y), Math.floor(z)];
+      assert.equal(p.at(cx, cy - 1, cz), PLANKS, `${p.name}: deck under the warden`);
+      for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) {
+        assert.equal(p.at(cx + dx, cy - 1, cz + dz), PLANKS, `${p.name}: open deck around`);
+        for (const h of [0, 1, 2]) assert.ok([undefined, null, "minecraft:air"].includes(p.at(cx + dx, cy + h, cz + dz)), `${p.name}: headroom ${dx},${h},${dz}`);
+      }
+      for (let dx = -2; dx <= 2; dx++) for (let dz = -2; dz <= 2; dz++) assert.notEqual(p.at(cx + dx, cy, cz + dz), FENCE, `${p.name}: away from rails`);
+    }
+  }
+  assert.equal(counts.central_mallorn_01, 2);
+  const nodes = Object.entries(counts).filter(([n, c]) => n !== "central_mallorn_01" && c > 0);
+  assert.ok(nodes.length >= 3 && nodes.every(([, c]) => c === 1), `1 warden on each of some node/tower pieces: ${JSON.stringify(counts)}`);
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  assert.ok(total >= 5, `${total} wardens across the pieces`);
+});
+test("elven warden: village group is applied through the structure's definitions list and exists in the entity file", () => {
+  assert.ok(Object.keys(wardenEntity().component_groups).includes(EW.VILLAGE_GROUP));
+  const src = readFileSync(new URL("../tools/build_village.mjs", import.meta.url), "utf8");
+  assert.ok(src.includes('"+lothlorien:village_warden"') && src.includes("invulnerable: false"));
 });
 
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }

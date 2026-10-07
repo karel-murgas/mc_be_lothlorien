@@ -20,6 +20,11 @@ import {
 
 export const MAX_DEPTH = 5;
 const MENDER = "lothlorien:rail_mender";
+const WARDEN = "lothlorien:elven_warden";
+// Village wardens (entities/elven_warden.json, group lothlorien:village_warden = persistent + home): placed as template
+// entities on the lower deck of these pieces. Whether Bedrock places structure entities in jigsaw pieces is an open question
+// (same as the rail mender), to be seen in game.
+const WARDENS = { central_mallorn_01: 2, node_b: 1, node_c: 1, node_f: 1, tower_a: 1, tower_c: 1 };
 const bp = join(dirname(fileURLToPath(import.meta.url)), "..", "lothlorien_bp");
 const out = join(bp, "structures", "lothlorien", "village");
 mkdirSync(out, { recursive: true });
@@ -46,19 +51,55 @@ function checkConnectors(name, blocks, connectors) {
     }
   }
 }
+// Standing cells for `count` wardens on the deck layer y = FLOOR_H (tree coordinates): planks under the cell and its 8
+// neighbours, 3 x 3 x 3 explicit air above, no rail within 2 cells, so nothing but open deck around (not at a connector, the
+// trunk, the rope hole, a stair or a lantern). The first warden stands near ring `want`, the next ones as far from the earlier
+// ones as possible. Deterministic. Returns [{ x, z }] (tree coordinates); throws when there is no room.
+export function wardenCells(name, blocks, count, want) {
+  if (!count) return [];
+  const at = (x, y, z) => blocks.get(key(x, y, z))?.name;
+  const ok = [];
+  for (const k of blocks.keys()) {
+    const [x, y, z] = k.split(",").map(Number);
+    if (y !== FLOOR_H || at(x, y, z) !== B.planks) continue;
+    let good = true;
+    for (let dx = -2; dx <= 2 && good; dx++) for (let dz = -2; dz <= 2 && good; dz++) {
+      if (at(x + dx, y + 1, z + dz) === RAIL) good = false;
+      if (Math.abs(dx) <= 1 && Math.abs(dz) <= 1) {
+        if (at(x + dx, y, z + dz) !== B.planks) good = false;
+        for (let h = 1; h <= 3; h++) if (at(x + dx, y + h, z + dz) !== "minecraft:air") good = false;
+      }
+    }
+    if (good) ok.push({ x, z, d: Math.hypot(x, z) });
+  }
+  const near = ok.filter((c) => Math.abs(c.d - want) <= 2.5);
+  const pool = (near.length >= count ? near : ok).sort((a, b) => Math.abs(a.d - want) - Math.abs(b.d - want) || a.x - b.x || a.z - b.z);
+  if (pool.length < count) throw new Error(`${name}: no room for ${count} wardens`);
+  const picked = [pool[0]];
+  while (picked.length < count) {
+    const next = pool.filter((c) => !picked.includes(c)).sort((a, b) =>
+      Math.min(...picked.map((p) => Math.hypot(b.x - p.x, b.z - p.z))) - Math.min(...picked.map((p) => Math.hypot(a.x - p.x, a.z - p.z))) || a.x - b.x || a.z - b.z)[0];
+    picked.push(next);
+  }
+  return picked.map(({ x, z }) => ({ x, z }));
+}
 function writePiece(name, blocks, size, origin, connectors) {
   checkConnectors(name, blocks, connectors);
   const [sx, sy, sz] = size;
   // one invisible rail mender marker per piece with rails (scripts/rail_mender.js): box centre, at the lowest rail's height
   const railYs = [...blocks].filter(([, b]) => b.name === RAIL).map(([k]) => Number(k.split(",")[1]));
   const markers = railYs.length ? [{ id: MENDER, x: sx / 2, y: Math.min(...railYs) + origin[1], z: sz / 2 }] : [];
-  const { buffer, clipped } = toMcstructure(blocks, size, origin, markers);
+  const wardens = wardenCells(name, blocks, WARDENS[name] ?? 0, name.startsWith("central") ? 7 : 5).map((c) => ({
+    id: WARDEN, x: c.x + origin[0] + 0.5, y: FLOOR_H + 1 + origin[1], z: c.z + origin[2] + 0.5,
+    definitions: [`+${WARDEN}`, "+lothlorien:village_warden"], mainhand: "minecraft:bow", invulnerable: false,
+  }));
+  const { buffer, clipped } = toMcstructure(blocks, size, origin, [...markers, ...wardens]);
   if (clipped) throw new Error(`${name}: ${clipped} blocks outside the box`);
   writeFileSync(join(out, `${name}.mcstructure`), buffer);
   const tally = (f) => [...blocks.values()].filter(f).length;
   const conn = connectors.map((c) => `${c.facing}@y${c.y + origin[1]}`).join(" ");
   summary.push(`${name}: ${sx}x${sy}x${sz}, connectors ${conn || "none"}; ` +
-    `${tally((b) => b.name.endsWith("_log") || b.name.endsWith("_wood"))} logs, ${tally((b) => b.name === B.leaves)} leaves, ` +
+    `${wardens.length} wardens, ${tally((b) => b.name.endsWith("_log") || b.name.endsWith("_wood"))} logs, ${tally((b) => b.name === B.leaves)} leaves, ` +
     `${tally((b) => b.name === B.planks)} planks, ${tally((b) => b.name.includes("slab"))} slabs, ${tally((b) => b.name === RAIL)} rails, ${buffer.length} bytes`);
 }
 

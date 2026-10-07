@@ -60,10 +60,15 @@ const stateTag = (v) => (typeof v === "boolean" ? byte(v) : typeof v === "number
 
 // blocks: Map<"x,y,z" (tree coords), { name, states, loot? }>. size/offset default to the giant tree box.
 // Template entity (structure.entities): positions are structure-local because structure_world_origin is 0,0,0.
-// entities: [{ id, x, y, z }] with x/y/z in structure cells (floats allowed).
-const entityTag = ({ id, x, y, z }, n) => compound({
-  Air: short(300), Fire: short(0), OnGround: byte(false), Invulnerable: byte(true), isPersistent: byte(true),
-  identifier: str(id), definitions: list(T.string, [str(`+${id}`)]),
+// entities: [{ id, x, y, z, definitions?, mainhand?, invulnerable? }] with x/y/z in structure cells (floats allowed).
+//   definitions: component groups to add on load, "+group" strings (default: the entity itself, "+<id>"; the engine saves a
+//   placed mob's groups this way, so "+lothlorien:village_warden" puts it into that group). mainhand: item name held in the
+//   main hand (written as the saved-entity Mainhand list). invulnerable defaults to true (markers); real mobs pass false.
+const emptySlot = () => compound({ Count: byte(0), Damage: short(0), Name: str(""), WasPickedUp: byte(false) });
+const entityTag = ({ id, x, y, z, definitions, mainhand, invulnerable = true }, n) => compound({
+  Air: short(300), Fire: short(0), OnGround: byte(false), Invulnerable: byte(invulnerable), isPersistent: byte(true),
+  identifier: str(id), definitions: list(T.string, (definitions ?? [`+${id}`]).map(str)),
+  ...(mainhand ? { Mainhand: list(T.compound, [compound({ Count: byte(1), Damage: short(0), Name: str(mainhand), WasPickedUp: byte(false) })]), Offhand: list(T.compound, [emptySlot()]) } : {}),
   Pos: list(T.float, [float(x), float(y), float(z)]), Motion: list(T.float, [float(0), float(0), float(0)]),
   Rotation: list(T.float, [float(0), float(0)]), UniqueID: long(-(2n ** 33n) - BigInt(n) * 7919n),
 });

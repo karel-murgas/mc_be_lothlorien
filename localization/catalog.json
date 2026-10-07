@@ -10139,6 +10139,114 @@
               "based_on": "48d70591b09482216b5eb902e2cf2cb8b6bcd7648b5919f5f1811ab6d47c7e86"
             }
           }
+        },
+        "entity.lothlorien:elven_warden.name": {
+          "source": "Elven Warden",
+          "context": {
+            "meaning": "Elven Warden: a bow-armed elven guardian of Lothlorien, defends the woods and the tree villages against monsters. Warden here means guard or protector.",
+            "location": "lothlorien_rp: inventory/block tooltip, entity name or spawn egg",
+            "trigger": "Viewed in inventory, Creative inventory, block targeting or entity UI, as appropriate to this key.",
+            "tone": "Clear Minecraft UI",
+            "grammar": "Standalone noun phrase, no sentence punctuation.",
+            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender."
+          },
+          "placeholders": [],
+          "translations": {
+            "cs_CZ": {
+              "text": "Elfský strážce",
+              "based_on": "3dc7569b5462b94b5fe45ace1007f9d4ddf9097601c8bddd9fd67eff67828891",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "Guardián élfico",
+              "based_on": "3dc7569b5462b94b5fe45ace1007f9d4ddf9097601c8bddd9fd67eff67828891",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "Guardián élfico",
+              "based_on": "3dc7569b5462b94b5fe45ace1007f9d4ddf9097601c8bddd9fd67eff67828891",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "Guardião élfico",
+              "based_on": "3dc7569b5462b94b5fe45ace1007f9d4ddf9097601c8bddd9fd67eff67828891",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "Guardião élfico",
+              "based_on": "3dc7569b5462b94b5fe45ace1007f9d4ddf9097601c8bddd9fd67eff67828891",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "Elbenwächter",
+              "based_on": "3dc7569b5462b94b5fe45ace1007f9d4ddf9097601c8bddd9fd67eff67828891",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "Gardien elfique",
+              "based_on": "3dc7569b5462b94b5fe45ace1007f9d4ddf9097601c8bddd9fd67eff67828891",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "Elfi strażnik",
+              "based_on": "3dc7569b5462b94b5fe45ace1007f9d4ddf9097601c8bddd9fd67eff67828891",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "item.spawn_egg.entity.lothlorien:elven_warden.name": {
+          "source": "Elven Warden Spawn Egg",
+          "context": {
+            "meaning": "Creative spawn egg for Elven Warden. Spawn Egg is the Minecraft item type; do not translate as an animal-laid egg.",
+            "location": "lothlorien_rp: inventory/block tooltip, entity name or spawn egg",
+            "trigger": "Viewed in inventory, Creative inventory, block targeting or entity UI, as appropriate to this key.",
+            "tone": "Clear Minecraft UI",
+            "grammar": "Standalone noun phrase, no sentence punctuation.",
+            "constraints": "Preserve namespace IDs, commands, coordinates, color codes, placeholder order and lore proper names. Action-bar labels must stay short; no assumed player gender."
+          },
+          "placeholders": [],
+          "translations": {
+            "cs_CZ": {
+              "text": "Vajíčko tvora: Elfský strážce",
+              "based_on": "75f12682dd22ac98bcb26ba35b4fb7f1d229e27f618fa949114a3e6f2231213e",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "Huevo generador: Guardián élfico",
+              "based_on": "75f12682dd22ac98bcb26ba35b4fb7f1d229e27f618fa949114a3e6f2231213e",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "Huevo generador: Guardián élfico",
+              "based_on": "75f12682dd22ac98bcb26ba35b4fb7f1d229e27f618fa949114a3e6f2231213e",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "Ovo de invocação: Guardião élfico",
+              "based_on": "75f12682dd22ac98bcb26ba35b4fb7f1d229e27f618fa949114a3e6f2231213e",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "Ovo gerador: Guardião élfico",
+              "based_on": "75f12682dd22ac98bcb26ba35b4fb7f1d229e27f618fa949114a3e6f2231213e",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "Spawn-Ei: Elbenwächter",
+              "based_on": "75f12682dd22ac98bcb26ba35b4fb7f1d229e27f618fa949114a3e6f2231213e",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "Œuf d’apparition : Gardien elfique",
+              "based_on": "75f12682dd22ac98bcb26ba35b4fb7f1d229e27f618fa949114a3e6f2231213e",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "Jajo przyzywające: Elfi strażnik",
+              "based_on": "75f12682dd22ac98bcb26ba35b4fb7f1d229e27f618fa949114a3e6f2231213e",
+              "status": "ai-draft"
+            }
+          }
         }
       }
     }

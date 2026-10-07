@@ -26,7 +26,9 @@ export function isFriend(state) {
 }
 
 // Kills that count as more than one (entity type id -> points). The white deer (white hart) counts as two deer, the unicorn as three.
-export const KILL_WEIGHTS = { "lothlorien:white_deer": 2, "lothlorien:unicorn": 3 };
+// The elven warden is listed at 1 (the default) on purpose: killing one counts like any kill inside the biome, hitting
+// one counts nothing (owner, 2026-10-07; to be reworked with the Disharmony redesign).
+export const KILL_WEIGHTS = { "lothlorien:white_deer": 2, "lothlorien:unicorn": 3, "lothlorien:elven_warden": 1 };
 export const killWeight = (typeId) => KILL_WEIGHTS[typeId] ?? 1;
 
 // A player kill inside the biome: `weight` more points (killWeight of the victim), and the peaceful streaks start over.

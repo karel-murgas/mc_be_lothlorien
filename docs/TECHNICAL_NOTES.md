@@ -1163,3 +1163,13 @@ exactly in all 4 rotations and the arches walk without jumping (slabs); (5) the 
 in most; (11) trunk bottoms vs terrain, open stubs.
 
 **Fence link repair (2026-10-07, written, not yet seen in game).** Village rail pieces carry an invisible marker entity `lothlorien:rail_mender`; `scripts/rail_mender.js` mends dropped `minecraft:connection_*` links (own fences only, never off) once when the marker loads, then removes it. Whether Bedrock jigsaw places template entities is unverified. Details: workspace skill `bedrock-modding/references/10-jigsaw-pieces.md`.
+
+## Elven Warden (2026-10-07, built; static checks and unit tests only, NOT yet seen in game)
+
+Design and owner decisions: `docs/mobs/elven_warden.md` (section 10). Bow-armed defender `lothlorien:elven_warden` (family `irongolem`: vanilla
+monsters hunt it), natural spawns (spawn rule + one-time depth / deck judge in `scripts/elven_warden.js`, tuning constants in
+`elven_warden_rules.js`) and persistent village wardens (template entities in `central_mallorn_01` x2, `node_b/c/f`, `tower_a/c` x1; group
+`lothlorien:village_warden` via the structure `definitions` list; `build_village.mjs` `WARDENS` / `wardenCells`). Friendly-fire guard on
+`world.beforeEvents.entityHurt`. Event-driven only, no `runInterval`. Despawn: standard `despawn_from_distance`, no filters (Phase 10 trap);
+only the village group adds `minecraft:persistent`. Kill = 1 Disharmony point, hit = 0. Open: template entities in jigsaw pieces, home point,
+bow from the equipment table. Depth-estimate cost per natural spawn still unmeasured (`/scriptevent lothlorien:depth`).

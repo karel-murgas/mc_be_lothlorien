@@ -1,0 +1,27 @@
+{
+  "format_version": "1.10.0",
+  "animation_controllers": {
+    "controller.animation.lothlorien.elven_warden.bow": {
+      "initial_state": "default",
+      "states": {
+        "default": {
+          "transitions": [
+            {
+              "aiming": "query.has_target"
+            }
+          ]
+        },
+        "aiming": {
+          "animations": [
+            "bow_and_arrow"
+          ],
+          "transitions": [
+            {
+              "default": "!query.has_target"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

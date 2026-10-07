@@ -359,3 +359,7 @@ lothlorien.settings.appearance=Lothlorien: ustawienia wyglądu (każdy gracz wyb
 lothlorien.settings.pretty_boats=Bardziej szczegółowe łódki z mallornu
 ## Context: Interaction prompt for catching a firefly in a glass bottle. Uses one bottle and gives a bottle containing the insect.
 action.interact.lothlorien.catch_firefly=Złap świetlika
+## Context: Elven Warden: a bow-armed elven guardian of Lothlorien, defends the woods and the tree villages against monsters. Warden here means guard or protector.
+entity.lothlorien:elven_warden.name=Elfi strażnik
+## Context: Creative spawn egg for Elven Warden. Spawn Egg is the Minecraft item type; do not translate as an animal-laid egg.
+item.spawn_egg.entity.lothlorien:elven_warden.name=Jajo przyzywające: Elfi strażnik

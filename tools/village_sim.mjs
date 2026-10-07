@@ -66,7 +66,7 @@ export function parseMcstructure(buf, name = "?") {
         name: e.name, target: e.target, pool: e.target_pool, final: e.final_state, joint: e.joint });
     } else if (entry.name !== AIR) blocks.push({ x, y, z, name: entry.name, states: entry.states ?? {} });
   }
-  const entities = (v.structure.entities ?? []).map((e) => ({ id: e.identifier, pos: e.Pos }));
+  const entities = (v.structure.entities ?? []).map((e) => ({ id: e.identifier, pos: e.Pos, defs: e.definitions, invulnerable: !!e.Invulnerable, mainhand: e.Mainhand?.[0]?.Name }));
   return { name, size: [sx, sy, sz], grid, blocks, jigsaws, entities, at: (x, y, z) => (x < 0 || y < 0 || z < 0 || x >= sx || y >= sy || z >= sz ? undefined : grid[(x * sy + y) * sz + z]) };
 }
 
@@ -315,6 +315,7 @@ export function check(data, res) {
   const kinds = { central: 0, node: 0, tower: 0, straight: 0, dog: 0, crown: 0, crownSmall: 0, balcony: 0, lookout: 0, plug: 0 };
   for (const p of res.placed) { const k = kindOf(p.name); if (k in kinds) kinds[k]++; if (p.name === "crown_small") kinds.crownSmall++; }
   kinds.trees = kinds.central + kinds.node + kinds.tower;
+  kinds.wardens = res.placed.reduce((n, p) => n + p.piece.entities.filter((e) => e.id === "lothlorien:elven_warden").length, 0); // template entities (placed if Bedrock keeps them)
   const startLoc = data.pools.get(data.structure.start_pool).elements.map((e) => data.getPiece(e.element.location).name);
   if (!startLoc.includes(res.start.name) || res.placed[0] !== res.start) fail.push("start piece missing");
   if (res.capped) fail.push("generation did not terminate (piece cap)");
@@ -496,7 +497,7 @@ function main() {
   const mm = (f) => `${Math.min(...rows.map(f))}/${avg(f)}/${Math.max(...rows.map(f))}`;
   console.log(`\nseeds ${rows.length}: failures ${bad}, distinct layouts ${new Set(rows.map((r) => r.hash)).size}`);
   console.log(`  pieces ${mm((r) => r.res.placed.length)} | trees ${mm((r) => r.ck.kinds.trees)} | towers avg ${avg((r) => r.ck.kinds.tower)} | levels used ${mm((r) => r.ck.levels)} (villages with 2+ levels: ${rows.filter((r) => r.ck.levels >= 2).length}/${rows.length})`);
-  console.log(`  bridges straight ${avg((r) => r.ck.kinds.straight)} dog-leg ${avg((r) => r.ck.kinds.dog)} | balconies ${avg((r) => r.ck.kinds.balcony)} lookouts ${avg((r) => r.ck.kinds.lookout)} plugs ${avg((r) => r.ck.kinds.plug)} | open connectors ${avg((r) => r.ck.open)} (vertical ${avg((r) => r.ck.openVertical)}) | crowns ${avg((r) => r.ck.kinds.crown)}, small fallback ${avg((r) => r.ck.kinds.crownSmall)}`);
+  console.log(`  bridges straight ${avg((r) => r.ck.kinds.straight)} dog-leg ${avg((r) => r.ck.kinds.dog)} | balconies ${avg((r) => r.ck.kinds.balcony)} lookouts ${avg((r) => r.ck.kinds.lookout)} plugs ${avg((r) => r.ck.kinds.plug)} | open connectors ${avg((r) => r.ck.open)} (vertical ${avg((r) => r.ck.openVertical)}) | crowns ${avg((r) => r.ck.kinds.crown)}, small fallback ${avg((r) => r.ck.kinds.crownSmall)} | wardens per village (template entities) ${mm((r) => r.ck.kinds.wardens)}`);
   const sum = (f) => rows.reduce((a, r) => a + f(r.ck.info), 0);
   console.log(`  totals: unreachable walk cells ${rows.reduce((a, r) => a + r.ck.unreachable, 0)}, overlaps ${rows.reduce((a, r) => a + r.ck.overlaps, 0)}, wrong ropes ${sum((i) => i.ropeWrong)}/${sum((i) => i.ropes)}, ` +
     `decaying leaves ${sum((i) => i.decay)}/${sum((i) => i.leaves)}, one-way fence links (open ends only) ${sum((i) => i.fenceOneWay)} (dangling stub ends ${sum((i) => i.fenceDangling)}), near-miss ends ${sum((i) => i.nearMiss)}`);
