@@ -24,7 +24,7 @@ Use Claude primarily for:
 - TypeScript Script API work,
 - feature rules / biome JSON,
 - custom entity behavior,
-- Disharmony system,
+- Harmony system,
 - custom crops/items,
 - procedural tree/structure generator,
 - automated validation scripts,
@@ -443,7 +443,9 @@ Claude + graphics.
 
 ---
 
-# Phase 9 — Disharmony core
+# Phase 9 — Disharmony core (replaced by Harmony, 2026-10-07)
+
+_Status 2026-10-07: **superseded.** Disharmony was rebuilt as Harmony (one -60..+10 number with five bands, deed costs, Hated wardens; spec `harmony_rework_plan.md`, rules in `scripts/harmony.js`, notes in `TECHNICAL_NOTES.md` "Harmony"). The text below is the original 2026-09 plan, kept as history._
 
 Implement before fauna, so every animal can plug into the same API.
 
@@ -535,7 +537,7 @@ Implement first because it proves most terrestrial-animal mechanics.
 - idle/walk/run,
 - herd spawning,
 - skittish behavior,
-- Disharmony avoidance,
+- Harmony avoidance (was Disharmony),
 - venison,
 - optional antler drop.
 
@@ -551,15 +553,15 @@ Blockbench + graphics + Claude.
 
 _Status 2026-09-30: **done**. Tested in game by the owner (1.26.52): luring, taming, guidance, the gift and the Great Mallorn nut growing
 into a flet giant work. The white deer is
-its own entity `lothlorien:white_deer` (a rare loner: no herd, no breeding, no babies, not tamable); offering it a **Mallorn acorn** at
-Disharmony 0 starts guidance (the knowledge base said Western Corn; the owner changed it to the acorn). It walks by the engine's own
+its own entity `lothlorien:white_deer` (a rare loner: no herd, no breeding, no babies, not tamable); offering it a **Mallorn acorn** as a
+Friend of Lothlórien (Harmony +10; Disharmony 0 before 2026-10-07) starts guidance (the knowledge base said Western Corn; the owner changed it to the acorn). It walks by the engine's own
 pathfinding, following an invisible helper `lothlorien:guide_beacon` that script moves ahead in 8-14 block hops (goal
 `follow_target_leader`; fallbacks prepared in `tools/dev_scripts/guide_goal/`, to be decided by an in-game experiment). Third owner round
 (2026-09-30): leading to hidden markers in flet giants was dropped (a loaded-chunk search only finds trees already in sight; script cannot
 locate placed structures) and the markers removed. Instead, once per deer, it leads 36-56 blocks to a spot it picks inside the biome and
 lays its gift, a **Great Mallorn nut** that grows like a sapling into a flet giant anywhere. Second owner round, built 2026-09-30 (static checks only):
-the white deer is always an antlered hart with a sure antler drop, leashable (a lead always wins over guidance), counts double for
-Disharmony, spawns more in the heart than at the edges (script filter on natural spawns by depth); ordinary deer eat only Western Corn
+the white deer is always an antlered hart with a sure antler drop, leashable (a lead always wins over guidance), costs 6 Harmony
+(twice a deer; Disharmony double before), spawns more in the heart than at the edges (script filter on natural spawns by depth); ordinary deer eat only Western Corn
 grain. Design, assumptions, the goal experiment and the in-game test plan: `TECHNICAL_NOTES.md` (White deer guidance)._
 
 Add variant / separate entity.
@@ -735,14 +737,14 @@ Pollinating our flowers would have needed script-guided flying (owner: no). Deta
 
 **Done 2026-10-02 (tried in game, accepted)** - see `docs/mobs/unicorn.md`.
 
-Do this after Disharmony and animal infrastructure are stable.
+Do this after Harmony and animal infrastructure are stable.
 
 ## Features
 
 - horse-derived locomotion,
 - custom model/texture,
 - uncommon spawn,
-- strong avoidance of Disharmonious players,
+- strong avoidance of players with low Harmony,
 - Friend-only approach,
 - offer Elanor while Friend status is active to initiate trust/taming,
 - rideable/tamable result,
@@ -876,7 +878,7 @@ Player should be able to say:
 
 without looking at debug UI.
 
-We should look at opportunities to apply Disharmony and Depth to make use of these mechanics.
+We should look at opportunities to apply Harmony and Depth to make use of these mechanics.
 
 ---
 
@@ -924,7 +926,7 @@ Test:
 - Western Corn acquisition,
 - Lembas usefulness,
 - Miruvor cost,
-- deer temptation vs Disharmony,
+- deer temptation vs Harmony,
 - Friend status difficulty,
 - unicorn encounter frequency,
 - custom mob population health,
@@ -959,7 +961,7 @@ Before calling v1 complete:
 | Pack architecture | Claude |
 | Biome/worldgen JSON | Claude |
 | Script API | Claude |
-| Disharmony | Claude |
+| Harmony (was Disharmony) | Claude |
 | Mob behavior | Claude |
 | Procedural tree generator | Claude |
 | Texture concepts | Image-generation tool |

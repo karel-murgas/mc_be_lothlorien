@@ -350,10 +350,16 @@ test("harmony: chat lines per band change and direction; Friend gained / lost; t
 test("harmony: the action bar shows the band name inside the forest only; saved state round-trips; junk is tolerated", () => {
   const entries = catalogEntries();
   for (const [h, band] of [[10, "friend"], [0, "guest"], [-5, "uneasy"], [-20, "shunned"], [-40, "hated"]]) {
-    assert.deepEqual(H.statusText(hs(h), true), { translate: `lothlorien.message.status.${band}` }, band);
+    assert.deepEqual(H.statusText(hs(h), true), { rawtext: [{ text: H.BAND_ICONS[band] }, { translate: `lothlorien.message.status.${band}` }] }, band);
     assert.equal(H.statusText(hs(h), false), undefined);
     assert.ok(entries[`lothlorien.message.status.${band}`], band);
   }
+  const glyphs = Object.values(H.BAND_ICONS).map((i) => i.trim());
+  assert.deepEqual(glyphs, ["\uE500", "\uE501", "\uE502", "\uE503", "\uE504"], "one glyph per band, U+E500...U+E504 in band order");
+  assert.equal(new Set(glyphs).size, 5);
+  const png = readFileSync(new URL("../lothlorien_rp/font/glyph_E5.png", import.meta.url));
+  assert.equal(png.subarray(1, 4).toString(), "PNG");
+  assert.deepEqual([png.readUInt32BE(16), png.readUInt32BE(20)], [256, 256], "glyph page: 16x16 cells of 16 px");
   const s = hs(-7, 12.5);
   assert.deepEqual(H.parse(H.serialize(s)), s);
   assert.deepEqual(H.parse(undefined), H.newState()); assert.deepEqual(H.parse("{oops"), H.newState());

@@ -1,7 +1,7 @@
 # Lothlorien
 
 A rare, peaceful Lothlórien biome for Minecraft Bedrock: Mallorn trees, Elven flora and
-structures, gentle fauna and the Disharmony mechanic.
+structures, gentle fauna and the Harmony mechanic.
 
 Namespace: `lothlorien:`
 

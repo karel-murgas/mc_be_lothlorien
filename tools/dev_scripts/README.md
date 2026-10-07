@@ -16,4 +16,4 @@ take it out again before committing. The pre-cleanup state is commit `dc1182e`.
 | `biome_debug.js` | `lothlorien:survey` biome share; world-load biome registration message |
 
 Kept in the pack on purpose: `lothlorien:depth` (depth estimate and timing), `lothlorien:debug`
-(actionbar with depth level), `lothlorien:disharmony [points]` (needed by the deer test plan).
+(actionbar with depth level), `lothlorien:harmony [value]` (shows or sets Harmony, -60..+10; needed by the deer test plan).

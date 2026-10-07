@@ -17,7 +17,7 @@ watchpost guardians" are NOT this mob: this one is a normal natural spawn (owner
 | Targets | Monster family minus an exclusion list (enderman, warden, wither, piglins, creaking, aquatic, shulker). **Creepers are shot and spiders always** (owner 2026-10-07; section 3 table is superseded). Never players, never other families. |
 | Monsters hunt it | **Baseline without script: family `irongolem`** (zombies, skeletons, spiders, slimes, illagers, drowned... already hunt that family) + arrows trigger their `hurt_by_target`. Script "hit on sight" is an optional second layer (section 4). |
 | Players | Ignored. `hurt_by_target` retaliates against whoever hurt it (player included), `alert_same_type` makes nearby wardens assist. Script cancels warden arrow damage to players/wildlife unless provoked. |
-| Disharmony | **Owner 2026-10-07: a kill = weight 1 (listed explicitly in `KILL_WEIGHTS`), hitting = 0; no `ALWAYS_COUNT`.** The old proposal (weight 4, counts outside the biome) is dropped; owner will rework Disharmony later. |
+| Harmony | **Owner 2026-10-07 (replaced Disharmony): fighting a warden costs 1 Harmony per fight (first player hit after 60 s without one), killing it 6 more; a Hated player (-30 or lower, tag `lothlorien_hated`) is shot on sight.** Unverified in game. |
 | Village wardens | **Added 2026-10-07:** template entities in the village pieces (2 on the central tree deck, 1 on node_b/c/f and tower_a/c), group `lothlorien:village_warden` (persistent + home 20) through the structure's `definitions` list. Section 10. |
 | Stats | 26 hp, speed 0.27, follow range 28, shoots every 1.5-2.5 s up to 22 blocks, mob arrow (skeleton damage class). No drops, no XP. |
 
@@ -152,21 +152,23 @@ risk]**. Fallback: village piece marker or `structure`-saved entity (persistent,
 `"minecraft:despawn": {"despawn_from_distance": {}}`, no `filters` (the trap that cost the Phase 10 critter two rounds; `spawning.md`, verified 2026-09-30). No `minecraft:persistent`, `set_persistent` false on both
 target goals. Name tag keeps it (`minecraft:nameable`). A warden mid-fight beyond 128 blocks goes like any mob. No `remove_in_peaceful` (it is not hostile to players).
 
-## 6. Players, friendly fire, Disharmony
+## 6. Players, friendly fire, Harmony
 
-- Never targets players (filter has no player family). Retaliates through `hurt_by_target` (max_dist 64). Incident ends when the target is lost.
+- Targets players only after being hit (`hurt_by_target`, max_dist 64; the incident ends when the target is lost) **or when the player is Hated** (see Harmony below).
 - **Friendly fire** (arrows hit whoever is in the line, like skeleton arrows hit zombies):
   `world.beforeEvents.entityHurt` has `cancel` and `damageSource.damagingEntity` / `damagingProjectile` (d.ts line 10806, restricted privilege, read-only checks fine **[D]**).
   One subscriber, no polling, cancels damage when the source is a warden (or an arrow whose owner is) and the victim is: another warden, any `lothlorien:*` animal, or a player who has
-  not hurt a warden in the last 60 s (Map filled by `afterEvents.entityHurt` when a warden is hurt by a player or his projectile). Whether a cancelled projectile hit still gives knockback or sticks the arrow **[U]**.
+  not hurt a warden in the last 60 s and is not Hated (Map filled by `afterEvents.entityHurt` when a warden is hurt by a player or his projectile). Whether a cancelled projectile hit still gives knockback or sticks the arrow **[U]**.
   Backup in JSON per wildlife entity: `minecraft:damage_sensor` with `other_with_families lothlorien_warden`; whether `other` is the arrow or its owner **[U]**.
   Villagers and vanilla golems in the line of fire are accepted (golem retaliates: it only ignores creepers).
 - Wardens do not harm decks (no explosions, no fire arrows).
-- **Disharmony.** `disharmony.js` `KILL_WEIGHTS`: white deer 2, unicorn 3, default 1; levels 1 point = I, 2-3 = II, 4+ = III, one point decays per 3 min inside **[V, disharmony.js]**.
-  Proposal: `"lothlorien:elven_warden": 4` -> a kill puts the player straight to III (about 12 min inside to clear, trading refused, "Disharmony = unwelcome"). One assist-kill by a
-  tamed wolf etc. does not count (only `damagingEntity` player, projectiles included **[V, disharmony_game.js]**). Today a kill only counts when the victim stands in the biome
-  (`isInside`); a warden may die outside it, so add an `ALWAYS_COUNT` set (the warden) bypassing that check; one line plus a test in `tests/run.mjs` (lines ~824-835 test kill weights).
-  Wounding (not killing) adds nothing in v1; retaliation is the consequence. A kill of a monster by a warden gives no player points (the existing rule already needs a player killer).
+- **Harmony (owner decisions 2026-10-07; replaces the Disharmony weights; plan `docs/design/harmony_rework_plan.md`, rules in `harmony.js` `DEED_COSTS`, hook in `harmony_game.js`).**
+  Hitting a warden starts a *fight*: -1 Harmony once per fight (first player hit after 60 s without one, the `provoked` map and `PROVOKE_MS` here). Killing a warden: -6 on top.
+  A kill costs only when a player is the damager (projectiles included); a warden killed by a tamed wolf costs nothing. A deed counts when the player or the warden is inside the forest,
+  so a warden dying outside the biome still counts. A warden killing a monster costs the player nothing.
+  **Hated players** (Harmony -30 or lower): the script keeps the player tag `lothlorien_hated` in step with the band; `nearest_attackable_target` has an entry for players with
+  that tag, so wardens shoot them on sight, and `isFriendlyFire` never shields a Hated player. Dying inside the forest while Hated sets Harmony to -29 (Shunned), so wardens stop and
+  spawn-camping does not work. **[U: the tag filter, the arrows and the reset have not been seen in game yet.]**
 
 ## 7. Stats
 
@@ -178,7 +180,7 @@ target goals. Name tag keeps it (`minecraft:nameable`). A warden mid-fight beyon
 | Shot interval | 3 s (2 s hard) | 1 s crossbow | **1.5-2.5 s**, flat (no hard variant) |
 | Range | 15 | 8 | **attack_range max 22**, `in_range_movement_mode hold_position`, `speed_multiplier 1.0` |
 | Melee | fallback 2 | fallback 3 | none; `knockback_resistance 0.2` |
-| Drops / XP | bow, bones / 5+ | crossbow, ... | **none, 0 XP** (a kill is a Disharmony event, no farm; bow `drop_chance 0`) |
+| Drops / XP | bow, bones / 5+ | crossbow, ... | **none, 0 XP** (a kill is a Harmony event, no farm; bow `drop_chance 0`) |
 
 Two wardens kill a zombie in about 4 s, one loses against a skeleton pair without help: intended, they are a group mob. Arrow supply is unlimited (no inventory).
 Collision 0.6 x 1.95. Other components: `type_family ["lothlorien_warden","irongolem","mob"]` (not `monster`), `navigation.walk {avoid_damage_blocks, avoid_water, can_path_over_water false}`,
@@ -195,8 +197,8 @@ Doors, ladders: not wanted v1 (custom mallorn doors are not vanilla door blocks 
 2. `loot_tables/entities/elven_warden_gear.json` (always `minecraft:bow`, 1 roll) and the `slot_drop_chance` shape from vanilla pillager captain `{slot, drop_chance}` **[V]**. No `loot` component.
 3. `spawn_rules/elven_warden.json` as section 5.
 4. `scripts/elven_warden_rules.js` (pure: `keepNaturalSpawn(level, onDeck, roll)`, `isFriendlyFire(...)`, constants) and `scripts/elven_warden.js`
-   (entitySpawn judge, `beforeEvents.entityHurt` guard, provoked map); `startElvenWardens(depthAt, ...)` wired in `main.js` next to `startWhiteDeer`. `disharmony.js`: weight 4 + `ALWAYS_COUNT`.
-5. `tests/run.mjs`: keep-chance table, weights equal to the spawn rule file, `KILL_WEIGHTS` warden = 4 and counts outside, friendly-fire decision table, entity JSON invariants
+   (entitySpawn judge, `beforeEvents.entityHurt` guard, provoked map); `startElvenWardens(depthAt, ...)` wired in `main.js` next to `startWhiteDeer`. Harmony costs: `harmony.js` (see section 6).
+5. `tests/run.mjs`: keep-chance table, weights equal to the spawn rule file, warden Harmony costs (fight 1, kill 6) in `tests/run.mjs`, friendly-fire decision table, entity JSON invariants
    (family has `mob` and `irongolem`, no `monster`/`player` in the targeting filters, `despawn_from_distance` and no `filters`, equipment drop chance 0, `set_persistent` absent).
 6. `.\mods verify lothlorien`. Optional verifier rule: a ranged mob with `shooter` must have `mob` in its families (arrow group); with a broken fixture in `tools/verification/test_verify_addon.py`.
 
@@ -217,7 +219,7 @@ Check: bow visible in hand and raised when `query.has_target`; arrow flies from 
    1. `/summon lothlorien:elven_warden`: bow in hand, no content-log errors, arms raised when it has a target, silent.
    2. `/summon zombie ~5 ~ ~`, night spawns, skeleton, spider: warden shoots; the monster walks at the warden; first arrow answered. Repeat with witch, slime (family baseline), and a creeper (ignored by design).
    3. `/damage <spider> 0.5 entity_attack entity <warden>`: does the spider turn on the warden? Decides layer 2.
-   4. Player hits a warden: it shoots back, neighbours within 20 blocks join (`alert_same_type` radius); it stops when you leave. Killing it: actionbar shows Disharmony III, also outside the biome.
+   4. Player hits a warden: it shoots back, neighbours within 20 blocks join (`alert_same_type` radius); it stops when you leave. Killing it: Harmony -1 for the fight and -6 for the kill (`/scriptevent lothlorien:harmony` shows it), also outside the biome.
    5. Player standing between a warden and a zombie, a deer in the line of fire: no damage taken (guard works), arrow knockback/sticking noted.
    6. `/summon ... lothlorien:spawn_natural` at edge, in the heart and on a deck: kept always / 10 % / always. `entitySpawn` cause for natural spawns is not `Loaded`.
    7. New world: spawn counts at the edge, in the forest, on the village decks (do natural spawns ever pick a deck?), population vs deer, despawn after 2-3 min far away, name tag keeps one.
@@ -225,7 +227,7 @@ Check: bow visible in hand and raised when `query.has_target`; arrow flies from 
 
 ## 9. Open questions for the owner
 1. Creepers: ignored by wardens (default, protects the decks) or shot (they will run at the warden and explode)?
-2. Disharmony weight 4 (kill = Disharmony III) and should kills count outside the biome? Should merely hitting a warden add a point?
+2. (Answered 2026-10-07, see section 10: fight -1, kill -6, counted when the warden or player is inside.)
 3. If natural spawns never land on the village decks: accept edge-only, or add a persistent, village-piece-placed warden (outside "normal" rules)?
 4. Spiders in daylight: shoot them anyway (default) or leave neutral ones alone?
 5. Do wardens ever fight vanilla iron golems or villager-defending mobs that get hit by stray arrows: acceptable?
@@ -233,13 +235,13 @@ Check: bow visible in hand and raised when `query.has_target`; arrow flies from 
 ## 10. Owner decisions (2026-10-07) and implementation status
 
 Decisions that override sections 1-9: wardens **shoot creepers** (the creeper exclusion is gone; the creeper may blow up a deck, accepted) and
-**spiders always**, also neutral daylight ones (no light filter). Disharmony: **kill = 1, hit = 0**. Monster aggression: baseline family
+**spiders always**, also neutral daylight ones (no light filter). Harmony (later rework, same day): **fight -1, kill -6, Hated players shot on sight**. Monster aggression: baseline family
 `irongolem` only; the script "hit on sight" layer 2 (section 4) is **skipped for now, future work** (needs the `/damage` test first and a
 playtest showing monsters standing around unaware). Section 9 questions 1, 2, 4 are answered by this; 3 became "add village wardens" (below).
 
 **Built (part A), files:** `lothlorien_bp/entities/elven_warden.json`, `spawn_rules/elven_warden.json`,
 `loot_tables/entities/elven_warden_gear.json` (bow), `scripts/elven_warden_rules.js` (pure) + `elven_warden.js` (wired in `main.js`),
-`KILL_WEIGHTS` in `disharmony.js`, localization in `localization/catalog.json` (rp pack: name + spawn egg, 9 locales),
+`DEED_COSTS` in `harmony.js`, localization in `localization/catalog.json` (rp pack: name + spawn egg, 9 locales),
 `tools/build_structures.mjs` (`entityTag` options), `tools/build_village.mjs` (`WARDENS`, `wardenCells`), `tools/village_sim.mjs`
 (wardens per village), tests `elven warden: ...` in `tests/run.mjs`. Spawn egg grey-green / silver is part of the RP client entity (worker B).
 No sounds, no drops, no XP.

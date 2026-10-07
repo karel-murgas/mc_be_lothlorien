@@ -1,7 +1,8 @@
 # Harmony rework plan (replaces Disharmony)
 
-Status: **design agreed with the owner 2026-10-07, not started.** Target Bedrock 1.26.52 / Script API 2.8.0.
-Replaces design KB section 10 and the "Disharmony core" section of `docs/TECHNICAL_NOTES.md` once built.
+Status: **design agreed with the owner 2026-10-07; phases 1-3 are built (commit `5587e94` plus the icon and docs work after it), not yet tested in game.**
+Target Bedrock 1.26.52 / Script API 2.8.0. Replaced design KB section 10 and the "Disharmony core" section of `docs/TECHNICAL_NOTES.md` (done in phase 4).
+Open: section 8 in-game checks, and whether the add-on glyph page renders in the action bar (the one-glyph spike was skipped: all five icons were built at once).
 
 ## 1. Model
 

@@ -33,7 +33,7 @@ Then commit `white_deer.json` in `mods/lothlorien/` and note the result in `docs
    node mods/lothlorien/tools/dev_scripts/guide_goal/switch_guide_goal.mjs --experiment
    .\mods deploy lothlorien --quick
    ```
-2. In game (leave and re-enter the world), survival or creative, Disharmony 0 (`/scriptevent lothlorien:disharmony 0`), flat open ground:
+2. In game (leave and re-enter the world), survival or creative, Harmony 0 (`/scriptevent lothlorien:harmony 0`), flat open ground:
    ```
    /summon lothlorien:white_deer ~ ~ ~
    /summon minecraft:armor_stand ~12 ~ ~

@@ -18,6 +18,9 @@ game data (1.26.52), the Microsoft creator docs and the Bedrock Wiki, in 2026-09
 | **Shed antlers as a world feature / placeable block** | Done (Phase 11), untested in game | See `TECHNICAL_NOTES.md` (Deer antler). The chandelier use belongs to Phase 17. |
 | **Deer grazing** | Left out | Vanilla `eat_block` turns grass blocks into dirt, which would bare the golden forest floor. A grazing animation without the block change needs script. |
 | **White deer guidance to structures** | Replaced 2026-09-30 by the gift, done and tested in game (owner, 1.26.52) | Leading to hidden markers in flet giants was dropped and the markers removed (script only sees loaded chunks; placed structures cannot be located). The white deer now leads once to a spot it picks and lays a Great Mallorn nut (`docs/mobs/white_deer.md`, `TECHNICAL_NOTES.md` White deer guidance). Not done: sounds, the in-game goal experiment (`tools/dev_scripts/guide_goal/`). |
+| **Harmony: plundering and care** | Left out (owner, 2026-10-07) | Chopping wood and picking flowers cost no Harmony in v1, and planting acorns earns none. `recordDeed(state, kind)` in `scripts/harmony.js` is the single entry point, so either is one `DEED_COSTS` entry plus a hook later. |
+| **Harmony: trades and the Loremaster** | Later (needs the elf traders) | Per-band trade tables pre-swapped by script, Shunned and Hated refused; design in `docs/design/harmony_rework_plan.md` section 5 and `lothlorien_elven_settlements_plan.md`. A script cannot open a trade screen (no trade API in 2.8.0). |
+| **Harmony: action bar icons** | Built, **not verified in game** | The five band icons are glyphs of the resource pack font page `font/glyph_E5.png` (U+E500...U+E504). If an add-on glyph page does not render in the action bar, fall back to colour codes (green Friend ... dark red Hated) in front of the band name. |
 
 ## Redstone
 

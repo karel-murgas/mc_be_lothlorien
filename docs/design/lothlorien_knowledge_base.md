@@ -16,7 +16,7 @@ The biome should not feel like "vanilla forest with yellow leaves". It should ha
 - atmosphere,
 - wildlife behavior,
 - exploration rewards,
-- moral/behavioral mechanic ("Disharmony"),
+- moral/behavioral mechanic ("Harmony", see section 10),
 - progression from biome edge toward its deeper/older areas.
 
 NPCs and quests are explicitly postponed until the biome itself is complete and fun to discover.
@@ -55,8 +55,8 @@ Bedrock client biome definitions can directly customize:
 - Passive/magical fauna.
 - Valuable plants and materials to bring home.
 - Sustainable Mallorn farming without destroying the generated forest.
-- A player behavior system: killing creatures inside Lothlórien creates Disharmony.
-- Being peaceful long enough grants "Friend of Lothlórien".
+- A player behavior system: Harmony. Peaceful time in Lothlórien raises it, killing creatures there lowers it.
+- Reaching full Harmony makes you a "Friend of Lothlórien".
 - The deeper parts of the biome should feel older, stranger, richer and more magical.
 
 ---
@@ -341,7 +341,7 @@ Behavior:
 
 - usually in small groups,
 - skittish,
-- flees more strongly from Disharmonious players.
+- flees more strongly from players with low Harmony.
 
 Drops:
 
@@ -358,12 +358,12 @@ Uncommon special variant.
 Behavior:
 
 - peaceful and rare,
-- reacts strongly to Disharmony,
+- reacts strongly to the player's Harmony band,
 - can act as an exploration guide.
 
 Proposed mechanic:
 
-- offer the white deer a Mallorn acorn while the player has Disharmony 0 / Friend status,
+- offer the white deer a Mallorn acorn while the player is a Friend of Lothlórien (Harmony +10),
 - once in its life it leads the player to a spot inside Lothlórien and leaves its gift there: a Great Mallorn nut that grows into a
   giant Mallorn with a flet.
 
@@ -415,115 +415,57 @@ Base:
 
 Behavior:
 
-- flees Disharmonious players,
+- flees players who are not Friends,
 - only becomes approachable/tamable under "Friend of Lothlórien".
 
 Taming requirement:
 
-- player has Disharmony 0,
-- player has maintained Disharmony 0 while in Lothlórien for at least 10 continuous minutes,
-- this grants Friend of Lothlórien,
+- the player is a Friend of Lothlórien (Harmony +10, reached by 10 peaceful minutes in the forest from 0),
 - while Friend status is active, offering Elanor initiates the unicorn's trust/taming interaction,
 - only then can horse-like taming proceed.
 
-All kills in Lothlórien count, including hostile mobs.
-
-This is intentionally stricter: even killing a hostile creature that wandered into the biome breaks the peaceful streak.
+This is intentionally strict: any single deed (even a monster kill, cost 1, doubled at +10) costs the Friend status.
 
 ---
 
-## 10. Disharmony system
+## 10. Harmony system
 
-This is one of the biome's signature mechanics.
+This is one of the biome's signature mechanics. It replaced the earlier "Disharmony" counter (owner decision 2026-10-07). The full
+design, numbers and in-game checks are in `harmony_rework_plan.md` (same folder); the rules live in `scripts/harmony.js` (pure) and
+`scripts/harmony_game.js` (wiring).
 
-### Trigger
+### Model
 
-Whenever an entity dies:
+Each player has one integer, **Harmony**, from -60 to +10 (one point is about one minute of peaceful time in the forest), starting at 0.
 
-1. Was the killer a player?
-2. Did the kill occur inside Lothlórien?
-3. If yes, increase that player's Disharmony.
+- Inside the forest it rises +1 per minute up to +10; outside it rises +1 per 2 minutes but never above 0 (positive Harmony is kept).
+- A deed restarts the minute timer. Deeds cost points: animals 3, monsters 1 (so luring monsters to the wardens stays a tactic),
+  white deer 6, unicorn 10, fighting a warden 1 per fight, killing a warden 6, killing a player 3. While Harmony is above 0 a cost
+  counts double.
+- A deed counts when the player **or** the victim is inside the forest. Only direct player kills count (projectiles included);
+  falls, lava and tamed wolves do not. Chopping wood and picking flowers cost nothing for now.
+- Dying changes nothing, except dying inside the forest while Hated: Harmony is set to -29.
+- Stored per player in the dynamic property `lothlorien:harmony`, written only when it changes.
 
-All direct player kills count:
+### Bands
 
-- passive animals,
-- neutral mobs,
-- hostile mobs.
+| Harmony | Band | Effect |
+|---|---|---|
+| +10 | Friend of Lothlórien | calmest wildlife, gifts and taming, white deer guidance, best trades |
+| 0 to +9 | Guest | calm wildlife; animals do not trust you yet |
+| -1 to -14 | Uneasy | animals keep more distance, "restless" refusals; trades dearer |
+| -15 to -29 | Shunned | wildlife flees far; trades refused |
+| -30 to -60 | Hated | wildlife flees furthest; **wardens shoot on sight** (player tag `lothlorien_hated`); trades refused |
 
-Indirect/environmental deaths not caused by the player do not count.
-
-### Persistence
-
-Disharmony should be stored per player using script dynamic properties.
-
-Suggested behavior:
-
-- persists when leaving the biome,
-- decays only through peaceful time spent inside Lothlórien,
-- therefore the player "restores harmony" by spending peaceful time there rather than simply waiting elsewhere.
-
-### Initial tuning proposal
-
-Treat the exact numbers as starting values, not final balance:
-
-- Disharmony I: 1 kill
-- Disharmony II: 2–3 accumulated points
-- Disharmony III: 4+ accumulated points
-- one point decays after ~5 minutes spent in Lothlórien without a new kill.
-
-### Effects
-
-#### Disharmony I
-- animals keep more distance,
-- unicorns flee,
-- rare flower bonus drops reduced.
-
-#### Disharmony II
-- deer/white deer become much harder to approach,
-- fireflies move away,
-- flower special/seed drops strongly reduced,
-- white deer guidance unavailable.
-
-#### Disharmony III
-- wildlife strongly avoids player,
-- unicorn interaction unavailable,
-- rare special plant drops suppressed,
-- future shrine blessings/NPC reactions can use this state.
-
-Basic blocks/materials should not stop dropping; the system should discourage violence, not make the biome unusable.
-
-### Friend of Lothlórien
-
-Condition:
-
-- Disharmony = 0,
-- remain at 0 while inside Lothlórien for at least 10 continuous minutes.
-
-Effects:
-
-- unicorns may be approached/tamed,
-- white deer can guide,
-- wildlife uses its calmest behavior,
-- could slightly improve rare flower harvesting if balance needs a positive reward.
-
-Leaving Lothlórien can pause/remove the visible Friend status; the exact persistence semantics should be chosen during implementation.
+Basic blocks and materials never stop dropping; the system discourages violence, it does not make the biome unusable.
 
 ### UI
 
-Current Bedrock add-on APIs do not provide a normal supported way to register an entirely new native potion/status effect with its own icon/name.
-
-Therefore:
-
-- do NOT fake Disharmony by hijacking a vanilla potion effect,
-- store it as scripted state,
-- show state changes with titles/toasts/actionbar,
-- while inside Lothlórien show a compact actionbar status such as:
-  - `Disharmony I`
-  - `Disharmony II`
-  - `Disharmony III`
-  - `Friend of Lothlórien`
-
-This avoids overriding vanilla UI assets and avoids conflicts with unrelated potion effects.
+Add-ons cannot register a native status effect with an icon, and a vanilla potion effect must not be hijacked. Instead, inside the
+forest the action bar shows `<icon> <band name>` for every band (no number; the number is only in the debug readout
+`/scriptevent lothlorien:harmony [value]`). The five icons are glyphs of a custom font page in the resource pack
+(`font/glyph_E5.png`, U+E500...U+E504, made by `tools/make_harmony_icons.py`); each differs in colour and shape. Band changes also
+send one chat line with flavour; a deed that keeps the band sends a short hint at most every 30 s.
 
 ---
 
@@ -778,7 +720,7 @@ These can be added only after the biome itself is stable and fun.
 - partial biome replacement
 - edge/interior/heart depth approximation
 - peaceful hostile-spawn policy
-- Disharmony
+- Harmony (bands, deeds, Hated wardens)
 - Friend of Lothlórien
 - white-deer guidance
 - unicorn taming gate
@@ -832,9 +774,8 @@ Official Bedrock Creator documentation:
 
 The design is considered structurally settled. These values should be tuned through survival playtests rather than fixed now:
 
-- Disharmony thresholds,
-- Disharmony decay time,
-- exact Friend timer if 10 minutes proves too short/long,
+- Harmony band thresholds (the Uneasy/Shunned edge at -15 is a starting value) and deed costs,
+- recovery rate (1 point per minute inside),
 - Western Corn growth rate,
 - acorn drop rate,
 - Lembas hunger/saturation values,

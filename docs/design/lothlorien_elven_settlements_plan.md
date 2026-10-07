@@ -11,12 +11,12 @@ The system should combine:
 - custom Elven settlements,
 - custom Elf entities,
 - profession-specific trading,
-- player-specific Disharmony / Friend of Lothlórien reactions,
+- player-specific Harmony reactions (Friend / Guest / Uneasy / Shunned / Hated),
 - bow-using Elven Guardians,
 - border/watchpost presence,
 - future quest hooks.
 
-This comes **after** the core biome, trees, flora, Disharmony system, and basic wildlife are stable.
+This comes **after** the core biome, trees, flora, Harmony system, and basic wildlife are stable.
 
 ## Settlement hierarchy
 
@@ -100,7 +100,7 @@ Shared behavior:
 - look at nearby players,
 - move toward assigned points,
 - flee hostile monsters,
-- react to Disharmony,
+- react to the player's Harmony band,
 - interact/trade.
 
 Do **not** try to reproduce every vanilla village mechanic.
@@ -203,78 +203,69 @@ Potential later role for:
 - maps/hints,
 - quest progression.
 
-It could teach the Lothlorien mechanics - disharmony, morning dew, syrup, flowers, acrons for deer and squirel, hints on unicorn, lembas baking...
+It could teach the Lothlorien mechanics - Harmony, morning dew, syrup, flowers, acrons for deer and squirel, hints on unicorn, lembas baking...
 
-## Disharmony-aware trading
+## Harmony-aware trading
 
-This should be **player-specific**.
+This should be **player-specific**, driven by the player's Harmony band (`docs/design/harmony_rework_plan.md`; bands Friend +10, Guest 0..+9,
+Uneasy -1..-14, Shunned -15..-29, Hated -30..-60).
 
-That matters in multiplayer: one player may be Friend of Lothlórien while another has Disharmony III.
+That matters in multiplayer: one player may be Friend of Lothlórien while another is Shunned.
 
-### Technical architecture
+### Technical architecture (decided 2026-10-07, plan section 5)
 
-Native Bedrock trade tables live on the trading entity. Entity component groups/events can swap a trader's table, but that changes the Elf for everyone.
+Native Bedrock trade tables live on the trading entity and are shared by everyone, and the Script API 2.8.0 has no trade API (a script cannot
+open or fill a trade screen). So the native screen is kept and the table is **pre-swapped** per player:
 
-Therefore, for personalized prices and item selection:
+1. The Elf has one `economy_trade_table` component group per band that trades (Friend, Guest, Uneasy), `persist_trades: false`.
+2. A script swaps the trader's table to the band of the player near it / looking at it (every ~10 ticks), so one click opens the right table.
+3. `world.beforeEvents.playerInteractWithEntity` (cancellable in 2.8.0) refuses Shunned and Hated players with a chat line; on a band mismatch
+   (two players at one Elf) it cancels, swaps and the player clicks again.
+4. Bedrock cure discounts are global and Hero of the Village only discounts and leaks to vanilla villagers, so neither is used.
 
-1. player interacts with custom Elf,
-2. script reads that player's Disharmony/Friend state,
-3. default interaction is cancelled,
-4. scripted trade UI opens,
-5. available goods and prices are generated for that player,
-6. inventory is validated server-side,
-7. transaction is performed.
-
-A native `economy_trade_table` can still be prototyped, but scripted trading is the safer target architecture if per-player reputation matters.
+A fully scripted trade UI (form, server-side inventory validation) stays the fallback if the pre-swap proves too fiddly in multiplayer.
 
 ## Proposed reputation trade states
 
-### Friend of Lothlórien
+### Friend of Lothlórien (Harmony +10)
 
 - best prices,
 - complete profession stock,
-- rare Friend-only items,
+- rare Friend-only items (elven bow...),
 - warm greeting/animation,
 - possible small occasional bonus.
 
 Starting balance idea:
-- about 10–15% cheaper than neutral.
+- about 10-15% cheaper than normal.
 
-### Disharmony 0, not yet Friend
+### Guest (0 to +9)
 
 - normal prices,
 - normal stock,
 - rare/special stock locked.
 
-### Disharmony I
+### Uneasy (-1 to -14)
 
-- mild price increase,
-- rare stock removed,
-- cooler reactions.
-
-Starting balance idea:
-- +15–25% cost.
-
-### Disharmony II
-
-- substantial price increase,
-- limited stock,
-- no rare plants,
-- no Miruvor,
-- no Mallorn acorn,
-- no premium lamps/decor.
+- fewer items, no rare plants, no Miruvor, no Mallorn acorn, no premium lamps/decor,
+- higher prices, cooler reactions.
 
 Starting balance idea:
-- +40–60% cost.
+- +15-50% cost, stock thinning with the distance below 0.
 
-### Disharmony III
+### Shunned (-15 to -29)
 
-- normal trading refused,
+- trading refused; the Loremaster says: "Learn to live in peace with the forest, then return.",
 - civilians keep distance,
 - Guardians observe the player,
-- no automatic aggression purely from Disharmony.
+- no automatic aggression.
 
-Disharmony should remain reversible.
+### Hated (-30 to -60)
+
+- trading refused (Loremaster refusal line only),
+- **Guardians (Elven Wardens) attack on sight**: players with the tag `lothlorien_hated` are targeted without provocation. This replaces the old
+  "no automatic aggression from the reputation score" rule (owner, 2026-10-07).
+
+Harmony is reversible: peaceful time restores it. Dying inside the forest while Hated sets it to -29 (Shunned), so the wardens stop.
 
 ## Elven Guardians
 
@@ -320,39 +311,40 @@ Potential later polish:
 
 ## Guardian behavior toward players
 
-Disharmony alone should **not** make Guardians attack.
+Harmony alone does **not** make Guardians attack, **except Hated** (Harmony -30 or lower): then they shoot on sight.
 
-### Friend / Disharmony 0
+### Friend / Guest
 - relaxed,
 - normal greeting,
 - ignores player as combat target.
 
-### Disharmony I
+### Uneasy
 - more watchful,
 - no hostility.
 
-### Disharmony II
+### Shunned
 - may follow/observe from modest distance around settlement,
+- may position between player and sensitive areas, may eventually escort outward,
+- trading unavailable,
 - still does not attack.
 
-### Disharmony III
-- may position between player and sensitive areas,
-- may eventually escort outward,
+### Hated
+- **attacks on sight** (tag `lothlorien_hated`, built into the Elven Warden 2026-10-07, not yet seen in game),
 - trading unavailable,
-- still no attack solely from Disharmony.
+- dying to them inside the forest resets Harmony to -29 (Shunned), which ends the attack.
 
 ### If player attacks an Elf
 
-Separate from Disharmony:
+Separate from the standing score:
 
 - Guardian retaliates,
 - nearby Guardians may assist,
-- hostility is incident-based,
-- attack also raises Disharmony strongly.
+- hostility is incident-based (fight = first hit after 60 s without one),
+- the fight costs Harmony (-1 per fight, killing a warden -6 more).
 
 Design distinction:
 
-**Disharmony = you are unwelcome.**
+**Low Harmony = you are unwelcome (Hated: unwelcome and shot).**
 
 **Attacking Elves = you are an active threat.**
 
@@ -395,12 +387,12 @@ Suggested rules:
 - settlement Guardians remain close to settlement,
 - edge Guardians defend boundary/watchpost areas.
 
-Disharmony interaction:
+Harmony interaction:
 
-- Guardian kills monster -> no player Disharmony.
-- Player kills monster in Lothlórien -> peaceful streak still breaks.
+- Guardian kills monster -> no player Harmony cost.
+- Player kills monster in Lothlórien -> costs 1 Harmony (2 while above 0), so a Friend loses the status.
 
-That preserves the unicorn challenge.
+That preserves the unicorn challenge, and leading monsters to the Guardians stays the free way to kill them.
 
 ## Population and persistence
 
@@ -483,24 +475,24 @@ Use behavior/sound to communicate reputation.
 - calm posture,
 - occasional wave/nod.
 
-### Neutral
+### Guest
 - normal interaction.
 
-### Disharmony I
+### Uneasy
 - cooler greeting,
 - slight hesitation.
 
-### Disharmony II
+### Shunned
 - backing away,
 - guarded voice line,
-- Guardian attention.
+- Guardian attention,
+- refuses trade, civilians move away.
 
-### Disharmony III
+### Hated
 - refuses trade,
-- civilians move away,
-- Guardians visibly observe.
+- Guardians attack on sight.
 
-The actionbar status remains the authoritative Disharmony/Friend display.
+The actionbar status (icon + band name) remains the authoritative Harmony display.
 
 ## Suggested implementation order
 
@@ -526,13 +518,13 @@ Test:
 - one sell transaction,
 - inventory validation.
 
-### C. Connect Disharmony to trading
-Implement:
+### C. Connect Harmony to trading
+Implement (table pre-swap, see above):
 - Friend,
-- neutral 0,
-- Disharmony I,
-- Disharmony II,
-- Disharmony III.
+- Guest,
+- Uneasy,
+- Shunned (refused),
+- Hated (refused).
 
 Verify in multiplayer that two players see different prices/stock from the same Elf.
 
@@ -554,7 +546,7 @@ Each defines:
 - wanted items,
 - base prices,
 - Friend stock,
-- Disharmony restrictions,
+- Harmony restrictions (band stock rules),
 - visual role ID.
 
 ### E. Settlement marker system
@@ -589,7 +581,7 @@ Do not build quests yet, but expose:
 - profession,
 - settlement ID,
 - Friend state,
-- Disharmony,
+- Harmony band,
 - interaction events,
 - structure markers.
 
@@ -603,11 +595,10 @@ The settlement system is architecturally proven when:
 - Gardener and Healer Elves exist,
 - the same trader gives player-specific prices,
 - Friend gets better prices and special stock,
-- Disharmony I pays more,
-- Disharmony II sees reduced stock,
-- Disharmony III is refused,
+- Uneasy pays more and sees reduced stock,
+- Shunned and Hated are refused,
 - attacking an Elf causes nearby Guardians to defend them,
-- Guardians do not attack merely because of Disharmony,
+- Guardians do not attack merely because of low Harmony, except Hated players (shot on sight),
 - multiplayer players can have different reputation responses from the same Elf.
 
 ## Official Bedrock references

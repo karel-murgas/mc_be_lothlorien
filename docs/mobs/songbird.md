@@ -17,7 +17,7 @@ Art: `tools/make_songbird.py` (generated box model, two plumages; same method as
 | Movement | flies (`navigation.fly`, `movement.fly`), no fall damage, floats on water, lava 4/tick |
 | Behaviour | 1 float, 1 panic (x1.25), 3 `random_fly` (xz 16, y 2, **no tree landing**), 4 `follow_mob` (loose flocks, range 12), 5 look at player, 6 look around. Speed 0.4 (parrot) |
 | Tree landing | **Off** (2026-10-02, owner: flight looked like diving). With `can_land_on_trees: true` the birds climbed high and dropped back down while moving only a block or two forward: in the Mallorn forest a trunk or canopy block is always within reach, and tree targets sit close sideways but far up or down. Without it they fly level and land on the ground; no canopy perching. Not yet re-tested in game |
-| Player / Disharmony | none: it does not flee from players beyond panic and ignores Disharmony (the deer carry that) |
+| Player / Harmony | none: it does not flee from players beyond panic and ignores the Harmony band (the deer carry that); a player kill costs 3 Harmony (an animal) |
 | Drops | feather 0-1 (looting +0-1), XP 1-2 on player kill |
 | Animations | procedural Molang: `idle` (tail and head tilt), `hop` (on ground), `fly` (wing flap, legs tucked, only while not on ground), vanilla `look_at_target` on bone `head` |
 | Sounds | **placeholder** vanilla parrot sounds at pitch 1.3-1.7 (ambient every 6-20 s); real birdsong is Phase 18 |

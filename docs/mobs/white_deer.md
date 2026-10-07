@@ -1,7 +1,7 @@
 # White deer (`lothlorien:white_deer`) - design sheet
 
 Archetype: rare, shy loner and guide (Phase 12), always an antlered **white hart**. Built 2026-09-30 from the deer (`docs/mobs/deer.md`);
-owner decisions of 2026-09-30 (second round: leash, always antlered, sure antler, double Disharmony, depth-dependent spawns; third round: the Great Mallorn nut gift
+owner decisions of 2026-09-30 (second round: leash, always antlered, sure antler, a heavier Harmony cost, depth-dependent spawns; third round: the Great Mallorn nut gift
 replaces leading to flet giants, markers removed) built the same day. **Static checks only - nothing below is tested in game** ("Tested" = `no` until a game run
 says otherwise). Guidance design, unverified assumptions and the test plan:
 `docs/TECHNICAL_NOTES.md` (White deer guidance). Files: BP `entities/white_deer.json`, `spawn_rules/white_deer.json`,
@@ -29,6 +29,6 @@ BP `loot_tables/entities/white_deer.json`.
 | Guiding goals | `state_guiding`: `follow_target_leader` towards `lothlorien:guide_beacon` (priority 2), avoid wolves/monsters (4); panic 1 stays above | yes (2026-09-30) |
 | Panic, alarm | panics when hurt; a player hurting it or a deer within 20 blocks alarms it (guidance ends) | no |
 | Drops | own table `white_deer.json`: leather 0-2 + venison 1-3 (as a buck deer, looting +0-1) and **one deer antler, always, on any death** (no player-kill or chance condition: it cannot breed, so nothing can be farmed; a hart killed by a wolf still leaves its antlers). XP 1-3 on player kill | no |
-| Disharmony | a player kill inside the biome counts **double** (2 points, like two deer; `KILL_WEIGHTS` in `scripts/disharmony.js`) | no |
+| Harmony | a player kill costs **6** (twice a deer's 3; `DEED_COSTS` in `scripts/harmony.js`, doubled while Harmony is above 0); counted when the player or the hart is inside the forest (owner decision 2026-10-07, replaced Disharmony) | no |
 | Model, animations | deer buck geometry and the deer's procedural animations, texture `deer_white.png` (placeholder palette swap) | no |
 | Sounds | the deer's adult sounds (placeholder horse) | no |

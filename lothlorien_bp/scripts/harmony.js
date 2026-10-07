@@ -122,8 +122,9 @@ export function changeMessages(from, to) {
 export const HINT_GAP_MS = 30000;
 export const hintDue = (lastMs, nowMs) => lastMs === undefined || nowMs - lastMs >= HINT_GAP_MS;
 
-// Per-band prefix of the action bar (icon glyphs later: a character such as " "). Empty for now.
-export const BAND_ICONS = { friend: "", guest: "", uneasy: "", shunned: "", hated: "" };
+// Per-band prefix of the action bar: a glyph from the custom font page lothlorien_rp/font/glyph_E5.png (U+E500 + cell, made
+// by tools/make_harmony_icons.py) and a space. Whether an add-on glyph page renders in the action bar is not verified in game.
+export const BAND_ICONS = { friend: "\uE500 ", guest: "\uE501 ", uneasy: "\uE502 ", shunned: "\uE503 ", hated: "\uE504 " };
 
 // Status text for the action bar, or undefined outside the forest. Shown for every band; the status is only ever
 // visible inside the biome.

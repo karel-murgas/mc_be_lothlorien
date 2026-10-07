@@ -9,7 +9,7 @@ lothlorien_rp/render_controllers/unicorn.render_controllers.json, lothlorien_rp/
 Body = the vanilla horse (geometry.horse.v3, white horse texture, walk/look animations) with the saddle, bridle, bags and
 mule ears left out and a three-step horn added on the head; the coat is tinted pearl, mane and tail lilac. Reads the
 vanilla files from reference/vanilla/current (git-ignored; rebuild with tools/refresh_vanilla_ref.ps1).
-Not seen in game yet. The state groups follow entities/white_deer.json (Disharmony wariness, driven by scripts/deer.js).
+Not seen in game yet. The state groups follow entities/white_deer.json (Harmony wariness, driven by scripts/deer.js).
 """
 import json
 from pathlib import Path
