@@ -15,6 +15,17 @@
       }
     },
     "component_groups": {
+      "lothlorien:angry": {
+        "minecraft:angry": {
+          "broadcast_anger": true,
+          "broadcast_range": 20,
+          "duration": 25,
+          "calm_event": {
+            "event": "lothlorien:on_calm",
+            "target": "self"
+          }
+        }
+      },
       "lothlorien:village_warden": {
         "minecraft:persistent": {},
         "minecraft:home": {
@@ -84,6 +95,13 @@
       "minecraft:despawn": {
         "despawn_from_distance": {}
       },
+      "minecraft:on_target_acquired": {
+        "event": "lothlorien:become_angry",
+        "target": "self"
+      },
+      "minecraft:loot": {
+        "table": "loot_tables/entities/elven_warden.json"
+      },
       "minecraft:equipment": {
         "table": "loot_tables/entities/elven_warden_gear.json",
         "slot_drop_chance": [
@@ -101,7 +119,6 @@
       },
       "minecraft:behavior.hurt_by_target": {
         "priority": 1,
-        "alert_same_type": true,
         "entity_types": {
           "max_dist": 64,
           "filters": {
@@ -225,6 +242,20 @@
       }
     },
     "events": {
+      "lothlorien:become_angry": {
+        "add": {
+          "component_groups": [
+            "lothlorien:angry"
+          ]
+        }
+      },
+      "lothlorien:on_calm": {
+        "remove": {
+          "component_groups": [
+            "lothlorien:angry"
+          ]
+        }
+      },
       "lothlorien:spawn_natural": {
         "set_property": {
           "lothlorien:natural": true

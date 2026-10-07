@@ -16,10 +16,10 @@ watchpost guardians" are NOT this mob: this one is a normal natural spawn (owner
 | Weapon | Bow in main hand via `minecraft:equipment` loot table, `minecraft:shooter` arrow, `behavior.ranged_attack`. Quiver is model-only. |
 | Targets | Monster family minus an exclusion list (enderman, warden, wither, piglins, creaking, aquatic, shulker). **Creepers are shot and spiders always** (owner 2026-10-07; section 3 table is superseded). Never players, never other families. |
 | Monsters hunt it | **Baseline without script: family `irongolem`** (zombies, skeletons, spiders, slimes, illagers, drowned... already hunt that family) + arrows trigger their `hurt_by_target`. Script "hit on sight" is an optional second layer (section 4). |
-| Players | Ignored. `hurt_by_target` retaliates against whoever hurt it (player included), `alert_same_type` makes nearby wardens assist. Script cancels warden arrow damage to players/wildlife unless provoked. |
+| Players | Ignored. `hurt_by_target` retaliates against whoever hurt it (player included), nearby wardens assist through `on_target_acquired` -> group `lothlorien:angry` (`minecraft:angry`, `broadcast_anger`, range 20, 25 s). Script cancels warden arrow damage to players/wildlife unless provoked. |
 | Harmony | **Owner 2026-10-07 (replaced Disharmony): fighting a warden costs 1 Harmony per fight (first player hit after 60 s without one), killing it 6 more; a Hated player (-30 or lower, tag `lothlorien_hated`) is shot on sight.** Unverified in game. |
 | Village wardens | **Added 2026-10-07:** template entities in the village pieces (2 on the central tree deck, 1 on node_b/c/f and tower_a/c), group `lothlorien:village_warden` (persistent + home 20) through the structure's `definitions` list. Section 10. |
-| Stats | 26 hp, speed 0.27, follow range 28, shoots every 1.5-2.5 s up to 22 blocks, mob arrow (skeleton damage class). No drops, no XP. |
+| Stats | 26 hp, speed 0.27, follow range 28, shoots every 1.5-2.5 s up to 22 blocks, mob arrow (skeleton damage class). Drops 0-2 arrows (looting +1, like a skeleton; owner 2026-10-07), no XP. |
 
 ## 2. Research: ranged bow AI (vanilla)
 
@@ -80,7 +80,7 @@ in data; hard-coded engine checks (village golem counts, raids) are **[U]**.
     { "test": "is_family", "subject": "other", "operator": "!=", "value": "creeper" } ] } }]
 },
 "minecraft:behavior.hurt_by_target": {
-  "priority": 1, "alert_same_type": true,
+  "priority": 1,
   "entity_types": { "max_dist": 64, "filters": { "test": "is_family", "subject": "other", "operator": "!=", "value": "lothlorien_warden" } }
 }
 ```
@@ -101,7 +101,10 @@ Why the exclusions (recommendation, owner may overrule):
 | Villager-family illagers (pillager, vindicator, evoker, ravager), vex, witch, breeze | included | real threats to the village |
 
 ### Assist
-`alert_same_type: true` (silverfish uses it, `silverfish.json` **[V]**) alerts "nearby mobs of the same type" **[D]**; the radius is not
+**2026-10-07: `alert_same_type` failed in game** (content log 1.26.52: "not present in the Schema", the whole entity did not load at
+format 1.26.50). Replaced by the angry broadcast (wolf / zombie pigman pattern): `minecraft:on_target_acquired` -> event `lothlorien:become_angry`
+adds group `lothlorien:angry` (`minecraft:angry` `broadcast_anger true`, `broadcast_range 20`, `duration 25`, `calm_event lothlorien:on_calm`).
+Original research, kept for history: `alert_same_type: true` (silverfish uses it, `silverfish.json` **[V]**) alerts "nearby mobs of the same type" **[D]**; the radius is not
 stated **[U]**. Fallback if it only reaches a few blocks: `minecraft:on_hurt_by_player` (exists, pillager uses it **[V]**) fires an event
 that adds a group with `minecraft:angry` (`broadcast_anger true`, `broadcast_range` 24 (default 20), `duration` 30, `calm_event`) **[D]**,
 the wolf/piglin way; `angry` only broadcasts and does not itself pick targets, so test which of the two gets neighbours to shoot.
@@ -180,7 +183,7 @@ target goals. Name tag keeps it (`minecraft:nameable`). A warden mid-fight beyon
 | Shot interval | 3 s (2 s hard) | 1 s crossbow | **1.5-2.5 s**, flat (no hard variant) |
 | Range | 15 | 8 | **attack_range max 22**, `in_range_movement_mode hold_position`, `speed_multiplier 1.0` |
 | Melee | fallback 2 | fallback 3 | none; `knockback_resistance 0.2` |
-| Drops / XP | bow, bones / 5+ | crossbow, ... | **none, 0 XP** (a kill is a Harmony event, no farm; bow `drop_chance 0`) |
+| Drops / XP | bow, bones / 5+ | crossbow, ... | **0-2 arrows** (looting +1; owner 2026-10-07), **0 XP** (a kill costs Harmony, no farm; bow `drop_chance 0`) |
 
 Two wardens kill a zombie in about 4 s, one loses against a skeleton pair without help: intended, they are a group mob. Arrow supply is unlimited (no inventory).
 Collision 0.6 x 1.95. Other components: `type_family ["lothlorien_warden","irongolem","mob"]` (not `monster`), `navigation.walk {avoid_damage_blocks, avoid_water, can_path_over_water false}`,
@@ -219,7 +222,7 @@ Check: bow visible in hand and raised when `query.has_target`; arrow flies from 
    1. `/summon lothlorien:elven_warden`: bow in hand, no content-log errors, arms raised when it has a target, silent.
    2. `/summon zombie ~5 ~ ~`, night spawns, skeleton, spider: warden shoots; the monster walks at the warden; first arrow answered. Repeat with witch, slime (family baseline), and a creeper (ignored by design).
    3. `/damage <spider> 0.5 entity_attack entity <warden>`: does the spider turn on the warden? Decides layer 2.
-   4. Player hits a warden: it shoots back, neighbours within 20 blocks join (`alert_same_type` radius); it stops when you leave. Killing it: Harmony -1 for the fight and -6 for the kill (`/scriptevent lothlorien:harmony` shows it), also outside the biome.
+   4. Player hits a warden: it shoots back, neighbours within 20 blocks join (angry broadcast); it stops when you leave. Killing it: Harmony -1 for the fight and -6 for the kill (`/scriptevent lothlorien:harmony` shows it), also outside the biome.
    5. Player standing between a warden and a zombie, a deer in the line of fire: no damage taken (guard works), arrow knockback/sticking noted.
    6. `/summon ... lothlorien:spawn_natural` at edge, in the heart and on a deck: kept always / 10 % / always. `entitySpawn` cause for natural spawns is not `Loaded`.
    7. New world: spawn counts at the edge, in the forest, on the village decks (do natural spawns ever pick a deck?), population vs deer, despawn after 2-3 min far away, name tag keeps one.
@@ -244,11 +247,11 @@ playtest showing monsters standing around unaware). Section 9 questions 1, 2, 4 
 `DEED_COSTS` in `harmony.js`, localization in `localization/catalog.json` (rp pack: name + spawn egg, 9 locales),
 `tools/build_structures.mjs` (`entityTag` options), `tools/build_village.mjs` (`WARDENS`, `wardenCells`), `tools/village_sim.mjs`
 (wardens per village), tests `elven warden: ...` in `tests/run.mjs`. Spawn egg grey-green / silver is part of the RP client entity (worker B).
-No sounds, no drops, no XP.
+No sounds, no XP. Drops 0-2 arrows (`loot_tables/entities/elven_warden.json`, added 2026-10-07).
 
 **Entity.** Family `lothlorien_warden, irongolem, mob`; 26 hp, speed 0.27, follow range 28; `equipment` (bow, mainhand drop chance 0),
 `shooter arrow`, `ranged_attack` 1.5-2.5 s up to 22 blocks, `hold_position`; targets: monster minus enderman, warden, wither, zombie_pigman,
-piglin, creaking, aquatic, shulker; `hurt_by_target` (max_dist 64, `alert_same_type`) skipping its own family. Property
+piglin, creaking, aquatic, shulker; `hurt_by_target` (max_dist 64) skipping its own family; assist via the `lothlorien:angry` broadcast group. Property
 `lothlorien:natural`; events `lothlorien:spawn_natural` (herd event, sets it) and `lothlorien:village_warden` (adds the group; summon hook).
 There is **no** `entity_spawned` event: a warden has no state to set up.
 
@@ -275,5 +278,5 @@ golems in the line are accepted. [U] whether a cancelled projectile hit still gi
 `damagingEntity` is the shooter for projectile damage.
 
 **Unverified for the in-game test (in addition to section 8C.4):** template entities placed by jigsaw; `definitions` group applied;
-saved-entity `Mainhand` list format accepted; home restriction from the placement point; `alert_same_type` radius; equipment table gives the
+saved-entity `Mainhand` list format accepted; home restriction from the placement point; angry broadcast reaching neighbours; equipment table gives the
 bow to `/summon`ed and spawn-egg wardens; `hold_position` accepted; deck spawn picking decks 16 up; ms cost of the depth estimate per spawn.

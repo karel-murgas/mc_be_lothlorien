@@ -1709,7 +1709,7 @@ test("elven warden: family has mob + irongolem (monsters hunt it, arrows get the
   for (const f of ["lothlorien_warden", "irongolem", "mob"]) assert.ok(fam.includes(f), f);
   assert.ok(!fam.includes("monster") && !fam.includes("player"));
 });
-test("elven warden: shoots monsters (spiders and creepers included), never players or other families; bow never drops", () => {
+test("elven warden: shoots monsters (spiders and creepers included), never players or other families; bow never drops, arrows do", () => {
   const c = wardenEntity().components;
   const filters = c["minecraft:behavior.nearest_attackable_target"].entity_types[0].filters.all_of;
   assert.deepEqual(filters[0], { test: "is_family", subject: "other", value: "monster" });
@@ -1720,12 +1720,23 @@ test("elven warden: shoots monsters (spiders and creepers included), never playe
   assert.equal(targets.length, 2, "monsters, and Hated players");
   assert.ok(!JSON.stringify(targets[0]).includes('"player"'), "players are only targets through the hated tag entry");
   assert.ok(JSON.stringify(targets[1]).includes('"has_tag"'));
-  assert.ok(c["minecraft:behavior.hurt_by_target"].alert_same_type && c["minecraft:behavior.hurt_by_target"].entity_types.max_dist >= 64);
+  const hurt = c["minecraft:behavior.hurt_by_target"];
+  assert.ok(!("alert_same_type" in hurt) && hurt.entity_types.max_dist >= 64, "alert_same_type fails to load at format 1.26.50 (content log, 1.26.52)");
+  // nearby wardens join through the wolf / zombie pigman pattern: target acquired -> angry group -> broadcast_anger
+  assert.equal(c["minecraft:on_target_acquired"].event, "lothlorien:become_angry");
+  const e = wardenEntity();
+  assert.equal(e.component_groups["lothlorien:angry"]["minecraft:angry"].broadcast_anger, true);
+  assert.equal(e.component_groups["lothlorien:angry"]["minecraft:angry"].calm_event.event, "lothlorien:on_calm");
+  assert.deepEqual(e.events["lothlorien:become_angry"].add.component_groups, ["lothlorien:angry"]);
+  assert.deepEqual(e.events["lothlorien:on_calm"].remove.component_groups, ["lothlorien:angry"]);
   assert.equal(c["minecraft:shooter"].def, "minecraft:arrow");
   assert.equal(c["minecraft:behavior.ranged_attack"].attack_range.max, 22);
   assert.ok(!("set_persistent" in c["minecraft:behavior.ranged_attack"]) && !("set_persistent" in c["minecraft:behavior.nearest_attackable_target"]));
   assert.deepEqual(c["minecraft:equipment"].slot_drop_chance, [{ slot: "slot.weapon.mainhand", drop_chance: 0 }]);
-  assert.ok(!c["minecraft:loot"] && !c["minecraft:experience_reward"], "no drops, no XP");
+  assert.ok(!c["minecraft:experience_reward"], "no XP");
+  assert.equal(c["minecraft:loot"].table, "loot_tables/entities/elven_warden.json");
+  const loot = readJson("../lothlorien_bp/loot_tables/entities/elven_warden.json");
+  assert.deepEqual(loot.pools.flatMap((p) => p.entries.map((e) => e.name)), ["minecraft:arrow"], "arrows only, like a skeleton (0-2, looting +1)");
   const gear = JSON.stringify(readJson("../lothlorien_bp/loot_tables/entities/elven_warden_gear.json"));
   assert.ok(gear.includes('"minecraft:bow"'));
 });
