@@ -3,6 +3,19 @@
 **Current verdict (2026-10-04): all current graphics accepted by the owner.**
 The dated pending-art and placeholder entries below are historical; this verdict supersedes them.
 
+**Pack icon final (2026-10-07): accepted by the owner, installed in both packs.**
+`lothlorien_bp/pack_icon.png` and `lothlorien_rp/pack_icon.png` share the same 256x256 PNG.
+Final design: straight silver log trunk, irregular connected block canopy with green tops and
+silver undersides, deep teal twilight background, sparse fireflies and a small grassy base.
+Owner requires live green-silver foliage and a tree shape resembling the mod's actual trees;
+older golden-foliage concept notes do not describe live tree art. Gold is a separate crafted variant.
+Built-in imagegen used a geometry reference from `buildBigMallorn(makeRandom(6))` in
+`lothlorien_bp/scripts/mallorn_tree.js` and the accepted texture preview. The reference came
+from the big sapling generator, not an in-game screenshot of worldgen. Resized the accepted
+image for pack thumbnails. Verification passed (0 errors, 7 warnings), both packs deployed;
+Minecraft's pack-menu rendering is not separately confirmed. No worldgen change.
+Commit: `Add accepted green-silver Mallorn pack icon`. Review scratch removed after acceptance.
+
 Work list for whoever makes the art (image generator + manual cleanup). Each step lists the
 files to produce, where they go, and what the code assumes about them. Textures live in
 `lothlorien_rp/textures/`. **Claude appends requirements to the "Requirements" section of a step
