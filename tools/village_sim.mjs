@@ -16,6 +16,7 @@ import { deflateSync } from "node:zlib";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const bp = join(root, "lothlorien_bp");
 import { RAIL, SLAB } from "./village_mallorn.mjs";
+import { MARKER_ID, decide, exitAt, finalBlocks } from "../lothlorien_bp/scripts/village_loop.js";
 export const PLANKS = "lothlorien:mallorn_planks", FENCE = RAIL, LANTERN_ID = "lothlorien:elven_lantern";
 const EMPTY = "minecraft:empty", AIR = "minecraft:air", JIGSAW = "minecraft:jigsaw";
 const FACING_VEC = { 2: [0, -1], 3: [0, 1], 4: [-1, 0], 5: [1, 0] };
@@ -440,6 +441,38 @@ export function nearMisses(res, max = 8) {
   return out;
 }
 
+// ---- loop closing (P7): the same pure rules as scripts/loop_marker.js, run on the simulated world ----------------------------------
+// Marker cell of a placed railing_end: the template entity position turned with the piece (continuous quarter turns, x' = sz - z, z' = x).
+export function markerCell(p) {
+  const e = p.piece.entities.find((q) => q.id === MARKER_ID);
+  if (!e) return null;
+  let [x, y, z] = e.pos, [sx, , sz] = p.piece.size;
+  for (let i = 0; i < p.rot; i++) { [x, z] = [sz - z, x]; [sx, sz] = [sz, sx]; }
+  return [p.o[0] + Math.floor(x), p.o[1] + Math.floor(y) - 1, p.o[2] + Math.floor(z)]; // deck cell under the marker
+}
+// Every marker acts once, in (x, z) order, on the world as the earlier ones left it (in game: load order). Applies the bridges to
+// `world` / `states`. -> { markers, missed (marker not on an exit), loops, lengths, offsets, reasons, remaining (closed exits left) }
+export function closeLoops(res, world, states) {
+  const at = (x, y, z) => world.get(wkey(x, y, z)) ?? AIR;
+  const markers = res.placed.filter((p) => p.name === "railing_end").map(markerCell).filter(Boolean).sort((a, b) => a[0] - b[0] || a[2] - b[2]);
+  const out = { markers: markers.length, missed: 0, loops: 0, lengths: [], offsets: [], reasons: {}, remaining: 0, builds: [] };
+  for (const [x, y, z] of markers) {
+    const A = exitAt(at, x, y, z);
+    if (!A) { if (at(x, y + 1, z) === FENCE) out.missed++; continue; } // gone = closed from the other side
+    const d = decide(at, A);
+    if (d.action === "build") {
+      for (const [k, b] of finalBlocks(d.plan)) {
+        const [bx, by, bz] = k.split(",").map(Number), wk = wkey(bx, by, bz);
+        if (b.id === AIR) world.delete(wk); else world.set(wk, b.id);
+        if (b.id === AIR) states.delete(wk); else states.set(wk, b.states ?? {});
+      }
+      out.loops++; out.lengths.push(d.plan.length); out.offsets.push(Math.abs(d.plan.offset)); out.builds.push(d.plan);
+    } else if (d.action === "none") out.reasons[d.reason] = (out.reasons[d.reason] ?? 0) + 1;
+  }
+  for (const [x, y, z] of markers) if (exitAt(at, x, y, z)) out.remaining++;
+  return out;
+}
+
 // ---- rendering: deck map with height shading, and a side view ------------------------------------------------------------
 const DECKISH = (n) => n === PLANKS || n === SLAB || n === FENCE || n === LANTERN_ID;
 function shadeTop(world) {
@@ -494,12 +527,16 @@ function main() {
   mkdirSync(outDir, { recursive: true });
   for (const f of readdirSync(outDir)) if (f.endsWith(".png")) unlinkSync(join(outDir, f));
   const rows = runSeeds(data, count, first);
+  for (const row of rows) { // P7: the loop closer acts on the finished village (after the checks above), then the deck must still be walkable
+    row.lp = closeLoops(row.res, row.ck.world, row.ck.states);
+    row.lpUnreach = walkability(row.res, row.ck.world, row.ck.states).unreachable.length;
+  }
   console.log(`max_depth ${data.structure.max_depth}`);
   console.log("seed pieces trees(tow) lvl straight dog balc look plug open crowns(sm) unreach overl ropeW decay oneWay noDest result");
   let bad = 0;
   const pad = (v, n) => String(v).padStart(n);
   for (const { seed, res, ck } of rows) {
-    const ok = ck.fail.length === 0 && ck.info.ropeWrong === 0 && ck.info.decay === 0 && true; if (!ok) bad++;
+    const ok = ck.fail.length === 0 && ck.info.ropeWrong === 0 && ck.info.decay === 0 && rows.find((r) => r.seed === seed).lpUnreach === 0; if (!ok) bad++;
     const k = ck.kinds;
     console.log(`${pad(seed, 4)} ${pad(res.placed.length, 6)} ${pad(`${k.trees}(${k.tower})`, 10)} ${pad(ck.levels, 3)} ${pad(k.straight, 8)} ${pad(k.dog, 3)} ${pad(k.balcony, 4)} ${pad(k.lookout, 4)} ${pad(k.plug, 4)} ${pad(ck.open, 4)} ${pad(`${k.crown}(${k.crownSmall})`, 10)} ${pad(ck.unreachable, 7)} ${pad(ck.overlaps, 5)} ${pad(ck.info.ropeWrong, 5)} ${pad(ck.info.decay, 5)} ${pad(ck.info.fenceOneWay, 9)} ${pad(ck.kinds.bridgesNoDest, 6)} ${ok ? "ok" : "FAIL"}`);
     for (const f of [...new Set(ck.fail)].slice(0, 6)) console.log(`       ! ${f}`);
@@ -510,6 +547,11 @@ function main() {
   console.log(`  pieces ${mm((r) => r.res.placed.length)} | trees ${mm((r) => r.ck.kinds.trees)} | towers avg ${avg((r) => r.ck.kinds.tower)} | levels used ${mm((r) => r.ck.levels)} (villages with 2+ levels: ${rows.filter((r) => r.ck.levels >= 2).length}/${rows.length})`);
   console.log(`  bridges straight ${avg((r) => r.ck.kinds.straight)} dog-leg ${avg((r) => r.ck.kinds.dog)} | balconies ${avg((r) => r.ck.kinds.balcony)} lookouts ${avg((r) => r.ck.kinds.lookout)} plugs ${avg((r) => r.ck.kinds.plug)} | open connectors ${avg((r) => r.ck.open)} (vertical ${avg((r) => r.ck.openVertical)}) | crowns ${avg((r) => r.ck.kinds.crown)}, small fallback ${avg((r) => r.ck.kinds.crownSmall)} | wardens per village (template entities) ${mm((r) => r.ck.kinds.wardens)}`);
   console.log(`  exits ending in railing ${avg((r) => r.ck.kinds.plug)} / braced balcony ${avg((r) => r.ck.kinds.balcony)} / lookout ${avg((r) => r.ck.kinds.lookout)} per village; bridges without a destination tree ${rows.reduce((a, r) => a + r.ck.kinds.bridgesNoDest, 0)}, unsupported balconies ${rows.reduce((a, r) => a + r.ck.kinds.unsupported, 0)}`);
+  const lsum = (f) => rows.reduce((a, r) => a + f(r.lp), 0), reasons = {};
+  for (const r of rows) for (const [k, v] of Object.entries(r.lp.reasons)) reasons[k] = (reasons[k] ?? 0) + v;
+  console.log(`  loops (loop closer, markers on closed railing exits): closed ${mm((r) => r.lp.loops)} per village (villages with a loop: ${rows.filter((r) => r.lp.loops).length}/${rows.length}), ` +
+    `closed exits before ${avg((r) => r.lp.markers)} / left ${avg((r) => r.lp.remaining)} per village; no partner ${reasons["no partner"] ?? 0}, not mutual ${reasons["not mutual"] ?? 0}, corridor blocked ${reasons.blocked ?? 0}, ` +
+    `markers not on an exit ${lsum((l) => l.missed)}/${lsum((l) => l.markers)}, unreachable walk cells after the loops ${rows.reduce((a, r) => a + r.lpUnreach, 0)}; bridge lengths ${rows.flatMap((r) => r.lp.lengths).join(",") || "-"}`);
   const sum = (f) => rows.reduce((a, r) => a + f(r.ck.info), 0);
   console.log(`  totals: unreachable walk cells ${rows.reduce((a, r) => a + r.ck.unreachable, 0)}, overlaps ${rows.reduce((a, r) => a + r.ck.overlaps, 0)}, wrong ropes ${sum((i) => i.ropeWrong)}/${sum((i) => i.ropes)}, ` +
     `decaying leaves ${sum((i) => i.decay)}/${sum((i) => i.leaves)}, one-way fence links (open ends only) ${sum((i) => i.fenceOneWay)} (dangling stub ends ${sum((i) => i.fenceDangling)}), near-miss ends ${sum((i) => i.nearMiss)}`);

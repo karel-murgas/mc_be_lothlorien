@@ -1915,7 +1915,7 @@ test("rail mender: markers inside the box, and every rail of every village piece
   for (const p of villagePieces()) {
     const rails = p.blocks.filter((b) => b.name === FENCE);
     const m = p.entities.filter((e) => e.id === MEND.MENDER_ID);
-    assert.equal(p.entities.length - p.entities.filter((e) => e.id === "lothlorien:elven_warden").length, m.length, `${p.name}: only markers (and village wardens)`);
+    assert.equal(p.entities.length - p.entities.filter((e) => e.id === "lothlorien:elven_warden" || e.id === "lothlorien:loop_marker").length, m.length, `${p.name}: only markers (and village wardens, loop markers)`);
     assert.equal(m.length, !rails.length ? 0 : p.name.startsWith("combo_") ? 2 : 1, `${p.name}: ${rails.length} rails, ${m.length} markers`);
     for (const e of m) {
       const [x, y, z] = e.pos;
@@ -1948,6 +1948,152 @@ const railJs = readFileSync(new URL("../lothlorien_bp/scripts/rail_mender.js", i
 test("rail mender: script is imported by main.js and removes the marker only after the scan", () => {
   assert.ok(readFileSync(new URL("../lothlorien_bp/scripts/main.js", import.meta.url), "utf8").includes('import "./rail_mender.js"'));
   assert.ok(railJs.includes("entityLoad") && railJs.includes("entitySpawn") && railJs.includes("entity.remove()"));
+});
+
+// --- loop closer (P7): marker on every closed railing exit, pure partner / corridor rules, light on runtime-built bridges ---
+import * as LOOP from "../lothlorien_bp/scripts/village_loop.js";
+import { blockLight as sharedLight } from "../../../.claude/skills/bedrock-modding/scripts/structure_light.mjs";
+import { closeLoops, buildWorld, wkey, markerCell, walkability } from "../tools/village_sim.mjs";
+const SLAB_NAME = "lothlorien:mallorn_slab";
+// synthetic village: a platform connector row (deck, rails at +-2, 3 air cells walk + headroom) and the railing_end row beyond it
+function fixtureWorld(exits) {
+  const w = new Map(), at = (x, y, z) => w.get(`${x},${y},${z}`) ?? "minecraft:air";
+  for (const e of exits) {
+    const a = [e.dir[1], e.dir[0]]; // along the row
+    for (const [row, back] of [[0, 0], [1, 1]]) { // row 0 = railing row, row 1 = platform connector row
+      const cx = e.x - e.dir[0] * back, cz = e.z - e.dir[1] * back;
+      for (let o = -2; o <= 2; o++) {
+        w.set(`${cx + a[0] * o},${e.y},${cz + a[1] * o}`, PLANKS);
+        if (row === 0 || Math.abs(o) === 2) w.set(`${cx + a[0] * o},${e.y + 1},${cz + a[1] * o}`, FENCE);
+      }
+    }
+  }
+  return { w, at };
+}
+const E = (x, z, dir, y = 40) => ({ x, y, z, dir });
+test("loop closer: every railing_end carries exactly one loop marker on its centre fence cell; no other piece has one; entity and script are wired", () => {
+  const re = villagePieces().filter((p) => p.name === "railing_end");
+  assert.equal(re.length, 1);
+  assert.deepEqual(re[0].entities.filter((e) => e.id === LOOP.MARKER_ID).map((e) => e.pos), [[2.5, 1.5, 0.5]]);
+  for (const p of villagePieces()) if (p.name !== "railing_end") assert.ok(!p.entities.some((e) => e.id === LOOP.MARKER_ID), `${p.name}: stray loop marker`);
+  let seen = 0;
+  for (const r of villages()) { // in every rotation the marker sits on the centre fence of a placed railing_end, and the exit signature faces away from the platform
+    const states = new Map(), world = buildWorld(r.res, states), at = (x, y, z) => world.get(wkey(x, y, z)) ?? "minecraft:air";
+    for (const p of r.res.placed.filter((q) => q.name === "railing_end")) {
+      const [x, y, z] = markerCell(p);
+      assert.equal(at(x, y + 1, z), FENCE, `seed ${r.seed}: marker on the centre fence`);
+      assert.equal(at(x, y, z), PLANKS);
+      seen++;
+    }
+  }
+  assert.ok(seen > 100, `${seen} railing_end exits seen`);
+  const entity = readJson("../lothlorien_bp/entities/loop_marker.json")["minecraft:entity"];
+  assert.equal(entity.description.identifier, LOOP.MARKER_ID);
+  assert.ok(entity.components["minecraft:persistent"] && entity.components["minecraft:physics"].has_collision === false && entity.description.is_spawnable === false);
+  assert.ok(existsSync(new URL("../lothlorien_rp/entity/loop_marker.entity.json", import.meta.url)) && existsSync(new URL("../lothlorien_rp/models/entity/loop_marker.geo.json", import.meta.url)));
+  assert.ok(readFileSync(new URL("../lothlorien_bp/scripts/main.js", import.meta.url), "utf8").includes('import "./loop_marker.js"'));
+  const js = readFileSync(new URL("../lothlorien_bp/scripts/loop_marker.js", import.meta.url), "utf8");
+  assert.ok(js.includes("entityLoad") && js.includes("entitySpawn") && js.includes("entity.remove()") && js.includes("system.runJob") && !js.includes("runInterval"));
+});
+test("loop closer: partner search takes facing exits at the same height within reach, nearest first, and refuses the rest", () => {
+  const A = E(0, 0, [0, 1]);
+  const find = (...others) => { const { at } = fixtureWorld([A, ...others]); return LOOP.findPartner(at, A); };
+  const ok = find(E(0, 12, [0, -1]));
+  assert.deepEqual([ok.B.x, ok.B.z, ok.length, ok.offset], [0, 12, 13, 0]);
+  assert.equal(find(E(3, 12, [0, -1])).offset, 3); // ex = (dir.z, -dir.x) = (1, 0)
+  assert.equal(find(E(-3, 12, [0, -1])).offset, -3);
+  assert.equal(find(E(0, 12, [0, -1]), E(1, 9, [0, -1])).B.z, 9, "nearest first");
+  assert.equal(find(E(0, 5, [0, -1])), null, "too close (needs 5 free cells between the rows)");
+  assert.ok(find(E(0, 6, [0, -1])) && find(E(0, 17, [0, -1])));
+  assert.equal(find(E(0, 18, [0, -1])), null, "too far");
+  assert.equal(find(E(7, 12, [0, -1])), null, "too far sideways");
+  assert.equal(find(E(0, 12, [0, 1])), null, "same facing, not facing each other");
+  assert.equal(find(E(0, 12, [0, -1], 41)), null, "other deck height");
+  assert.equal(find(E(0, -12, [0, -1])), null, "behind");
+  assert.equal(find(E(6, 8, [0, -1])), null, "sideways 6 > maxOffset");
+  assert.equal(LOOP.exitAt(fixtureWorld([A]).at, 0, 40, 0).dir.join(), "0,1");
+  assert.equal(LOOP.exitAt(fixtureWorld([E(4, 4, [1, 0])]).at, 4, 40, 4).dir.join(), "1,0");
+  assert.equal(LOOP.exitAt(fixtureWorld([E(4, 4, [-1, 0])]).at, 4, 40, 4).dir.join(), "-1,0");
+  assert.equal(LOOP.exitAt(fixtureWorld([A]).at, 0, 40, -1), null, "the platform's own connector row is no exit");
+});
+test("loop closer: exactly one of a pair builds (smaller x, z), the other stands down; non-mutual pairs do nothing; all 4 headings", () => {
+  const A = E(0, 0, [0, 1]), B = E(2, 12, [0, -1]), { at } = fixtureWorld([A, B]);
+  assert.equal(LOOP.decide(at, A).action, "build");
+  assert.equal(LOOP.decide(at, B).action, "standDown");
+  const C = E(-1, 9, [0, -1]), w2 = fixtureWorld([A, B, C]); // A prefers C (nearer); B's best is A
+  assert.equal(LOOP.decide(w2.at, A).partner.z, 9);
+  assert.equal(LOOP.decide(w2.at, B).action, "none", "B's best is A, A's best is C: not mutual");
+  for (const dir of [[0, 1], [1, 0], [0, -1], [-1, 0]]) {
+    const a1 = E(10, 10, dir), b1 = E(10 + dir[0] * 12 + dir[1] * 2, 10 + dir[1] * 12 - dir[0] * 2, [-dir[0], -dir[1]]), f = fixtureWorld([a1, b1]);
+    const d = LOOP.decide(f.at, a1), e = LOOP.decide(f.at, b1);
+    assert.deepEqual([d.action, e.action].sort(), ["build", "standDown"], `heading ${dir}`);
+    assert.equal((d.action === "build" ? d : e).plan.length, 13);
+  }
+});
+test("loop closer: corridor check - air and leaves are cleared, anything else (log, planks, rock, unloaded) aborts; a built bridge removes both exits and clears leaves", () => {
+  const A = E(0, 0, [0, 1]), B = E(3, 12, [0, -1]);
+  const build = (extra = []) => { const f = fixtureWorld([A, B]); for (const [k, v] of extra) f.w.set(k, v); return f; };
+  const base = build(), plan = LOOP.decide(base.at, A).plan;
+  assert.equal(plan.offset, 3);
+  assert.deepEqual(LOOP.blockedCells(base.at, plan), []);
+  const mid = [...LOOP.finalBlocks(plan)].find(([k, b]) => b.id === PLANKS && k.split(",")[2] === "6")[0];
+  const [mx, my, mz] = mid.split(",").map(Number);
+  for (const [name, block, blocks] of [["leaves", "lothlorien:mallorn_leaves", false], ["log", "lothlorien:mallorn_log", true], ["stone", "minecraft:stone", true], ["planks", PLANKS, true]]) {
+    for (const dy of [0, 1, 3]) { // the deck itself and the headroom both count
+      const f = build([[`${mx},${my + dy},${mz}`, block]]), d = LOOP.decide(f.at, A);
+      if (name === "planks" && dy === 0) continue; // the deck cell may already be planks only in the end rows
+      assert.equal(d.action, blocks ? "none" : "build", `${name} at +${dy}`);
+      if (blocks) assert.equal(d.reason, "blocked");
+    }
+  }
+  assert.equal(LOOP.decide((x, y, z) => (z === 6 ? undefined : base.at(x, y, z)), A).action, "none", "unloaded cells abort");
+  const f = build([[`${mx},${my + 2},${mz}`, "lothlorien:mallorn_leaves"]]), d = LOOP.decide(f.at, A);
+  assert.equal(d.action, "build");
+  for (const [k, b] of LOOP.finalBlocks(d.plan)) b.id === "minecraft:air" ? f.w.delete(k) : f.w.set(k, b.id);
+  assert.equal(LOOP.exitAt(f.at, A.x, A.y, A.z), null);
+  assert.equal(LOOP.exitAt(f.at, B.x, B.y, B.z), null);
+  assert.equal(f.at(A.x, A.y + 1, A.z), "minecraft:air", "the railing's centre is open");
+  assert.equal(f.at(A.x + 2, A.y + 1, A.z), FENCE, "the railing's outer posts stay as the bridge rails");
+  assert.equal(f.at(mx, my + 2, mz), "minecraft:air", "leaves in the corridor are cleared");
+});
+test("loop closer: runtime bridges are lit to >= 8 on every walk cell (shared flood fill over the plan's own blocks), all lengths / offsets / headings", () => {
+  const passes = (n) => n === undefined || /^minecraft:air$|fence$|elven_lantern$/.test(n);
+  let worst = 99, count = 0;
+  for (const dir of [[0, 1], [1, 0], [0, -1], [-1, 0]]) {
+    for (let length = LOOP.LOOP.minDist + 1; length <= LOOP.LOOP.maxDist + 1; length++) {
+      const maxOff = Math.min(LOOP.LOOP.maxOffset, length - 3);
+      for (let off = -maxOff; off <= maxOff; off++) {
+        const A = E(0, 0, dir), ex = [dir[1], -dir[0]], B = E(dir[0] * (length - 1) + ex[0] * off, dir[1] * (length - 1) + ex[1] * off, [-dir[0], -dir[1]]);
+        const plan = LOOP.planBridge(A, B, length, off), blocks = LOOP.finalBlocks(plan);
+        const xs = [...blocks.keys()].map((k) => k.split(",").map(Number)), lo = [0, 1, 2].map((i) => Math.min(...xs.map((c) => c[i]))), hi = [0, 1, 2].map((i) => Math.max(...xs.map((c) => c[i])));
+        const get = (x, y, z) => blocks.get(`${x + lo[0]},${y + lo[1]},${z + lo[2]}`)?.id;
+        const size = [hi[0] - lo[0] + 1, hi[1] - lo[1] + 1, hi[2] - lo[2] + 1];
+        const L = sharedLight(get, size, { [LOOP.LANTERN]: 14 }, passes);
+        for (const [k, b] of blocks) { // walk cells = feet cells above a plank / slab with two air cells above
+          if (b.id !== PLANKS && b.id !== SLAB_NAME) continue;
+          const [x, y, z] = k.split(",").map(Number);
+          if (blocks.get(`${x},${y + 1},${z}`)?.id !== "minecraft:air" || blocks.get(`${x},${y + 2},${z}`)?.id !== "minecraft:air") continue;
+          const l = L.get(`${x - lo[0]},${y + 1 - lo[1]},${z - lo[2]}`) ?? 0;
+          worst = Math.min(worst, l); count++;
+          assert.ok(l >= LOOP.LOOP.lightTarget, `heading ${dir} length ${length} offset ${off}: walk cell ${x},${y + 1},${z} has light ${l}`);
+        }
+        assert.equal(plan.lanterns.filter((l) => l.row === 0 || l.row === length - 1).length, 0, "no lantern in the connector rows");
+        assert.ok(plan.lanterns.length <= 8, `${plan.lanterns.length} lanterns`);
+      }
+    }
+  }
+  console.log(`loop closer bridges: ${count} walk cells, darkest ${worst}`);
+});
+test("loop closer: in simulated villages every closed loop leaves both exits gone, a continuous walkable deck and the counts add up", () => {
+  let loops = 0;
+  for (const r of villages()) {
+    const states = new Map(), world = buildWorld(r.res, states), lp = closeLoops(r.res, world, states);
+    loops += lp.loops;
+    assert.ok(lp.missed <= 1, `seed ${r.seed}: ${lp.missed} markers not on an exit`);
+    assert.ok(lp.remaining <= lp.markers - lp.loops, "every bridge consumes at least its own exit (the far end may be a lookout arm: same 5-wide rail wall)");
+    assert.equal(walkability(r.res, world, states).unreachable.length, 0, `seed ${r.seed}: walkable deck after the loops`);
+  }
+  assert.ok(loops >= 1, "at least one loop closes in 30 seeds");
 });
 
 // --- elven warden: entity invariants, spawn rule, natural-spawn thinning, friendly fire, village wardens ---

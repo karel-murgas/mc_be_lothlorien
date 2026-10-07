@@ -14,6 +14,7 @@ import "./athelas.js";
 import "./trees.js";
 import "./great_mallorn.js";
 import "./rail_mender.js";
+import "./loop_marker.js";
 import { leafUndersideY } from "./leaf_fall.js";
 import { handleHarmonyEvent, startHarmony } from "./harmony_game.js";
 import { startDeer } from "./deer.js";

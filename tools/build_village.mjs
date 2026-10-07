@@ -26,6 +26,7 @@ const EXIT_WEIGHTS = { railing: 4, balcony: 2, lookout: 1 };
 const EARLY_END = { railing_end: 10, balcony_braced: 6, lookout_01: 2 };
 const MENDER = "lothlorien:rail_mender";
 const WARDEN = "lothlorien:elven_warden";
+const LOOP_MARKER = "lothlorien:loop_marker";
 // Village wardens (entities/elven_warden.json, group lothlorien:village_warden = persistent + home): placed as template
 // entities on the lower deck of these pieces. Whether Bedrock places structure entities in jigsaw pieces is an open question
 // (same as the rail mender), to be seen in game.
@@ -97,6 +98,9 @@ function writePiece(name, blocks, size, origin, connectors, extra = {}) {
   // so the whole bridge + node is covered); y = the lowest rail
   const railYs = [...blocks].filter(([, b]) => b.name === RAIL).map(([k]) => Number(k.split(",")[1]));
   const markers = railYs.length ? (extra.markers ?? [[sx / 2, sz / 2]]).map(([x, z]) => ({ id: MENDER, x, y: Math.min(...railYs) + origin[1], z })) : [];
+  // loop closer (scripts/loop_marker.js): every closed exit (railing_end) carries one marker on the centre fence cell (y + 0.5 = cell middle, so
+  // rotation rounding cannot change the cell); it finds its railing, a facing one and the bridge direction from the blocks, not from its own rotation
+  if (name === "railing_end") markers.push({ id: LOOP_MARKER, x: sx / 2, y: Math.min(...railYs) + origin[1] + 0.5, z: sz / 2 });
   const cells = extra.wardens ?? wardenCells(name, blocks, WARDENS[name] ?? 0, name.startsWith("central") ? 7 : 5);
   const wardens = cells.map((c) => ({
     id: WARDEN, x: c.x + origin[0] + 0.5, y: FLOOR_H + 1 + origin[1], z: c.z + origin[2] + 0.5,

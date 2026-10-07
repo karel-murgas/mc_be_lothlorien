@@ -1,0 +1,20 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "lothlorien:loop_marker",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/guide_beacon"
+      },
+      "geometry": {
+        "default": "geometry.lothlorien.loop_marker"
+      },
+      "render_controllers": [
+        "controller.render.default"
+      ]
+    }
+  }
+}
