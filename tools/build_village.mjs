@@ -15,7 +15,7 @@ import { toMcstructure } from "./build_structures.mjs";
 import { B } from "./flet_mallorn.mjs";
 import {
   ROOTS, FLOOR_H, LEVEL_H, FACING, SHAPES, key, AIR, planks, slab, Deck, buildTree, buildCrown, deckJigsaw, lantern, lonelyRail,
-  writeRails, RAIL, shapeCells,
+  writeRails, RAIL, shapeCells, addLanterns,
 } from "./village_mallorn.mjs";
 
 export const MAX_DEPTH = 5;
@@ -134,8 +134,8 @@ const crown = (name, o) => { const c = buildCrown(o); writePiece(name, c.blocks,
 crown("crown_small", { h: 4, H: 14, seed: 4004, branches: 5, blob: 1.8 });
 crown("crown_medium", { h: 6, H: 18, seed: 6006, branches: 7, blob: 2.2 });
 crown("crown_large", { h: 8, H: 22, seed: 8008, branches: 8, blob: 2.6 });
-crown("crown_central_a", { h: 12, H: 28, seed: 12012, branches: 10, blob: 3.2 });
-crown("crown_central_b", { h: 10, H: 24, seed: 10010, branches: 9, blob: 3.0 });
+crown("crown_central_a", { h: 12, H: 28, seed: 12012, branches: 10, blob: 3.2, central: true });
+crown("crown_central_b", { h: 10, H: 24, seed: 10010, branches: 9, blob: 3.0, central: true });
 
 // --- bridges: 5 wide (+ shift for dog-legs), deck at box y 0 on the connectors, gently arched with bottom slabs ----------
 // Walking surface in half-blocks k(z) = min(z, L-1-z, top): even k = planks at layer k/2, odd k = bottom slab at layer
@@ -155,6 +155,7 @@ function bridge(name, length, { shift = 0, mirror = false, lanterns = false } = 
     const k = kOf(z), L = layerOf(k), [a, b] = range(z);
     for (let x = a; x <= b; x++) {
       blocks.set(key(mx(x), L, z), k % 2 === 0 ? planks() : slab("bottom"));
+      if (k % 2 === 1) blocks.set(key(mx(x), L - 1, z), slab("top")); // the body is never one slab thin: top slab under a bottom slab
       for (let h = 1; h <= 3; h++) blocks.set(key(mx(x), L + h, z), AIR);
       let rim = false;
       for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) if (!isDeck(x + dx, z + dz)) rim = true;
@@ -167,15 +168,23 @@ function bridge(name, length, { shift = 0, mirror = false, lanterns = false } = 
       if (sides.length) forced.set(rk, sides);
     }
   }
+  // step links: where the rail rises one block between neighbouring cells, the lower cell gets a fence one block up, so the rail is
+  // one stepped line with no diagonal-only join (both sides, both halves of the arch)
+  for (const rk of [...rails]) {
+    const [x, y, z] = rk.split(",").map(Number);
+    for (const dz of [-1, 1]) if (rails.has(key(x, y + 1, z + dz))) rails.add(key(x, y + 1, z));
+  }
   // the walk cells of the rail rows' air are overwritten by the rails above
   writeRails(blocks, rails, forced);
   if (lanterns) {
     const z = Math.floor(length / 2), L = layerOf(kOf(z));
     for (const x of [0, 4]) { blocks.set(key(mx(x), L + 2, z), lonelyRail()); blocks.set(key(mx(x), L + 3, z), lantern()); }
   }
+  const sy = layerOf(top) + 4;
+  addLanterns(blocks, { x0: 0, x1: W - 1, y0: 0, y1: sy - 1, z0: 0, z1: length - 1 }, (x, y, z) => z === 0 || z === length - 1); // not on the connector rows
   const connectors = [{ x: mx(2), y: 0, z: 0, facing: "north" }, { x: mx(shift + 2), y: 0, z: length - 1, facing: "south" }];
   for (const c of connectors) blocks.set(key(c.x, 0, c.z), deckJigsaw(c.facing, POOL("nodes")));
-  writePiece(name, blocks, [W, layerOf(top) + 4, length], [0, 0, 0], connectors);
+  writePiece(name, blocks, [W, sy, length], [0, 0, 0], connectors);
 }
 for (const L of [5, 7, 9, 11, 13]) bridge(`bridge_${L}`, L, { lanterns: L >= 9 });
 bridge("bridge_dog_11_l", 11, { shift: 2 });
@@ -193,6 +202,7 @@ bridge("bridge_dog_13_r", 13, { shift: 3, mirror: true });
   const { rails, forced } = deck.build();
   writeRails(blocks, rails, forced);
   blocks.set(key(0, 2, widths.length - 1), lantern());
+  addLanterns(blocks, { x0: -3, x1: 3, y0: 0, y1: 3, z0: 0, z1: widths.length - 1 }, (x, y, z) => z === 0);
   writePiece("balcony_small", blocks, [7, 4, widths.length], [3, 0, 0], deck.connectors.map((c) => ({ ...c, y: 0 })));
 }
 // lookout_01: square-ish platform on a log pillar down to ROOTS, one connector
@@ -204,6 +214,7 @@ bridge("bridge_dog_13_r", 13, { shift: 3, mirror: true });
   const { rails, forced } = deck.build();
   writeRails(blocks, rails, forced);
   blocks.set(key(0, FLOOR_H + 2, 4), lantern()); // on the rail post at the far end
+  addLanterns(blocks, { x0: -4, x1: 4, y0: -ROOTS, y1: FLOOR_H + 3, z0: -4, z1: 4 }, (x, y, z) => z === -4);
   writePiece("lookout_01", blocks, [9, ROOTS + FLOOR_H + 4, 9], [4, ROOTS, 4], deck.connectors.map((c) => ({ ...c, y: FLOOR_H })));
 }
 // railing_end (plug): deck row of 5 + 5 rails; connector at the middle deck cell facing the parent

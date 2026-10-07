@@ -64,6 +64,84 @@ export function writeRails(blocks, rails, forced = new Map()) {
   }
 }
 
+// ---- block light -----------------------------------------------------------------------------------------------------
+// Monsters spawn at block light 0 only; the owner wants a vivid city: >= LIGHT_TARGET on every walkable cell. Model: lanterns are
+// the only sources (the lantern block emits 14), light spreads through air, void, rails and lanterns losing 1 per step
+// (6-neighbours), and is stopped by everything else (planks, slabs, logs, leaves: the safe assumption). Only sources inside the
+// piece box count. Walk cell = the feet cell above a deck / slab / connector block with feet and head cell free (not a rail).
+export const LANTERN_LIGHT = 14, LIGHT_TARGET = 8;
+const N6 = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+const clearForLight = (n) => n === undefined || n === "minecraft:air" || n === RAIL || n === LANTERN;
+const inBox = (b, x, y, z) => x >= b.x0 && x <= b.x1 && y >= b.y0 && y <= b.y1 && z >= b.z0 && z <= b.z1;
+// nameAt(x, y, z) -> block name, undefined for structure void; b = { x0, x1, y0, y1, z0, z1 }
+export function lightField(nameAt, b) {
+  const L = new Map(), q = [];
+  for (let x = b.x0; x <= b.x1; x++) for (let y = b.y0; y <= b.y1; y++) for (let z = b.z0; z <= b.z1; z++) {
+    if (nameAt(x, y, z) === LANTERN) { L.set(key(x, y, z), LANTERN_LIGHT); q.push([x, y, z]); }
+  }
+  for (let i = 0; i < q.length; i++) {
+    const [x, y, z] = q[i], l = L.get(key(x, y, z));
+    if (l <= 1) continue;
+    for (const [dx, dy, dz] of N6) {
+      const nx = x + dx, ny = y + dy, nz = z + dz, nk = key(nx, ny, nz);
+      if (L.has(nk) || !inBox(b, nx, ny, nz) || !clearForLight(nameAt(nx, ny, nz))) continue;
+      L.set(nk, l - 1); q.push([nx, ny, nz]);
+    }
+  }
+  return L;
+}
+export function walkCells(nameAt, b) {
+  const cells = [];
+  for (let x = b.x0; x <= b.x1; x++) for (let y = b.y0; y < b.y1 - 1; y++) for (let z = b.z0; z <= b.z1; z++) {
+    const n = nameAt(x, y, z);
+    if (n !== B.planks && n !== SLAB && n !== "minecraft:jigsaw") continue;
+    const f = nameAt(x, y + 1, z), h = nameAt(x, y + 2, z);
+    if ((f === undefined || f === "minecraft:air") && (h === undefined || h === "minecraft:air")) cells.push([x, y + 1, z]);
+  }
+  return cells;
+}
+export function worstLight(nameAt, b) {
+  const L = lightField(nameAt, b), cells = walkCells(nameAt, b);
+  let worst = 99, at = null;
+  for (const c of cells) { const l = L.get(key(...c)) ?? 0; if (l < worst) { worst = l; at = c; } }
+  return { worst, at, cells: cells.length };
+}
+// Adds lanterns (on top of rail posts first, then on deck cells beside the trunk) until every walk cell is lit to LIGHT_TARGET.
+// Greedy: the candidate that lights most of the dark cells wins. avoid(x, y, z) keeps connector corridors free.
+export function addLanterns(blocks, b, avoid = () => false) {
+  const nameAt = (x, y, z) => blocks.get(key(x, y, z))?.name;
+  const free = (x, y, z) => { const n = nameAt(x, y, z); return (n === undefined || n === "minecraft:air") && inBox(b, x, y, z) && !avoid(x, y, z); };
+  const cells = walkCells(nameAt, b);
+  for (let guard = 0; guard < 60; guard++) {
+    const L = lightField(nameAt, b);
+    const dark = new Set(cells.filter((c) => (L.get(key(...c)) ?? 0) < LIGHT_TARGET).map((c) => key(...c)));
+    if (!dark.size) return;
+    const gain = (x, y, z) => { // dark cells within LANTERN_LIGHT - LIGHT_TARGET steps of a lantern at (x, y, z)
+      const seen = new Map([[key(x, y, z), 0]]), q = [[x, y, z]];
+      let n = 0;
+      for (let i = 0; i < q.length; i++) {
+        const [cx, cy, cz] = q[i], d = seen.get(key(cx, cy, cz));
+        if (dark.has(key(cx, cy, cz))) n++;
+        if (d >= LANTERN_LIGHT - LIGHT_TARGET) continue;
+        for (const [dx, dy, dz] of N6) {
+          const nx = cx + dx, ny = cy + dy, nz = cz + dz, nk = key(nx, ny, nz);
+          if (!seen.has(nk) && inBox(b, nx, ny, nz) && clearForLight(nameAt(nx, ny, nz))) { seen.set(nk, d + 1); q.push([nx, ny, nz]); }
+        }
+      }
+      return n;
+    };
+    let best = null, bg = 0;
+    const consider = (x, y, z) => { if (!free(x, y, z)) return; const g = gain(x, y, z); if (g > bg) { bg = g; best = [x, y, z]; } };
+    for (const [k, v] of blocks) if (v.name === RAIL) { const [x, y, z] = k.split(",").map(Number); consider(x, y + 1, z); }
+    if (!best) { // no rail helps: a lantern on the deck beside the trunk (hugging a log, off the walkway)
+      for (const [x, y, z] of cells) if (N6.slice(0, 2).concat(N6.slice(4)).some(([dx, , dz]) => /_log$|_wood$/.test(nameAt(x + dx, y, z + dz) ?? ""))) consider(x, y, z);
+    }
+    if (!best) throw new Error(`cannot light ${dark.size} walk cells, e.g. ${[...dark][0]}`);
+    blocks.set(key(...best), lantern());
+  }
+  throw new Error("addLanterns: no convergence");
+}
+
 // ---- platform shapes --------------------------------------------------------------------------------------------
 // A shape is an array of half-widths: rows[|z|] = half-width in x at that |z|. Outlines are rectilinear (straight runs and
 // square corners, runs of >= 2 cells), never a diagonal staircase of single cells.
@@ -99,8 +177,8 @@ const N8 = DIRS8;
 // A deck layer at height y over a shape. Connectors sit on the rim cells of the box face (no stub walkways):
 // deck under 5 cells, 3 walk cells (headroom air), rails at +-2.
 export class Deck {
-  constructor(blocks, y, rows, { box, inner = new Set(), holes = new Set(), noRail = new Set(), cells = null }) {
-    Object.assign(this, { blocks, y, rows, box, inner, holes, noRail });
+  constructor(blocks, y, rows, { box, inner = new Set(), holes = new Set(), noRail = new Set(), cells = null, topSlabs = new Set() }) {
+    Object.assign(this, { blocks, y, rows, box, inner, holes, noRail, topSlabs });
     this.cells = cells ?? shapeCells(rows);
     this.connectors = []; // { x, z, facing, pool, name }
   }
@@ -136,7 +214,7 @@ export class Deck {
     for (const k of floor) {
       const [x, z] = k.split(",").map(Number);
       for (let h = 1; h <= 3; h++) blocks.set(key(x, y + h, z), AIR);
-      blocks.set(key(x, y, z), planks());
+      blocks.set(key(x, y, z), this.topSlabs.has(k) ? slab("top") : planks()); // top slab: walking surface as high as the deck, headroom 0.5 lower
     }
     const rails = new Set();
     for (const k of rim) { const [x, z] = k.split(",").map(Number); rails.add(key(x, y + 1, z)); }
@@ -163,7 +241,14 @@ export const RING = (() => { // the 16 cells around the 3x3 trunk, clockwise fro
 // stair cell i: walking surface 3 + i half-blocks above the lower deck's block bottom (deck surface = 2): planks on even
 // surfaces, a bottom slab on odd ones; one half-step (0.5 block, steppable without jumping) per cell
 export const stairLayer = (i) => { const s = 3 + i; return s % 2 === 0 ? (s - 2) / 2 : (s - 1) / 2; };
-export const STAIR_CUT = [9, 10, 11, 12, 13]; // ring cells whose headroom would reach the upper deck: the deck is cut there
+// The upper floor over the spiral (ring cells 9..13; 0..8 are under full deck, 14 and 15 are the exit). A walker needs 1.8
+// blocks of headroom, i.e. 4 half-blocks in the sim: the full deck block (bottom at 2*LEVEL_H) fits over the stair surface s
+// when 2*LEVEL_H - s >= 4, a top slab (bottom at 2*LEVEL_H + 1) when 2*LEVEL_H + 1 - s >= 4; only the rest stays open.
+const stairS = (i) => 3 + i;
+const ringOver = [9, 10, 11, 12, 13];
+export const STAIR_FULL = ringOver.filter((i) => 2 * LEVEL_H - stairS(i) >= 4); // full deck over these ring cells
+export const STAIR_TOP = ringOver.filter((i) => !STAIR_FULL.includes(i) && 2 * LEVEL_H + 1 - stairS(i) >= 4); // top slab at floor level
+export const STAIR_CUT = ringOver.filter((i) => !STAIR_FULL.includes(i) && !STAIR_TOP.includes(i)); // the remaining hole
 
 // opts: name-free tree builder.
 //   levels: [{ rows, conn: [{ facing, off, hi? }], clip?: (x, z) => remove this cell }] one entry (single level) or two (lower, upper at +LEVEL_H, slab stair)
@@ -179,12 +264,12 @@ export function buildTree({ levels, trunk = "plus", seed, pool, upPool, rope = f
   if (ropeAt) inner.add(`${ropeAt.x},${ropeAt.z}`);
   const isTrunk = (x, z) => tk.cells.some(([a, c]) => a === x && c === z);
 
-  // trunk sunk ROOTS into the ground; a round 5x5 trunk narrows right under the crown jigsaw
-  for (let y = -ROOTS; y <= topY + 3; y++) {
-    const cells = trunk === "round5" && y > D + 1 ? PLUS : tk.cells;
-    for (const [x, z] of cells) b.addLog(x, y, z, "up");
+  // trunk sunk ROOTS into the ground; it keeps its full section up to the crown, and the crown piece goes on with the same
+  // section (3x3 for village trees, round 5x5 for the central one): a plus-shaped trunk widens to 3x3 in the top two layers
+  const crownCells = trunk === "round5" ? ROUND5 : SQUARE3;
+  for (let y = -ROOTS; y <= topY + CROWN_AT; y++) {
+    for (const [x, z] of y >= topY + 4 ? crownCells : tk.cells) b.addLog(x, y, z, "up");
   }
-  b.addLog(0, topY + 4, 0, "up");
 
   // foot: bark flare round the trunk (not at the rope), logs down to the roots
   const frng = makeRandom(seed ^ 0x51ed);
@@ -213,7 +298,7 @@ export function buildTree({ levels, trunk = "plus", seed, pool, upPool, rope = f
     const sx = dx !== 0 ? dx * rT : 0, sz = dx !== 0 ? 0 : dz * rT;
     b.branch(sx, sz, dx, dz, b.between([5, D - 6]), b.between([3, Math.max(3, Math.min(hx, hz) - 3)]), 0, 2.0 + random() * 0.6);
   }
-  const tree = b.result(topY + 4);
+  const tree = b.result(topY + CROWN_AT);
   const blocks = new Map();
   for (const c of tree.leaves) blocks.set(key(c.x, c.y, c.z), leafBlock());
   for (const c of tree.logs) blocks.set(key(c.x, c.y, c.z), c.face === "wood" ? { name: B.wood, states: {} } : logBlock(c.face));
@@ -229,14 +314,15 @@ export function buildTree({ levels, trunk = "plus", seed, pool, upPool, rope = f
   }
 
   // decks
-  const stairHoles = new Set(), noRail = new Set();
+  const stairHoles = new Set(), noRail = new Set(), topSlabs = new Set();
   if (two) {
     for (const i of STAIR_CUT) stairHoles.add(RING[i].join(","));
+    for (const i of STAIR_TOP) topSlabs.add(RING[i].join(","));
     for (const i of [14, 15]) noRail.add(RING[i].join(","));
     noRail.add("-3,-1"); noRail.add("-3,0"); // the exit onto the upper deck stays open
   }
   const deckObjs = levels.map((lv, i) => new Deck(blocks, i === 0 ? D : D + LEVEL_H, lv.rows, {
-    box, inner, holes: i === 1 ? stairHoles : new Set(), noRail: i === 1 ? noRail : new Set(),
+    box, inner, holes: i === 1 ? stairHoles : new Set(), noRail: i === 1 ? noRail : new Set(), topSlabs: i === 1 ? topSlabs : new Set(),
     cells: lv.clip ? new Set([...shapeCells(lv.rows)].filter((c) => !lv.clip(...c.split(",").map(Number)))) : null,
   }));
   levels.forEach((lv, i) => lv.conn.forEach((c) => deckObjs[i].connect(c.facing, c.off, pool, c.hi ? DECK_HI_NAME : DECK_NAME)));
@@ -249,7 +335,12 @@ export function buildTree({ levels, trunk = "plus", seed, pool, upPool, rope = f
     RING.forEach(([x, z], i) => {
       const L = stairLayer(i), s = 3 + i;
       blocks.set(key(x, D + L, z), s % 2 === 0 ? planks() : slab("bottom"));
-      for (let h = 1; h <= 3; h++) blocks.set(key(x, D + L + h, z), AIR);
+      // a bottom slab is not left one slab thin: a top slab under it (the body is 1 block thick); not under the lower deck
+      if (s % 2 === 1 && [undefined, "minecraft:air", B.leaves].includes(blocks.get(key(x, D + L - 1, z))?.name)) blocks.set(key(x, D + L - 1, z), slab("top"));
+      for (let h = 1; h <= 3; h++) { // headroom wins over leaves and logs, but never cuts the upper floor (planks / top slab) over the stair
+        const over = blocks.get(key(x, D + L + h, z))?.name;
+        if (over !== B.planks && over !== SLAB) blocks.set(key(x, D + L + h, z), AIR);
+      }
     });
     const ringSet = new Set(RING.map((c) => c.join(",")));
     const addRail = (x, z, L) => {
@@ -273,7 +364,14 @@ export function buildTree({ levels, trunk = "plus", seed, pool, upPool, rope = f
     for (let y = 0; y <= D; y++) blocks.set(key(ropeAt.x, y, ropeAt.z), { name: B.ropeHanging, states: { "minecraft:cardinal_direction": "north" } });
     for (let h = 1; h <= 3; h++) blocks.set(key(ropeAt.x, D + h, ropeAt.z), AIR);
   }
-  // LAST clearing step done: now drop every leaf that has no path <= 8 to a log (leaf decay in game breaks the rest)
+  // rails, deck, walk cells and headroom win over leaves: no leaf in the 3 cells above any deck / stair block or on a rail
+  // (everything above is written after the leaves already; this keeps it so if the order ever changes)
+  for (const [k, v] of [...blocks]) {
+    if (v.name !== B.planks && v.name !== SLAB) continue;
+    const [x, y, z] = k.split(",").map(Number);
+    for (let h = 1; h <= 3; h++) if (blocks.get(key(x, y + h, z))?.name === B.leaves) blocks.delete(key(x, y + h, z));
+  }
+  // the orphan-leaf trim stays the LAST step that changes leaves: drop every leaf that has no path <= 8 to a log (leaf decay in game breaks the rest)
   trimFarLeaves(blocks);
   // lanterns: on the deck beside the trunk (diagonals), and on rim posts away from the connectors
   if (diagLamps && !two) for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) blocks.set(key(sx * (rT + 1), D + 1, sz * (rT + 1)), lantern());
@@ -290,6 +388,8 @@ export function buildTree({ levels, trunk = "plus", seed, pool, upPool, rope = f
       if (best) blocks.set(key(best[0], D + 2, best[1]), lantern());
     }
   }
+  addLanterns(blocks, { x0: -hx, x1: hx, y0: -ROOTS, y1: topY + CROWN_AT, z0: -hz, z1: hz },
+    (x, y, z) => deckObjs.some((dk) => dk.connectors.some((c) => Math.abs(y - dk.y) <= 4 && (c.d[0] ? x === c.x && Math.abs(z - c.z) <= 2 : z === c.z && Math.abs(x - c.x) <= 2))));
   if (anchor) blocks.set(key(0, -ROOTS, 0), anchorJigsaw());
   blocks.set(key(0, topY + CROWN_AT, 0), crownUpJigsaw(upPool));
   const connectors = deckObjs.flatMap((dk) => dk.connectors.map((c) => ({ ...c, y: dk.y })));
@@ -298,13 +398,17 @@ export function buildTree({ levels, trunk = "plus", seed, pool, upPool, rope = f
 
 // ---- crown piece: trunk continues from the jigsaw upward, branches, leaves, all inside the box ------------------------
 // local coords: jigsaw at (0,0,0) = box layer 0 centre. opts: h (half width), H (height), seed, branches, blob
-export function buildCrown({ h, H, seed, branches, blob }) {
+export function buildCrown({ h, H, seed, branches, blob, central = false }) {
   const random = makeRandom(seed), b = makeBuilder(random);
-  for (let y = 1; y <= H - 4; y++) b.addLog(0, y, 0, "up");
-  const dirs = b.shuffled();
+  // the trunk keeps the platform's section well up into the crown and tapers gradually, thin only in the top third:
+  // village 3x3 -> plus (from 40 %) -> 1x1 (from 67 %); central round 5x5 -> 3x3 (30 %) -> plus (50 %) -> 1x1 (67 %)
+  const top = H - 4, steps = central ? [[0.3, ROUND5], [0.5, SQUARE3], [0.67, PLUS]] : [[0.4, SQUARE3], [0.67, PLUS]];
+  const section = (y) => (steps.find(([t]) => y / top < t)?.[1] ?? [[0, 0]]);
+  for (let y = 1; y <= top; y++) for (const [x, z] of section(y)) b.addLog(x, y, z, "up");
+  const rT = central ? 2 : 1, dirs = b.shuffled();
   for (let i = 0; i < branches; i++) {
     const [dx, dz] = dirs[i % 8];
-    b.branch(0, 0, dx, dz, b.between([3, Math.max(4, H - 12)]), b.between([Math.max(2, h - 6), Math.max(3, h - 4)]), 0.45, blob + random() * 0.5);
+    b.branch(dx !== 0 ? dx * rT : 0, dx !== 0 ? 0 : dz * rT, dx, dz, b.between([3, Math.max(4, H - 12)]), b.between([Math.max(2, h - 6), Math.max(3, h - 4)]), 0.45, blob + random() * 0.5);
   }
   b.blob(0, H - 6, 0, Math.min(h - 0.5, blob + 2.6), Math.min(4, H / 4), 3, 1.0);
   b.blob(0, H - 3, 0, Math.min(h - 2, blob + 1.4), 2.6, H - 5, 0.8);
@@ -317,6 +421,7 @@ export function buildCrown({ h, H, seed, branches, blob }) {
     if (Math.abs(x) > h || Math.abs(z) > h || y < 1 || y > H - 1) blocks.delete(k);
   }
   trimFarLeaves(blocks);
+  for (const [x, z] of central ? ROUND5 : SQUARE3) blocks.set(key(x, 0, z), logBlock("up")); // the full trunk section starts at the jigsaw layer
   blocks.set(key(0, 0, 0), crownDownJigsaw());
   return { blocks, size: [2 * h + 1, H, 2 * h + 1], origin: [h, 0, h] };
 }
