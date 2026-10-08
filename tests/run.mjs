@@ -1540,7 +1540,8 @@ test("village: the one rail constant is the only rail block, bridges are symmetr
   }
   assert.deepEqual([...lengths].sort((a, b) => a - b), [7, 9, 11, 13, 15], "every straight bridge length is used by some combo"); // P9: no 5-long bridge, the bigger crowns need room
   const names = villagePieces().map((q) => q.name);
-  for (const n of ["bridge_dog_11_l", "bridge_dog_11_r", "bridge_dog_13_l", "bridge_dog_13_r"]) assert.ok(names.some((q) => q.endsWith(`_${n}`)), `a combo with ${n}`);
+  // owner 2026-10-08: no dog-legs in combos ("ugly and unnecessary, it could have been straight"); the loop closer keeps the diagonal
+  assert.ok(!names.some((q) => q.includes("_bridge_dog_")), "no dog-leg combo");
 });
 test("village: platform shapes differ (irregular rectilinear outlines of different sizes)", () => {
   const seen = new Map();
@@ -1578,7 +1579,7 @@ test("village combos: a bridge only exists inside a combo piece with its destina
   const names = readdirSync(new URL(`${VILLAGE}/`, import.meta.url)).filter((f) => f.endsWith(".mcstructure")).map((f) => f.replace(".mcstructure", ""));
   assert.ok(!names.some((n) => /^(bridge_|node_|tower_|tree_platform)/.test(n)), "no bridge, node or tower piece is shipped alone");
   const combos = villagePieces().filter((p) => p.name.startsWith("combo_"));
-  assert.ok(combos.length >= 30, `${combos.length} combo pieces`);
+  assert.ok(combos.length >= 20, `${combos.length} combo pieces`); // straight bridges only since 2026-10-08
   const pool = (id) => villageData.pools.get(`lothlorien:village/${id}`);
   const inCombos = new Set(pool("combos").elements.map((e) => e.element.location.split("/").pop()));
   for (const p of combos) {
@@ -1953,7 +1954,7 @@ test("rail mender: script is imported by main.js and removes the marker only aft
 // --- loop closer (P7): marker on every closed railing exit, pure partner / corridor rules, light on runtime-built bridges ---
 import * as LOOP from "../lothlorien_bp/scripts/village_loop.js";
 import { blockLight as sharedLight } from "../../../.claude/skills/bedrock-modding/scripts/structure_light.mjs";
-import { closeLoops, buildWorld, wkey, markerCell, walkability } from "../tools/village_sim.mjs";
+import { closeLoops, buildWorld, wkey, markerCell, markerCells, walkability } from "../tools/village_sim.mjs";
 const SLAB_NAME = "lothlorien:mallorn_slab";
 // synthetic village: a platform connector row (deck, rails at +-2, 3 air cells walk + headroom) and the railing_end row beyond it
 function fixtureWorld(exits) {
@@ -1971,22 +1972,27 @@ function fixtureWorld(exits) {
   return { w, at };
 }
 const E = (x, z, dir, y = 40) => ({ x, y, z, dir });
-test("loop closer: every railing_end carries exactly one loop marker on its centre fence cell; no other piece has one; entity and script are wired", () => {
+test("loop closer: railing_end, balcony_braced and lookout_01 carry loop markers on their rim centres (1 / 1 / 3), no other piece has one; entity and script are wired", () => {
+  const MARKED = { railing_end: 1, balcony_braced: 1, lookout_01: 3 };
   const re = villagePieces().filter((p) => p.name === "railing_end");
   assert.equal(re.length, 1);
   assert.deepEqual(re[0].entities.filter((e) => e.id === LOOP.MARKER_ID).map((e) => e.pos), [[2.5, 1.5, 0.5]]);
-  for (const p of villagePieces()) if (p.name !== "railing_end") assert.ok(!p.entities.some((e) => e.id === LOOP.MARKER_ID), `${p.name}: stray loop marker`);
-  let seen = 0;
-  for (const r of villages()) { // in every rotation the marker sits on the centre fence of a placed railing_end, and the exit signature faces away from the platform
+  for (const p of villagePieces()) assert.equal(p.entities.filter((e) => e.id === LOOP.MARKER_ID).length, MARKED[p.name] ?? 0, `${p.name}: loop markers`);
+  const seen = {}, exits = {};
+  for (const r of villages()) { // in every rotation each marker sits on the centre fence of a placed piece, and the exit signature faces away from the platform
     const states = new Map(), world = buildWorld(r.res, states), at = (x, y, z) => world.get(wkey(x, y, z)) ?? "minecraft:air";
-    for (const p of r.res.placed.filter((q) => q.name === "railing_end")) {
-      const [x, y, z] = markerCell(p);
-      assert.equal(at(x, y + 1, z), FENCE, `seed ${r.seed}: marker on the centre fence`);
-      assert.equal(at(x, y, z), PLANKS);
-      seen++;
+    for (const p of r.res.placed.filter((q) => MARKED[q.name])) {
+      for (const [x, y, z] of markerCells(p)) {
+        assert.equal(at(x, y + 1, z), FENCE, `seed ${r.seed}: ${p.name} marker on the centre fence`);
+        assert.equal(at(x, y, z), PLANKS);
+        // balcony far rim and the lookout's three free sides are exits in the sense of exitAt (a neighbouring piece may merge the rim into a longer run)
+        seen[p.name] = (seen[p.name] ?? 0) + 1;
+        if (LOOP.exitAt(at, x, y, z)) exits[p.name] = (exits[p.name] ?? 0) + 1;
+      }
     }
   }
-  assert.ok(seen > 100, `${seen} railing_end exits seen`);
+  assert.ok(seen.railing_end > 100 && seen.balcony_braced > 50 && seen.lookout_01 > 20, `markers seen ${JSON.stringify(seen)}`);
+  for (const k of Object.keys(seen)) assert.ok(exits[k] >= 0.95 * seen[k], `${k}: ${exits[k]} of ${seen[k]} markers sit on a recognised exit`);
   const entity = readJson("../lothlorien_bp/entities/loop_marker.json")["minecraft:entity"];
   assert.equal(entity.description.identifier, LOOP.MARKER_ID);
   assert.ok(entity.components["minecraft:persistent"] && entity.components["minecraft:physics"].has_collision === false && entity.description.is_spawnable === false);
@@ -2005,7 +2011,9 @@ test("loop closer: partner search takes facing exits at the same height within r
   assert.equal(find(E(0, 12, [0, -1]), E(1, 9, [0, -1])).B.z, 9, "nearest first");
   assert.equal(find(E(0, 5, [0, -1])), null, "too close (needs 5 free cells between the rows)");
   assert.ok(find(E(0, 6, [0, -1])) && find(E(0, 17, [0, -1])));
-  assert.equal(find(E(0, 18, [0, -1])), null, "too far");
+  assert.ok(find(E(0, 18, [0, -1])) && find(E(0, 30, [0, -1])), "18..30: a span with a landing");
+  assert.equal(find(E(0, 31, [0, -1])), null, "too far");
+  assert.ok(find(E(8, 24, [0, -1])) && !find(E(9, 24, [0, -1])), "a span may shift 8 sideways, not 9");
   assert.equal(find(E(7, 12, [0, -1])), null, "too far sideways");
   assert.equal(find(E(0, 12, [0, 1])), null, "same facing, not facing each other");
   assert.equal(find(E(0, 12, [0, -1], 41)), null, "other deck height");
@@ -2140,12 +2148,117 @@ test("loop closer: runtime bridges are lit to >= 8 on every walk cell (shared fl
   }
   console.log(`loop closer bridges: ${count} walk cells, darkest ${worst}`);
 });
+// ground fixture: stone at and below y = top where the world has nothing (the fixture world is air everywhere else); extra(x, y, z) overrides
+const withGround = (at, top, extra = () => undefined) => (x, y, z) => extra(x, y, z) ?? (at(x, y, z) !== "minecraft:air" ? at(x, y, z) : y <= top ? "minecraft:stone" : "minecraft:air");
+const LOGN = "lothlorien:mallorn_log";
+test("loop closer (long spans): above 17 blocks two bridges meet on a 5 x 5 landing that stands on a log pier to the ground; walkable end to end, rails closed, openings cut", () => {
+  for (const [dist, lat] of [[18, 0], [22, 5], [26, -6], [30, 8], [30, -8]]) {
+    for (const dir of [[0, 1], [1, 0], [0, -1], [-1, 0]]) {
+      const ex = [dir[1], -dir[0]], A = E(0, 0, dir), B = E(dir[0] * dist + ex[0] * lat, dir[1] * dist + ex[1] * lat, [-dir[0], -dir[1]]);
+      const f = fixtureWorld([A, B]), at = withGround(f.at, 20), dA = LOOP.decide(at, A), d = dA.action === "build" ? dA : LOOP.decide(at, B); // the smaller (x, z) builds
+      assert.equal(d.action, "build", `dist ${dist} lat ${lat} heading ${dir}`);
+      const plan = d.plan, L = plan.landing;
+      assert.ok(plan.landing && plan.length === dist + 1 && plan.offset === lat);
+      assert.equal(L.d1 + 4 + L.d2, dist);
+      assert.ok(L.d1 >= LOOP.LOOP.minDist && L.d2 >= LOOP.LOOP.minDist && L.d1 <= LOOP.LOOP.maxDist && L.d2 <= LOOP.LOOP.maxDist);
+      const out = LOOP.finalBlocks(plan), get = (x, y, z) => out.get(`${x},${y},${z}`)?.id ?? at(x, y, z);
+      // landing deck 5 x 5, rim fenced except the two 3-wide openings, two lanterns on the side posts
+      let deck = 0, fences = 0;
+      for (let k = 0; k < 5; k++) for (let o = -2; o <= 2; o++) {
+        const x = L.x + dir[0] * (k - 2) + ex[0] * o, z = L.z + dir[1] * (k - 2) + ex[1] * o;
+        if (get(x, 40, z) === PLANKS) deck++;
+        const rim = k === 0 || k === 4 || Math.abs(o) === 2, opening = (k === 0 || k === 4) && Math.abs(o) <= 1;
+        if (get(x, 41, z) === FENCE) fences++;
+        assert.equal(get(x, 41, z) === FENCE, rim && !opening, `landing cell k${k} o${o}`);
+        if (!rim) for (const up of [1, 2, 3]) assert.equal(get(x, 40 + up, z), "minecraft:air");
+      }
+      assert.equal(deck, 25); assert.equal(fences, 10); // 16 rim cells - 2 x 3 opening cells
+      assert.equal(plan.lanterns.filter((l) => l.row === L.d1 + 2).length, 2);
+      // pier: plus of columns under the centre from under the deck to y 21 (ground top 20), four braces under the deck
+      for (const [dx, dz] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) for (let y = 21; y <= 39; y++) assert.equal(get(L.x + dx, y, L.z + dz), LOGN, `pier ${dx},${dz} at ${y}`);
+      assert.equal(get(L.x, 20, L.z), "minecraft:stone");
+      for (const [dx, dz, dy] of [[2, 0, -1], [-2, 0, -1], [0, 2, -1], [0, -2, -1], [2, 0, -3], [0, -2, -3]]) assert.equal(get(L.x + dx, 40 + dy, L.z + dz), LOGN, `brace ${dx},${dz},${dy}`);
+      // both end rows are opened, rows 0..dist all have a 3-wide walk (deck / slab with 2 free cells above)
+      assert.equal(get(A.x, 41, A.z), "minecraft:air"); assert.equal(get(B.x, 41, B.z), "minecraft:air");
+      for (let row = 0; row <= dist; row++) {
+        let walk = 0;
+        for (const k of out.keys()) {
+          const [x, y, z] = k.split(",").map(Number);
+          if ((x - A.x) * dir[0] + (z - A.z) * dir[1] !== row || ![PLANKS, SLAB_NAME].includes(out.get(k).id)) continue;
+          if (get(x, y + 1, z) === "minecraft:air" && get(x, y + 2, z) === "minecraft:air") walk++;
+        }
+        assert.ok(walk >= 3, `row ${row}: ${walk} walk cells (dist ${dist} lat ${lat} heading ${dir})`);
+      }
+    }
+  }
+});
+test("loop closer (long spans): bridges and landing are lit to >= 8 on every walk cell, no lantern in the end rows, all spans / offsets / headings", () => {
+  const passes = (n) => n === undefined || /^minecraft:air$|fence$|elven_lantern$/.test(n);
+  let worst = 99, count = 0;
+  for (const dir of [[0, 1], [1, 0], [0, -1], [-1, 0]]) {
+    for (let dist = LOOP.LOOP.maxDist + 1; dist <= LOOP.LOOP.maxSpan; dist++) {
+      for (let lat = -LOOP.LOOP.maxSpanOffset; lat <= LOOP.LOOP.maxSpanOffset; lat += 2) {
+        const A = E(0, 0, dir), ex = [dir[1], -dir[0]], B = E(dir[0] * dist + ex[0] * lat, dir[1] * dist + ex[1] * lat, [-dir[0], -dir[1]]);
+        for (const side of [false, true]) {
+          const plan = LOOP.planSpan(A, B, dist, lat, side), blocks = LOOP.finalBlocks(plan);
+          const xs = [...blocks.keys()].map((k) => k.split(",").map(Number)), lo = [0, 1, 2].map((i) => Math.min(...xs.map((c) => c[i]))), hi = [0, 1, 2].map((i) => Math.max(...xs.map((c) => c[i])));
+          const get = (x, y, z) => blocks.get(`${x + lo[0]},${y + lo[1]},${z + lo[2]}`)?.id;
+          const L = sharedLight(get, [hi[0] - lo[0] + 1, hi[1] - lo[1] + 1, hi[2] - lo[2] + 1], { [LOOP.LANTERN]: 14 }, passes);
+          for (const [k, b] of blocks) {
+            if (b.id !== PLANKS && b.id !== SLAB_NAME) continue;
+            const [x, y, z] = k.split(",").map(Number);
+            if (blocks.get(`${x},${y + 1},${z}`)?.id !== "minecraft:air" || blocks.get(`${x},${y + 2},${z}`)?.id !== "minecraft:air") continue;
+            const l = L.get(`${x - lo[0]},${y + 1 - lo[1]},${z - lo[2]}`) ?? 0;
+            worst = Math.min(worst, l); count++;
+            assert.ok(l >= LOOP.LOOP.lightTarget, `heading ${dir} dist ${dist} lat ${lat}: walk cell ${x},${y + 1},${z} has light ${l}`);
+          }
+          assert.equal(plan.lanterns.filter((l) => l.row === 0 || l.row === dist).length, 0, "no lantern in the two end rows");
+        }
+      }
+    }
+  }
+  console.log(`loop closer long spans: ${count} walk cells, darkest ${worst}`);
+});
+test("loop closer (pier): stands on any ground, goes through leaves and a lake to its bottom, refuses lava, no ground within 48 blocks and unloaded columns", () => {
+  const A = E(0, 0, [0, 1]), B = E(0, 24, [0, -1]), f = fixtureWorld([A, B]);
+  const L = LOOP.decide(withGround(f.at, 20), A).plan.landing; // centre (0, 40, 10 + 2 = 12)
+  assert.equal(L.z, 12);
+  const plan = (top, extra) => LOOP.decide(withGround(f.at, top, extra), A);
+  const uneven = plan(20, (x, y, z) => (x === 1 && z === 12 && y <= 33 ? "minecraft:dirt" : undefined)); // one arm's column hits a hill at 33
+  const logs = [...LOOP.finalBlocks(uneven.plan)].filter(([, b]) => b.id === LOGN).map(([k]) => k);
+  assert.ok(logs.includes("1,34,12") && !logs.includes("1,33,12") && logs.includes("0,21,12"), "each column stops on its own ground");
+  const lake = plan(20, (x, y, z) => (y >= 21 && y <= 33 && Math.abs(x) < 8 && z > 5 && z < 20 ? "minecraft:water" : undefined));
+  assert.equal(lake.action, "build"); assert.ok(LOOP.finalBlocks(lake.plan).get("0,25,12")?.id === LOGN, "pier stands in the water down to the bottom");
+  const leaves = plan(20, (x, y, z) => (y === 30 && z === 12 && x === 0 ? "lothlorien:mallorn_leaves" : undefined));
+  assert.equal(leaves.action, "build"); assert.equal(LOOP.finalBlocks(leaves.plan).get("0,30,12")?.id, LOGN, "leaves are replaced");
+  assert.equal(plan(20, (x, y, z) => (x === 0 && z === 12 && y === 25 ? "minecraft:lava" : undefined)).reason, "pier over lava");
+  assert.match(plan(-10).reason, /no ground within 48/);
+  assert.equal(plan(-9).action, "build", "48 free cells below the deck (y 39 .. -8) and ground at -9 is just in reach");
+  assert.equal(LOOP.decide((x, y, z) => (y < 38 && x === 0 && z === 12 ? undefined : withGround(f.at, 20)(x, y, z)), A).reason, "pier column not loaded");
+  // a span that cannot get a pier falls back to a nearer target if there is one, otherwise none
+  const near = fixtureWorld([A, E(0, 24, [0, -1])]); addPlatform(near.w, -3, 3, 12, 20);
+  assert.equal(LOOP.decide(withGround(near.at, -50), A).kind, "side", "pier impossible, the platform side is nearer anyway");
+});
+test("loop closer (lantern on a rim post): a bridge into a platform side may replace the lantern that stands next to the opening", () => {
+  const A = E(0, 0, [0, 1]), f = fixtureWorld([A]);
+  addPlatform(f.w, -6, 6, 12, 20);
+  for (const x of [-2, 2]) f.w.set(`${x},42,12`, "lothlorien:elven_lantern");
+  const d = LOOP.decide(f.at, A);
+  assert.equal(d.action, "build"); assert.equal(d.kind, "side");
+  assert.deepEqual(LOOP.blockedCells(f.at, d.plan), []);
+});
+test("loop closer (marker-less partner): the one with a marker builds even when it is the larger (x, z); with markers on both the smaller builds", () => {
+  const A = E(5, 0, [0, 1]), B = E(0, 12, [0, -1]), { at } = fixtureWorld([A, B]); // B has the smaller x
+  assert.equal(LOOP.decide(at, A).action, "standDown");
+  assert.equal(LOOP.decide(at, A, { hasMarker: () => false }).action, "build", "an older balcony has no marker: nobody else would build");
+  assert.equal(LOOP.decide(at, B, { hasMarker: () => true }).action, "build");
+});
 test("loop closer: in simulated villages every closed loop leaves both exits gone, a continuous walkable deck and the counts add up", () => {
   let loops = 0;
   for (const r of villages()) {
     const states = new Map(), world = buildWorld(r.res, states), lp = closeLoops(r.res, world, states);
     loops += lp.loops;
-    assert.ok(lp.missed <= 1, `seed ${r.seed}: ${lp.missed} markers not on an exit`);
+    assert.ok(lp.missed <= 2, `seed ${r.seed}: ${lp.missed} markers not on an exit`); // neighbouring pieces can merge two rims into one run
     assert.ok(lp.remaining <= lp.markers - lp.loops, "every bridge consumes at least its own exit (the far end may be a lookout arm: same 5-wide rail wall)");
     assert.equal(walkability(r.res, world, states).unreachable.length, 0, `seed ${r.seed}: walkable deck after the loops`);
   }
@@ -2301,6 +2414,122 @@ test("elven warden: village group is applied through the structure's definitions
   assert.ok(Object.keys(wardenEntity().component_groups).includes(EW.VILLAGE_GROUP));
   const src = readFileSync(new URL("../tools/build_village.mjs", import.meta.url), "utf8");
   assert.ok(src.includes('"+lothlorien:village_warden"') && src.includes("invulnerable: false"));
+});
+
+import * as SS from "../lothlorien_bp/scripts/speed_stats.js";
+test("speed probe: speed is distance over elapsed ticks per entity, in blocks per second", () => {
+  const st = SS.createStats();
+  assert.equal(SS.addSample(st, { key: "a", type: "t", x: 0, z: 0, tick: 0 }), undefined, "first sample has no speed");
+  assert.ok(Math.abs(SS.addSample(st, { key: "a", type: "t", x: 3, z: 4, tick: 20 }) - 5) < 1e-9, "5 blocks in 1 s");
+  assert.ok(Math.abs(SS.addSample(st, { key: "a", type: "t", x: 3, z: 5, tick: 25 }) - 4) < 1e-9, "1 block in 5 ticks");
+  assert.equal(SS.addSample(st, { key: "b", type: "t", x: 100, z: 100, tick: 25 }), undefined, "other entity starts its own series");
+});
+test("speed probe: summary has count, min/avg/max, moving share and splits flagged samples", () => {
+  const st = SS.createStats();
+  const walk = (key, type, speeds, flags = []) => {
+    let x = 0;
+    SS.addSample(st, { key, type, x, z: 0, tick: 0 });
+    speeds.forEach((bps, i) => { x += bps / 4; SS.addSample(st, { key, type, x, z: 0, tick: (i + 1) * 5, flag: !!flags[i] }); });
+  };
+  walk("w1", "minecraft:skeleton", [0, 2, 4, 2]);
+  walk("w2", "minecraft:skeleton", [0, 0, 0, 0]);
+  walk("g1", "lothlorien:elven_warden", [1, 1, 3, 3], [false, false, true, true]);
+  const rows = SS.summarize(st);
+  assert.deepEqual(rows.map((r) => r.type), ["lothlorien:elven_warden", "minecraft:skeleton"], "sorted by type id");
+  const sk = rows[1];
+  assert.equal(sk.count, 2);
+  assert.equal(sk.samples, 8);
+  assert.ok(Math.abs(sk.min) < 1e-9 && Math.abs(sk.max - 4) < 1e-9 && Math.abs(sk.avg - 1) < 1e-9);
+  assert.ok(Math.abs(sk.moving - 3 / 8) < 1e-9, "3 of 8 samples above the moving threshold");
+  const gu = rows[0];
+  assert.equal(gu.calm.samples, 2);
+  assert.equal(gu.flagged.samples, 2);
+  assert.ok(Math.abs(gu.calm.avg - 1) < 1e-9 && Math.abs(gu.flagged.avg - 3) < 1e-9);
+  assert.equal(SS.summarize(SS.createStats()).length, 0);
+});
+test("speed probe: teleports are dropped and counted, formatting helpers", () => {
+  const st = SS.createStats();
+  SS.addSample(st, { key: "a", type: "t", x: 0, z: 0, tick: 0 });
+  assert.equal(SS.addSample(st, { key: "a", type: "t", x: 500, z: 0, tick: 5 }), undefined);
+  const [row] = SS.summarize(st);
+  assert.equal(row.dropped, 1);
+  assert.equal(row.samples, 0);
+  assert.equal(SS.fmt1(1.005 * 2), "2.01");
+  assert.equal(SS.percent(0.375), "38");
+});
+test("speed probe: scriptevent is wired and its messages are localized", () => {
+  const main = readFileSync(new URL("../lothlorien_bp/scripts/main.js", import.meta.url), "utf8");
+  assert.ok(main.includes('"lothlorien:speed"') && main.includes("startSpeedProbe"));
+  const probe = readFileSync(new URL("../lothlorien_bp/scripts/speed_probe.js", import.meta.url), "utf8");
+  const keys = [...probe.matchAll(/message\("(speed\.[a-z]+)"/g)].map((m) => m[1]);
+  assert.ok(keys.length >= 5);
+  const entries = catalogEntries();
+  for (const k of new Set(keys)) assert.ok(entries[`lothlorien.message.${k}`], `catalog entry for ${k}`);
+});
+
+test("dash detector: arguments, block text, median", () => {
+  assert.equal(SS.parseDashArgs("32"), undefined);
+  assert.equal(SS.parseDashArgs(""), undefined);
+  assert.deepEqual(SS.parseDashArgs("dash"), { radius: 16, seconds: 20 });
+  assert.deepEqual(SS.parseDashArgs("dash 8 5"), { radius: 8, seconds: 5 });
+  assert.deepEqual(SS.parseDashArgs("DASH 999 9999"), { radius: 64, seconds: 120 });
+  assert.deepEqual(SS.parseDashArgs("dash x -1"), { radius: 16, seconds: 20 });
+  assert.equal(SS.fmtBlock("minecraft:air", {}), "air");
+  assert.equal(SS.fmtBlock(undefined), "unloaded");
+  assert.equal(SS.fmtBlock("lothlorien:mallorn_slab", { "minecraft:vertical_half": "top", color: "x" }), "lothlorien:mallorn_slab[vertical_half=top]");
+  assert.equal(SS.median([3, 1, 2]), 2);
+  assert.equal(SS.median([4, 1, 2, 3]), 2.5);
+  assert.equal(SS.median([]), 0);
+});
+test("dash detector: one spike per burst, relative and absolute thresholds, since-last", () => {
+  const tr = SS.createDashTracker();
+  const ctxFn = ({ bps }) => ({ vy: 0, onGround: true, falling: false, water: false, below: "b", frontFeet: "air", frontHead: "air", seen: bps });
+  let x = 0;
+  const run = (key, type, tick, bps) => { x += bps / 10; return SS.addDashSample(tr, { key, type, x, y: 64, z: 0, tick, ctxFn }); };
+  // walks at 2 b/s (0.2 per 2 ticks), bursts at 6.2 b/s for 2 samples at ticks 40-42, again at 100
+  let tick = 0; run("warden-aaaa1234", "w", tick, 0);
+  const plan = [];
+  for (let i = 1; i <= 60; i++) plan.push(i >= 20 && i <= 21 ? 6.2 : i === 50 ? 6.2 : 2);
+  for (const bps of plan) { tick += 2; run("warden-aaaa1234", "w", tick, bps); }
+  const spikes = SS.findSpikes(tr);
+  assert.equal(spikes.length, 2, JSON.stringify(spikes.map((s) => s.start)));
+  assert.equal(spikes[0].samples, 2);
+  assert.equal(spikes[0].sinceLast, null);
+  assert.equal(spikes[1].sinceLast, spikes[1].start - spikes[0].start);
+  assert.ok(Math.abs(spikes[0].median - 2) < 1e-9);
+  const line = SS.formatSpikeLine(spikes[0]);
+  assert.ok(line.includes("w#1234") && line.includes("speed=6.20b/s") && line.includes("ground=1") && line.includes("front_head=air") && line.includes("since=-"), line);
+  assert.ok(SS.formatSpikeLine(spikes[1]).includes(`since=${spikes[1].sinceLast}t`));
+  const rows = SS.summarizeSpikes(tr, spikes);
+  assert.deepEqual(rows.map((r) => [r.type, r.mobs, r.spikes]), [["w", 1, 2]]);
+  assert.ok(Math.abs(rows[0].peak - 6.2) < 1e-9);
+});
+test("dash detector: steady runner is no spike; slow mob needs only the ratio; absolute limit without history", () => {
+  const steady = SS.createDashTracker();
+  let x = 0;
+  SS.addDashSample(steady, { key: "r", type: "t", x, y: 0, z: 0, tick: 0 });
+  for (let i = 1; i <= 40; i++) SS.addDashSample(steady, { key: "r", type: "t", x: (x += 0.5), y: 0, z: 0, tick: i * 2 }); // 5 b/s
+  assert.equal(SS.findSpikes(steady).length, 0, "constant 5 b/s is its own median");
+  const slow = SS.createDashTracker();
+  let sx = 0;
+  SS.addDashSample(slow, { key: "s", type: "t", x: sx, y: 0, z: 0, tick: 0 });
+  for (let i = 1; i <= 30; i++) SS.addDashSample(slow, { key: "s", type: "t", x: (sx += i === 15 ? 0.2 : 0.06), y: 0, z: 0, tick: i * 2 });
+  const sp = SS.findSpikes(slow);
+  assert.equal(sp.length, 1, "2 b/s against a 0.6 b/s median");
+  assert.ok(sp[0].peak.bps < SS.DASH_ABS_BPS);
+  const fresh = SS.createDashTracker();
+  SS.addDashSample(fresh, { key: "f", type: "t", x: 0, y: 0, z: 0, tick: 0 });
+  SS.addDashSample(fresh, { key: "f", type: "t", x: 0.7, y: 0, z: 0, tick: 2 });
+  assert.equal(SS.findSpikes(fresh).length, 1, "7 b/s with no history exceeds the absolute limit");
+  assert.equal(SS.addDashSample(fresh, { key: "f", type: "t", x: 99, y: 0, z: 0, tick: 4 }), undefined, "teleports are dropped");
+});
+test("dash detector: scriptevent dispatch and messages are localized", () => {
+  const probe = readFileSync(new URL("../lothlorien_bp/scripts/speed_probe.js", import.meta.url), "utf8");
+  assert.ok(probe.includes("parseDashArgs") && probe.includes("console.warn(formatSpikeLine"));
+  const keys = [...probe.matchAll(/message\("(dash\.[a-z]+)"/g)].map((m) => m[1]);
+  assert.deepEqual([...new Set(keys)].sort(), ["dash.none", "dash.row", "dash.started"]);
+  const entries = catalogEntries();
+  for (const k of new Set(keys)) assert.ok(entries[`lothlorien.message.${k}`], `catalog entry for ${k}`);
 });
 
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }

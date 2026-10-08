@@ -100,7 +100,9 @@ function writePiece(name, blocks, size, origin, connectors, extra = {}) {
   const markers = railYs.length ? (extra.markers ?? [[sx / 2, sz / 2]]).map(([x, z]) => ({ id: MENDER, x, y: Math.min(...railYs) + origin[1], z })) : [];
   // loop closer (scripts/loop_marker.js): every closed exit (railing_end) carries one marker on the centre fence cell (y + 0.5 = cell middle, so
   // rotation rounding cannot change the cell); it finds its railing, a facing one and the bridge direction from the blocks, not from its own rotation
-  if (name === "railing_end") markers.push({ id: LOOP_MARKER, x: sx / 2, y: Math.min(...railYs) + origin[1] + 0.5, z: sz / 2 });
+  // Balcony and lookout ends have the very same signature on their free rim sides (5 planks + fences, 5-wide connector row behind), so they carry
+  // markers too (extra.loopMarkers: [[x, z]] box coordinates of the rim's centre cell): a loop may start there and the end becomes a walk-through.
+  for (const [x, z] of name === "railing_end" ? [[sx / 2, sz / 2]] : extra.loopMarkers ?? []) markers.push({ id: LOOP_MARKER, x, y: Math.min(...railYs) + origin[1] + 0.5, z });
   const cells = extra.wardens ?? wardenCells(name, blocks, WARDENS[name] ?? 0, name.startsWith("central") ? 7 : 5);
   const wardens = cells.map((c) => ({
     id: WARDEN, x: c.x + origin[0] + 0.5, y: FLOOR_H + 1 + origin[1], z: c.z + origin[2] + 0.5,
@@ -147,6 +149,10 @@ const NODES = {
 // --- combo pieces: bridge + destination tree in one piece ------------------------------------------------------------------
 // Every (node, entry connector) pair gets a straight bridge (lengths cycle 7..15) and every second pair also a dog-leg
 // (cycle 11l, 11r, 13l, 13r); the entry connector's face is the bridge side, the other connectors stay exits.
+// Owner 2026-10-08: dog-legs inside combos are "ugly and unnecessary, it could have been straight" (the destination tree
+// moves with the bridge anyway). Combos use straight bridges only; the diagonal stays for the loop-closer, which must
+// reach exits that are offset sideways.
+const DOG_COMBOS = false;
 const comboList = [];
 {
   let pair = 0;
@@ -156,7 +162,7 @@ const comboList = [];
       const facing = tree.connectors[ei].facing;
       if (makeCombo(tree, ei, STRAIGHT[0], POOL("combos")).why?.match(/^(entry|another)/)) continue; // no bridge side on this connector
       const want = [[STRAIGHT, "straight"]];
-      if (pair % 2 === 0) want.push([DOGS, "dog"]);
+      if (DOG_COMBOS && pair % 2 === 0) want.push([DOGS, "dog"]);
       for (const [list, kind] of want) {
         for (let t = 0; t < list.length; t++) {
           const spec = list[(next[kind] + t) % list.length];
@@ -189,7 +195,7 @@ crown("crown_central_b", { h: 13, H: 30, seed: 10010, branches: 12, blob: 3.3, c
 // balcony_braced: half-round rim balcony on a log pillar to the ground, braced under the deck; one connector, 7 x 7
 {
   const b = buildBalcony();
-  writePiece("balcony_braced", b.blocks, b.size, b.origin, b.connectors);
+  writePiece("balcony_braced", b.blocks, b.size, b.origin, b.connectors, { loopMarkers: [[b.origin[0] + 0.5, b.size[2] - 0.5]] }); // centre of the far rim row
 }
 // lookout_01: square-ish platform on a log pillar down to ROOTS, one connector
 {
@@ -201,7 +207,8 @@ crown("crown_central_b", { h: 13, H: 30, seed: 10010, branches: 12, blob: 3.3, c
   writeRails(blocks, rails, forced);
   blocks.set(key(0, FLOOR_H + 2, 4), lantern()); // on the rail post at the far end
   addLanterns(blocks, { x0: -4, x1: 4, y0: -ROOTS, y1: FLOOR_H + 3, z0: -4, z1: 4 }, (x, y, z) => z === -4);
-  writePiece("lookout_01", blocks, [9, ROOTS + FLOOR_H + 4, 9], [4, ROOTS, 4], deck.connectors.map((c) => ({ ...c, y: FLOOR_H })));
+  // the three free sides (south, east, west) are 5-wide rim rows: loop markers on their centres
+  writePiece("lookout_01", blocks, [9, ROOTS + FLOOR_H + 4, 9], [4, ROOTS, 4], deck.connectors.map((c) => ({ ...c, y: FLOOR_H })), { loopMarkers: [[4.5, 8.5], [8.5, 4.5], [0.5, 4.5]] });
 }
 // railing_end (plug): deck row of 5 + 5 rails; connector at the middle deck cell facing the parent
 {

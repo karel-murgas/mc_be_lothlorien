@@ -16,14 +16,6 @@
       {
         "element": {
           "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/village/combo_node_a_north_bridge_dog_11_l",
-          "projection": "rigid"
-        },
-        "weight": 2
-      },
-      {
-        "element": {
-          "element_type": "minecraft:single_pool_element",
           "location": "lothlorien/village/combo_node_a_south_bridge_9",
           "projection": "rigid"
         },
@@ -36,14 +28,6 @@
           "projection": "rigid"
         },
         "weight": 3
-      },
-      {
-        "element": {
-          "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/village/combo_node_b_west_bridge_dog_11_r",
-          "projection": "rigid"
-        },
-        "weight": 2
       },
       {
         "element": {
@@ -64,14 +48,6 @@
       {
         "element": {
           "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/village/combo_node_b_south_bridge_dog_13_l",
-          "projection": "rigid"
-        },
-        "weight": 2
-      },
-      {
-        "element": {
-          "element_type": "minecraft:single_pool_element",
           "location": "lothlorien/village/combo_node_c_north_bridge_7",
           "projection": "rigid"
         },
@@ -84,14 +60,6 @@
           "projection": "rigid"
         },
         "weight": 3
-      },
-      {
-        "element": {
-          "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/village/combo_node_c_east_bridge_dog_13_r",
-          "projection": "rigid"
-        },
-        "weight": 2
       },
       {
         "element": {
@@ -112,14 +80,6 @@
       {
         "element": {
           "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/village/combo_node_c_west_bridge_dog_11_l",
-          "projection": "rigid"
-        },
-        "weight": 2
-      },
-      {
-        "element": {
-          "element_type": "minecraft:single_pool_element",
           "location": "lothlorien/village/combo_node_d_east_bridge_15",
           "projection": "rigid"
         },
@@ -132,14 +92,6 @@
           "projection": "rigid"
         },
         "weight": 3
-      },
-      {
-        "element": {
-          "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/village/combo_node_d_west_bridge_dog_11_r",
-          "projection": "rigid"
-        },
-        "weight": 2
       },
       {
         "element": {
@@ -160,14 +112,6 @@
       {
         "element": {
           "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/village/combo_node_e_north_bridge_dog_13_r",
-          "projection": "rigid"
-        },
-        "weight": 2
-      },
-      {
-        "element": {
-          "element_type": "minecraft:single_pool_element",
           "location": "lothlorien/village/combo_node_e_east_bridge_13",
           "projection": "rigid"
         },
@@ -180,14 +124,6 @@
           "projection": "rigid"
         },
         "weight": 3
-      },
-      {
-        "element": {
-          "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/village/combo_node_f_west_bridge_dog_11_l",
-          "projection": "rigid"
-        },
-        "weight": 2
       },
       {
         "element": {
@@ -208,14 +144,6 @@
       {
         "element": {
           "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/village/combo_node_f_south_bridge_dog_11_r",
-          "projection": "rigid"
-        },
-        "weight": 2
-      },
-      {
-        "element": {
-          "element_type": "minecraft:single_pool_element",
           "location": "lothlorien/village/combo_tower_a_south_bridge_11",
           "projection": "rigid"
         },
@@ -228,14 +156,6 @@
           "projection": "rigid"
         },
         "weight": 5
-      },
-      {
-        "element": {
-          "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/village/combo_tower_a_west_bridge_dog_13_l",
-          "projection": "rigid"
-        },
-        "weight": 4
       },
       {
         "element": {
@@ -256,14 +176,6 @@
       {
         "element": {
           "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/village/combo_tower_b_north_bridge_dog_13_r",
-          "projection": "rigid"
-        },
-        "weight": 4
-      },
-      {
-        "element": {
-          "element_type": "minecraft:single_pool_element",
           "location": "lothlorien/village/combo_tower_c_north_bridge_9",
           "projection": "rigid"
         },
@@ -276,14 +188,6 @@
           "projection": "rigid"
         },
         "weight": 5
-      },
-      {
-        "element": {
-          "element_type": "minecraft:single_pool_element",
-          "location": "lothlorien/village/combo_tower_c_south_bridge_dog_11_l",
-          "projection": "rigid"
-        },
-        "weight": 4
       },
       {
         "element": {

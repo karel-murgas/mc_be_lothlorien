@@ -24,6 +24,7 @@ import { startSwans } from "./swan.js";
 import { startSquirrels } from "./squirrel.js";
 import { startUnicorns } from "./unicorn.js";
 import { DEPTH_NAMES, estimateDepth, probeCount } from "./depth.js";
+import { startSpeedProbe } from "./speed_probe.js";
 
 const BIOME_ID = "lothlorien:lothlorien";
 
@@ -140,6 +141,10 @@ function onScriptEvent(event) {
   if (handleHarmonyEvent(event, player)) return;
   if (event.id === "lothlorien:depth") {
     reportDepth(player);
+    return;
+  }
+  if (event.id === "lothlorien:speed") {
+    startSpeedProbe(player, event.message);
     return;
   }
   if (event.id !== "lothlorien:debug") return;

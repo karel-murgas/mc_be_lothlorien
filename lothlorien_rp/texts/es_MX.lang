@@ -377,3 +377,19 @@ lothlorien.message.harmony.better.guest=§aLos bosques te perdonan.
 lothlorien.message.harmony.hint=§7Los árboles callan a tu alrededor.
 ## Context: Developer diagnostic displayed to players who invoke /scriptevent lothlorien:harmony: [lothlorien] harmony=%s band=%s timer=%s s. Translate labels; retain technical tokens and commands. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
 lothlorien.message.harmony.debug=[lothlorien] armonía=%s banda=%s temporizador=%s s
+## Context: Announces the start of the speed measurement.
+lothlorien.message.speed.started=[lothlorien] medición de velocidad: midiendo mobs a menos de %s bloques durante %s segundos.
+## Context: One result line per entity type: count of mobs, minimum, average and maximum horizontal speed, and the share of samples in which the mob was moving.
+lothlorien.message.speed.row=%s: %s mobs, velocidad mín. %s / promedio %s / máx. %s bloques por segundo, en movimiento en el %s por ciento de %s muestras
+## Context: Extra line for guards: average speed while a monster stood nearby versus while none did.
+lothlorien.message.speed.threat=%s con un monstruo a menos de %s bloques: promedio de %s bloques por segundo (%s muestras); en caso contrario, promedio de %s bloques por segundo (%s muestras)
+## Context: Reports that the measurement found no mobs.
+lothlorien.message.speed.none=[lothlorien] medición de velocidad: no hay mobs dentro del radio.
+## Context: Reports that a second measurement was requested while one is running.
+lothlorien.message.speed.busy=[lothlorien] medición de velocidad: ya hay una medición en curso.
+## Context: Announces the start of the speed spike detector.
+lothlorien.message.dash.started=[lothlorien] detector de aceleraciones: vigilando mobs a menos de %s bloques durante %s segundos; los picos van al registro de contenido.
+## Context: One result line per entity type: tracked mobs, number of speed spikes and the highest spike speed.
+lothlorien.message.dash.row=%s: %s mobs, %s picos de velocidad, máximo %s bloques por segundo
+## Context: Reports that the detector window ended without any speed spike, or with no mobs in range.
+lothlorien.message.dash.none=[lothlorien] detector de aceleraciones: no se encontraron picos de velocidad (los detalles están en el registro de contenido).

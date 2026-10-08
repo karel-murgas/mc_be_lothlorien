@@ -377,3 +377,19 @@ lothlorien.message.harmony.better.guest=§aLesy vám odpouštějí.
 lothlorien.message.harmony.hint=§7Stromy kolem vás ztichly.
 ## Context: Developer diagnostic displayed to players who invoke /scriptevent lothlorien:harmony: [lothlorien] harmony=%s band=%s timer=%s s. Translate labels; retain technical tokens and commands. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
 lothlorien.message.harmony.debug=[lothlorien] soulad=%s pásmo=%s časovač=%s s
+## Context: Announces the start of the speed measurement.
+lothlorien.message.speed.started=[lothlorien] měření rychlosti: sleduji moby do vzdálenosti %s bloků po dobu %s s.
+## Context: One result line per entity type: count of mobs, minimum, average and maximum horizontal speed, and the share of samples in which the mob was moving.
+lothlorien.message.speed.row=%s: %s mobů, rychlost min %s / prům. %s / max %s bloků za sekundu, v pohybu v %s procentech z %s měření
+## Context: Extra line for guards: average speed while a monster stood nearby versus while none did.
+lothlorien.message.speed.threat=%s s monstrem do %s bloků: průměr %s bloků za sekundu (%s měření); jinak průměr %s bloků za sekundu (%s měření)
+## Context: Reports that the measurement found no mobs.
+lothlorien.message.speed.none=[lothlorien] měření rychlosti: v dosahu nejsou žádní mobové.
+## Context: Reports that a second measurement was requested while one is running.
+lothlorien.message.speed.busy=[lothlorien] měření rychlosti: jedno měření už běží.
+## Context: Announces the start of the speed spike detector.
+lothlorien.message.dash.started=[lothlorien] detektor zrychlení: sleduji moby do %s bloků po dobu %s sekund; výkyvy rychlosti půjdou do logu obsahu.
+## Context: One result line per entity type: tracked mobs, number of speed spikes and the highest spike speed.
+lothlorien.message.dash.row=%s: %s mobů, %s výkyvů rychlosti, maximum %s bloků za sekundu
+## Context: Reports that the detector window ended without any speed spike, or with no mobs in range.
+lothlorien.message.dash.none=[lothlorien] detektor zrychlení: žádný výkyv rychlosti (podrobnosti jsou v logu obsahu).

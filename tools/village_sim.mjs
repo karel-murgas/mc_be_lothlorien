@@ -442,34 +442,47 @@ export function nearMisses(res, max = 8) {
 }
 
 // ---- loop closing (P7): the same pure rules as scripts/loop_marker.js, run on the simulated world ----------------------------------
-// Marker cell of a placed railing_end: the template entity position turned with the piece (continuous quarter turns, x' = sz - z, z' = x).
-export function markerCell(p) {
-  const e = p.piece.entities.find((q) => q.id === MARKER_ID);
-  if (!e) return null;
-  let [x, y, z] = e.pos, [sx, , sz] = p.piece.size;
-  for (let i = 0; i < p.rot; i++) { [x, z] = [sz - z, x]; [sx, sz] = [sz, sx]; }
-  return [p.o[0] + Math.floor(x), p.o[1] + Math.floor(y) - 1, p.o[2] + Math.floor(z)]; // deck cell under the marker
+// Marker cells of a placed piece (railing_end, balcony_braced, lookout_01 carry loop markers): the template entity positions turned with the
+// piece (continuous quarter turns, x' = sz - z, z' = x). -> [[x, y, z]] deck cells under the markers
+export function markerCells(p) {
+  return p.piece.entities.filter((q) => q.id === MARKER_ID).map((e) => {
+    let [x, y, z] = e.pos, [sx, , sz] = p.piece.size;
+    for (let i = 0; i < p.rot; i++) { [x, z] = [sz - z, x]; [sx, sz] = [sz, sx]; }
+    return [p.o[0] + Math.floor(x), p.o[1] + Math.floor(y) - 1, p.o[2] + Math.floor(z)];
+  });
 }
+export const markerCell = (p) => markerCells(p)[0] ?? null;
+const LOG_IDS = new Set(["lothlorien:mallorn_log", "lothlorien:mallorn_wood"]);
 // Every marker acts once, in (x, z) order, on the world as the earlier ones left it (in game: load order). Applies the bridges to
-// `world` / `states`. -> { markers, missed (marker not on an exit), loops, lengths, offsets, reasons, remaining (closed exits left) }
-export function closeLoops(res, world, states) {
-  const at = (x, y, z) => world.get(wkey(x, y, z)) ?? AIR;
-  const markers = res.placed.filter((p) => p.name === "railing_end").map(markerCell).filter(Boolean).sort((a, b) => a[0] - b[0] || a[2] - b[2]);
-  const out = { markers: markers.length, missed: 0, loops: 0, loopsExit: 0, loopsSide: 0, lengths: [], offsets: [], reasons: {}, remaining: 0, builds: [] };
+// `world` / `states`. The ground for piers is the lowest log of the village (the sim has no terrain): everything below it is stone.
+// opts.pieces: piece names that carry markers (default all three; ["railing_end"] = the template before balconies / lookouts got markers).
+// -> { markers, missed (marker not on an exit), loops, lengths, offsets, reasons, remaining (closed exits left), builds, landings }
+export function closeLoops(res, world, states, opts = {}) {
+  let ground = 1e9;
+  for (const [k, n] of world) if (LOG_IDS.has(n)) ground = Math.min(ground, wdecode(k)[1]);
+  const at = (x, y, z) => world.get(wkey(x, y, z)) ?? (y < ground ? "minecraft:stone" : AIR);
+  const names = opts.pieces ?? ["railing_end", "balcony_braced", "lookout_01"];
+  const markers = res.placed.filter((p) => names.includes(p.name)).flatMap(markerCells).sort((a, b) => a[0] - b[0] || a[2] - b[2]);
+  const marked = new Set(markers.map(([x, y, z]) => `${x},${y},${z}`));
+  const hasMarker = (B) => marked.has(`${B.x},${B.y},${B.z}`);
+  const out = { markers: markers.length, missed: 0, loops: 0, loopsExit: 0, loopsSide: 0, landings: 0, lengths: [], offsets: [], reasons: {}, remaining: 0, builds: [] };
   for (const [x, y, z] of markers) {
     const A = exitAt(at, x, y, z);
     if (!A) { if (at(x, y + 1, z) === FENCE) out.missed++; continue; } // gone = closed from the other side
-    const d = decide(at, A);
+    const d = decide(at, A, { hasMarker });
     if (d.action === "build") {
       for (const [k, b] of finalBlocks(d.plan)) {
         const [bx, by, bz] = k.split(",").map(Number), wk = wkey(bx, by, bz);
         if (b.id === AIR) world.delete(wk); else world.set(wk, b.id);
         if (b.id === AIR) states.delete(wk); else states.set(wk, b.states ?? {});
       }
-      out.loops++; out[d.kind === "side" ? "loopsSide" : "loopsExit"]++; out.lengths.push(d.plan.length); out.offsets.push(Math.abs(d.plan.offset)); out.builds.push(d.plan);
+      out.loops++; out[d.kind === "side" ? "loopsSide" : "loopsExit"]++; if (d.plan.landing) out.landings++;
+      out.lengths.push(d.plan.length); out.offsets.push(Math.abs(d.plan.offset)); out.builds.push(d.plan);
     } else if (d.action === "none") out.reasons[d.reason] = (out.reasons[d.reason] ?? 0) + 1;
   }
-  for (const [x, y, z] of markers) if (exitAt(at, x, y, z)) out.remaining++;
+  out.left = [];
+  for (const [x, y, z] of markers) { const e = exitAt(at, x, y, z); if (e) { out.remaining++; out.left.push(e); } }
+  out.at = at;
   return out;
 }
 
@@ -549,8 +562,8 @@ function main() {
   console.log(`  exits ending in railing ${avg((r) => r.ck.kinds.plug)} / braced balcony ${avg((r) => r.ck.kinds.balcony)} / lookout ${avg((r) => r.ck.kinds.lookout)} per village; bridges without a destination tree ${rows.reduce((a, r) => a + r.ck.kinds.bridgesNoDest, 0)}, unsupported balconies ${rows.reduce((a, r) => a + r.ck.kinds.unsupported, 0)}`);
   const lsum = (f) => rows.reduce((a, r) => a + f(r.lp), 0), reasons = {};
   for (const r of rows) for (const [k, v] of Object.entries(r.lp.reasons)) reasons[k] = (reasons[k] ?? 0) + v;
-  console.log(`  loops (loop closer, markers on closed railing exits): closed ${mm((r) => r.lp.loops)} per village (villages with a loop: ${rows.filter((r) => r.lp.loops).length}/${rows.length}; exit-exit ${avg((r) => r.lp.loopsExit)}, exit-to-platform-side ${avg((r) => r.lp.loopsSide)}), ` +
-    `closed exits before ${avg((r) => r.lp.markers)} / left ${avg((r) => r.lp.remaining)} per village; no target ${(reasons["no partner"] ?? 0)}, not mutual ${reasons["not mutual"] ?? 0}, corridor blocked ${reasons.blocked ?? 0}, ` +
+  console.log(`  loops (loop closer, markers on closed railing / balcony / lookout exits): closed ${mm((r) => r.lp.loops)} per village (villages with a loop: ${rows.filter((r) => r.lp.loops).length}/${rows.length}; exit-exit ${avg((r) => r.lp.loopsExit)}, exit-to-platform-side ${avg((r) => r.lp.loopsSide)}; with a landing and pier ${avg((r) => r.lp.landings)}), ` +
+    `closed exits before ${avg((r) => r.lp.markers)} / left ${avg((r) => r.lp.remaining)} per village; no target ${(reasons["no partner"] ?? 0)}, not mutual ${reasons["not mutual"] ?? 0}, corridor blocked ${reasons.blocked ?? 0}, other (pier) ${Object.entries(reasons).filter(([k]) => !["no partner", "not mutual", "blocked"].includes(k)).map(([k, v]) => `${k}: ${v}`).join("; ") || 0}, ` +
     `markers not on an exit ${lsum((l) => l.missed)}/${lsum((l) => l.markers)}, unreachable walk cells after the loops ${rows.reduce((a, r) => a + r.lpUnreach, 0)}; bridge lengths ${rows.flatMap((r) => r.lp.lengths).join(",") || "-"}`);
   const sum = (f) => rows.reduce((a, r) => a + f(r.ck.info), 0);
   console.log(`  totals: unreachable walk cells ${rows.reduce((a, r) => a + r.ck.unreachable, 0)}, overlaps ${rows.reduce((a, r) => a + r.ck.overlaps, 0)}, wrong ropes ${sum((i) => i.ropeWrong)}/${sum((i) => i.ropes)}, ` +

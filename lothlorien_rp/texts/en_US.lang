@@ -377,3 +377,19 @@ lothlorien.message.harmony.better.guest=§aThe woods forgive you.
 lothlorien.message.harmony.hint=§7The trees grow quiet around you.
 ## Context: Developer diagnostic displayed to players who invoke /scriptevent lothlorien:harmony: [lothlorien] harmony=%s band=%s timer=%s s. Translate labels; retain technical tokens and commands. Harmony is a per-player number from -60 to +10 with five bands: Friend (+10), Guest (0 to +9), Uneasy (-1 to -14), Shunned (-15 to -29), Hated (-30 to -60). Deeds against the forest's creatures lower it; peaceful time inside the forest raises it.
 lothlorien.message.harmony.debug=[lothlorien] harmony=%s band=%s timer=%s s
+## Context: Announces the start of the speed measurement.
+lothlorien.message.speed.started=[lothlorien] speed probe: measuring mobs within %s blocks for %s seconds.
+## Context: One result line per entity type: count of mobs, minimum, average and maximum horizontal speed, and the share of samples in which the mob was moving.
+lothlorien.message.speed.row=%s: %s mobs, speed min %s / avg %s / max %s blocks per second, moving in %s percent of %s samples
+## Context: Extra line for guards: average speed while a monster stood nearby versus while none did.
+lothlorien.message.speed.threat=%s with a monster within %s blocks: average %s blocks per second (%s samples); otherwise average %s blocks per second (%s samples)
+## Context: Reports that the measurement found no mobs.
+lothlorien.message.speed.none=[lothlorien] speed probe: no mobs within range.
+## Context: Reports that a second measurement was requested while one is running.
+lothlorien.message.speed.busy=[lothlorien] speed probe: a measurement is already running.
+## Context: Announces the start of the speed spike detector.
+lothlorien.message.dash.started=[lothlorien] dash detector: watching mobs within %s blocks for %s seconds; spikes go to the content log.
+## Context: One result line per entity type: tracked mobs, number of speed spikes and the highest spike speed.
+lothlorien.message.dash.row=%s: %s mobs, %s speed spikes, peak %s blocks per second
+## Context: Reports that the detector window ended without any speed spike, or with no mobs in range.
+lothlorien.message.dash.none=[lothlorien] dash detector: no speed spikes found (details are in the content log).

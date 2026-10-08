@@ -10608,6 +10608,572 @@
               "status": "ai-draft"
             }
           }
+        },
+        "lothlorien.message.speed.started": {
+          "source": "[lothlorien] speed probe: measuring mobs within %s blocks for %s seconds.",
+          "context": {
+            "meaning": "Announces the start of the speed measurement.",
+            "location": "lothlorien_rp: chat message to the player who ran the command",
+            "trigger": "Player runs /scriptevent lothlorien:speed [radius], a one-shot mob speed measurement for development.",
+            "tone": "Technical and concise",
+            "grammar": "Short status line or measurement result; no player gender.",
+            "constraints": "Keep the [lothlorien] tag, entity type ids and placeholder order unchanged; units are blocks per second.",
+            "source_paths": [
+              "lothlorien_bp/scripts/speed_probe.js"
+            ]
+          },
+          "placeholders": [
+            {
+              "name": "radius",
+              "type": "string",
+              "meaning": "search radius in blocks"
+            },
+            {
+              "name": "seconds",
+              "type": "string",
+              "meaning": "measurement duration in seconds"
+            }
+          ],
+          "translations": {
+            "cs_CZ": {
+              "text": "[lothlorien] měření rychlosti: sleduji moby do vzdálenosti %s bloků po dobu %s s.",
+              "based_on": "27891958af36652c5a3a67dd4418ddf21b61abfb7f3165d1ccfa27b48c889614",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "[lothlorien] medición de velocidad: midiendo mobs a menos de %s bloques durante %s segundos.",
+              "based_on": "27891958af36652c5a3a67dd4418ddf21b61abfb7f3165d1ccfa27b48c889614",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "[lothlorien] medición de velocidad: midiendo mobs a menos de %s bloques durante %s segundos.",
+              "based_on": "27891958af36652c5a3a67dd4418ddf21b61abfb7f3165d1ccfa27b48c889614",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "[lothlorien] medição de velocidade: a medir mobs a menos de %s blocos durante %s segundos.",
+              "based_on": "27891958af36652c5a3a67dd4418ddf21b61abfb7f3165d1ccfa27b48c889614",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "[lothlorien] medição de velocidade: medindo mobs a menos de %s blocos por %s segundos.",
+              "based_on": "27891958af36652c5a3a67dd4418ddf21b61abfb7f3165d1ccfa27b48c889614",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "[lothlorien] Geschwindigkeitsmessung: Mobs im Umkreis von %s Blöcken werden %s Sekunden lang gemessen.",
+              "based_on": "27891958af36652c5a3a67dd4418ddf21b61abfb7f3165d1ccfa27b48c889614",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "[lothlorien] mesure de vitesse : mesure des créatures à moins de %s blocs pendant %s secondes.",
+              "based_on": "27891958af36652c5a3a67dd4418ddf21b61abfb7f3165d1ccfa27b48c889614",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "[lothlorien] pomiar prędkości: mierzę moby w promieniu %s bloków przez %s s.",
+              "based_on": "27891958af36652c5a3a67dd4418ddf21b61abfb7f3165d1ccfa27b48c889614",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.speed.row": {
+          "source": "%s: %s mobs, speed min %s / avg %s / max %s blocks per second, moving in %s percent of %s samples",
+          "context": {
+            "meaning": "One result line per entity type: count of mobs, minimum, average and maximum horizontal speed, and the share of samples in which the mob was moving.",
+            "location": "lothlorien_rp: chat message to the player who ran the command",
+            "trigger": "Player runs /scriptevent lothlorien:speed [radius], a one-shot mob speed measurement for development.",
+            "tone": "Technical and concise",
+            "grammar": "Short status line or measurement result; no player gender.",
+            "constraints": "Keep the [lothlorien] tag, entity type ids and placeholder order unchanged; units are blocks per second.",
+            "source_paths": [
+              "lothlorien_bp/scripts/speed_probe.js"
+            ]
+          },
+          "placeholders": [
+            {
+              "name": "type",
+              "type": "string",
+              "meaning": "entity type id"
+            },
+            {
+              "name": "count",
+              "type": "string",
+              "meaning": "number of distinct mobs"
+            },
+            {
+              "name": "min",
+              "type": "string",
+              "meaning": "minimum speed in blocks per second"
+            },
+            {
+              "name": "avg",
+              "type": "string",
+              "meaning": "average speed in blocks per second"
+            },
+            {
+              "name": "max",
+              "type": "string",
+              "meaning": "maximum speed in blocks per second"
+            },
+            {
+              "name": "moving",
+              "type": "string",
+              "meaning": "percentage of samples above the moving threshold, without the percent sign"
+            },
+            {
+              "name": "samples",
+              "type": "string",
+              "meaning": "number of speed samples"
+            }
+          ],
+          "translations": {
+            "cs_CZ": {
+              "text": "%s: %s mobů, rychlost min %s / prům. %s / max %s bloků za sekundu, v pohybu v %s procentech z %s měření",
+              "based_on": "d2dc8d940ee632b6f4cc406d09d05cb537e6306a49ab208f161fd8eeb9649a2e",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "%s: %s mobs, velocidad mín. %s / media %s / máx. %s bloques por segundo, en movimiento en el %s por ciento de %s muestras",
+              "based_on": "d2dc8d940ee632b6f4cc406d09d05cb537e6306a49ab208f161fd8eeb9649a2e",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "%s: %s mobs, velocidad mín. %s / promedio %s / máx. %s bloques por segundo, en movimiento en el %s por ciento de %s muestras",
+              "based_on": "d2dc8d940ee632b6f4cc406d09d05cb537e6306a49ab208f161fd8eeb9649a2e",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "%s: %s mobs, velocidade mín. %s / média %s / máx. %s blocos por segundo, em movimento em %s por cento de %s amostras",
+              "based_on": "d2dc8d940ee632b6f4cc406d09d05cb537e6306a49ab208f161fd8eeb9649a2e",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "%s: %s mobs, velocidade mín. %s / média %s / máx. %s blocos por segundo, em movimento em %s por cento de %s amostras",
+              "based_on": "d2dc8d940ee632b6f4cc406d09d05cb537e6306a49ab208f161fd8eeb9649a2e",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "%s: %s Mobs, Geschwindigkeit min. %s / Mittel %s / max. %s Blöcke pro Sekunde, in Bewegung bei %s Prozent von %s Messungen",
+              "based_on": "d2dc8d940ee632b6f4cc406d09d05cb537e6306a49ab208f161fd8eeb9649a2e",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "%s : %s créatures, vitesse min. %s / moy. %s / max. %s blocs par seconde, en mouvement dans %s pour cent des %s mesures",
+              "based_on": "d2dc8d940ee632b6f4cc406d09d05cb537e6306a49ab208f161fd8eeb9649a2e",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "%s: %s mobów, prędkość min. %s / śr. %s / maks. %s bloków na sekundę, w ruchu w %s procentach z %s pomiarów",
+              "based_on": "d2dc8d940ee632b6f4cc406d09d05cb537e6306a49ab208f161fd8eeb9649a2e",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.speed.threat": {
+          "source": "%s with a monster within %s blocks: average %s blocks per second (%s samples); otherwise average %s blocks per second (%s samples)",
+          "context": {
+            "meaning": "Extra line for guards: average speed while a monster stood nearby versus while none did.",
+            "location": "lothlorien_rp: chat message to the player who ran the command",
+            "trigger": "Player runs /scriptevent lothlorien:speed [radius], a one-shot mob speed measurement for development.",
+            "tone": "Technical and concise",
+            "grammar": "Short status line or measurement result; no player gender.",
+            "constraints": "Keep the [lothlorien] tag, entity type ids and placeholder order unchanged; units are blocks per second.",
+            "source_paths": [
+              "lothlorien_bp/scripts/speed_probe.js"
+            ]
+          },
+          "placeholders": [
+            {
+              "name": "type",
+              "type": "string",
+              "meaning": "entity type id"
+            },
+            {
+              "name": "distance",
+              "type": "string",
+              "meaning": "monster distance in blocks"
+            },
+            {
+              "name": "threat_avg",
+              "type": "string",
+              "meaning": "average speed with a monster nearby"
+            },
+            {
+              "name": "threat_samples",
+              "type": "string",
+              "meaning": "samples with a monster nearby"
+            },
+            {
+              "name": "calm_avg",
+              "type": "string",
+              "meaning": "average speed without a monster nearby"
+            },
+            {
+              "name": "calm_samples",
+              "type": "string",
+              "meaning": "samples without a monster nearby"
+            }
+          ],
+          "translations": {
+            "cs_CZ": {
+              "text": "%s s monstrem do %s bloků: průměr %s bloků za sekundu (%s měření); jinak průměr %s bloků za sekundu (%s měření)",
+              "based_on": "64de76530aa08f58c09e74faf483adfdc0654c990bd9764108ce2f75b2fd98ed",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "%s con un monstruo a menos de %s bloques: media de %s bloques por segundo (%s muestras); en caso contrario, media de %s bloques por segundo (%s muestras)",
+              "based_on": "64de76530aa08f58c09e74faf483adfdc0654c990bd9764108ce2f75b2fd98ed",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "%s con un monstruo a menos de %s bloques: promedio de %s bloques por segundo (%s muestras); en caso contrario, promedio de %s bloques por segundo (%s muestras)",
+              "based_on": "64de76530aa08f58c09e74faf483adfdc0654c990bd9764108ce2f75b2fd98ed",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "%s com um monstro a menos de %s blocos: média de %s blocos por segundo (%s amostras); caso contrário, média de %s blocos por segundo (%s amostras)",
+              "based_on": "64de76530aa08f58c09e74faf483adfdc0654c990bd9764108ce2f75b2fd98ed",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "%s com um monstro a menos de %s blocos: média de %s blocos por segundo (%s amostras); caso contrário, média de %s blocos por segundo (%s amostras)",
+              "based_on": "64de76530aa08f58c09e74faf483adfdc0654c990bd9764108ce2f75b2fd98ed",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "%s mit einem Monster im Umkreis von %s Blöcken: Mittel %s Blöcke pro Sekunde (%s Messungen); sonst Mittel %s Blöcke pro Sekunde (%s Messungen)",
+              "based_on": "64de76530aa08f58c09e74faf483adfdc0654c990bd9764108ce2f75b2fd98ed",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "%s avec un monstre à moins de %s blocs : moyenne de %s blocs par seconde (%s mesures) ; sinon moyenne de %s blocs par seconde (%s mesures)",
+              "based_on": "64de76530aa08f58c09e74faf483adfdc0654c990bd9764108ce2f75b2fd98ed",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "%s z potworem w promieniu %s bloków: średnio %s bloków na sekundę (%s pomiarów); w przeciwnym razie średnio %s bloków na sekundę (%s pomiarów)",
+              "based_on": "64de76530aa08f58c09e74faf483adfdc0654c990bd9764108ce2f75b2fd98ed",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.speed.none": {
+          "source": "[lothlorien] speed probe: no mobs within range.",
+          "context": {
+            "meaning": "Reports that the measurement found no mobs.",
+            "location": "lothlorien_rp: chat message to the player who ran the command",
+            "trigger": "Player runs /scriptevent lothlorien:speed [radius], a one-shot mob speed measurement for development.",
+            "tone": "Technical and concise",
+            "grammar": "Short status line or measurement result; no player gender.",
+            "constraints": "Keep the [lothlorien] tag, entity type ids and placeholder order unchanged; units are blocks per second.",
+            "source_paths": [
+              "lothlorien_bp/scripts/speed_probe.js"
+            ]
+          },
+          "placeholders": [],
+          "translations": {
+            "cs_CZ": {
+              "text": "[lothlorien] měření rychlosti: v dosahu nejsou žádní mobové.",
+              "based_on": "dd0ad850256a144b2263b7a0adb827f63e30868a7a25e7bda08bcab2ed0b82b0",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "[lothlorien] medición de velocidad: no hay mobs en el radio.",
+              "based_on": "dd0ad850256a144b2263b7a0adb827f63e30868a7a25e7bda08bcab2ed0b82b0",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "[lothlorien] medición de velocidad: no hay mobs dentro del radio.",
+              "based_on": "dd0ad850256a144b2263b7a0adb827f63e30868a7a25e7bda08bcab2ed0b82b0",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "[lothlorien] medição de velocidade: não há mobs ao alcance.",
+              "based_on": "dd0ad850256a144b2263b7a0adb827f63e30868a7a25e7bda08bcab2ed0b82b0",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "[lothlorien] medição de velocidade: não há mobs no alcance.",
+              "based_on": "dd0ad850256a144b2263b7a0adb827f63e30868a7a25e7bda08bcab2ed0b82b0",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "[lothlorien] Geschwindigkeitsmessung: keine Mobs in Reichweite.",
+              "based_on": "dd0ad850256a144b2263b7a0adb827f63e30868a7a25e7bda08bcab2ed0b82b0",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "[lothlorien] mesure de vitesse : aucune créature à portée.",
+              "based_on": "dd0ad850256a144b2263b7a0adb827f63e30868a7a25e7bda08bcab2ed0b82b0",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "[lothlorien] pomiar prędkości: brak mobów w zasięgu.",
+              "based_on": "dd0ad850256a144b2263b7a0adb827f63e30868a7a25e7bda08bcab2ed0b82b0",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.speed.busy": {
+          "source": "[lothlorien] speed probe: a measurement is already running.",
+          "context": {
+            "meaning": "Reports that a second measurement was requested while one is running.",
+            "location": "lothlorien_rp: chat message to the player who ran the command",
+            "trigger": "Player runs /scriptevent lothlorien:speed [radius], a one-shot mob speed measurement for development.",
+            "tone": "Technical and concise",
+            "grammar": "Short status line or measurement result; no player gender.",
+            "constraints": "Keep the [lothlorien] tag, entity type ids and placeholder order unchanged; units are blocks per second.",
+            "source_paths": [
+              "lothlorien_bp/scripts/speed_probe.js"
+            ]
+          },
+          "placeholders": [],
+          "translations": {
+            "cs_CZ": {
+              "text": "[lothlorien] měření rychlosti: jedno měření už běží.",
+              "based_on": "8c3c18fbcbf6dad52a10527ef6610cfcaf33cf74468d68f3c88d5056c2a00b8d",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "[lothlorien] medición de velocidad: ya hay una medición en curso.",
+              "based_on": "8c3c18fbcbf6dad52a10527ef6610cfcaf33cf74468d68f3c88d5056c2a00b8d",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "[lothlorien] medición de velocidad: ya hay una medición en curso.",
+              "based_on": "8c3c18fbcbf6dad52a10527ef6610cfcaf33cf74468d68f3c88d5056c2a00b8d",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "[lothlorien] medição de velocidade: já está a decorrer uma medição.",
+              "based_on": "8c3c18fbcbf6dad52a10527ef6610cfcaf33cf74468d68f3c88d5056c2a00b8d",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "[lothlorien] medição de velocidade: já há uma medição em andamento.",
+              "based_on": "8c3c18fbcbf6dad52a10527ef6610cfcaf33cf74468d68f3c88d5056c2a00b8d",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "[lothlorien] Geschwindigkeitsmessung: Es läuft bereits eine Messung.",
+              "based_on": "8c3c18fbcbf6dad52a10527ef6610cfcaf33cf74468d68f3c88d5056c2a00b8d",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "[lothlorien] mesure de vitesse : une mesure est déjà en cours.",
+              "based_on": "8c3c18fbcbf6dad52a10527ef6610cfcaf33cf74468d68f3c88d5056c2a00b8d",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "[lothlorien] pomiar prędkości: pomiar już trwa.",
+              "based_on": "8c3c18fbcbf6dad52a10527ef6610cfcaf33cf74468d68f3c88d5056c2a00b8d",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.dash.started": {
+          "source": "[lothlorien] dash detector: watching mobs within %s blocks for %s seconds; spikes go to the content log.",
+          "context": {
+            "meaning": "Announces the start of the speed spike detector.",
+            "location": "lothlorien_rp: chat message to the player who ran the command",
+            "trigger": "Player runs /scriptevent lothlorien:speed dash [radius] [seconds], a one-shot detector of sudden mob speed spikes for development.",
+            "tone": "Technical and concise",
+            "grammar": "Short status line or measurement result; no player gender.",
+            "constraints": "Keep the [lothlorien] tag, entity type ids and placeholder order unchanged; units are blocks per second.",
+            "source_paths": [
+              "lothlorien_bp/scripts/speed_probe.js"
+            ]
+          },
+          "placeholders": [
+            {
+              "name": "radius",
+              "type": "string",
+              "meaning": "search radius in blocks"
+            },
+            {
+              "name": "seconds",
+              "type": "string",
+              "meaning": "length of the window in seconds"
+            }
+          ],
+          "translations": {
+            "cs_CZ": {
+              "text": "[lothlorien] detektor zrychlení: sleduji moby do %s bloků po dobu %s sekund; výkyvy rychlosti půjdou do logu obsahu.",
+              "based_on": "3e78bb1c0e230efdcb723fc1efd6372ca2d19449e3f9b17607436e4b7429e209",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "[lothlorien] detector de acelerones: vigilando mobs a menos de %s bloques durante %s segundos; los picos van al registro de contenido.",
+              "based_on": "3e78bb1c0e230efdcb723fc1efd6372ca2d19449e3f9b17607436e4b7429e209",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "[lothlorien] detector de aceleraciones: vigilando mobs a menos de %s bloques durante %s segundos; los picos van al registro de contenido.",
+              "based_on": "3e78bb1c0e230efdcb723fc1efd6372ca2d19449e3f9b17607436e4b7429e209",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "[lothlorien] detetor de arrancos: a vigiar mobs a menos de %s blocos durante %s segundos; os picos vão para o registo de conteúdo.",
+              "based_on": "3e78bb1c0e230efdcb723fc1efd6372ca2d19449e3f9b17607436e4b7429e209",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "[lothlorien] detector de arrancadas: monitorando mobs a menos de %s blocos por %s segundos; os picos vão para o registro de conteúdo.",
+              "based_on": "3e78bb1c0e230efdcb723fc1efd6372ca2d19449e3f9b17607436e4b7429e209",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "[lothlorien] Spurt-Erkennung: Mobs im Umkreis von %s Blöcken werden %s Sekunden lang beobachtet; Ausreißer landen im Inhaltslog.",
+              "based_on": "3e78bb1c0e230efdcb723fc1efd6372ca2d19449e3f9b17607436e4b7429e209",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "[lothlorien] détecteur d'accélérations : surveillance des mobs à moins de %s blocs pendant %s secondes ; les pics vont dans le journal de contenu.",
+              "based_on": "3e78bb1c0e230efdcb723fc1efd6372ca2d19449e3f9b17607436e4b7429e209",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "[lothlorien] wykrywacz zrywów: obserwuję moby w promieniu %s bloków przez %s sekund; skoki prędkości trafią do dziennika zawartości.",
+              "based_on": "3e78bb1c0e230efdcb723fc1efd6372ca2d19449e3f9b17607436e4b7429e209",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.dash.row": {
+          "source": "%s: %s mobs, %s speed spikes, peak %s blocks per second",
+          "context": {
+            "meaning": "One result line per entity type: tracked mobs, number of speed spikes and the highest spike speed.",
+            "location": "lothlorien_rp: chat message to the player who ran the command",
+            "trigger": "Player runs /scriptevent lothlorien:speed dash [radius] [seconds], a one-shot detector of sudden mob speed spikes for development.",
+            "tone": "Technical and concise",
+            "grammar": "Short status line or measurement result; no player gender.",
+            "constraints": "Keep the [lothlorien] tag, entity type ids and placeholder order unchanged; units are blocks per second.",
+            "source_paths": [
+              "lothlorien_bp/scripts/speed_probe.js"
+            ]
+          },
+          "placeholders": [
+            {
+              "name": "type",
+              "type": "string",
+              "meaning": "entity type id"
+            },
+            {
+              "name": "mobs",
+              "type": "string",
+              "meaning": "number of tracked mobs"
+            },
+            {
+              "name": "spikes",
+              "type": "string",
+              "meaning": "number of speed spikes found"
+            },
+            {
+              "name": "peak",
+              "type": "string",
+              "meaning": "highest spike speed in blocks per second"
+            }
+          ],
+          "translations": {
+            "cs_CZ": {
+              "text": "%s: %s mobů, %s výkyvů rychlosti, maximum %s bloků za sekundu",
+              "based_on": "e3a39782aead754d2aaf63f4bba1df0a66de9eb44678c6b1c7909ba0ccfd5c18",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "%s: %s mobs, %s picos de velocidad, máximo %s bloques por segundo",
+              "based_on": "e3a39782aead754d2aaf63f4bba1df0a66de9eb44678c6b1c7909ba0ccfd5c18",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "%s: %s mobs, %s picos de velocidad, máximo %s bloques por segundo",
+              "based_on": "e3a39782aead754d2aaf63f4bba1df0a66de9eb44678c6b1c7909ba0ccfd5c18",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "%s: %s mobs, %s picos de velocidade, máximo %s blocos por segundo",
+              "based_on": "e3a39782aead754d2aaf63f4bba1df0a66de9eb44678c6b1c7909ba0ccfd5c18",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "%s: %s mobs, %s picos de velocidade, máximo %s blocos por segundo",
+              "based_on": "e3a39782aead754d2aaf63f4bba1df0a66de9eb44678c6b1c7909ba0ccfd5c18",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "%s: %s Mobs, %s Geschwindigkeitsspitzen, Höchstwert %s Blöcke pro Sekunde",
+              "based_on": "e3a39782aead754d2aaf63f4bba1df0a66de9eb44678c6b1c7909ba0ccfd5c18",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "%s : %s mobs, %s pics de vitesse, maximum %s blocs par seconde",
+              "based_on": "e3a39782aead754d2aaf63f4bba1df0a66de9eb44678c6b1c7909ba0ccfd5c18",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "%s: %s mobów, %s skoków prędkości, maksimum %s bloków na sekundę",
+              "based_on": "e3a39782aead754d2aaf63f4bba1df0a66de9eb44678c6b1c7909ba0ccfd5c18",
+              "status": "ai-draft"
+            }
+          }
+        },
+        "lothlorien.message.dash.none": {
+          "source": "[lothlorien] dash detector: no speed spikes found (details are in the content log).",
+          "context": {
+            "meaning": "Reports that the detector window ended without any speed spike, or with no mobs in range.",
+            "location": "lothlorien_rp: chat message to the player who ran the command",
+            "trigger": "Player runs /scriptevent lothlorien:speed dash [radius] [seconds], a one-shot detector of sudden mob speed spikes for development.",
+            "tone": "Technical and concise",
+            "grammar": "Short status line or measurement result; no player gender.",
+            "constraints": "Keep the [lothlorien] tag, entity type ids and placeholder order unchanged; units are blocks per second.",
+            "source_paths": [
+              "lothlorien_bp/scripts/speed_probe.js"
+            ]
+          },
+          "placeholders": [],
+          "translations": {
+            "cs_CZ": {
+              "text": "[lothlorien] detektor zrychlení: žádný výkyv rychlosti (podrobnosti jsou v logu obsahu).",
+              "based_on": "e3d103fcca5d1ab64470fc9bf836426d77cd3a5e48868b816a7e56e57ffd00ca",
+              "status": "ai-draft"
+            },
+            "es_ES": {
+              "text": "[lothlorien] detector de acelerones: no se encontraron picos de velocidad (los detalles están en el registro de contenido).",
+              "based_on": "e3d103fcca5d1ab64470fc9bf836426d77cd3a5e48868b816a7e56e57ffd00ca",
+              "status": "ai-draft"
+            },
+            "es_MX": {
+              "text": "[lothlorien] detector de aceleraciones: no se encontraron picos de velocidad (los detalles están en el registro de contenido).",
+              "based_on": "e3d103fcca5d1ab64470fc9bf836426d77cd3a5e48868b816a7e56e57ffd00ca",
+              "status": "ai-draft"
+            },
+            "pt_PT": {
+              "text": "[lothlorien] detetor de arrancos: não foram encontrados picos de velocidade (os detalhes estão no registo de conteúdo).",
+              "based_on": "e3d103fcca5d1ab64470fc9bf836426d77cd3a5e48868b816a7e56e57ffd00ca",
+              "status": "ai-draft"
+            },
+            "pt_BR": {
+              "text": "[lothlorien] detector de arrancadas: nenhum pico de velocidade encontrado (os detalhes estão no registro de conteúdo).",
+              "based_on": "e3d103fcca5d1ab64470fc9bf836426d77cd3a5e48868b816a7e56e57ffd00ca",
+              "status": "ai-draft"
+            },
+            "de_DE": {
+              "text": "[lothlorien] Spurt-Erkennung: keine Geschwindigkeitsspitzen gefunden (Einzelheiten im Inhaltslog).",
+              "based_on": "e3d103fcca5d1ab64470fc9bf836426d77cd3a5e48868b816a7e56e57ffd00ca",
+              "status": "ai-draft"
+            },
+            "fr_FR": {
+              "text": "[lothlorien] détecteur d'accélérations : aucun pic de vitesse trouvé (détails dans le journal de contenu).",
+              "based_on": "e3d103fcca5d1ab64470fc9bf836426d77cd3a5e48868b816a7e56e57ffd00ca",
+              "status": "ai-draft"
+            },
+            "pl_PL": {
+              "text": "[lothlorien] wykrywacz zrywów: nie znaleziono skoków prędkości (szczegóły w dzienniku zawartości).",
+              "based_on": "e3d103fcca5d1ab64470fc9bf836426d77cd3a5e48868b816a7e56e57ffd00ca",
+              "status": "ai-draft"
+            }
+          }
         }
       }
     }

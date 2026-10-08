@@ -4,7 +4,9 @@
 //
 // On load the marker waits until the chunks around it are loaded, finds its exit by reading the blocks (rotation independent: the
 // marker only has to sit on the railing's centre), and asks decide(): build (it is the smaller (x, z) of a mutually-best pair), stand
-// down (the partner builds) or none. P7b: an exit without a partner exit may also join the side of a platform (decide() kind "side"). Then it removes itself. Unloaded neighbours keep the marker for another load, at most LOOP.maxTries
+// down (the partner builds) or none. P7b: an exit without a partner exit may also join the side of a platform (decide() kind "side"). Spans above
+// 17 blocks are two bridges with a 5 x 5 landing on a log pier to the ground (decide() scans down for it). Balconies and lookouts carry markers
+// too; a partner without a marker (older worlds) does not stand in the way: the marker that finds it builds. Then it removes itself. Unloaded neighbours keep the marker for another load, at most LOOP.maxTries
 // times; a blocked corridor gives up for good. The writes run as a job (a few dozen blocks per tick).
 import { BlockPermutation, system, world } from "@minecraft/server";
 import { LOOP, MARKER_ID, decide, exitAt, finalBlocks } from "./village_loop.js";
@@ -62,7 +64,7 @@ function* build(entity, dimension, plan, at) {
   }
   if (!plan.side) removeMarkerNear(dimension, plan.B);
   if (entity.isValid) entity.remove();
-  console.warn(`[lothlorien] loop closer: ${plan.side ? "side" : "exit"} bridge of ${plan.length} (offset ${plan.offset}) built between ${plan.A.x},${plan.A.y},${plan.A.z} and ${plan.B.x},${plan.B.y},${plan.B.z}: ${writes.length} blocks, ${plan.lanterns.length} lanterns${failed ? `, ${failed} write(s) failed` : ""}`);
+  console.warn(`[lothlorien] loop closer: ${plan.side ? "side" : "exit"} bridge of ${plan.length}${plan.landing ? ` with a landing and ${plan.pier.length} pier blocks` : ""} (offset ${plan.offset}) built between ${plan.A.x},${plan.A.y},${plan.A.z} and ${plan.B.x},${plan.B.y},${plan.B.z}: ${writes.length} blocks, ${plan.lanterns.length} lanterns${failed ? `, ${failed} write(s) failed` : ""}`);
 }
 
 function retryLater(entity) { // not everything was loaded: keep the marker for the next load, but not forever
@@ -83,11 +85,15 @@ function attempt(entity, waited) {
     }
     busy.delete(entity.id);
     const at = reader(dimension), A = exitAt(at, x, y, z);
+    const hasMarker = (B) => { // a marker (entity) still stands on the partner's centre fence cell
+      try { return dimension.getEntities({ type: MARKER_ID, location: { x: B.x + 0.5, y: B.y + 1.5, z: B.z + 0.5 }, maxDistance: 2 }).length > 0; } catch { return true; }
+    };
     if (!A) return entity.remove(); // the railing is gone: this exit was already closed from the other side
-    const d = decide(at, A);
+    const d = decide(at, A, { hasMarker });
     if (d.action === "build") system.runJob(build(entity, dimension, d.plan, at));
     else {
       if (d.reason === "blocked") console.warn(`[lothlorien] loop closer: corridor at ${x},${y},${z} blocked by ${d.blocked[0].block} at ${d.blocked[0].x},${d.blocked[0].y},${d.blocked[0].z} (${d.blocked.length} cells)`);
+      else if (d.reason !== "no partner" && d.reason !== "not mutual") console.warn(`[lothlorien] loop closer: exit at ${x},${y},${z} gave up: ${d.reason}`);
       entity.remove();
     }
   } catch (e) {
