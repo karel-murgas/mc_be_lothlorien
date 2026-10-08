@@ -2057,22 +2057,29 @@ test("loop closer: railing_end, balcony_braced and lookout_01 carry loop markers
   const re = villagePieces().filter((p) => p.name === "railing_end");
   assert.equal(re.length, 1);
   assert.deepEqual(re[0].entities.filter((e) => e.id === LOOP.MARKER_ID).map((e) => e.pos), [[2.5, 1.5, 0.5]]);
-  for (const p of villagePieces()) assert.equal(p.entities.filter((e) => e.id === LOOP.MARKER_ID).length, MARKED[p.name] ?? 0, `${p.name}: loop markers`);
-  const seen = {}, exits = {};
+  for (const p of villagePieces()) { // round 2: the platform pieces (central, combos = bridge + node) carry side markers on their rim runs; crowns never
+    const n = p.entities.filter((e) => e.id === LOOP.MARKER_ID).length;
+    if (MARKED[p.name]) assert.equal(n, MARKED[p.name], `${p.name}: loop markers`);
+    else if (/^(central|combo_)/.test(p.name)) assert.ok(n <= 12, `${p.name}: ${n} side markers`);
+    else assert.equal(n, 0, `${p.name}: loop markers`);
+  }
+  const seen = {}, exits = {}, sides = [];
   for (const r of villages()) { // in every rotation each marker sits on the centre fence of a placed piece, and the exit signature faces away from the platform
     const states = new Map(), world = buildWorld(r.res, states), at = (x, y, z) => world.get(wkey(x, y, z)) ?? "minecraft:air";
-    for (const p of r.res.placed.filter((q) => MARKED[q.name])) {
+    for (const p of r.res.placed.filter((q) => MARKED[q.name] || /^(central|combo_)/.test(q.name))) {
       for (const [x, y, z] of markerCells(p)) {
         assert.equal(at(x, y + 1, z), FENCE, `seed ${r.seed}: ${p.name} marker on the centre fence`);
         assert.equal(at(x, y, z), PLANKS);
         // balcony far rim and the lookout's three free sides are exits in the sense of exitAt (a neighbouring piece may merge the rim into a longer run)
         seen[p.name] = (seen[p.name] ?? 0) + 1;
         if (LOOP.exitAt(at, x, y, z)) exits[p.name] = (exits[p.name] ?? 0) + 1;
+        else if (!MARKED[p.name]) sides.push(!!LOOP.sideAt(at, x, y, z));
       }
     }
   }
   assert.ok(seen.railing_end > 100 && seen.balcony_braced > 50 && seen.lookout_01 > 20, `markers seen ${JSON.stringify(seen)}`);
-  for (const k of Object.keys(seen)) assert.ok(exits[k] >= 0.95 * seen[k], `${k}: ${exits[k]} of ${seen[k]} markers sit on a recognised exit`);
+  for (const k of Object.keys(seen).filter((q) => MARKED[q])) assert.ok(exits[k] >= 0.95 * seen[k], `${k}: ${exits[k]} of ${seen[k]} markers sit on a recognised exit`);
+  assert.ok(sides.length > 200 && sides.filter(Boolean).length >= 0.9 * sides.length, `side markers recognised by sideAt: ${sides.filter(Boolean).length} of ${sides.length}`);
   const entity = readJson("../lothlorien_bp/entities/loop_marker.json")["minecraft:entity"];
   assert.equal(entity.description.identifier, LOOP.MARKER_ID);
   assert.ok(entity.components["minecraft:persistent"] && entity.components["minecraft:physics"].has_collision === false && entity.description.is_spawnable === false);
@@ -2089,16 +2096,16 @@ test("loop closer: partner search takes facing exits at the same height within r
   assert.equal(find(E(3, 12, [0, -1])).offset, 3); // ex = (dir.z, -dir.x) = (1, 0)
   assert.equal(find(E(-3, 12, [0, -1])).offset, -3);
   assert.equal(find(E(0, 12, [0, -1]), E(1, 9, [0, -1])).B.z, 9, "nearest first");
-  assert.equal(find(E(0, 5, [0, -1])), null, "too close (needs 5 free cells between the rows)");
-  assert.ok(find(E(0, 6, [0, -1])) && find(E(0, 17, [0, -1])));
+  assert.equal(find(E(0, 1, [0, -1])), null, "too close (the rows would touch: minDist 2)");
+  assert.ok(find(E(0, 2, [0, -1])) && find(E(0, 5, [0, -1])) && find(E(0, 6, [0, -1])) && find(E(0, 17, [0, -1])), "2..5: a flat deck (F2)");
   assert.ok(find(E(0, 18, [0, -1])) && find(E(0, 30, [0, -1])), "18..30: a span with a landing");
   assert.equal(find(E(0, 31, [0, -1])), null, "too far");
   assert.ok(find(E(8, 24, [0, -1])) && !find(E(9, 24, [0, -1])), "a span may shift 8 sideways, not 9");
-  assert.equal(find(E(7, 12, [0, -1])), null, "too far sideways");
+  assert.ok(find(E(8, 12, [0, -1])) && !find(E(9, 12, [0, -1])), "direct bridge: 8 sideways at most (F3, owner 2026-10-09), 9 is too far");
   assert.equal(find(E(0, 12, [0, 1])), null, "same facing, not facing each other");
   assert.equal(find(E(0, 12, [0, -1], 41)), null, "other deck height");
   assert.equal(find(E(0, -12, [0, -1])), null, "behind");
-  assert.equal(find(E(6, 8, [0, -1])), null, "sideways 6 > maxOffset");
+  assert.ok(find(E(6, 8, [0, -1])) && !find(E(7, 8, [0, -1])), "sideways is also limited by length - 3");
   assert.equal(LOOP.exitAt(fixtureWorld([A]).at, 0, 40, 0).dir.join(), "0,1");
   assert.equal(LOOP.exitAt(fixtureWorld([E(4, 4, [1, 0])]).at, 4, 40, 4).dir.join(), "1,0");
   assert.equal(LOOP.exitAt(fixtureWorld([E(4, 4, [-1, 0])]).at, 4, 40, 4).dir.join(), "-1,0");
@@ -2339,10 +2346,136 @@ test("loop closer: in simulated villages every closed loop leaves both exits gon
     const states = new Map(), world = buildWorld(r.res, states), lp = closeLoops(r.res, world, states);
     loops += lp.loops;
     assert.ok(lp.missed <= 2, `seed ${r.seed}: ${lp.missed} markers not on an exit`); // neighbouring pieces can merge two rims into one run
-    assert.ok(lp.remaining <= lp.markers - lp.loops, "every bridge consumes at least its own exit (the far end may be a lookout arm: same 5-wide rail wall)");
+    assert.ok(lp.remaining <= lp.markers - (lp.loops - (lp.byKind.sideside ?? 0)), "every join from an exit consumes at least its own exit (the far end may be a lookout arm: same 5-wide rail wall)");
     assert.equal(walkability(r.res, world, states).unreachable.length, 0, `seed ${r.seed}: walkable deck after the loops`);
   }
   assert.ok(loops >= 1, "at least one loop closes in 30 seeds");
+});
+
+// --- loop closer round 2 (owner 2026-10-09): F1 side-to-side, F2 flat short decks, F3 offset 8, F4 plaza, F5 L-join, clutter rule ---
+import { applyPlan, joinChecks } from "../tools/village_sim.mjs";
+// A platform with an exit: exit row (5 planks + 5 fences) at (ex, ez) heading `dir`, behind it the connector row t = 1 and a rail-ringed deck `depth` rows deep.
+function exitPlatform(w, ex, ez, dir, { y = 40, depth = 9, half = 4 } = {}) {
+  const a = [Math.abs(dir[1]), Math.abs(dir[0])], xz = (t, o) => [ex - dir[0] * t + a[0] * o, ez - dir[1] * t + a[1] * o];
+  const put = (t, o, fence) => { const [x, z] = xz(t, o); w.set(`${x},${y},${z}`, PLANKS); if (fence) w.set(`${x},${y + 1},${z}`, FENCE); };
+  for (let o = -2; o <= 2; o++) put(0, o, true);
+  for (let t = 1; t <= depth; t++) for (let o = -half; o <= half; o++) put(t, o, t === depth || Math.abs(o) === half || (t === 1 && Math.abs(o) >= 2));
+}
+const mkWorld = (build) => { // Map "x,y,z" fixture -> sim world (wkey) with stone below y 35
+  const w = new Map(); build(w);
+  const world = new Map(), states = new Map();
+  for (const [k, v] of w) { const [x, y, z] = k.split(",").map(Number); world.set(wkey(x, y, z), v); states.set(wkey(x, y, z), v === FENCE ? { "minecraft:connection_north": false, "minecraft:connection_south": false, "minecraft:connection_west": false, "minecraft:connection_east": false } : {}); }
+  const at = (x, y, z) => world.get(wkey(x, y, z)) ?? (y < 35 ? "minecraft:stone" : "minecraft:air");
+  return { world, states, at };
+};
+const joined = (f, d) => { // apply a built plan and run the walk + light checks on it
+  assert.equal(d.action, "build", d.reason);
+  const r = joinChecks(f.world, f.states, d.plan, () => applyPlan(f.world, f.states, d.plan));
+  assert.deepEqual(r.walk, [], `${d.kind}: walk violations`);
+  assert.ok(r.light >= LOOP.LOOP.lightTarget, `${d.kind}: darkest walk cell ${r.light}`);
+  return r;
+};
+test("loop closer (F1): a rim run of one platform starts a bridge to the facing rim of another; both rims open, rails continuous, lit; sideAt finds the run from a marker up to 4 cells off", () => {
+  const g = mkWorld((w) => { addPlatform(w, -5, 5, 0, 8); addPlatform(w, -4, 6, 19, 27); });
+  const S = LOOP.sideAt(g.at, 0, 40, 8);
+  assert.deepEqual([S.x, S.z, S.dir.join()], [0, 8, "0,1"]);
+  assert.ok(LOOP.sideAt(g.at, 3, 40, 8) && LOOP.sideAt(g.at, -4, 40, 8), "a marker 3-4 cells along the rim still finds a run");
+  assert.equal(LOOP.sideAt(g.at, 0, 40, 4), null, "a deck cell inside the platform is no rim");
+  assert.equal(LOOP.sideAt(g.at, 20, 40, 8), null);
+  const d = LOOP.decide(g.at, S, { sideStart: true });
+  assert.equal(d.kind, "sideside");
+  assert.deepEqual([d.plan.length, d.plan.offset], [12, 0]);
+  joined(g, d);
+  for (const o of [-1, 0, 1]) assert.equal(g.at(o, 41, 8), "minecraft:air", "near rim opened");
+  assert.equal(g.at(-2, 41, 8), FENCE);
+  assert.equal(LOOP.sideAt(g.at, 0, 40, 8), null, "after the join the rim has an opening: no second join from the same rim run");
+  assert.equal(LOOP.sideAt(g.at, 1, 40, 19), null, "and none from the far rim either");
+});
+test("loop closer (F1): no side start from a stair opening; the clutter rule refuses a join within 2 cells of foreign deck (offset 1 and 4); never through another structure", () => {
+  for (const off of [1, 4]) {
+    const mk = (extra) => mkWorld((w) => { addPlatform(w, -5, 5, 0, 8); addPlatform(w, -5 + off, 5 + off, 19, 27); extra?.(w); });
+    const A = { x: 0, y: 40, z: 8, dir: [0, 1] };
+    assert.equal(LOOP.decide(mk().at, A, { sideStart: true }).action, "build", `offset ${off}`);
+    const near = mk((w) => { for (let x = 4; x <= 8; x++) { w.set(`${x},40,13`, PLANKS); w.set(`${x},41,13`, FENCE); } }); // a foreign strip 2 cells from the bridge edge
+    const dn = LOOP.decide(near.at, A, { sideStart: true });
+    assert.deepEqual([dn.action, dn.reason], ["none", "clutter"], `offset ${off}: foreign deck within 2 cells`);
+    if (off === 1) assert.equal(LOOP.decideSide(near.at, 0, 40, 8).kind, "sideside", "the marker tries the next rim cells: a start further along the rim is free");
+    const farOff = mk((w) => { for (let x = 9; x <= 12; x++) { w.set(`${x},40,13`, PLANKS); w.set(`${x},41,13`, FENCE); } });
+    assert.equal(LOOP.decide(farOff.at, A, { sideStart: true }).action, "build", "3 cells away is fine");
+  }
+  const blocked = mkWorld((w) => { addPlatform(w, -5, 5, 0, 8); addPlatform(w, -5, 5, 19, 27); for (let x = -9; x <= 9; x++) w.set(`${x},42,13`, "lothlorien:mallorn_log"); });
+  assert.equal(LOOP.decide(blocked.at, { x: 0, y: 40, z: 8, dir: [0, 1] }, { sideStart: true }).reason, "blocked");
+  const stairs = mkWorld((w) => { addPlatform(w, -5, 5, 0, 8); addPlatform(w, -5, 5, 19, 27); for (let x = -1; x <= 1; x++) w.delete(`${x},40,7`); });
+  assert.equal(LOOP.sideAt(stairs.at, 0, 40, 8), null, "a hole behind the rim (stair opening) is no side");
+});
+test("loop closer (F2/F3): exits 2..5 apart get a FLAT deck (no arch, no slabs), 6.. the arch; sideways reach is 8 for a direct bridge; all lit and walkable", () => {
+  for (const dist of [2, 3, 4, 5, 6]) { // length dist + 1 <= 5 (dist <= 4) is flat
+    const f = mkWorld((w) => { exitPlatform(w, 0, 0, [0, 1]); exitPlatform(w, 0, dist, [0, -1]); });
+    const d = LOOP.decide(f.at, LOOP.exitAt(f.at, 0, 40, 0));
+    assert.equal(d.kind, "exit", `dist ${dist}`);
+    assert.equal(d.plan.length, dist + 1);
+    const slabs = d.plan.cells.filter((c) => c.kind.startsWith("slab")).length;
+    if (dist <= 4) assert.equal(slabs, 0, `dist ${dist}: flat`); else assert.ok(slabs > 0, "arched");
+    joined(f, d);
+  }
+  for (const lat of [6, 7, 8]) {
+    const f = mkWorld((w) => { exitPlatform(w, 0, 0, [0, 1]); exitPlatform(w, lat, 12, [0, -1]); });
+    const d = LOOP.decide(f.at, LOOP.exitAt(f.at, 0, 40, 0));
+    assert.equal(d.kind, "exit", `lateral ${lat}`);
+    assert.equal(Math.abs(d.plan.offset), lat);
+    joined(f, d);
+  }
+  const f9 = mkWorld((w) => { exitPlatform(w, 0, 0, [0, 1]); exitPlatform(w, 9, 14, [0, -1]); });
+  assert.notEqual(LOOP.decide(f9.at, LOOP.exitAt(f9.at, 0, 40, 0)).kind, "exit", "9 sideways is too far for a direct bridge");
+});
+test("loop closer (F4): the plaza - two close balcony ends 6 sideways (the owner's gap5) get a filled railed deck, rails of the joined edges removed, on a pier; refused when blocked", () => {
+  const mk = (extra) => mkWorld((w) => { exitPlatform(w, 0, 0, [0, 1]); exitPlatform(w, 6, 2, [0, -1]); extra?.(w); });
+  const f = mk(), A = LOOP.exitAt(f.at, 0, 40, 0);
+  assert.ok(A && LOOP.exitAt(f.at, 6, 40, 2));
+  assert.equal(LOOP.findPartner(f.at, A), null, "no bridge fits (dist 2, lateral 6)");
+  assert.equal(LOOP.decide(f.at, LOOP.exitAt(f.at, 6, 40, 2)).action, "standDown", "the larger (x, z) stands down");
+  const d = LOOP.decide(f.at, A);
+  assert.equal(d.kind, "plaza");
+  assert.ok(d.plan.cells.filter((c) => c.kind === "plank").length >= 20 && d.plan.pier.length > 0, "a filled deck on a log pier (owner: no unsupported balconies)");
+  joined(f, d);
+  for (const [x, z] of [[0, 0], [6, 2]]) assert.equal(f.at(x, 41, z), "minecraft:air", "the rails of the joined edges are gone");
+  assert.ok([...f.world].some(([, n]) => n === LOOP.LANTERN));
+  const log = mk((w) => w.set("3,41,1", "lothlorien:mallorn_log"));
+  assert.notEqual(LOOP.decide(log.at, LOOP.exitAt(log.at, 0, 40, 0)).kind, "plaza", "a log in the patch: no plaza");
+  const cant = mkWorld((w) => { exitPlatform(w, 0, 0, [0, 1], { depth: 2, half: 2 }); exitPlatform(w, 8, 6, [0, -1], { depth: 2, half: 2 }); });
+  assert.notEqual(LOOP.decide(cant.at, LOOP.exitAt(cant.at, 0, 40, 0)).kind, "plaza", "the patch would hang more than 4 cells out");
+});
+test("loop closer (F5): L-join - exits at right angles meet on a 5 x 5 railed, lit landing on a log pier; two straight legs, no diagonal; refused by clutter and by obstacles", () => {
+  const mk = (extra) => mkWorld((w) => { exitPlatform(w, 0, 0, [0, 1]); exitPlatform(w, 12, 12, [-1, 0]); extra?.(w); });
+  const f = mk(), A = LOOP.exitAt(f.at, 0, 40, 0);
+  assert.deepEqual(LOOP.findLs(f.at, A).map((c) => [c.s, c.u]), [[12, 12]]);
+  assert.equal(LOOP.decide(f.at, LOOP.exitAt(f.at, 12, 40, 12)).action, "standDown");
+  const d = LOOP.decide(f.at, A);
+  assert.equal(d.kind, "L");
+  assert.ok(d.plan.parts.every((p) => p.offset === 0), "both legs straight");
+  assert.ok(d.plan.pier.length > 20, "pier under the landing");
+  joined(f, d);
+  assert.equal(f.at(0, 41, 0), "minecraft:air");
+  assert.equal(f.at(12, 41, 12), "minecraft:air");
+  assert.equal(f.at(0, 40, 12), PLANKS);
+  const g = mk((w) => { w.set("0,42,7", "lothlorien:mallorn_log"); }); // in the arch of the first leg
+  assert.notEqual(LOOP.decide(g.at, LOOP.exitAt(g.at, 0, 40, 0)).kind, "L", "obstacle in a leg");
+  const h = mk((w) => { for (let x = 3; x <= 5; x++) { w.set(`${x},40,5`, PLANKS); w.set(`${x},41,5`, FENCE); } });
+  assert.notEqual(LOOP.decide(h.at, LOOP.exitAt(h.at, 0, 40, 0)).kind, "L", "foreign deck within 2 cells of the first leg");
+  assert.ok(LOOP.planPier((x, y, z) => (y === 36 ? "minecraft:lava" : mk().at(x, y, z)), d.plan.landing).error, "the pier gives up over lava (existing error path)");
+});
+test("loop closer round 2: 30 simulated villages - every join passes the shared walk checker and light >= 8, all join kinds occur, deck stays walkable; marker counts stay modest", () => {
+  const kinds = {}; let sideMarkers = 0, n = 0;
+  for (const r of villages()) {
+    const states = new Map(), world = buildWorld(r.res, states), lp = closeLoops(r.res, world, states, { verify: true });
+    assert.deepEqual(lp.bad, [], `seed ${r.seed}: joins with walk / light violations`);
+    for (const [k, v] of Object.entries(lp.byKind)) kinds[k] = (kinds[k] ?? 0) + v;
+    sideMarkers += lp.sideMarkers; n++;
+    assert.equal(walkability(r.res, world, states).unreachable.length, 0, `seed ${r.seed}: walkable deck`);
+  }
+  for (const k of ["exit", "side", "sideside", "L"]) assert.ok(kinds[k] >= 1, `join kind ${k} occurs: ${JSON.stringify(kinds)}`);
+  assert.ok(sideMarkers / n <= 30, `side markers per village ${(sideMarkers / n).toFixed(1)}`);
+  console.log(`loop closer round 2 (30 villages): ${JSON.stringify(kinds)}, side markers/village ${(sideMarkers / n).toFixed(1)}`);
 });
 
 // --- elven warden: entity invariants, spawn rule, natural-spawn thinning, friendly fire, village wardens ---

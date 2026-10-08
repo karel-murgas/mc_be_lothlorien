@@ -513,3 +513,12 @@ Mallorn node
 ```
 
 This is the first implementation target.
+
+# 16. Loop closer (round 2, owner decisions 2026-10-09)
+
+A jigsaw village is a tree; `scripts/loop_marker.js` + `village_loop.js` close loops at runtime (details and numbers: `docs/TECHNICAL_NOTES.md` P7 to P7d).
+Owner decisions: (1) two facing plain platform rims get a bridge (F1, markers on rim runs); (2) exits may be as close as 2 apart, 2..4 apart is a flat deck (F2);
+(3) direct bridges may shift 8 sideways (F3); (4) a "plaza" deck joins two close, sideways offset balcony ends, always on a pier (F4, approved on the gap5 case);
+(5) L-joins: leave A, straight bridge, a square 5 x 5 railed landing on a pier, turn 90 degrees, straight bridge into B, no diagonals (F5);
+(6) clutter rule: no new join within 2 cells of another structure's deck, one join per pair, never through other structures. Standing rules: arched slab bridges with a
+continuous slab body, continuous rails, light >= 8 on every walk cell, headroom and walkability by the shared checker. Status: simulator and unit tests only.

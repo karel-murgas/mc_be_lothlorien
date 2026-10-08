@@ -15,6 +15,7 @@ import { toMcstructure } from "./build_structures.mjs";
 import { B } from "./flet_mallorn.mjs";
 import { checkWalk } from "../../../.claude/skills/bedrock-modding/scripts/structure_walk.mjs"; // shared walkability checker (headroom, steps, edges, rings, rail links)
 import { makeCombo, buildBalcony, STRAIGHT, DOGS } from "./village_combo.mjs";
+import { sideTarget } from "../lothlorien_bp/scripts/village_loop.js"; // the runtime's own rim test decides where a side marker may stand
 import {
   ROOTS, FLOOR_H, LEVEL_H, FACING, SHAPES, key, AIR, planks, slab, Deck, buildTree, buildCrown, deckJigsaw, lantern, lonelyRail,
   writeRails, RAIL, shapeCells, addLanterns,
@@ -106,6 +107,35 @@ export function wardenCells(name, blocks, count, want) {
   }
   return picked.map(({ x, z }) => ({ x, z }));
 }
+// Where a platform's plain rim sides can start a bridge (F1): one marker per straight rim run, on the run's middle cell, where the runtime's
+// sideTarget holds for a bridge heading into the platform (5-run of rail on 5 planks, two plain deck rows behind with open air; a stair opening,
+// trunk, slab or connector row fails it). `inRegion(x, z)` limits the cells (a combo's bridge half is excluded). -> [[x, z, deckY]] in box coordinates.
+export function sideMarkerCells(blocks, origin, inRegion = () => true) {
+  const nameAt = (x, y, z) => blocks.get(key(x, y, z))?.name ?? "minecraft:air";
+  const runs = new Map();
+  for (const [k, b] of blocks) {
+    if (b.name !== B.planks) continue;
+    const [x, y, z] = k.split(",").map(Number);
+    if (!inRegion(x, z) || nameAt(x, y + 1, z) !== RAIL) continue;
+    for (const out of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
+      if (!sideTarget(nameAt, x, y, z, [-out[0], -out[1]])) continue;
+      const along = out[0] ? z : x, line = out[0] ? x : z, id = `${out}|${y}|${line}`;
+      (runs.get(id) ?? runs.set(id, { out, y, line, cells: [] }).get(id)).cells.push(along);
+    }
+  }
+  const res = [];
+  for (const r of runs.values()) { // split into contiguous runs of the along coordinate
+    const cs = r.cells.sort((a, b) => a - b);
+    let start = 0;
+    for (let i = 1; i <= cs.length; i++) {
+      if (i < cs.length && cs[i] === cs[i - 1] + 1) continue;
+      const along = cs[start + Math.floor((i - start - 1) / 2)];
+      res.push(r.out[0] ? [r.line, along, r.y] : [along, r.line, r.y]);
+      start = i;
+    }
+  }
+  return res.sort((a, b) => a[2] - b[2] || a[0] - b[0] || a[1] - b[1]).map(([x, z, y]) => [x + origin[0] + 0.5, z + origin[2] + 0.5, y]);
+}
 // extra.markers: [[x, z]] rail mender marker positions in box coordinates (default: the box centre); extra.wardens: standing cells
 // [{ x, z }] in block coordinates (default: computed here for WARDENS[name])
 function writePiece(name, blocks, size, origin, connectors, extra = {}) {
@@ -120,7 +150,8 @@ function writePiece(name, blocks, size, origin, connectors, extra = {}) {
   // rotation rounding cannot change the cell); it finds its railing, a facing one and the bridge direction from the blocks, not from its own rotation
   // Balcony and lookout ends have the very same signature on their free rim sides (5 planks + fences, 5-wide connector row behind), so they carry
   // markers too (extra.loopMarkers: [[x, z]] box coordinates of the rim's centre cell): a loop may start there and the end becomes a walk-through.
-  for (const [x, z] of name === "railing_end" ? [[sx / 2, sz / 2]] : extra.loopMarkers ?? []) markers.push({ id: LOOP_MARKER, x, y: Math.min(...railYs) + origin[1] + 0.5, z });
+  // Side markers (round 2, F1): [x, z, deckY] in box coordinates + block key y of the deck; a platform rim run of its own is a bridge START too.
+  for (const m of name === "railing_end" ? [[sx / 2, sz / 2]] : extra.loopMarkers ?? []) markers.push({ id: LOOP_MARKER, x: m[0], y: m[2] === undefined ? Math.min(...railYs) + origin[1] + 0.5 : m[2] + 1 + origin[1] + 0.5, z: m[1] });
   const cells = extra.wardens ?? wardenCells(name, blocks, WARDENS[name] ?? 0, name.startsWith("central") ? 7 : 5);
   const wardens = cells.map((c) => ({
     id: WARDEN, x: c.x + origin[0] + 0.5, y: FLOOR_H + 1 + origin[1], z: c.z + origin[2] + 0.5,
@@ -167,7 +198,7 @@ const NODES = {
     pool: POOL("combos"), levels: [{ rows: SHAPES.octagon21, conn: [C("north", -3), C("east", 2), C("south", 4), C("west", -2)] }],
     trunk: "round5", seed: 20261007, rope: true, anchor: true, lamps: 4, upPool: POOL("crowns_central"),
   });
-  writePiece("central_mallorn_01", t.blocks, t.size, t.origin, t.connectors);
+  writePiece("central_mallorn_01", t.blocks, t.size, t.origin, t.connectors, { loopMarkers: sideMarkerCells(t.blocks, t.origin) });
 }
 
 // --- combo pieces: bridge + destination tree in one piece ------------------------------------------------------------------
@@ -196,6 +227,7 @@ const comboList = [];
           const nodeWardens = wardenCells(node, tree.blocks, WARDENS[node] ?? 0, 5).map(cb.wardenMap);
           writePiece(name, cb.blocks, cb.size, cb.origin, cb.connectors, {
             markers: [[cb.bridgeMid[0], cb.bridgeMid[1]], [cb.axis[0] + 0.5, cb.axis[1] + 0.5]], wardens: nodeWardens,
+            loopMarkers: sideMarkerCells(cb.blocks, cb.origin, (x, z) => z >= cb.bridgeLen), // the node's rims; the bridge half has none
           });
           comboList.push({ name, kind, node });
           next[kind] += t + 1;
