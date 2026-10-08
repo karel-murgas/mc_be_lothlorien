@@ -10,6 +10,7 @@ import { makeRandom } from "../lothlorien_bp/scripts/mallorn_tree.js";
 import { buildFletMallorn, LADDER, ROUND_LADDER, LEAF_KEEP, ROOT_DEPTH, B } from "../tools/flet_mallorn.mjs";
 import { SIZE, SIZE_Y, TRUNK_AT, CHOSEN, TRUNK_ANCHOR } from "../tools/build_structures.mjs";
 import { existsSync, readdirSync } from "node:fs";
+import * as WR from "../lothlorien_bp/scripts/warden_replace_rules.js";
 import { loadVillageData, parseMcstructure, runSeeds, rotated, PLANKS, FENCE, LANTERN_ID } from "../tools/village_sim.mjs";
 
 const L = "lothlorien:lothlorien", RIVER = "minecraft:river", FOREST = "minecraft:forest";
@@ -1844,7 +1845,7 @@ test("village: a bottom slab is never one slab thin - a top slab (or solid block
 });
 test("village towers: the upper floor covers the stair opening as far as headroom allows (full deck / top slab), spiral stays walkable", () => {
   assert.deepEqual(STAIR_FULL.concat(STAIR_TOP, STAIR_CUT).sort((a, b) => a - b), [9, 10, 11, 12, 13]);
-  assert.ok(STAIR_CUT.length <= 3, `remaining hole ${STAIR_CUT.length} cells`);
+  assert.ok(STAIR_CUT.length <= 4, `remaining hole ${STAIR_CUT.length} cells`);
   const towers = villagePieces().filter((p) => p.name.startsWith("combo_tower_"));
   assert.ok(towers.length >= 6, `${towers.length} tower combos`);
   for (const p of towers) {
@@ -1852,8 +1853,9 @@ test("village towers: the upper floor covers the stair opening as far as headroo
     const k = (4 - ["north", "east", "south", "west"].indexOf(p.name.match(/^combo_tower_[a-z]_(north|east|south|west)_/)[1])) % 4; // the combo is the tower turned k quarter turns
     for (let i = 0; i < 14; i++) {
       const [rx, rz] = rotateCell(...RING[i], k), s = 3 + i, at = p.at(rx + hx, yU, rz + hz), blk = p.blocks.find((q) => q.x === rx + hx && q.y === yU && q.z === rz + hz);
-      if (2 * V_LEVEL - s >= 4) assert.equal(at, PLANKS, `${p.name}: ring ${i} under full deck`);
-      else if (2 * V_LEVEL + 1 - s >= 4) assert.ok(at === SLAB_ID && blk.states["minecraft:vertical_half"] === "top", `${p.name}: ring ${i} top slab, got ${at}`);
+      // the ceiling over tread i must clear the NEXT tread (2.0 blocks = 4 half-blocks): a walker steps up with his head still over column i (owner 2026-10-08)
+      if (2 * V_LEVEL - (s + 1) >= 4) assert.equal(at, PLANKS, `${p.name}: ring ${i} under full deck`);
+      else if (2 * V_LEVEL + 1 - (s + 1) >= 4) assert.ok(at === SLAB_ID && blk.states["minecraft:vertical_half"] === "top", `${p.name}: ring ${i} top slab, got ${at}`);
       else assert.ok(at === null || at === "minecraft:air", `${p.name}: ring ${i} stays open, got ${at}`);
     }
   }
@@ -1866,6 +1868,84 @@ test("village: rails, deck, walk cells and headroom win over leaves in every pie
       for (let h = 1; h <= 3; h++) assert.notEqual(p.at(b.x, b.y + h, b.z), LEAVES_ID, `${p.name}: leaf ${h} above deck at ${[b.x, b.y, b.z]}`);
     }
   }
+});
+// --- Elven village walkability (owner 2026-10-08: stair headroom, walk round the stair, rails over leaves, stair rail links) --------
+// Rules + model: .claude/skills/bedrock-modding/references/13-structure-walkability.md; checker: scripts/structure_walk.mjs
+import { checkWalk, protectedCells } from "../../../.claude/skills/bedrock-modding/scripts/structure_walk.mjs";
+import { buildTree as vBuildTree, SHAPES as V_SHAPES, linkRails } from "../tools/village_mallorn.mjs";
+const walkOf = (p) => { // a parsed piece as get(x, y, z) for the checker (jigsaw states: horizontal ones are deck connectors)
+  const st = new Map(p.blocks.map((b) => [`${b.x},${b.y},${b.z}`, b.states]));
+  const jig = new Map(p.jigsaws.map((j) => [`${j.x},${j.y},${j.z}`, j.dirId]));
+  return (x, y, z) => { const n = p.at(x, y, z); return n == null ? undefined : { name: n, states: n === "minecraft:jigsaw" ? { facing_direction: jig.get(`${x},${y},${z}`) } : st.get(`${x},${y},${z}`) ?? {} }; };
+};
+test("village walkability: every shipped piece passes the checker (headroom over every step, rails guard drops, rail step links, connectors reachable)", () => {
+  for (const p of villagePieces()) {
+    if (p.name.startsWith("crown_")) continue;
+    const must = p.name === "railing_end" ? [] : p.jigsaws.filter((j) => j.dir && (j.target === DECK_NAME || j.name === DECK_HI_NAME)).map((j) => ({ x: j.x, y: j.y + 1, z: j.z }));
+    assert.ok(p.name === "railing_end" || must.length >= 1, `${p.name}: connectors`);
+    const r = checkWalk(walkOf(p), { x0: 0, x1: p.size[0] - 1, y0: 0, y1: p.size[1] - 1, z0: 0, z1: p.size[2] - 1 }, { must });
+    assert.deepEqual(r.violations.slice(0, 3), [], `${p.name}: ${r.violations.length} walkability violations`);
+    assert.ok(r.components.length <= 1, `${p.name}: walk nodes split in ${r.components}`);
+  }
+});
+const towerSpec = () => ({ pool: "p", upPool: "u", trunk: "square3", seed: 88088, lamps: 0, levels: [
+  { rows: V_SHAPES.plus15w, conn: [{ facing: "east", off: 1 }, { facing: "north", off: -1 }, { facing: "south", off: 0 }] },
+  { rows: V_SHAPES.octagon15, conn: [{ facing: "south", off: 1, hi: true }, { facing: "west", off: -1, hi: true }] }] });
+const towerWalk = (mutate) => {
+  const t = vBuildTree(towerSpec());
+  if (mutate) mutate(t.blocks);
+  const trunk = []; for (let x = -1; x <= 1; x++) for (let z = -1; z <= 1; z++) trunk.push([x, z]);
+  const box = { x0: -t.box.hx, x1: t.box.hx, y0: -V_ROOTS, y1: t.topY + 5, z0: -t.box.hz, z1: t.box.hz };
+  return checkWalk((x, y, z) => t.blocks.get(`${x},${y},${z}`), box, { ring: [{ trunk, level: V_FLOOR + 1 }, { trunk, level: V_FLOOR + V_LEVEL + 1 }], must: t.connectors.map((c) => ({ x: c.x, y: c.y + 1, z: c.z })) });
+};
+const rulesOf = (r) => [...new Set(r.violations.map((v) => v.rule))].sort();
+test("village walkability fixtures: the owner's four stair problems are caught (low slab over the head, ring blocked, leaves in the way, rail without step link)", () => {
+  assert.deepEqual(towerWalk().violations, [], "the generated tower is clean");
+  const U = V_FLOOR + V_LEVEL, topSlab = { name: SLAB_ID, states: { "minecraft:vertical_half": "top" } }, fence = { name: FENCE, states: {} };
+  // 1: the old top slab over ring cell 10 (surface 13 half-blocks, next tread 14): the head hits it while stepping up
+  assert.ok(rulesOf(towerWalk((b) => b.set(`${RING[10][0]},${U},${RING[10][1]}`, topSlab))).includes("headroom"), "top slab over the step-up is a headroom violation");
+  // 2: a fence wall across the deck beside the stair foot (what the old low, shifted stair rails amounted to): the walk ring is cut
+  assert.ok(rulesOf(towerWalk((b) => { for (let x = 2; x <= 8; x++) b.set(`${x},${V_FLOOR + 1},0`, fence); })).includes("ring"), "a low rail line cuts the walk round the stair foot");
+  // 3: a leaf block at the head of a tread
+  assert.ok(rulesOf(towerWalk((b) => b.set(`${RING[6][0]},${V_FLOOR + 5},${RING[6][1]}`, { name: LEAVES_ID, states: {} }))).includes("headroom"), "leaves over a tread are a headroom violation");
+  // 4: a rail that steps up one block with no post, and the same pair after linkRails
+  assert.ok(rulesOf(towerWalk((b) => { b.set(`5,${V_FLOOR + 3},0`, fence); b.set(`6,${V_FLOOR + 4},0`, fence); })).includes("rail_link"), "missing up-forward link");
+  const linked = new Set(["4,0,5", "5,1,5"]); linkRails(linked);
+  assert.ok(linked.has("5,0,5"), "linkRails adds the post below the higher rail");
+  // 5: an unguarded opening: the deck rails around the stair opening removed
+  const noRails = towerWalk((b) => { for (const [k, v] of [...b]) { const [x, y, z] = k.split(",").map(Number); if (v.name === FENCE && y === U + 1 && Math.abs(x) <= 3 && Math.abs(z) <= 3) b.delete(k); } });
+  assert.ok(rulesOf(noRails).includes("unguarded_edge"), "an opening without a rail is an unguarded edge");
+});
+test("village walkability: synthetic cases of the checker model (step height, ceilings, ropes, jump, protected cells)", () => {
+  const deck = (n = 7) => { const m = new Map(); for (let x = 0; x < n; x++) for (let z = 0; z < n; z++) m.set(`${x},0,${z}`, { name: PLANKS, states: {} }); return m; };
+  const BOX = { x0: 0, x1: 8, y0: -1, y1: 8, z0: 0, z1: 8 };
+  const run = (m, opts = {}) => checkWalk((x, y, z) => m.get(`${x},${y},${z}`), BOX, opts);
+  const slab = (half = "bottom") => ({ name: SLAB_ID, states: { "minecraft:vertical_half": half } });
+  const full = { name: PLANKS, states: {} };
+  // a flat deck with a rim of fences: no violations; no rim: the edges are open drops
+  const flat = deck(); for (let i = 0; i < 7; i++) for (const [x, z] of [[i, 0], [i, 6], [0, i], [6, i]]) flat.set(`${x},1,${z}`, { name: FENCE, states: {} });
+  assert.deepEqual(run(flat).violations, []);
+  assert.ok(rulesOf(run(deck())).includes("unguarded_edge"));
+  // a bottom slab step (+0.5) walks; a full block (+1) is a wall unless the walker may jump
+  const step = new Map(flat); step.set("4,1,4", slab());
+  assert.equal(run(step).components.length, 1, "a slab step joins");
+  const wall = new Map(flat); wall.set("4,1,4", full);
+  assert.ok(run(wall).components.length >= 2, "a full block is a wall without a jump");
+  assert.equal(run(wall, { jump: true }).components.length, 1, "with a jump the full block joins");
+  // ceilings: a block 2 above a deck cell leaves 1.0 free (not a walk cell); a top slab 2 above a bottom-slab tread leaves 2.0 (ok)
+  const low = new Map(flat); low.set("4,2,4", full);
+  assert.equal(run(low).nodes.filter((n) => n.x === 4 && n.z === 4 && n.T === 1).length, 0, "1 block of air is not a walk cell");
+  const ok = new Map(flat); ok.set("4,1,4", slab()); ok.set("4,3,4", slab("top"));
+  assert.equal(run(ok).nodes.filter((n) => n.x === 4 && n.z === 4 && n.T === 1.5).length, 1, "bottom slab tread under a top slab: 2.0 free");
+  // a rope side is a way down, not a fall
+  const rope = deck(); rope.set("4,0,4", { name: "lothlorien:elven_rope_hanging", states: {} });
+  assert.ok(!run(rope).violations.some((v) => v.rule === "unguarded_edge" && Math.abs(v.at[0] - 4) + Math.abs(v.at[2] - 4) === 1));
+  // protected cells: rails, and the surface block plus the two cells above it
+  const pc = protectedCells((x, y, z) => flat.get(`${x},${y},${z}`), BOX);
+  assert.ok(pc.has("4,1,4") && pc.has("4,2,4") && pc.has("0,1,0") && !pc.has("4,3,4"));
+});
+test("village: no leaf of any placed piece sits in a cell another piece owns (rails, surfaces, two cells above): simulated villages report no 'leaf in protected cell'", () => {
+  for (const r of villages().slice(0, 12)) assert.ok(!r.ck.fail.some((f) => f.includes("leaf in protected")), `seed ${r.seed}: ${r.ck.fail.find((f) => f.includes("leaf in protected"))}`);
 });
 test("village: crown pieces never reach a platform's rail, deck, walk or headroom cells in any of the 4 rollable rotations; crowns own only their cells (void elsewhere, no air)", () => {
   const pool = (id) => villageData.pools.get(`lothlorien:village/${id}`);
@@ -2295,7 +2375,7 @@ test("elven warden: shoots monsters (spiders and creepers included), never playe
   assert.deepEqual(e.events["lothlorien:on_calm"].remove.component_groups, ["lothlorien:angry"]);
   assert.equal(c["minecraft:shooter"].def, "minecraft:arrow");
   const ra = c["minecraft:behavior.ranged_attack"];
-  assert.equal(ra.attack_range.max, 18); assert.ok(!("attack_radius" in ra) && !("attack_radius_min" in ra), "not in the schema at format 1.26.50: the entity fails to load"); assert.ok(ra.speed_multiplier < 1, "closes in at a walk");
+  assert.equal(ra.attack_range.max, 18); assert.ok(!("attack_radius" in ra) && !("attack_radius_min" in ra), "not in the schema at format 1.26.50: the entity fails to load"); assert.ok(ra.speed_multiplier <= 1, "closes in no faster than a skeleton"); const av = c["minecraft:behavior.avoid_mob_type"].entity_types[0]; assert.ok(av.walk_speed_multiplier > 1 && av.sprint_speed_multiplier > av.walk_speed_multiplier, "retreats faster than a chasing zombie (owner 2026-10-08)");
   assert.equal(c["minecraft:movement"].value, 0.25);
   assert.equal(c["minecraft:behavior.avoid_mob_type"].entity_types[0].max_dist, 5, "keeps monsters off (kiting)");
   assert.ok(!("set_persistent" in c["minecraft:behavior.ranged_attack"]) && !("set_persistent" in c["minecraft:behavior.nearest_attackable_target"]));
@@ -2530,6 +2610,18 @@ test("dash detector: scriptevent dispatch and messages are localized", () => {
   assert.deepEqual([...new Set(keys)].sort(), ["dash.none", "dash.row", "dash.started"]);
   const entries = catalogEntries();
   for (const k of new Set(keys)) assert.ok(entries[`lothlorien.message.${k}`], `catalog entry for ${k}`);
+});
+
+test("warden replace: only engine-default movement is replaced", () => {
+  assert.equal(WR.needsReplacement(WR.ENGINE_MOVEMENT), true, "template entity default 0.7");
+  assert.equal(WR.needsReplacement(WR.JSON_MOVEMENT), false, "JSON value 0.25");
+  assert.equal(WR.needsReplacement(0.25 * 1.2), false, "speed effect stays below the threshold");
+  assert.equal(WR.needsReplacement(undefined), false);
+  assert.equal(WR.needsReplacement(NaN), false);
+  const json = JSON.parse(readFileSync(new URL("../lothlorien_bp/entities/elven_warden.json", import.meta.url), "utf8"));
+  const groups = json["minecraft:entity"].component_groups;
+  assert.equal(json["minecraft:entity"].components["minecraft:movement"].value, WR.JSON_MOVEMENT);
+  assert.ok(groups["lothlorien:village_warden"], "spawn event group exists");
 });
 
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }

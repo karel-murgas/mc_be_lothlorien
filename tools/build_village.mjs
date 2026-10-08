@@ -13,6 +13,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { toMcstructure } from "./build_structures.mjs";
 import { B } from "./flet_mallorn.mjs";
+import { checkWalk } from "../../../.claude/skills/bedrock-modding/scripts/structure_walk.mjs"; // shared walkability checker (headroom, steps, edges, rings, rail links)
 import { makeCombo, buildBalcony, STRAIGHT, DOGS } from "./village_combo.mjs";
 import {
   ROOTS, FLOOR_H, LEVEL_H, FACING, SHAPES, key, AIR, planks, slab, Deck, buildTree, buildCrown, deckJigsaw, lantern, lonelyRail,
@@ -40,6 +41,22 @@ for (const f of readdirSync(out)) unlinkSync(join(out, f)); // pieces of earlier
 
 const POOL = (n) => `lothlorien:village/${n}`;
 const summary = [];
+
+// Walkability (owner 2026-10-08, rules in .claude/skills/bedrock-modding/references/13-structure-walkability.md): every piece is checked
+// with the shared checker; any violation stops the build. opts.ring: [{ trunk: [[x, z]], level }] (walk ring round a trunk at deck level),
+// opts.connectors: deck connectors that must be reachable from each other. `blocks` are in piece coordinates (any origin).
+export function walkReport(blocks, { connectors = [], ring = [] } = {}) {
+  const ks = [...blocks.keys()].map((k) => k.split(",").map(Number));
+  const lo = (i) => Math.min(...ks.map((k) => k[i])), hi = (i) => Math.max(...ks.map((k) => k[i]));
+  const box = { x0: lo(0), x1: hi(0), y0: lo(1), y1: hi(1), z0: lo(2), z1: hi(2) };
+  const must = connectors.map((c) => ({ x: c.x, y: c.y + 1, z: c.z }));
+  const r = checkWalk((x, y, z) => blocks.get(key(x, y, z)), box, { must, ring });
+  return r.violations;
+}
+export function assertWalk(name, blocks, opts) {
+  const v = walkReport(blocks, opts);
+  if (v.length) throw new Error(`${name}: ${v.length} walkability violations, e.g. ${v.slice(0, 6).map((x) => `${x.rule} at ${x.at} (${x.detail})`).join("; ")}`);
+}
 
 // connector standard (depth 1: the connector cell itself): deck under 5 cells, rails at +-2 one above, 3 air above the walk cells
 function checkConnectors(name, blocks, connectors) {
@@ -93,6 +110,7 @@ export function wardenCells(name, blocks, count, want) {
 // [{ x, z }] in block coordinates (default: computed here for WARDENS[name])
 function writePiece(name, blocks, size, origin, connectors, extra = {}) {
   checkConnectors(name, blocks, connectors);
+  if (!name.startsWith("crown_")) assertWalk(name, blocks, { connectors });
   const [sx, sy, sz] = size;
   // rail mender markers (scripts/rail_mender.js, scan radius 17): one at the box centre, two for a combo (bridge middle and tree axis,
   // so the whole bridge + node is covered); y = the lowest rail
@@ -119,7 +137,13 @@ function writePiece(name, blocks, size, origin, connectors, extra = {}) {
 }
 
 // --- tree nodes: platform + crown. Nodes and towers are never written alone: each is a part of combo pieces -----------------
-const treeSpec = (opts) => buildTree({ pool: POOL("combos"), upPool: POOL("crowns"), ...opts });
+const treeSpec = (opts) => {
+  const t = buildTree({ pool: POOL("combos"), upPool: POOL("crowns"), ...opts });
+  // a tower has the stair base on its lower deck and the opening on its upper deck: a closed walk ring round the 3x3 trunk must stay free on both (owner: "going round the staircase was not possible")
+  const trunk = []; for (let x = -1; x <= 1; x++) for (let z = -1; z <= 1; z++) trunk.push([x, z]);
+  assertWalk(`tree seed ${opts.seed}`, t.blocks, { connectors: t.connectors, ring: opts.levels.length === 2 ? [{ trunk, level: FLOOR_H + 1 }, { trunk, level: FLOOR_H + LEVEL_H + 1 }] : [] });
+  return t;
+};
 const C = (facing, off, hi = false) => ({ facing, off, hi });
 // single level: shape, connectors (face, offset along the face), trunk 3x3
 const NODES = {
@@ -131,9 +155,9 @@ const NODES = {
   node_f: treeSpec({ trunk: "square3", levels: [{ rows: SHAPES.cutrect17, conn: [C("west", 1), C("east", -1), C("south", 1)] }], seed: 66066, lamps: 3 }),
   // two levels: lower deck, upper deck +8, slab spiral stair in the ring round a 3x3 trunk
   tower_a: treeSpec({ trunk: "square3", seed: 77077, lamps: 0, levels: [
-    { rows: SHAPES.octagon15, conn: [C("south", -1), C("west", 1)] }, { rows: SHAPES.plus15, conn: [C("north", 1, true), C("east", -1, true)], clip: (x, z) => z >= 4 }] }), // no south arm: the stair well is there
+    { rows: SHAPES.octagon15, conn: [C("south", -1), C("west", 1)] }, { rows: SHAPES.octagon15, conn: [C("north", 1, true), C("east", -1, true)], clip: (x, z) => z >= 6 }] }), // upper deck stops at z 5: rows to z 4 keep the walk ring round the stair opening (was plus15 clipped at z 4)
   tower_b: treeSpec({ trunk: "square3", seed: 88088, lamps: 0, levels: [
-    { rows: SHAPES.plus15, conn: [C("east", 1), C("north", -1), C("south", 0)] }, { rows: SHAPES.octagon15, conn: [C("south", 1, true), C("west", -1, true)] }] }),
+    { rows: SHAPES.plus15w, conn: [C("east", 1), C("north", -1), C("south", 0)] }, { rows: SHAPES.octagon15, conn: [C("south", 1, true), C("west", -1, true)] }] }),
   tower_c: treeSpec({ trunk: "square3", seed: 99099, lamps: 0, levels: [
     { rows: SHAPES.oval17, conn: [C("north", 2), C("south", -2)] }, { rows: SHAPES.cutrect17.concat([6]), conn: [C("east", 1, true), C("west", -1, true)] }] }),
 };

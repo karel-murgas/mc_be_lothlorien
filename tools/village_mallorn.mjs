@@ -144,6 +144,7 @@ export const SHAPES = {
   cutrect17: [8, 8, 8, 8, 6, 6], // 17 x 11
   octagon15: [7, 7, 7, 7, 5, 5, 3, 3], // 15 x 15, two 2-cell steps per corner
   plus15: [7, 7, 7, 7, 3, 3, 3, 3], // 15 x 15, arms 7 wide
+  plus15w: [7, 7, 7, 7, 4, 4, 4, 4], // 15 x 15, arms 9 wide: the cell (4, 4) exists, so a walk ring round a stair (rails at radius 3) fits at radius 4
   oval17: [8, 8, 8, 6, 6, 4, 4], // 17 x 13, ends 5 wide
   octagon21: [10, 10, 10, 10, 10, 10, 8, 8, 6, 6, 6], // central, 21 x 21
   lookout9: [4, 4, 4, 2, 2], // 9 x 9
@@ -234,14 +235,37 @@ export const RING = (() => { // the 16 cells around the 3x3 trunk, clockwise fro
 // stair cell i: walking surface 3 + i half-blocks above the lower deck's block bottom (deck surface = 2): planks on even
 // surfaces, a bottom slab on odd ones; one half-step (0.5 block, steppable without jumping) per cell
 export const stairLayer = (i) => { const s = 3 + i; return s % 2 === 0 ? (s - 2) / 2 : (s - 1) / 2; };
-// The upper floor over the spiral (ring cells 9..13; 0..8 are under full deck, 14 and 15 are the exit). A walker needs 1.8
-// blocks of headroom, i.e. 4 half-blocks in the sim: the full deck block (bottom at 2*LEVEL_H) fits over the stair surface s
-// when 2*LEVEL_H - s >= 4, a top slab (bottom at 2*LEVEL_H + 1) when 2*LEVEL_H + 1 - s >= 4; only the rest stays open.
+// The upper floor over the spiral (ring cells 9..13; 0..8 are under full deck, 14 and 15 are the exit). Owner 2026-10-08: "the slab over the
+// head is too low, a standing man can't go through". A walker steps from tread i to tread i+1 (half a block higher) with his body still over
+// column i, so the ceiling over cell i must clear the NEXT tread: ceiling - stairS(i + 1) >= 4 half-blocks (1.8 + margin 0.1 -> 2.0 blocks).
+// A full deck block has its bottom at 2 * LEVEL_H, a top slab at 2 * LEVEL_H + 1; only the rest stays open (and is railed on the deck).
 const stairS = (i) => 3 + i;
+const NEED = 4; // half-blocks of free space above the feet (1.8 + 0.1 margin, rounded up to half-blocks)
 const ringOver = [9, 10, 11, 12, 13];
-export const STAIR_FULL = ringOver.filter((i) => 2 * LEVEL_H - stairS(i) >= 4); // full deck over these ring cells
-export const STAIR_TOP = ringOver.filter((i) => !STAIR_FULL.includes(i) && 2 * LEVEL_H + 1 - stairS(i) >= 4); // top slab at floor level
-export const STAIR_CUT = ringOver.filter((i) => !STAIR_FULL.includes(i) && !STAIR_TOP.includes(i)); // the remaining hole
+export const STAIR_FULL = ringOver.filter((i) => 2 * LEVEL_H - stairS(i + 1) >= NEED); // full deck over these ring cells
+export const STAIR_TOP = ringOver.filter((i) => !STAIR_FULL.includes(i) && 2 * LEVEL_H + 1 - stairS(i + 1) >= NEED); // top slab at floor level (carries the rail)
+export const STAIR_CUT = ringOver.filter((i) => !STAIR_FULL.includes(i) && !STAIR_TOP.includes(i)); // the remaining opening, railed on the deck
+
+// Rail step links (same rule as the arched bridges, round 4a): when a rail goes from (x, y, z) to the next column one higher, a post at
+// (next column, y) closes the diagonal gap ("up-forward corner"); a same-height diagonal pair gets the outer cell. Mutates `set`.
+export function linkRails(set) {
+  const has = (x, y, z) => set.has(key(x, y, z));
+  for (let again = true; again;) {
+    again = false;
+    for (const k of [...set]) {
+      const [x, y, z] = k.split(",").map(Number);
+      for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        if (has(x + dx, y + 1, z + dz) && !has(x + dx, y, z + dz) && !has(x, y + 1, z)) { set.add(key(x + dx, y, z + dz)); again = true; }
+        if (dx !== 0) for (const sz of [1, -1]) {
+          if (has(x + dx, y, z + sz) && !has(x + dx, y, z) && !has(x, y, z + sz)) { // diagonal only: the cell farther from the trunk
+            const a = [x + dx, z], c = [x, z + sz];
+            set.add(key(...(Math.hypot(...a) >= Math.hypot(...c) ? [a[0], y, a[1]] : [c[0], y, c[1]]))); again = true;
+          }
+        }
+      }
+    }
+  }
+}
 
 // opts: name-free tree builder.
 //   levels: [{ rows, conn: [{ facing, off, hi? }], clip?: (x, z) => remove this cell }] one entry (single level) or two (lower, upper at +LEVEL_H, slab stair)
@@ -328,11 +352,15 @@ export function buildTree({ levels, trunk = "plus", seed, pool, upPool, rope = f
         if (over !== B.planks && over !== SLAB) blocks.set(key(x, D + L + h, z), AIR);
       }
     });
+    // Stair rails (owner 2026-10-08): outside the ring, at the walker's feet level + 1 (the cell beside the tread), only where the fence
+    // (1.5 high) fits under the upper deck and never lower than D + 3 (so the walk round the stair foot keeps 2 blocks of headroom);
+    // the opening above is railed by the deck itself. Never shifted down into another layer; leaves and branches in a rail cell are cut.
     const ringSet = new Set(RING.map((c) => c.join(",")));
+    const stairRails = new Set();
     const addRail = (x, z, L) => {
-      let y = D + L + 1;
-      if (blocks.has(key(x, y, z)) && blocks.get(key(x, y, z)).name !== "minecraft:air") y -= 1; // the upper deck is in the way
-      rails.add(key(x, y, z));
+      const y = D + L + 1;
+      if (y + 2 > D + LEVEL_H) return; // fence top (y + 1.5) would reach the upper deck
+      stairRails.add(key(x, y, z));
     };
     for (let i = 3; i <= 13; i++) {
       const [x, z] = RING[i], L = stairLayer(i);
@@ -342,6 +370,12 @@ export function buildTree({ levels, trunk = "plus", seed, pool, upPool, rope = f
         addRail(nx, nz, L);
       }
       if (Math.abs(x) === 2 && Math.abs(z) === 2) addRail(x * 1.5, z * 1.5, L); // outer corner post (3,3)
+    }
+    linkRails(stairRails);
+    for (const k of stairRails) {
+      const [x, y, z] = k.split(",").map(Number);
+      for (const dy of [0, 1]) { const v = blocks.get(key(x, y + dy, z)); if (v && (v.name === B.leaves || (v.name.endsWith("_log") && dy === 0 && Math.abs(x) > 1 && Math.abs(z) > 1) || v.name === B.wood)) blocks.delete(key(x, y + dy, z)); }
+      rails.add(k);
     }
   }
   writeRails(blocks, rails, forced);
@@ -377,8 +411,10 @@ export function buildTree({ levels, trunk = "plus", seed, pool, upPool, rope = f
       if (best) blocks.set(key(best[0], D + 2, best[1]), lantern());
     }
   }
+  // a lantern block is 1 high and solid: never on the stair (ring columns between the decks) or in a connector corridor
+  const stairCol = new Map(two ? RING.map((c, i) => [c.join(","), [i < 14 ? D : D + LEVEL_H - 1, D + stairLayer(i) + 3]]) : []); // column -> (lo, hi]: no lantern from the deck to the headroom over the tread (the exit nook under cells 14, 15 may hold one at the deck)
   addLanterns(blocks, { x0: -hx, x1: hx, y0: -ROOTS, y1: topY + CROWN_AT, z0: -hz, z1: hz },
-    (x, y, z) => deckObjs.some((dk) => dk.connectors.some((c) => Math.abs(y - dk.y) <= 4 && (c.d[0] ? x === c.x && Math.abs(z - c.z) <= 2 : z === c.z && Math.abs(x - c.x) <= 2))));
+    (x, y, z) => (stairCol.has(`${x},${z}`) && y > stairCol.get(`${x},${z}`)[0] && y <= stairCol.get(`${x},${z}`)[1]) || deckObjs.some((dk) => dk.connectors.some((c) => Math.abs(y - dk.y) <= 4 && (c.d[0] ? x === c.x && Math.abs(z - c.z) <= 2 : z === c.z && Math.abs(x - c.x) <= 2))));
   if (anchor) blocks.set(key(0, -ROOTS, 0), anchorJigsaw());
   blocks.set(key(0, topY + CROWN_AT, 0), crownUpJigsaw(upPool));
   const connectors = deckObjs.flatMap((dk) => dk.connectors.map((c) => ({ ...c, y: dk.y })));

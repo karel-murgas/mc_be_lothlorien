@@ -1145,6 +1145,21 @@ Rebuild everything (pieces, pools, structure; it first deletes old village piece
   the last two cells (14, 15) are the exit onto it; rails float one above the stair block on the outer side from cell 3
   on, and the cut gets rails except at the exit. The upper deck clips away what lies beyond the stair well (tower_a: no
   south arm), otherwise the well rail would cut that part off.
+  **Stair walkability (2026-10-08, owner report on the new village; generated + checked, NOT yet walked in game).** Owner: "the slab
+  over the head is too low, a standing man can't go through; going round the staircase on the platform was not possible; the railing
+  is sometimes replaced with leaves and has no up-forward corner". Causes: (1) the ceiling over tread i was tested against tread i
+  only; a walker steps onto tread i+1 with his head still under column i, so it must clear the NEXT tread (>= 2.0 blocks): full deck
+  over cells 0..8, one top slab over cell 9 (it carries the rail, the owner's "slab under the railing"), cells 10..13 open and railed on
+  the deck (`STAIR_FULL/TOP/CUT` in `village_mallorn.mjs`); (2) `plus15` lower deck of tower_b had no cell at (4,4), so the ring round
+  the stair rails (radius 3) was cut: now `plus15w` (arms 9 wide); tower_a's upper deck was clipped at z 4 (now octagon15 clipped at
+  z 6); a lantern could also be put ON a tread (now excluded); (3) a stair rail whose cell held a leaf was moved one layer down and
+  the leaf stayed above it: rails now stay in their layer, leaves and branch logs in rail cells are cut, stair rails stop where the
+  fence would reach the upper deck; (4) `linkRails` adds the up-forward post (rail at (x,y) and the next column at y+1 get a post at
+  (next column, y)) and the diagonal-only same-height post. Rules baked into the shared checker
+  `.claude/skills/bedrock-modding/scripts/structure_walk.mjs` (reference `13-structure-walkability.md`): `build_village.mjs` stops on
+  any violation (headroom incl. step straddle, connector connectivity, unguarded edge, ring round the trunk on both tower decks,
+  rail links), `tests/run.mjs` has fixtures reproducing the four problems and a shipped-piece sweep, `village_sim.mjs` checks that
+  no leaf of any piece sits in a cell another piece owns (always 0: boxes never share cells, crowns start above the platform box).
 - **Pools** (`village_*.json`): `start` central; `combos` (every combo: straight 3, dog-leg 2, +2 for tower combos so most villages climb; early ends railing 10, balcony 6,
   lookout 2; fallback `exits`); `exits` (railing 4, braced balcony 2, lookout 1; fallback `plugs`); `plugs`; `crowns` (large 3, medium 2; fallback `crowns_fallback`);
   `crowns_fallback` (large 12, medium 8, small 1: trees at max_depth only see the fallback pool, so it must offer big crowns too); `crowns_small`; `crowns_central`.

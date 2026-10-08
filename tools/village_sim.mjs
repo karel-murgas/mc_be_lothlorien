@@ -16,6 +16,7 @@ import { deflateSync } from "node:zlib";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const bp = join(root, "lothlorien_bp");
 import { RAIL, SLAB } from "./village_mallorn.mjs";
+import { protectedCells } from "../../../.claude/skills/bedrock-modding/scripts/structure_walk.mjs"; // shared walkability checker (cells a piece owns)
 import { MARKER_ID, decide, exitAt, finalBlocks } from "../lothlorien_bp/scripts/village_loop.js";
 export const PLANKS = "lothlorien:mallorn_planks", FENCE = RAIL, LANTERN_ID = "lothlorien:elven_lantern";
 const EMPTY = "minecraft:empty", AIR = "minecraft:air", JIGSAW = "minecraft:jigsaw";
@@ -367,6 +368,23 @@ export function check(data, res) {
   if (kinds.bridgesNoDest) fail.push(`${kinds.bridgesNoDest} bridge(s) without a destination tree`);
   if (kinds.unsupported) fail.push(`${kinds.unsupported} unsupported balcony / lookout`);
   const walk = walkability(res, world, states);
+  // cross-piece overwrite guard (owner 2026-10-08, rails over leaves): a later piece writes over earlier blocks of its box, so no leaf of
+  // any piece may sit in a cell another piece owns (rail, tread / deck surface, the two cells above). Boxes never overlap (checked above),
+  // so this stays 0 unless pieces start to share cells.
+  const owned = new Map();
+  for (const p of res.placed) {
+    if (p.name.startsWith("crown_")) continue;
+    if (!owned.has(p.rp)) {
+      const m = new Map(), [sx, sy, sz] = p.rp.size;
+      for (const b of p.rp.blocks) m.set(wkey(b.x, b.y, b.z), b);
+      for (const j of p.rp.jigsaws) m.set(wkey(j.x, j.y, j.z), { name: JIGSAW, states: { facing_direction: j.dirId } });
+      owned.set(p.rp, [...protectedCells((x, y, z) => m.get(wkey(x, y, z)), { x0: 0, x1: sx - 1, y0: 0, y1: sy - 1, z0: 0, z1: sz - 1 })]);
+    }
+    for (const k of owned.get(p.rp)) {
+      const [x, y, z] = k.split(",").map(Number), wk = wkey(p.o[0] + x, p.o[1] + y, p.o[2] + z);
+      if (world.get(wk)?.includes("leaves")) { fail.push(`leaf in protected cell ${wk} (${p.name})`); break; }
+    }
+  }
   if (!walk.start) fail.push("no walkable start cell on the central platform");
   else if (walk.unreachable.length) {
     const u = walk.unreachable[0];

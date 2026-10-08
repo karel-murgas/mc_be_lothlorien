@@ -59,6 +59,9 @@ function encode(root) {
 const stateTag = (v) => (typeof v === "boolean" ? byte(v) : typeof v === "number" ? int(v) : str(v));
 
 // blocks: Map<"x,y,z" (tree coords), { name, states, loot? }>. size/offset default to the giant tree box.
+// NOTE: a template mob loads with ENGINE DEFAULT attributes (movement 0.7, health 20, follow_range 16), not its JSON values; the
+// definitions (component groups) do apply. Village wardens are swapped for a fresh spawn by scripts/warden_replace.js, so the
+// structures need no Attributes list (verified in a saved world, 2026-10-08).
 // Template entity (structure.entities): positions are structure-local because structure_world_origin is 0,0,0.
 // entities: [{ id, x, y, z, definitions?, mainhand?, invulnerable? }] with x/y/z in structure cells (floats allowed).
 //   definitions: component groups to add on load, "+group" strings (default: the entity itself, "+<id>"; the engine saves a

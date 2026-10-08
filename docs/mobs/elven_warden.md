@@ -26,7 +26,7 @@ common as wanted.** No spawns on Peaceful is accepted by the owner. **[U]** inte
 | Players | Ignored. `hurt_by_target` retaliates against whoever hurt it (player included), nearby wardens assist through `on_target_acquired` -> group `lothlorien:angry` (`minecraft:angry`, `broadcast_anger`, range 20, 25 s). Script cancels warden arrow damage to players/wildlife unless provoked. |
 | Harmony | **Owner 2026-10-07 (replaced Disharmony): fighting a warden costs 1 Harmony per fight (first player hit after 60 s without one), killing it 6 more; a Hated player (-30 or lower, tag `lothlorien_hated`) is shot on sight.** Unverified in game. |
 | Village wardens | **Added 2026-10-07:** template entities in the village pieces (2 on the central tree deck, 1 on node_b/c/f and tower_a/c), group `lothlorien:village_warden` (persistent + home 20) through the structure's `definitions` list. Section 10. |
-| Stats | 26 hp, speed 0.25, follow range 28, shoots every 1.5-2.5 s from up to 18 blocks (`attack_range` max 18; `attack_radius`/`_min` failed to load, see below), approaches at 0.7x, backs off from monsters within 5 blocks (`avoid_mob_type`, not skeletons/endermen; owner 2026-10-07: "run very quickly, sometimes too close for a ranged unit"; **verified in game 2026-10-07: owner says range, kiting, speed and ally assist "work like a charm"**), mob arrow (skeleton damage class). Drops 0-2 arrows (looting +1, like a skeleton; owner 2026-10-07), no XP. |
+| Stats | 26 hp, speed 0.25, follow range 28, shoots every 1.5-2.5 s from up to 18 blocks (`attack_range` max 18; `attack_radius`/`_min` failed to load, see below), approaches at 1.0x, backs off from monsters within 5 blocks at 1.2x/1.4x (`avoid_mob_type`, not skeletons/endermen; **2026-10-08: the 'very fast' report was the template-entity bug (village wardens ran at movement 0.7); with it fixed, approach is back to 1.0x and the retreat is walk 1.2x / sprint 1.4x (0.30-0.35, above a chasing zombie's 0.23; owner: 'a bit slow when running away').** Earlier: owner 2026-10-07: "run very quickly, sometimes too close for a ranged unit"; **verified in game 2026-10-07: owner says range, kiting, speed and ally assist "work like a charm"**), mob arrow (skeleton damage class). Drops 0-2 arrows (looting +1, like a skeleton; owner 2026-10-07), no XP. |
 
 ## 2. Research: ranged bow AI (vanilla)
 
@@ -185,10 +185,10 @@ target goals. Name tag keeps it (`minecraft:nameable`). A warden mid-fight beyon
 | Item | Skeleton (V) | Pillager (V) | Warden |
 |---|---|---|---|
 | Health | 20 | 24 | **26** |
-| Movement | 0.25 | 0.35 | **0.25** (2026-10-07, was 0.27), approach 0.7x, backs off within 5 blocks |
+| Movement | 0.25 | 0.35 | **0.25** (2026-10-07, was 0.27), approach 1.0x (0.7x on 2026-10-07, reverted 2026-10-08), backs off within 5 blocks at 1.2x/1.4x |
 | Follow range | default | 64 | **28** |
 | Shot interval | 3 s (2 s hard) | 1 s crossbow | **1.5-2.5 s**, flat (no hard variant) |
-| Range | 15 | 8 | **`attack_range` max 18** (was 22; `attack_radius`/`attack_radius_min` are **not in the schema at entity format 1.26.50**: content log 1.26.52 "not present in the Schema", whole entity failed to load, 2026-10-07), `hold_position`, `speed_multiplier 0.7` |
+| Range | 15 | 8 | **`attack_range` max 18** (was 22; `attack_radius`/`attack_radius_min` are **not in the schema at entity format 1.26.50**: content log 1.26.52 "not present in the Schema", whole entity failed to load, 2026-10-07), `hold_position`, `speed_multiplier 1.0` |
 | Melee | fallback 2 | fallback 3 | none; `knockback_resistance 0.2` |
 | Drops / XP | bow, bones / 5+ | crossbow, ... | **0-2 arrows** (looting +1; owner 2026-10-07), **0 XP** (a kill costs Harmony, no farm; bow `drop_chance 0`) |
 
@@ -257,7 +257,7 @@ playtest showing monsters standing around unaware). Section 9 questions 1, 2, 4 
 No sounds, no XP. Drops 0-2 arrows (`loot_tables/entities/elven_warden.json`, added 2026-10-07).
 
 **Entity.** Family `lothlorien_warden, irongolem, mob`; 26 hp, speed 0.25, follow range 28; `equipment` (bow, mainhand drop chance 0),
-`shooter arrow`, `ranged_attack` 1.5-2.5 s, `attack_range` max 18, `hold_position`, approach 0.7x, `avoid_mob_type` monsters within 5; targets: monster minus enderman, warden, wither, zombie_pigman,
+`shooter arrow`, `ranged_attack` 1.5-2.5 s, `attack_range` max 18, `hold_position`, approach 1.0x, `avoid_mob_type` monsters within 5 (walk 1.2x / sprint 1.4x); targets: monster minus enderman, warden, wither, zombie_pigman,
 piglin, creaking, aquatic, shulker; `hurt_by_target` (max_dist 64) skipping its own family; assist via the `lothlorien:angry` broadcast group. Property
 `lothlorien:natural`; events `lothlorien:spawn_natural` (herd event, sets it) and `lothlorien:village_warden` (adds the group; summon hook).
 There is **no** `entity_spawned` event: a warden has no state to set up.
@@ -287,3 +287,12 @@ golems in the line are accepted. [U] whether a cancelled projectile hit still gi
 **Unverified for the in-game test (in addition to section 8C.4):** template entities placed by jigsaw; `definitions` group applied;
 saved-entity `Mainhand` list format accepted; home restriction from the placement point; angry broadcast reaching neighbours; equipment table gives the
 bow to `/summon`ed and spawn-egg wardens; `hold_position` accepted; deck spawn picking decks 16 up; ms cost of the depth estimate per spawn.
+
+**Village wardens too fast (found 2026-10-08).** Owner: wardens "start walking and then dash forward ... falling through the fence".
+Cause (read from the saved world with `tools/world_scan.py "TT" --actors lothlorien:elven_warden`): wardens loaded from the structure
+template entities have the engine default attributes (movement 0.7, health 20, follow_range 16), not the JSON values (0.25 / 26 / 28);
+the `definitions` groups do apply. Walking was ~9 b/s, dashing ~13 b/s. Fix: `scripts/warden_replace.js` (rules in
+`warden_replace_rules.js`) checks each warden on `entitySpawn` / `entityLoad` one tick later; if `minecraft:movement` currentValue > 0.5
+it spawns a fresh warden (same place, rotation, nameTag, spawn event `lothlorien:village_warden`), removes the old one and logs one
+`console.warn` ("warden replace"). The structures are not regenerated (builder comment in `tools/build_structures.mjs`). Generic note:
+`.claude/skills/bedrock-mobs/references/lifecycle.md`. [U] in game: replaced wardens keep their post and the bow (the equipment table runs on the new spawn).
