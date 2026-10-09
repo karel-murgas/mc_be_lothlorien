@@ -1,0 +1,409 @@
+{
+  "format_version": "1.26.50",
+  "minecraft:block": {
+    "description": {
+      "identifier": "lothlorien:support_probe_movable",
+      "traits": {
+        "minecraft:placement_direction": {
+          "enabled_states": [
+            "minecraft:cardinal_direction"
+          ]
+        },
+        "minecraft:placement_position": {
+          "enabled_states": [
+            "minecraft:block_face"
+          ]
+        }
+      },
+      "menu_category": {
+        "category": "none"
+      }
+    },
+    "components": {
+      "minecraft:collision_box": false,
+      "minecraft:light_dampening": 0,
+      "minecraft:selection_box": {
+        "origin": [
+          -8,
+          0,
+          -8
+        ],
+        "size": [
+          16,
+          4.5,
+          16
+        ]
+      },
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 0.3
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 0
+      },
+      "minecraft:sound": {
+        "sound": "bone_block"
+      },
+      "minecraft:map_color": "#c4ae80",
+      "minecraft:geometry": "geometry.lothlorien.deer_antler_floor",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "lothlorien:deer_antler",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:placement_filter": {
+        "conditions": [
+          {
+            "allowed_faces": [
+              "up",
+              "down",
+              "north",
+              "south",
+              "east",
+              "west"
+            ]
+          }
+        ]
+      },
+      "minecraft:movable": {
+        "movement_type": "push_pull"
+      },
+      "minecraft:loot": "loot_tables/blocks/support_probe.json",
+      "lothlorien:support_probe_trace": {}
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'up' && q.block_state('minecraft:cardinal_direction') == 'north'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'up' && q.block_state('minecraft:cardinal_direction') == 'west'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'up' && q.block_state('minecraft:cardinal_direction') == 'south'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'up' && q.block_state('minecraft:cardinal_direction') == 'east'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              270,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'north'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.deer_antler_wall",
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          },
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              0,
+              3.5
+            ],
+            "size": [
+              16,
+              16,
+              4.5
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'west'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.deer_antler_wall",
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          },
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              0,
+              3.5
+            ],
+            "size": [
+              16,
+              16,
+              4.5
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'south'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.deer_antler_wall",
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          },
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              0,
+              3.5
+            ],
+            "size": [
+              16,
+              16,
+              4.5
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'east'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.deer_antler_wall",
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              270,
+              0
+            ]
+          },
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              0,
+              3.5
+            ],
+            "size": [
+              16,
+              16,
+              4.5
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'down' && q.block_state('minecraft:cardinal_direction') == 'north'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.deer_antler_ceiling",
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          },
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              11.5,
+              -8
+            ],
+            "size": [
+              16,
+              4.5,
+              16
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'down' && q.block_state('minecraft:cardinal_direction') == 'west'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.deer_antler_ceiling",
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          },
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              11.5,
+              -8
+            ],
+            "size": [
+              16,
+              4.5,
+              16
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'down' && q.block_state('minecraft:cardinal_direction') == 'south'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.deer_antler_ceiling",
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          },
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              11.5,
+              -8
+            ],
+            "size": [
+              16,
+              4.5,
+              16
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'down' && q.block_state('minecraft:cardinal_direction') == 'east'",
+        "components": {
+          "minecraft:geometry": "geometry.lothlorien.deer_antler_ceiling",
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              270,
+              0
+            ]
+          },
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              11.5,
+              -8
+            ],
+            "size": [
+              16,
+              4.5,
+              16
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'up'",
+        "components": {
+          "minecraft:placement_filter": {
+            "conditions": [
+              {
+                "allowed_faces": [
+                  "up"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'down'",
+        "components": {
+          "minecraft:placement_filter": {
+            "conditions": [
+              {
+                "allowed_faces": [
+                  "down"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'north'",
+        "components": {
+          "minecraft:placement_filter": {
+            "conditions": [
+              {
+                "allowed_faces": [
+                  "north"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'south'",
+        "components": {
+          "minecraft:placement_filter": {
+            "conditions": [
+              {
+                "allowed_faces": [
+                  "south"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'east'",
+        "components": {
+          "minecraft:placement_filter": {
+            "conditions": [
+              {
+                "allowed_faces": [
+                  "east"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:block_face') == 'west'",
+        "components": {
+          "minecraft:placement_filter": {
+            "conditions": [
+              {
+                "allowed_faces": [
+                  "west"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
