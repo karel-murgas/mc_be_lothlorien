@@ -71,7 +71,7 @@ function useRope(player, block, blockFace) {
 
 // Removes every piece of the rope in column (x, z) that is connected to row y and drops all of them, plus one when
 // the piece at y is already gone (`gone`), as stacks at row y.
-function dropWholeRope(dimension, { x, y, z }, face, { creative = false, gone = false } = {}) {
+export function dropWholeRope(dimension, { x, y, z }, face, { creative = false, gone = false } = {}) {
   const { bottom, top } = columnBounds((row) => faceOf(dimension.getBlock({ x, y: row, z })) === face, y);
   let total = gone ? 1 : 0;
   for (let row = bottom; row <= top; row++) {
@@ -119,7 +119,7 @@ world.afterEvents.playerBreakBlock.subscribe(({ block, brokenBlockPermutation, p
   try {
     if (ROPE_IDS.has(brokenBlockPermutation.type.id)) {
       const creative = player.getGameMode() === GameMode.Creative;
-      dropWholeRope(block.dimension, block.location, permFace(brokenBlockPermutation), { creative, gone: true });
+      dropWholeRope(block.dimension, block.location, permFace(brokenBlockPermutation), { creative });
     }
     checkWalls(block.dimension, block.location);
   } catch {
@@ -129,7 +129,7 @@ world.afterEvents.playerBreakBlock.subscribe(({ block, brokenBlockPermutation, p
 world.afterEvents.blockExplode.subscribe(({ block, dimension, explodedBlockPermutation }) => {
   try {
     if (ROPE_IDS.has(explodedBlockPermutation?.type.id)) {
-      dropWholeRope(dimension, block.location, permFace(explodedBlockPermutation), { gone: true });
+      dropWholeRope(dimension, block.location, permFace(explodedBlockPermutation));
     }
     checkWalls(dimension, block.location);
   } catch {

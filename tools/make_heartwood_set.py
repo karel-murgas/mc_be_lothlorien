@@ -109,3 +109,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    from configure_support import main as configure_production_support
+    configure_production_support()

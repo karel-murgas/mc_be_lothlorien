@@ -381,7 +381,8 @@ The history below is kept because it records the traps.
 
 Blocks: plants `elanor`, `niphredil`, `athelas`, `golden_fern` (`minecraft:geometry.cross`, `alpha_test`, no
 collision, break instantly, soil-only `placement_filter`) and two **segmented ground covers**, `mallorn_leaf_carpet`
-(opaque) and `mallorn_blossom` (cutout), made by `.claude/skills/bedrock-blocks/scripts/gen_ground_cover.py`.
+(opaque) and `mallorn_blossom` (cutout), made by `tools/generate_ground_cover.py`
+(the mod entrypoint for the shared generator, which reapplies production support and segment loot).
 Covers work like vanilla leaf litter: state `lothlorien:amount` 1-4 = that many 8x8 quarter-tiles (1 px tall, one geo per
 amount, `geometry.lothlorien.ground_cover_1..4`), rotated by `placement_direction` permutations. Using the item on
 the cover (or on the ground under it) adds a segment; breaking drops one item per segment (`scripts/ground_cover.js`).

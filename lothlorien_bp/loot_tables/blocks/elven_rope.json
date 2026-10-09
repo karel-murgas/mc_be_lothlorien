@@ -5,8 +5,7 @@
       "entries": [
         {
           "type": "item",
-          "name": "minecraft:stick",
-          "weight": 1
+          "name": "lothlorien:elven_rope"
         }
       ]
     }

@@ -74,7 +74,18 @@
       },
       "minecraft:loot": "loot_tables/blocks/mallorn_sapling.json",
       "lothlorien:sapling": {},
-      "minecraft:flower_pottable": {}
+      "minecraft:flower_pottable": {},
+      "minecraft:movable": {
+        "movement_type": "popped"
+      },
+      "lothlorien:motion_support": {},
+      "minecraft:tick": {
+        "interval_range": [
+          2,
+          2
+        ],
+        "looping": true
+      }
     }
   }
 }

@@ -107,7 +107,19 @@
         ]
       },
       "lothlorien:grass_overlay": {},
-      "lothlorien:dew_cover": {}
+      "lothlorien:dew_cover": {},
+      "minecraft:movable": {
+        "movement_type": "popped"
+      },
+      "lothlorien:motion_support": {},
+      "minecraft:tick": {
+        "interval_range": [
+          2,
+          2
+        ],
+        "looping": true
+      },
+      "minecraft:loot": "loot_tables/blocks/mallorn_leaf_carpet.json"
     },
     "permutations": [
       {
@@ -492,6 +504,24 @@
               "ambient_occlusion": 1.0
             }
           }
+        }
+      },
+      {
+        "condition": "q.block_state('lothlorien:amount') == 2",
+        "components": {
+          "minecraft:loot": "loot_tables/blocks/mallorn_leaf_carpet_2.json"
+        }
+      },
+      {
+        "condition": "q.block_state('lothlorien:amount') == 3",
+        "components": {
+          "minecraft:loot": "loot_tables/blocks/mallorn_leaf_carpet_3.json"
+        }
+      },
+      {
+        "condition": "q.block_state('lothlorien:amount') == 4",
+        "components": {
+          "minecraft:loot": "loot_tables/blocks/mallorn_leaf_carpet_4.json"
         }
       }
     ]

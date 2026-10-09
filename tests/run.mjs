@@ -1,5 +1,7 @@
 // Regression tests: node tests/run.mjs (run by `mods verify lothlorien`).
 import assert from "node:assert/strict";
+import "./support_motion.mjs";
+import "./rope_lifecycle.mjs";
 import { leafUndersideY } from "../lothlorien_bp/scripts/leaf_fall.js";
 import { BONEMEAL_TABLE, SPREAD_TRIES, COVERS, pickWeighted } from "../lothlorien_bp/scripts/flora_table.js";
 import { readFileSync } from "node:fs";
@@ -460,7 +462,8 @@ test("antler block: a permutation for every floor, ceiling and wall placement; n
     .every((p) => p.components["minecraft:geometry"] === "geometry.lothlorien.deer_antler_wall"));
   assert.ok(!b.components["minecraft:placement_filter"], "placeable on any block, like an item frame");
   assert.ok(b.components["lothlorien:antler_support"], "support handled by script events");
-  assert.ok(!b.components["minecraft:tick"], "no polling");
+  assert.deepEqual(b.components["minecraft:tick"].interval_range, [2, 2], "scheduled warming preserves pre-piston support history");
+  assert.ok(b.components["lothlorien:motion_support"], "production motion tracking is installed");
 });
 test("antler support: opposite side of the clicked face; air and liquid drop it, unloaded keeps it", () => {
   assert.deepEqual(AR.supportOffset("up"), { x: 0, y: -1, z: 0 });
@@ -1341,7 +1344,7 @@ test("Elven rope: block, item and recipe agree", () => {
   const block = readJson("../lothlorien_bp/blocks/elven_rope.json")["minecraft:block"];
   assert.deepEqual(block.description.states["lothlorien:face"], ROPE.FACES);
   assert.equal(block.components["minecraft:collision_box"], false, "climb through it");
-  assert.equal(block.components["minecraft:loot"], undefined, "the script drops the whole rope");
+  assert.equal(block.components["minecraft:loot"], "loot_tables/blocks/elven_rope.json", "native loot covers the popped piece; script drops remaining pieces");
   assert.equal(block.permutations.length, ROPE.FACES.length);
   const item = readJson("../lothlorien_bp/items/elven_rope.json")["minecraft:item"];
   assert.equal(item.components["minecraft:max_stack_size"], 64);
@@ -1727,7 +1730,7 @@ test("Elven rope hanging: structure-only twin of the rope, same geometry, a stat
   assert.deepEqual(hang.description.traits["minecraft:placement_direction"].enabled_states, ["minecraft:cardinal_direction"]);
   assert.equal(hang.description.states, undefined, "no custom state: custom-namespace states are not rotated with a piece");
   assert.deepEqual(hang.components, rope.components, "same geometry, texture, sound, selection box");
-  assert.equal(hang.components["minecraft:loot"], undefined, "the script drops the whole rope as the normal item");
+  assert.equal(hang.components["minecraft:loot"], "loot_tables/blocks/elven_rope.json", "native loot uses the normal rope item for either block variant");
   assert.deepEqual(hang.permutations.map((p) => p.condition.replace("minecraft:cardinal_direction", "lothlorien:face")), rope.permutations.map((p) => p.condition));
   assert.deepEqual(hang.permutations.map((p) => p.components), rope.permutations.map((p) => p.components), "same side for the same value");
   const js = readFileSync(new URL("../lothlorien_bp/scripts/elven_rope.js", import.meta.url), "utf8");

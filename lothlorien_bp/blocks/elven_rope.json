@@ -51,7 +51,19 @@
           "render_method": "alpha_test",
           "ambient_occlusion": 0.0
         }
-      }
+      },
+      "minecraft:movable": {
+        "movement_type": "popped"
+      },
+      "lothlorien:motion_support": {},
+      "minecraft:tick": {
+        "interval_range": [
+          2,
+          2
+        ],
+        "looping": true
+      },
+      "minecraft:loot": "loot_tables/blocks/elven_rope.json"
     },
     "permutations": [
       {

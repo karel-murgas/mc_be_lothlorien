@@ -1,7 +1,7 @@
 import { message } from "./messages.js";
 import { world, system } from "@minecraft/server";
 import "./blocks.js";
-import "./support_probe.js"; // Temporary native support/piston experiment.
+import "./support_motion.js";
 import "./ground_cover.js";
 import "./grass_overlay.js";
 import "./bonemeal.js";

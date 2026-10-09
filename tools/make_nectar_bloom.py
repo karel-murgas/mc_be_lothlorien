@@ -59,6 +59,9 @@ def texture(stage):
 
 
 def dump(path, obj):
+    if "minecraft:block" in obj:
+        from configure_support import configure
+        configure(obj)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, indent=2) + "\n", newline="\n")
 
@@ -121,3 +124,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    from configure_support import main as configure_production_support
+    configure_production_support()

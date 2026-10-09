@@ -78,6 +78,17 @@
       },
       "lothlorien:button": {
         "ticks": 30
+      },
+      "minecraft:movable": {
+        "movement_type": "popped"
+      },
+      "lothlorien:motion_support": {},
+      "minecraft:tick": {
+        "interval_range": [
+          2,
+          2
+        ],
+        "looping": true
       }
     },
     "permutations": [

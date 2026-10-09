@@ -85,7 +85,11 @@
             ]
           }
         ]
-      }
+      },
+      "minecraft:movable": {
+        "movement_type": "popped"
+      },
+      "lothlorien:motion_support": {}
     },
     "permutations": [
       {
